@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>8bit-sequencer / Neuma.js</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <style>
+    .pattern {
+      font-family: monospace;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      margin: 15px 0;
+    }
+    .pattern li {
+      margin-left: 4px;
+    }
+    .pattern li:nth-child(4n+1) {
+      margin-left: 16px;
+    }
+    .pattern li:nth-child(16n+1) {
+      margin-left: 26px;
+    }
+    #code {
+      padding: 0;
+      margin: 0;
+      background: white;
+      border: none;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="../build/neuma.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>neuma.js 8bit-sequencer</h1>
+    <div id="three"></div>
+    <div id="app">
+      <button v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+      <div class="pattern">
+        <ul class="list-inline" v-repeat="score">
+          <li v-repeat="$data" v-on="click: $data.checked = 1 - $data.checked">{{ $data.checked ? 'O' : '-' }}</li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">example code</h3>
+      </div>
+      <div class="panel-body">
+        <pre class="prettyprint" id="code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script id="example">
+  var Seq1 = new Neuma(function($, freq) {
+    return $("xline", { start: 0.05, dur: 0.250 },
+      $("saw", { freq: freq * 0.99 }), $("saw", { freq: freq * 1.01 })
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  var Seq2 = new Neuma(function($, freq) {
+    return $("xline", { start: 0.1, dur: 1.500 },
+      $("sin", { freq: freq * 7 },
+        $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: 1.000 }) })
+      )
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  var HiHat = new Neuma(function($, amp) {
+    return $("xline", { start: amp * 0.005, dur: 0.050 },
+      $("hpf", { freq: 8000, Q: 25 }, $("white"))
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  var Snare = new Neuma(function($, dur) {
+    return $("xline", { start: 0.1, dur: dur * 0.1 },
+      $("lpf", { freq: 2400, Q: 10 }, $("white"))
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  var Bass = new Neuma(function($) {
+    return $("xline", { start: 0.8, dur: 0.100 },
+      $("lowshelf", { freq: 120, gain: 10 },
+        $("tri", { freq: 80 }),
+        $("white", { mul: 0.05 })
+      )
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  var instruments = [
+    { Synth: Seq1 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
+    { Synth: Seq2 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
+    { Synth: HiHat, arg: [ 4, 1, 2, 1 ] },
+    { Synth: Snare, arg: [ 8, 2, 6, 4 ] },
+    { Synth: Bass , arg: [] },
+  ];
+
+  var timer = null;
+
+  function start(score) {
+    timer = new Neuma.Interval(0.125, function(e) {
+      var index = e.count % 32;
+
+      _.each(instruments, function(instrument, i) {
+        var arg = wrapAt(instrument.arg, index);
+
+        if (score[i][index].checked) {
+          new instrument.Synth(arg).start(e.playbackTime);
+        }
+      });
+
+    }).start();
+  }
+
+  function stop() {
+    if (timer) {
+      timer.stop();
+    }
+  }
+
+  function wrapAt(list, index) {
+    return list[index % list.length];
+  }
+  </script>
+
+  <script>
+  $(function() {
+    "use strict";
+
+    function canUseWebGL() {
+      try {
+        return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
+      } catch(e) {
+        return false;
+      }
+    }
+
+    var WaveVisualizer = (function() {
+      function WaveVisualizer(analyer, spec) {
+        this._analyer = analyer;
+        this._width   = spec.width;
+        this._height  = spec.height;
+
+        this._state = "init";
+        this._data = new Uint8Array(analyer.frequencyBinCount);
+
+        this._scene  = new THREE.Scene();
+        this._camera = new THREE.PerspectiveCamera(75, this._width / this._height, 0.1, 1000);
+
+        if (canUseWebGL()) {
+          this._renderer = new THREE.WebGLRenderer();
+          this._maxWaves = 64;
+          this._renderer.setSize(this._width, this._height);
+        } else {
+          this._renderer = new THREE.CanvasRenderer();
+          this._maxWaves = 12;
+        }
+
+        this._waves = [];
+
+        Object.defineProperties(this, {
+          width: {
+            value: this._width,
+            enumerable: true
+          },
+          height: {
+            value: this._height,
+            enumerable: true
+          },
+          state: {
+            get: function() {
+              return this._state;
+            },
+            enumerable: true
+          },
+          domElement: {
+            value: this._renderer.domElement,
+            enumerable: true
+          },
+          camera: {
+            value: this._camera,
+            enumerable: true
+          }
+        })
+      }
+
+      WaveVisualizer.prototype.start = function() {
+        if (this._state !== "start") {
+          this._state = "start";
+          if (canUseWebGL()) {
+            requestAnimationFrame(this.render.bind(this));
+          }
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.stop = function() {
+        if (this._state === "start") {
+          this._state = "stop";
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.render = function(t) {
+        this._analyer.getByteTimeDomainData(this._data);
+
+        this._render(t);
+
+        this._camera.lookAt(this._scene.position);
+        this._renderer.render(this._scene, this._camera);
+
+        if (this._state === "start") {
+          requestAnimationFrame(this.render.bind(this));
+        }
+      };
+
+      WaveVisualizer.prototype._render = function(t) {
+        if (this._maxWaves <= this._waves.length) {
+          this._scene.remove(this._waves.pop());
+        }
+
+        var geometry = new THREE.Geometry();
+        geometry.vertices = getVertices(this._data, this._width / this._waves.length);
+
+        var material = new THREE.LineBasicMaterial({
+          color: new THREE.Color().setHSL((t % 3600) / 3600, 0.8, 0.6).getHex()
+        });
+
+        var wave = new THREE.Line(geometry, material);
+        wave.rotation.set(Math.cos(t * 0.25), 0, Math.sin(t * 0.25));
+
+        this._scene.add(wave);
+        this._waves.unshift(wave);
+
+        this._waves.forEach(function(wave, index, list) {
+          wave.scale.set(index + 1, list.length - index, index + 1);
+        });
+      };
+
+      function getVertices(data, r) {
+        var result = new Array(data.length + 1);
+
+        for (var i = 0, imax = data.length; i <= imax; i++) {
+          var x = Math.cos(Math.PI * 2 * (i / imax)) * r;
+          var y = ((data[i % imax] / 256) - 0.5) * 24;
+          var z = Math.sin(Math.PI * 2 * (i / imax)) * r;
+          result[i] = new THREE.Vector3(x, y, z);
+        }
+
+        return result;
+      }
+
+      return WaveVisualizer;
+    })();
+
+    var visualizer = new WaveVisualizer(Neuma.analyer, { width: 800, height: 240 });
+
+    visualizer.camera.position.y = -200;
+    visualizer.camera.position.z = -200;
+
+    $("#three").append(visualizer.domElement);
+
+
+    var vue = new Vue({
+      el: "#app",
+      data: {
+        isPlaying: false,
+        score: _.map([
+          [ 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+            0, 1, 0, 0,  1, 0, 1, 0,  0, 0, 1, 0,  1, 0, 1, 1, ],
+          [ 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,
+            1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, ],
+          [ 1, 1, 1, 1,  1, 1, 1, 1,  1, 0, 1, 0,  1, 1, 1, 0,
+            1, 1, 1, 1,  1, 1, 1, 1,  1, 0, 1, 0,  1, 1, 1, 0, ],
+          [ 0, 0, 0, 0,  1, 0, 0, 1,  0, 0, 0, 0,  1, 0, 0, 0,
+            0, 0, 0, 0,  1, 0, 0, 1,  0, 0, 1, 0,  0, 0, 1, 0, ],
+          [ 1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1,  0, 0, 0, 0,
+            1, 0, 0, 0,  0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0, ],
+        ], function(pattern) {
+          return _.extend({}, _.map(pattern, function(checked) {
+            return { checked: checked };
+          }));
+        })
+      },
+      methods: {
+        toggle: function() {
+          this.isPlaying = !this.isPlaying;
+          if (this.isPlaying) {
+            start(this.$data.score);
+            visualizer.start();
+          } else {
+            stop();
+            visualizer.stop();
+          }
+        }
+      }
+    });
+
+    $("#code").text($("#example").text());
+    prettyPrint();
+  });
+  </script>
+</body>
+</html>
