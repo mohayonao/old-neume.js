@@ -1,0 +1,24 @@
+{
+  "curly"    : true,
+  "eqeqeq"   : true,
+  "forin"    : true,
+  "immed"    : true,
+  "noarg"    : true,
+  "undef"    : true,
+  "quotmark" : "double",
+  "trailing" : true,
+  "eqnull"   : true,
+  "node"     : true,
+  "browser"  : true,
+  "globals": {
+    "describe"  : true,
+    "it"        : true,
+    "before"    : true,
+    "beforeEach": true,
+    "afterEach" : true,
+    "after"     : true,
+    "assert"    : true,
+    "sinon"     : true,
+    "DC"        : true
+  }
+}

@@ -9,18 +9,20 @@ var uglify    = require("gulp-uglify");
 var rename    = require("gulp-rename");
 
 gulp.task("lint", function() {
-  return gulp.src([ "gulpfile.js", "src/**/*.js" ])
-    .pipe(jshint(".jshintrc"))
+  return gulp.src([ "gulpfile.js", "src/**/*.js", "test/**/*.js" ])
+    .pipe(jshint())
     .pipe(jshint.reporter(require("jshint-stylish")))
     .pipe(jshint.reporter("fail"));
 });
 
 gulp.task("test", function() {
+  require("./test/bootstrap/bootstrap");
   return gulp.src("test/**/*.js")
     .pipe(mocha());
 });
 
 gulp.task("cover", function(cb) {
+  require("./test/bootstrap/bootstrap");
   gulp.src("src/**/*.js")
     .pipe(istanbul())
     .on("finish", function() {
