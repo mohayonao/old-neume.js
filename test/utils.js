@@ -122,4 +122,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".second(list)", function() {
+    it("gets the second element of the list", function() {
+      assert(_.second([ 1, 2, 3 ]) === 2);
+      assert(_.second([ 1 ]) === undefined);
+    });
+  });
+
 });

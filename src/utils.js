@@ -69,4 +69,8 @@ utils.first = function(list) {
   return list[0];
 };
 
+utils.second = function(list) {
+  return list[1];
+};
+
 module.exports = utils;
