@@ -19,4 +19,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".isDictionary(value)", function() {
+    it("checks if value is an object created by the Object constructor", function() {
+      assert(_.isDictionary({}) === true);
+      assert(_.isDictionary(new RegExp()) === false);
+    });
+  });
+
 });
