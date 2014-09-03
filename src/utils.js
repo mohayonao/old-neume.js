@@ -54,4 +54,11 @@ utils.toArray = function(value) {
   return Array.prototype.slice.call(value);
 };
 
+utils.fill = function(list, value) {
+  for (var i = 0, imax = list.length; i < imax; i++) {
+    list[i] = value;
+  }
+  return list;
+};
+
 module.exports = utils;

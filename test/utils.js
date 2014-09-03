@@ -101,4 +101,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".fill(list, value)", function() {
+    it("fills the value to the list", function() {
+      assert.deepEqual(_.fill(new Array(4), 1)     , [ 1, 1, 1, 1 ]);
+      assert.deepEqual(_.fill(new Uint8Array(4), 1), new Uint8Array([ 1, 1, 1, 1 ]));
+    });
+  });
+
 });
