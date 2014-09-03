@@ -236,4 +236,10 @@ describe("utils", function() {
     });
   });
 
+  describe(".values(obj)", function() {
+    it("return all of the values of the object's properties", function() {
+      assert.deepEqual(_.values({ a: 0, b: 1, c: 2 }), [ 0, 1, 2 ]);
+    });
+  });
+
 });

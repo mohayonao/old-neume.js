@@ -176,4 +176,10 @@ utils.keys = function(obj) {
   return Object.keys(obj);
 };
 
+utils.values = function(obj) {
+  return Object.keys(obj).map(function(key) {
+    return obj[key];
+  });
+};
+
 module.exports = utils;
