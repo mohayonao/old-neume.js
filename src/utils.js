@@ -262,4 +262,8 @@ utils.isAudioNode = function(value) {
   return value instanceof window.AudioNode;
 };
 
+utils.isAudioParam = function(value) {
+  return value instanceof window.AudioParam;
+};
+
 module.exports = utils;

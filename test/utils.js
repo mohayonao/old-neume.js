@@ -346,4 +346,14 @@ describe("utils", function() {
     });
   });
 
+  describe(".isAudioParam(value)", function() {
+    it("checks if value is an instance of AudioParam", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      assert(_.isAudioParam(audioContext) === false);
+      assert(_.isAudioParam(osc) === false);
+      assert(_.isAudioParam(osc.detune) === true);
+    });
+  });
+
 });
