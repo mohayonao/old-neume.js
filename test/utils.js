@@ -281,4 +281,16 @@ describe("utils", function() {
     });
   });
 
+  describe(".finite(value)", function() {
+    it("converts into a finite number", function() {
+      assert(_.finite(10)       === 10);
+      assert(_.finite(10.5)     === 10.5);
+      assert(_.finite("10")     === 10);
+      assert(_.finite("10.5")   === 10.5);
+      assert(_.finite(Infinity) === 0);
+      assert(_.finite(NaN)      === 0);
+      assert(_.finite("zero")   === 0);
+    });
+  });
+
 });

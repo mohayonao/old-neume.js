@@ -205,4 +205,12 @@ utils.int = function(value) {
   return +value|0;
 };
 
+utils.finite = function(value) {
+  value = +value||0;
+  if (!utils.isFinite(value)) {
+    value = 0;
+  }
+  return value;
+};
+
 module.exports = utils;
