@@ -115,4 +115,18 @@ utils.collect = function(list, func, ctx) {
   return result;
 };
 
+utils.select = function(list, pred, ctx) {
+  var result = [];
+
+  pred = pred.bind(ctx);
+
+  utils.each(list, function(elem, index) {
+    if (pred(elem, index, list)) {
+      result.push(elem);
+    }
+  });
+
+  return result;
+};
+
 module.exports = utils;
