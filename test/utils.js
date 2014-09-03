@@ -33,4 +33,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".isFinite(value)", function() {
+    it("checks if value is, or can be coerced to, a finite number", function() {
+      assert(_.isFinite(10)       === true);
+      assert(_.isFinite(Infinity) === false);
+      assert(_.isFinite(NaN)      === false);
+      assert(_.isFinite("10")     === false);
+    });
+  });
+
 });

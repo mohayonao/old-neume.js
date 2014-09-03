@@ -18,4 +18,8 @@ utils.isFunction = function(value) {
   return typeof value === "function";
 };
 
+utils.isFinite = function(value) {
+  return typeof value === "number" && isFinite(value);
+};
+
 module.exports = utils;
