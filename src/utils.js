@@ -182,4 +182,10 @@ utils.values = function(obj) {
   });
 };
 
+utils.pairs = function(obj) {
+  return Object.keys(obj).map(function(key) {
+    return [ key, obj[key] ];
+  });
+};
+
 module.exports = utils;

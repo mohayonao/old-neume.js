@@ -242,4 +242,10 @@ describe("utils", function() {
     });
   });
 
+  describe(".pairs(obj)", function() {
+    it("convert an object into a list of [key, value] pairs", function() {
+      assert(_.pairs({ a: 0, b: 1, c: 2 }), [ [ "a", 0 ], [ "b", 1 ], [ "c", 2 ] ]);
+    });
+  });
+
 });
