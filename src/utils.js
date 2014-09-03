@@ -65,4 +65,8 @@ utils.isEmpty = function(list) {
   return list.length === 0;
 };
 
+utils.first = function(list) {
+  return list[0];
+};
+
 module.exports = utils;

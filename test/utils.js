@@ -115,4 +115,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".first(list)", function() {
+    it("gets the first element of the list", function() {
+      assert(_.first([ 1, 2, 3 ]) === 1);
+      assert(_.first([]) === undefined);
+    });
+  });
+
 });
