@@ -68,4 +68,14 @@ describe("utils", function() {
     });
   });
 
+  describe(".isObject(value)", function() {
+    it("checks if value is the language type of Object", function() {
+      assert(_.isObject({})   === true);
+      assert(_.isObject(it)   === true);
+      assert(_.isObject(null) === false);
+      assert(_.isObject(1000) === false);
+      assert(_.isObject("10") === false);
+    });
+  });
+
 });

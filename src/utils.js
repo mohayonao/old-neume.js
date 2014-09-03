@@ -34,4 +34,9 @@ utils.isNumber = function(value) {
   return typeof value === "number" && !isNaN(value);
 };
 
+utils.isObject = function(value) {
+  var type = typeof value;
+  return type === "function" || type === "object" && value !== null;
+};
+
 module.exports = utils;
