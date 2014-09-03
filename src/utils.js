@@ -201,4 +201,8 @@ utils.num = function(value) {
   return +value||0;
 };
 
+utils.int = function(value) {
+  return +value|0;
+};
+
 module.exports = utils;
