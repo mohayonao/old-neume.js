@@ -22,4 +22,8 @@ utils.isFinite = function(value) {
   return typeof value === "number" && isFinite(value);
 };
 
+utils.isNaN = function(value) {
+  return value !== value;
+};
+
 module.exports = utils;

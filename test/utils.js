@@ -42,4 +42,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".isNaN", function() {
+    it("checks if value is NaN.", function() {
+      assert(_.isNaN(NaN)      === true);
+      assert(_.isNaN(10)       === false);
+      assert(_.isNaN(Infinity) === false);
+      assert(_.isNaN("NaN")    === false);
+    });
+  });
+
 });
