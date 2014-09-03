@@ -43,4 +43,8 @@ utils.isString = function(value) {
   return typeof value === "string";
 };
 
+utils.isUndefined = function(value) {
+  return value === void 0;
+};
+
 module.exports = utils;

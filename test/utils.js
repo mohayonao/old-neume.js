@@ -85,4 +85,12 @@ describe("utils", function() {
     });
   });
 
+  describe(".isUndefined(value)", function() {
+    it("checks if value is undefined", function() {
+      assert(_.isUndefined(undefined) === true);
+      assert(_.isUndefined(0)         === false);
+      assert(_.isUndefined(null)      === false);
+    });
+  });
+
 });
