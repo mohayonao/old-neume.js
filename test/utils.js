@@ -204,4 +204,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".partition(list, pred, ctx)", function() {
+    it("split array into two arrays", function() {
+      var expected = _.partition([ 1, 2, 3, 4 ], function(elem) {
+        return elem % 2 === 0;
+      });
+      assert.deepEqual(expected, [ [ 2, 4], [ 1, 3 ] ]);
+    });
+  });
+
 });

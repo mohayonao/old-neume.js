@@ -143,4 +143,17 @@ utils.reject = function(list, pred, ctx) {
   return result;
 };
 
+utils.partition = function(list, pred, ctx) {
+  var selected = [];
+  var rejected = [];
+
+  pred = pred.bind(ctx);
+
+  utils.each(list, function(elem, index) {
+    (pred(elem, index, list) ? selected : rejected).push(elem);
+  });
+
+  return [ selected, rejected ];
+};
+
 module.exports = utils;
