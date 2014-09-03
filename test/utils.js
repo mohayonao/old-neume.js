@@ -422,4 +422,117 @@ describe("utils", function() {
     });
   });
 
+  describe(".connect(spec)", function() {
+    it("assign value if finite number -> AudioParam", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+
+      _.connect({ from: 10, to: osc.frequency });
+
+      assert.deepEqual(osc.toJSON(), {
+        name: "OscillatorNode",
+        type: "sine",
+        frequency: {
+          value: 10,
+          inputs: []
+        },
+        detune: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("connect nodes if AudioNode -> AudioNode", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      var amp = audioContext.createGain();
+
+      _.connect({ from: osc, to: amp });
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+    it("connect nodes if AudioNode -> AudioParam", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      var amp = audioContext.createGain();
+
+      _.connect({ from: osc, to: amp.gain });
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        },
+        inputs: []
+      });
+    });
+    it("do nothing if else", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      var amp = audioContext.createGain();
+
+      _.connect({ from: amp.gain, to: osc });
+      _.connect({ from: osc, to: null });
+
+      assert.deepEqual(osc.toJSON(), {
+        name: "OscillatorNode",
+        type: "sine",
+        frequency: {
+          value: 440,
+          inputs: []
+        },
+        detune: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });

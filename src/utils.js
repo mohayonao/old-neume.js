@@ -284,4 +284,20 @@ utils.isValidInput = function(value) {
   return utils.isFinite(value) || utils.isAudioNode(utils.findAudioNode(value));
 };
 
+utils.connect = function(spec) {
+  var from = spec.from;
+  var to   = spec.to;
+
+  if (utils.isFinite(from) && utils.isAudioParam(to)) {
+    return to.setValueAtTime(from, 0);
+  }
+
+  if (utils.isAudioNode(to) || utils.isAudioParam(to)) {
+    from = utils.findAudioNode(from);
+    if (from) {
+      return from.connect(to);
+    }
+  }
+};
+
 module.exports = utils;
