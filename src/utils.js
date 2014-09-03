@@ -172,4 +172,8 @@ utils.has = function(obj, key) {
   return obj != null && obj.hasOwnProperty(key);
 };
 
+utils.keys = function(obj) {
+  return Object.keys(obj);
+};
+
 module.exports = utils;

@@ -230,4 +230,10 @@ describe("utils", function() {
     });
   });
 
+  describe(".keys(obj)", function() {
+    it("retrieve all the names of the object's properties", function() {
+      assert.deepEqual(_.keys({ a: 0, b: 1, c: 2 }), [ "a", "b", "c" ]);
+    });
+  });
+
 });
