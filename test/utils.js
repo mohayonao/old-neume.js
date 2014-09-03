@@ -136,4 +136,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".rest(list)", function() {
+    it("gets the rest of the elements of the list", function() {
+      assert.deepEqual(_.rest([ 1, 2, 3 ]), [ 2, 3 ]);
+      assert.deepEqual(_.rest([]), []);
+    });
+  });
+
 });

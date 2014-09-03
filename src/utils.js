@@ -77,4 +77,8 @@ utils.last = function(list) {
   return list[list.length - 1];
 };
 
+utils.rest = function(list) {
+  return list.slice(1);
+};
+
 module.exports = utils;
