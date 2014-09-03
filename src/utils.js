@@ -61,4 +61,8 @@ utils.fill = function(list, value) {
   return list;
 };
 
+utils.isEmpty = function(list) {
+  return list.length === 0;
+};
+
 module.exports = utils;

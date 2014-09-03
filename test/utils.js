@@ -108,4 +108,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".isEmpty(list)", function() {
+    it("checks if value is empty", function() {
+      assert(_.isEmpty([]) === true);
+      assert(_.isEmpty("") === true);
+    });
+  });
+
 });
