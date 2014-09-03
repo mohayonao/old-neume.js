@@ -195,4 +195,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".reject(list, pred, ctx)", function() {
+    it("returns an array of all the values that does NOT pass a truth test", function() {
+      var expected = _.reject([ 1, 2, 3, 4 ], function(elem) {
+        return elem % 2 === 0;
+      });
+      assert.deepEqual(expected, [ 1, 3 ]);
+    });
+  });
+
 });
