@@ -26,4 +26,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".isFunction(value)", function() {
+    it("checks if value is a function", function() {
+      assert(_.isFunction(it) === true);
+      assert(_.isFunction("") === false);
+    });
+  });
+
 });

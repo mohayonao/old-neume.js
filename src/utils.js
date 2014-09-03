@@ -14,4 +14,8 @@ utils.isDictionary = function(value) {
   return value != null && value.constructor === Object;
 };
 
+utils.isFunction = function(value) {
+  return typeof value === "function";
+};
+
 module.exports = utils;
