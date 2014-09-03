@@ -293,4 +293,19 @@ describe("utils", function() {
     });
   });
 
+  describe(".typeOf(value)", function() {
+    it("returns type name", function() {
+      assert(_.typeOf(10) === "number");
+      assert(_.typeOf([]) === "array");
+      assert(_.typeOf("") === "string");
+      assert(_.typeOf(it) === "function");
+      assert(_.typeOf(true) === "boolean");
+      assert(_.typeOf(null) === "null");
+      assert(_.typeOf(undefined) === "undefined");
+      assert(_.typeOf(NaN) === "nan");
+      assert(_.typeOf(new Float32Array()) === "float32array");
+      assert(_.typeOf({ constructor: null }) === "object");
+    });
+  });
+
 });

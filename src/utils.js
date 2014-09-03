@@ -213,4 +213,35 @@ utils.finite = function(value) {
   return value;
 };
 
+utils.typeOf = function(value) {
+  if (utils.isNumber(value)) {
+    return "number";
+  }
+  if (utils.isArray(value)) {
+    return "array";
+  }
+  if (utils.isString(value)) {
+    return "string";
+  }
+  if (utils.isFunction(value)) {
+    return "function";
+  }
+  if (utils.isBoolean(value)) {
+    return "boolean";
+  }
+  if (utils.isNull(value)) {
+    return "null";
+  }
+  if (utils.isUndefined(value)) {
+    return "undefined";
+  }
+  if (utils.isNaN(value)) {
+    return "nan";
+  }
+  if (value.constructor && utils.isString(value.constructor.name)) {
+    return value.constructor.name.toLowerCase();
+  }
+  return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
+};
+
 module.exports = utils;
