@@ -248,4 +248,17 @@ describe("utils", function() {
     });
   });
 
+  describe(".format(fmt, dict)", function() {
+    it("should format with an array", function() {
+      assert(_.format("#{0} is #{1}", [
+        "rock and roll", "dead", "!?"
+      ]) === "rock and roll is dead");
+    });
+    it("should format with a dictionary", function() {
+      assert(_.format("#{a} is #{b}", {
+        a: "rock and roll", b: "dead", ".": "!?"
+      }) === "rock and roll is dead");
+    });
+  });
+
 });

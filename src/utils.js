@@ -188,4 +188,13 @@ utils.pairs = function(obj) {
   });
 };
 
+utils.format = function(fmt, dict) {
+  utils.each(dict, function(val, key) {
+    if (/^\w+$/.test(key)) {
+      fmt = fmt.replace(new RegExp("#\\{" + key + "\\}", "g"), val);
+    }
+  });
+  return fmt;
+};
+
 module.exports = utils;
