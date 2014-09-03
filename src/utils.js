@@ -47,4 +47,11 @@ utils.isUndefined = function(value) {
   return value === void 0;
 };
 
+utils.toArray = function(value) {
+  if (value == null) {
+    return [];
+  }
+  return Array.prototype.slice.call(value);
+};
+
 module.exports = utils;

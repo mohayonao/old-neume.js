@@ -93,4 +93,12 @@ describe("utils", function() {
     });
   });
 
+  describe(".toArray(list)", function() {
+    it("converts the list to an array", function() {
+      assert.deepEqual(_.toArray(arguments), []);
+      assert.deepEqual(_.toArray([ 5, 10 ]), [ 5, 10 ]);
+      assert.deepEqual(_.toArray(null)     , []);
+    });
+  });
+
 });
