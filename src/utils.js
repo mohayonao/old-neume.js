@@ -39,4 +39,8 @@ utils.isObject = function(value) {
   return type === "function" || type === "object" && value !== null;
 };
 
+utils.isString = function(value) {
+  return typeof value === "string";
+};
+
 module.exports = utils;

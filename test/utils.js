@@ -78,4 +78,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".isString(value)", function() {
+    it("checks if value is a string.", function() {
+      assert(_.isString("") === true);
+      assert(_.isString([]) === false);
+    });
+  });
+
 });
