@@ -30,4 +30,8 @@ utils.isNull = function(value) {
   return value === null;
 };
 
+utils.isNumber = function(value) {
+  return typeof value === "number" && !isNaN(value);
+};
+
 module.exports = utils;

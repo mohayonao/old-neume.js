@@ -59,4 +59,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".isNumber(value)", function() {
+    it("checks if value is a number", function() {
+      assert(_.isNumber(10)       === true);
+      assert(_.isNumber(Infinity) === true);
+      assert(_.isNumber(NaN)      === false);
+      assert(_.isNumber("10")     === false);
+    });
+  });
+
 });
