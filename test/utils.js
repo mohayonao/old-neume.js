@@ -406,4 +406,20 @@ describe("utils", function() {
     });
   });
 
+  describe(".isValidInput(value)", function() {
+    it("checks if value is finite number or has AudioNode-link", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      var obj = {
+        $outlet: {
+          $outlet: osc
+        }
+      };
+      assert(_.isValidInput(obj)      === true);
+      assert(_.isValidInput(10)       === true);
+      assert(_.isValidInput(Infinity) === false);
+      assert(_.isValidInput(NaN)      === false);
+    });
+  });
+
 });

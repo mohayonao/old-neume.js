@@ -280,4 +280,8 @@ utils.findAudioNode = function(obj) {
   return obj || null;
 };
 
+utils.isValidInput = function(value) {
+  return utils.isFinite(value) || utils.isAudioNode(utils.findAudioNode(value));
+};
+
 module.exports = utils;
