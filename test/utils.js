@@ -174,4 +174,16 @@ describe("utils", function() {
     });
   });
 
+  describe(".collect(list, func, ctx)", function() {
+    it("produces a new array of values by mapping each value", function() {
+      var expected = _.collect([ 1, 2, 3, 4 ], function(elem, index, list) {
+        return [ elem, index, list ];
+      });
+      assert.deepEqual(expected, [
+        [ 1, 0, [ 1, 2, 3, 4 ] ], [ 2, 1, [ 1, 2, 3, 4 ] ],
+        [ 3, 2, [ 1, 2, 3, 4 ] ], [ 4, 3, [ 1, 2, 3, 4 ] ],
+      ]);
+    });
+  });
+
 });

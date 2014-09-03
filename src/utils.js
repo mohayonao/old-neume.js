@@ -103,4 +103,16 @@ utils.each = function(list, func, ctx) {
   return list;
 };
 
+utils.collect = function(list, func, ctx) {
+  var result = [];
+
+  func = func.bind(ctx);
+
+  utils.each(list, function(elem, index) {
+    result.push(func(elem, index, list));
+  });
+
+  return result;
+};
+
 module.exports = utils;
