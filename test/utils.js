@@ -308,4 +308,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".defaults(value, defaultValue)", function() {
+    it("return default value if it receives null or undefined", function() {
+      assert(_.defaults(1, 10) === 1);
+      assert(_.defaults(0, 10) === 0);
+      assert(_.defaults(null, 10)      === 10);
+      assert(_.defaults(undefined, 10) === 10);
+    });
+  });
+
 });

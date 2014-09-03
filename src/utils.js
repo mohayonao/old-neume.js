@@ -244,4 +244,8 @@ utils.typeOf = function(value) {
   return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
 };
 
+utils.defaults = function(value, defaultValue) {
+  return value == null ? defaultValue : value;
+};
+
 module.exports = utils;
