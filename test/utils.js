@@ -317,4 +317,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".inherits(ctor, superCtor)", function() {
+    it("inherit the prototype methods from one constructor into another. ", function() {
+      function A() {}
+      function B() {}
+      _.inherits(B, A);
+      assert(new B() instanceof A);
+    });
+  });
+
 });
