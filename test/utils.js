@@ -129,4 +129,11 @@ describe("utils", function() {
     });
   });
 
+  describe(".last(list)", function() {
+    it("gets the last element of the list", function() {
+      assert(_.last([ 1, 2, 3 ]) === 3);
+      assert(_.last([]) === undefined);
+    });
+  });
+
 });

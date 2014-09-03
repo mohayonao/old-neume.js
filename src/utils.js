@@ -73,4 +73,8 @@ utils.second = function(list) {
   return list[1];
 };
 
+utils.last = function(list) {
+  return list[list.length - 1];
+};
+
 module.exports = utils;
