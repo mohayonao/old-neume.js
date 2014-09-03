@@ -143,4 +143,35 @@ describe("utils", function() {
     });
   });
 
+  describe(".each(list, func, ctx)", function() {
+    it("iterates over elements of a list", function() {
+      var expected = [];
+      _.each([ 1, 2, 3, 4 ], function(elem, index, list) {
+        expected.push(elem, index, list);
+      });
+      assert.deepEqual(expected, [
+        1, 0, [ 1, 2, 3, 4 ], 2, 1, [ 1, 2, 3, 4 ],
+        3, 2, [ 1, 2, 3, 4 ], 4, 3, [ 1, 2, 3, 4 ],
+      ]);
+    });
+    it("iterates over elements of an object", function() {
+      var expected = [];
+      _.each({ a: 1, b: 2 }, function(elem, index, list) {
+        expected.push(elem, index, list);
+      });
+      assert.deepEqual(expected, [
+        1, "a", { a: 1, b: 2 },
+        2, "b", { a: 1, b: 2 },
+      ]);
+    });
+
+    it("else case", function() {
+      var expected = [];
+      _.each(null, function(elem, index, list) {
+        expected.push(elem, index, list);
+      });
+      assert.deepEqual(expected, []);
+    });
+  });
+
 });

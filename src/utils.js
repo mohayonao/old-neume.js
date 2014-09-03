@@ -81,4 +81,26 @@ utils.rest = function(list) {
   return list.slice(1);
 };
 
+utils.each = function(list, func, ctx) {
+  var i, len, keys;
+
+  if (list != null) {
+    func = func.bind(ctx);
+    len  = list.length;
+    if (len === +len) {
+      for (i = 0; i < len; ++i) {
+        func(list[i], i, list);
+      }
+    } else {
+      keys = Object.keys(list);
+      len  = keys.length;
+      for (i = 0; i < len; ++i) {
+        func(list[keys[i]], keys[i], list);
+      }
+    }
+  }
+
+  return list;
+};
+
 module.exports = utils;
