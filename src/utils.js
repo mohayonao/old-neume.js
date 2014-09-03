@@ -26,4 +26,8 @@ utils.isNaN = function(value) {
   return value !== value;
 };
 
+utils.isNull = function(value) {
+  return value === null;
+};
+
 module.exports = utils;

@@ -51,4 +51,12 @@ describe("utils", function() {
     });
   });
 
+  describe(".isNull(value)", function() {
+    it("checks if value is null", function() {
+      assert(_.isNull(null)      === true);
+      assert(_.isNull(0)         === false);
+      assert(_.isNull(undefined) === false);
+    });
+  });
+
 });
