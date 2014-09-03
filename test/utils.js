@@ -213,4 +213,13 @@ describe("utils", function() {
     });
   });
 
+  describe(".reduce(list, func, init, ctx)", function() {
+    it("reduces boils down a list of values into a single value", function() {
+      var expected = _.reduce([ 1, 2, 3, 4 ], function(a, b) {
+        return a + b;
+      }, 0);
+      assert(expected === 10);
+    });
+  });
+
 });

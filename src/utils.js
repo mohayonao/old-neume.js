@@ -156,4 +156,16 @@ utils.partition = function(list, pred, ctx) {
   return [ selected, rejected ];
 };
 
+utils.reduce = function(list, func, init, ctx) {
+  var result = init;
+
+  func = func.bind(ctx);
+
+  utils.each(list, function(elem, index) {
+    result = func(result, elem, index, list);
+  });
+
+  return result;
+};
+
 module.exports = utils;
