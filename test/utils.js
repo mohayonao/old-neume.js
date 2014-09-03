@@ -222,4 +222,12 @@ describe("utils", function() {
     });
   });
 
+  describe(".has(obj, key)", function() {
+    it("does the object contain the given key?", function() {
+      assert(_.has({ a: 10, b: 20 }, "a") === true);
+      assert(_.has({ a: 10, b: 20 }, "b") === true);
+      assert(_.has({ a: 10, b: 20 }, "c") === false);
+    });
+  });
+
 });

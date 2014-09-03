@@ -168,4 +168,8 @@ utils.reduce = function(list, func, init, ctx) {
   return result;
 };
 
+utils.has = function(obj, key) {
+  return obj != null && obj.hasOwnProperty(key);
+};
+
 module.exports = utils;
