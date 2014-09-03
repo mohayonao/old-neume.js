@@ -261,4 +261,14 @@ describe("utils", function() {
     });
   });
 
+  describe(".num(value)", function() {
+    it("converts into a number", function() {
+      assert(_.num(10)       === 10);
+      assert(_.num("10")     === 10);
+      assert(_.num(Infinity) === Infinity);
+      assert(_.num(NaN)      === 0);
+      assert(_.num("zero")   === 0);
+    });
+  });
+
 });

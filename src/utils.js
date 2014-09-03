@@ -197,4 +197,8 @@ utils.format = function(fmt, dict) {
   return fmt;
 };
 
+utils.num = function(value) {
+  return +value||0;
+};
+
 module.exports = utils;
