@@ -266,4 +266,11 @@ utils.isAudioParam = function(value) {
   return value instanceof window.AudioParam;
 };
 
+utils.findAudioContext = function(obj) {
+  while (!(obj == null || utils.isAudioContext(obj))) {
+    obj = obj.$context;
+  }
+  return obj || null;
+};
+
 module.exports = utils;

@@ -356,4 +356,28 @@ describe("utils", function() {
     });
   });
 
+  describe(".findAudioContext(obj)", function() {
+    it("returns obj if it is an instance of AudioContext", function() {
+      var audioContext = new window.AudioContext();
+      assert(_.findAudioContext(audioContext) === audioContext);
+    });
+    it("returns an insance of AudioContext that found from link", function() {
+      var audioContext = new window.AudioContext();
+      var obj = {
+        $context: {
+          $context: audioContext
+        }
+      };
+      assert(_.findAudioContext(obj) === audioContext);
+    });
+    it("returns null if not found", function() {
+      var obj = {
+        $context: {
+          $context: {}
+        }
+      };
+      assert(_.findAudioContext(obj) === null);
+    });
+  });
+
 });
