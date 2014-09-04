@@ -273,4 +273,11 @@ utils.findAudioContext = function(obj) {
   return obj || null;
 };
 
+utils.findAudioNode = function(obj) {
+  while (!(obj == null || utils.isAudioNode(obj))) {
+    obj = obj.$outlet;
+  }
+  return obj || null;
+};
+
 module.exports = utils;
