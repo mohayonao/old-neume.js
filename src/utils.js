@@ -258,4 +258,8 @@ utils.isAudioContext = function(value) {
   return value instanceof window.AudioContext;
 };
 
+utils.isAudioNode = function(value) {
+  return value instanceof window.AudioNode;
+};
+
 module.exports = utils;
