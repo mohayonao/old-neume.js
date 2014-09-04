@@ -326,4 +326,14 @@ describe("utils", function() {
     });
   });
 
+  describe(".isAudioContext(value)", function() {
+    it("checks if value is an instance of AudioContext", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      assert(_.isAudioContext(audioContext) === true);
+      assert(_.isAudioContext(osc) === false);
+      assert(_.isAudioContext(osc.detune) === false);
+    });
+  });
+
 });

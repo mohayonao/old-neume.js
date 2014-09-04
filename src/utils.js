@@ -254,4 +254,8 @@ utils.inherits = function(ctor, superCtor) {
   });
 };
 
+utils.isAudioContext = function(value) {
+  return value instanceof window.AudioContext;
+};
+
 module.exports = utils;
