@@ -535,4 +535,25 @@ describe("utils", function() {
     });
   });
 
+  describe("#disconnect(spec)", function() {
+    it("disconnect nodes", function() {
+      var audioContext = new window.AudioContext();
+      var osc = audioContext.createOscillator();
+      var amp = audioContext.createGain();
+
+      _.connect({ from: osc, to: amp.gain });
+
+      _.disconnect({ from: osc });
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });

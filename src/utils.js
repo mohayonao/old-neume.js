@@ -300,4 +300,13 @@ utils.connect = function(spec) {
   }
 };
 
+utils.disconnect = function(spec) {
+  var from = utils.findAudioNode(spec.from);
+
+  /* istanbul ignore else */
+  if (from) {
+    from.disconnect();
+  }
+};
+
 module.exports = utils;
