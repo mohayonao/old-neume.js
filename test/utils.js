@@ -85,6 +85,22 @@ describe("utils", function() {
     });
   });
 
+  describe(".isTypedArray(value)", function() {
+    it("checks if value is an instance of TypedArray", function() {
+      assert(_.isTypedArray(new Float32Array()) === true);
+      assert(_.isTypedArray(new Uint8Array())   === true);
+      assert(_.isTypedArray(new Int8Array())    === true);
+      assert(_.isTypedArray(new Uint16Array())  === true);
+      assert(_.isTypedArray(new Int16Array())   === true);
+      assert(_.isTypedArray(new Uint32Array())  === true);
+      assert(_.isTypedArray(new Int32Array())   === true);
+      assert(_.isTypedArray(new Float64Array()) === true);
+      assert(_.isTypedArray(new Uint8ClampedArray()) === true);
+      assert(_.isTypedArray([]) === false);
+      assert(_.isTypedArray("") === false);
+    });
+  });
+
   describe(".isUndefined(value)", function() {
     it("checks if value is undefined", function() {
       assert(_.isUndefined(undefined) === true);

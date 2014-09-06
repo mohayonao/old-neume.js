@@ -43,6 +43,18 @@ utils.isString = function(value) {
   return typeof value === "string";
 };
 
+utils.isTypedArray = function(value) {
+  return value instanceof Float32Array ||
+    value instanceof Uint8Array ||
+    value instanceof Int8Array ||
+    value instanceof Uint16Array ||
+    value instanceof Int16Array ||
+    value instanceof Uint32Array ||
+    value instanceof Int32Array ||
+    value instanceof Float64Array ||
+    value instanceof Uint8ClampedArray;
+};
+
 utils.isUndefined = function(value) {
   return value === void 0;
 };
