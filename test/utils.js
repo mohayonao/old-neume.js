@@ -85,6 +85,22 @@ describe("utils", function() {
     });
   });
 
+  describe(".isTypedArray(value)", function() {
+    it("checks if value is an instance of TypedArray", function() {
+      assert(_.isTypedArray(new Float32Array()) === true);
+      assert(_.isTypedArray(new Uint8Array())   === true);
+      assert(_.isTypedArray(new Int8Array())    === true);
+      assert(_.isTypedArray(new Uint16Array())  === true);
+      assert(_.isTypedArray(new Int16Array())   === true);
+      assert(_.isTypedArray(new Uint32Array())  === true);
+      assert(_.isTypedArray(new Int32Array())   === true);
+      assert(_.isTypedArray(new Float64Array()) === true);
+      assert(_.isTypedArray(new Uint8ClampedArray()) === true);
+      assert(_.isTypedArray([]) === false);
+      assert(_.isTypedArray("") === false);
+    });
+  });
+
   describe(".isUndefined(value)", function() {
     it("checks if value is undefined", function() {
       assert(_.isUndefined(undefined) === true);
@@ -403,6 +419,32 @@ describe("utils", function() {
         }
       };
       assert(_.findAudioNode(obj) === null);
+    });
+  });
+
+  describe(".findAudioBuffer(obj)", function() {
+    it("returns obj if it is an instance of AudioBuffer", function() {
+      var audioContext = new window.AudioContext();
+      var buf = audioContext.createBuffer(1, 18, 44100);
+      assert(_.findAudioBuffer(buf) === buf);
+    });
+    it("returns an instance of AudioNode that found from link", function() {
+      var audioContext = new window.AudioContext();
+      var buf = audioContext.createBuffer(1, 18, 44100);
+      var obj = {
+        $buffer: {
+          $buffer: buf
+        }
+      };
+      assert(_.findAudioBuffer(obj) === buf);
+    });
+    it("returns null if not found", function() {
+      var obj = {
+        $buffer: {
+          $buffer: {}
+        }
+      };
+      assert(_.findAudioBuffer(obj) === null);
     });
   });
 

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>buffer-work - neuma.js</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <style>
+    #start {
+      margin: 10px 0;
+    }
+    #canvas {
+      width: 100%;
+      height: 240px;
+      background: black;
+    }
+    #code {
+      padding: 0;
+      margin: 0;
+      background: white;
+      border: none;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
+  <script src="../build/neuma.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>neuma.js buffer-work</h1>
+    <div id="canvas"></div>
+    <div id="app">
+      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">source</h3>
+      </div>
+      <div class="panel-body">
+        <pre class="prettyprint" id="code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script id="example">
+  var buffer = null;
+
+  Neuma.Buffer.load("./amen.wav").then(function(result) {
+    buffer = result;
+  }).catch(function(e) {
+    console.error("Neuma.Buffer.load: failed");
+  });
+
+  var Granular = new Neuma(function($, buffer, depth) {
+    return $("xline", { start: 0.2, end: _.random(50, 500) * 0.001, dur: 2.0 },
+      $("buf", { buffer: glitch(buffer, depth), loop: true })
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  function glitch(buffer, n) {
+    if (n === 0) {
+      return buffer;
+    }
+    return glitch(_.sample(glitch.fn)(buffer), n - 1);
+  }
+  glitch.fn = [];
+
+  glitch.fn.push(function beep(buffer) {
+    if (Math.random() < 0.6 || buffer.length < 128) {
+      return buffer;
+    }
+    var a = _.random(0, buffer.length);
+    var b = a + _.random(128, 1024);
+    return buffer.slice(a, b);
+  });
+
+  glitch.fn.push(function reverse(buffer) {
+    if (buffer.length < 2048) {
+      return buffer;
+    }
+    return buffer.reverse();
+  });
+
+  glitch.fn.push(function slice(buffer) {
+    if (buffer.length < 1024) {
+      return buffer;
+    }
+    var a = _.random(0, buffer.length);
+    var b = _.random(a, buffer.length);
+    return buffer.slice(a, b);
+  });
+
+  glitch.fn.push(function shuffle(buffer) {
+    if (buffer.length < 1024) {
+      return buffer;
+    }
+    var list = _.shuffle(buffer.split(16));
+    return buffer.concat.apply(_.first(list), _.rest(list));
+  });
+
+  glitch.fn.push(function nop(buffer) {
+    return buffer;
+  });
+
+  var timer = null;
+
+  function start() {
+    if (buffer) {
+      timer = new Neuma.Interval(0.500, function(e) {
+        new Granular(buffer, 4).start(e.playbackTime);
+      }).start();
+    }
+  }
+
+  function stop() {
+    if (timer) {
+      timer.stop();
+    }
+  }
+  </script>
+
+  <script>
+  function canUseWebGL() {
+    try {
+      return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
+    } catch(e) {
+      return false;
+    }
+  }
+  $(function() {
+    "use strict";
+
+    var WaveVisualizer = (function() {
+      function WaveVisualizer(analyer, spec) {
+        this._analyer = analyer;
+
+        this._scene  = new THREE.Scene();
+        this._camera = new THREE.PerspectiveCamera(75, spec.width / spec.height, 0.1, 1000);
+
+        if (canUseWebGL()) {
+          this._analyer.fftSize = 256;
+          this._renderer = new THREE.WebGLRenderer();
+          this._maxWaves = 128;
+        } else {
+          this._analyer.fftSize = 128;
+          this._renderer = new THREE.CanvasRenderer();
+          this._maxWaves = 32;
+        }
+        this._renderer.setSize(spec.width, spec.height);
+
+        this._state = "init";
+        this._timeData = new Uint8Array(analyer.frequencyBinCount);
+        this._freqData = new Uint8Array(analyer.frequencyBinCount);
+        this._waves = [];
+
+        Object.defineProperties(this, {
+          width: {
+            value: spec.width,
+            enumerable: true
+          },
+          height: {
+            value: spec.height,
+            enumerable: true
+          },
+          state: {
+            get: function() {
+              return this._state;
+            },
+            enumerable: true
+          },
+          domElement: {
+            value: this._renderer.domElement,
+            enumerable: true
+          },
+          camera: {
+            value: this._camera,
+            enumerable: true
+          }
+        })
+      }
+
+      WaveVisualizer.prototype.start = function() {
+        if (this._state !== "start") {
+          this._state = "start";
+          requestAnimationFrame(this.render.bind(this));
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.stop = function() {
+        if (this._state === "start") {
+          this._state = "stop";
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.render = function(t) {
+        this._analyer.getByteTimeDomainData(this._timeData);
+        this._analyer.getByteFrequencyData(this._freqData);
+
+        this._render(t);
+
+        this._camera.lookAt(this._scene.position);
+        this._renderer.render(this._scene, this._camera);
+
+        if (this._state === "start") {
+          requestAnimationFrame(this.render.bind(this));
+        }
+      };
+
+      WaveVisualizer.prototype._render = function(t) {
+        if (this._maxWaves <= this._waves.length) {
+          this._scene.remove(this._waves.pop());
+        }
+
+        var geometry = new THREE.Geometry();
+        geometry.vertices = getVertices(this._timeData);
+
+        var material = new THREE.LineBasicMaterial({
+          color: new THREE.Color().setHSL(calcHue(this._freqData), 0.8, 0.6).getHex()
+        });
+
+        var wave = new THREE.Line(geometry, material);
+        wave.rotation.set(Math.cos(t * 0.25), 0, Math.sin(t * 0.25));
+
+        this._scene.add(wave);
+        this._waves.unshift(wave);
+
+        var r = this.width / this._timeData.length;
+
+        this._waves.forEach(function(wave, index, list) {
+          var scaleR = (index + 1) * r;
+          var scaleY = (list.length - index) * 32;
+
+          wave.scale.set(scaleR, scaleY, scaleR);
+        }, this);
+      };
+
+      function calcHue(freqData) {
+        var maxIndex = 0;
+        for (var i = 0, imax = freqData.length * 0.5; i < imax; i += 4) {
+          if (112 <= freqData[i]) {
+            maxIndex = i * 2;
+          }
+        }
+        return maxIndex / freqData.length;
+      }
+
+      function getVertices(data) {
+        var result = new Array(data.length + 1);
+
+        for (var i = 0, imax = data.length; i <= imax; i++) {
+          var x = Math.cos(Math.PI * 2 * (i / imax));
+          var y = ((data[i % imax] / 256) - 0.5) * 2;
+          var z = Math.sin(Math.PI * 2 * (i / imax));
+          result[i] = new THREE.Vector3(x, y, z);
+        }
+
+        return result;
+      }
+
+      return WaveVisualizer;
+    })();
+
+    var canvas = $("#canvas").on("mousemove", function(e) {
+      var x = (e.pageX - canvas.$offset.left) / visualizer.width  - 0.5;
+      var y = (e.pageY - canvas.$offset.top ) / visualizer.height - 0.5;
+
+      visualizer.camera.position.set(
+        Math.sin(x * 2 * Math.PI) * -300,
+        y * 250,
+        Math.cos(x * 2 * Math.PI) * -300
+      );
+    });
+    canvas.$offset = canvas.offset();
+
+    var visualizer = new WaveVisualizer(Neuma.analyer, { width: canvas.width(), height: 240 });
+
+    visualizer.camera.position.set(0, 0, -300);
+
+    canvas.append(visualizer.domElement);
+
+    var vue = new Vue({
+      el: "#app",
+      data: {
+        isPlaying: false,
+      },
+      methods: {
+        toggle: function() {
+          this.isPlaying = !this.isPlaying;
+          if (this.isPlaying) {
+            start(this.$data.score);
+            visualizer.start();
+          } else {
+            stop();
+            visualizer.stop();
+          }
+        }
+      }
+    });
+
+    $("#code").text($("#example").text());
+    prettyPrint();
+  });
+  </script>
+</body>
+</html>
