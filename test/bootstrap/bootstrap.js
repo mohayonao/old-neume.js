@@ -11,6 +11,27 @@ require("espower-loader")({
 
 global.Promise = require("promise");
 
+global.XMLHttpRequest = (function() {
+  function XMLHttpRequest() {
+  }
+  XMLHttpRequest.prototype.open = function(method, url) {
+    this._url = url;
+  };
+  XMLHttpRequest.prototype.send = function() {
+    setTimeout(function() {
+      if (this._url === "/success") {
+        this.readyState = 4;
+        this.status = 200;
+        this.response = new Uint32Array(16).buffer;
+        this.onload();
+      } else {
+        this.onerror();
+      }
+    }.bind(this), 0);
+  };
+  return XMLHttpRequest;
+})();
+
 global.DC = function(/* value */) {
   return {
     name: "AudioBufferSourceNode",
