@@ -66,22 +66,23 @@ describe("NeuSynth", function() {
         ]);
       }));
     });
-    describe("spec.params", function() {
+    describe("spec.params(name, defaultValue)", function() {
       it("works", function() {
         var params = {};
 
         var synth = new NeuSynth(context, {
           def: function($) {
-            params.freq = $.freq;
-            params.amp  = $.amp;
-          },
-          params: { freq: 440, amp: 0.25 }
+            params.freq = $.param("freq", 440);
+            params.amp  = $.param("amp", 0.25);
+            params.amp2 = $.param("amp");
+          }
         }, []);
 
         assert(params.freq instanceof NeuParam);
         assert(params.amp  instanceof NeuParam);
         assert(params.freq === synth.freq);
         assert(params.amp  === synth.amp );
+        assert(params.amp  === params.amp2);
 
         synth.freq = 220;
         synth.amp  = 0.1;
@@ -89,15 +90,10 @@ describe("NeuSynth", function() {
         assert(params.freq.valueOf() === 220);
         assert(params.amp .valueOf() === 0.1);
       });
-      it("throw an error if given an invalid key", function() {
-        var spec = { def: NOP, params: { "*": Infinity } };
-
-        assert.throws(function() {
-          new NeuSynth(context, spec, []);
-        }, TypeError);
-      });
-      it("throw an error if given an invalid value", function() {
-        var spec = { def: NOP, params: { validKey: "INVALID VALUE" } };
+      it("throw an error if given an invalid name", function() {
+        var spec = { def: function($) {
+          $.param("*", Infinity);
+        } };
 
         assert.throws(function() {
           new NeuSynth(context, spec, []);

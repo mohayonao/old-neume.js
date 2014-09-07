@@ -29,12 +29,20 @@ function NeuSynth(context, spec, args) {
     return ugen;
   }
 
-  _.each(spec.params, function(val, key) {
-    validateParam(key, val);
+  var params = {};
 
-    var param = new _.NeuParam(_this, key, val);
+  $.param = function(name, defaultValue) {
+    if (_.has(params, name)) {
+      return params[name];
+    }
 
-    Object.defineProperty(this, key, {
+    defaultValue = _.finite(_.defaults(defaultValue, 0));
+
+    validateParam(name, defaultValue);
+
+    var param = new _.NeuParam(_this, name, defaultValue);
+
+    Object.defineProperty(_this, name, {
       set: function(value) {
         param.set(value);
       },
@@ -43,10 +51,10 @@ function NeuSynth(context, spec, args) {
       }
     });
 
-    Object.defineProperty($, key, {
-      value: param
-    });
-  }, this);
+    params[name] = param;
+
+    return param;
+  };
 
   this.$outlet = _.findAudioNode(spec.def.apply(null, [ $ ].concat(args)));
   this._db = _.isAudioNode(this.$outlet) ? db : EMPTY_DB;
@@ -187,19 +195,11 @@ function parseEvent(event) {
   return { selector: matched[1], event: matched[2] };
 }
 
-function validateParam(name, value) {
+function validateParam(name) {
   if (!/^[a-z]\w*$/.test(name)) {
     throw new TypeError(_.format(
       "invalid parameter name: #{name}", {
         name: name
-      }
-    ));
-  }
-  if (!_.isNumber(value)) {
-    throw new TypeError(_.format(
-      "param '#{name}' must be a number, but got #{value}", {
-        name : name,
-        value: _.typeOf(value)
       }
     ));
   }
