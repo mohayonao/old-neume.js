@@ -26,6 +26,29 @@ var neuma = function(context) {
       value: audioContext.sampleRate,
       enumerable: true
     },
+    Buffer: {
+      value: Object.defineProperties({}, {
+        create: {
+          value: function(channels, length, sampleRate) {
+            return neuma.Buffer.create(context, channels, length, sampleRate);
+          },
+          enumerable: true
+        },
+        from: {
+          value: function(data) {
+            return neuma.Buffer.from(context, data);
+          },
+          enumerable: true
+        },
+        load: {
+          value: function(url) {
+            return neuma.Buffer.load(context, url);
+          },
+          enumerable: true
+        }
+      }),
+      enumerable: true
+    },
     Interval: {
       value: function(interval, callback) {
         return new neuma.Interval(context, interval, callback);
@@ -45,7 +68,7 @@ neuma.UGen     = require("./ugen");
 neuma.Param    = require("./param");
 neuma.Unit     = require("./unit");
 neuma.DC       = require("./dc");
-neuma.Buffer   = {}; // TODO: implements
+neuma.Buffer   = require("./buffer");
 neuma.Interval = require("./interval");
 
 var context = new neuma.Context(new window.AudioContext());
