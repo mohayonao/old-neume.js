@@ -3,6 +3,7 @@ module.exports = function(neuma) {
 
   neuma.use(require("./add"));
   neuma.use(require("./biquad"));
+  neuma.use(require("./buf"));
   neuma.use(require("./line"));
   neuma.use(require("./mul"));
   neuma.use(require("./number"));
