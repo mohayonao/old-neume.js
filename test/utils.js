@@ -422,6 +422,32 @@ describe("utils", function() {
     });
   });
 
+  describe(".findAudioBuffer(obj)", function() {
+    it("returns obj if it is an instance of AudioBuffer", function() {
+      var audioContext = new window.AudioContext();
+      var buf = audioContext.createBuffer(1, 18, 44100);
+      assert(_.findAudioBuffer(buf) === buf);
+    });
+    it("returns an instance of AudioNode that found from link", function() {
+      var audioContext = new window.AudioContext();
+      var buf = audioContext.createBuffer(1, 18, 44100);
+      var obj = {
+        $buffer: {
+          $buffer: buf
+        }
+      };
+      assert(_.findAudioBuffer(obj) === buf);
+    });
+    it("returns null if not found", function() {
+      var obj = {
+        $buffer: {
+          $buffer: {}
+        }
+      };
+      assert(_.findAudioBuffer(obj) === null);
+    });
+  });
+
   describe(".isValidInput(value)", function() {
     it("checks if value is finite number or has AudioNode-link", function() {
       var audioContext = new window.AudioContext();

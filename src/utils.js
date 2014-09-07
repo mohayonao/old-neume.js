@@ -292,6 +292,13 @@ utils.findAudioNode = function(obj) {
   return obj || null;
 };
 
+utils.findAudioBuffer = function(obj) {
+  while (!(obj == null || obj instanceof window.AudioBuffer)) {
+    obj = obj.$buffer;
+  }
+  return obj || null;
+};
+
 utils.isValidInput = function(value) {
   return utils.isFinite(value) || utils.isAudioNode(utils.findAudioNode(value));
 };
