@@ -3,6 +3,7 @@
 var _ = require("../src/utils");
 var NeuContext = require("../src/context");
 var NeuSynthDef = require("../src/synthdef");
+var NOP = function() {};
 
 describe("NeuSynthDef", function() {
   var context = null;
@@ -11,64 +12,55 @@ describe("NeuSynthDef", function() {
     context = new NeuContext(new window.AudioContext());
   });
 
-  describe("(context, spec)", function() {
+  describe("(context, func)", function() {
     it("returns a function that returns an instance of NeuSynth", function() {
-      assert(typeof new NeuSynthDef(context, {}) === "function");
+      assert(typeof new NeuSynthDef(context, NOP) === "function");
     });
 
     describe("#context", function() {
       it("is an instance of AudioContext", function() {
-        var def = new NeuSynthDef(context, {});
-        assert(def.context instanceof window.AudioContext);
+        var synthDef = new NeuSynthDef(context, NOP);
+          assert(synthDef.context instanceof window.AudioContext);
       });
     });
 
     describe("(...args)", function() {
-      it("calls new NeuSynth(default context, spec, ...args)", sinon.test(function() {
+      it("calls new NeuSynth(default context, func, ...args)", sinon.test(function() {
         this.stub(_, "NeuSynth");
 
-        var spec = { a: 10, b : 20 };
-        var def  = new NeuSynthDef(context, spec);
+        var synthDef = new NeuSynthDef(context, NOP);
 
-        def("a", "b", "c");
+        synthDef("a", "b", "c");
 
         assert(_.NeuSynth.calledWithNew() === true);
-        assert.deepEqual(_.NeuSynth.args[0], [ context, spec, [ "a", "b", "c" ] ]);
+        assert.deepEqual(_.NeuSynth.args[0], [ context, NOP, [ "a", "b", "c" ] ]);
       }));
     });
 
     describe("(context, ...args)", function() {
-      it("calls new NeuSynth(received context, spec, ...args)", sinon.test(function() {
+      it("calls new NeuSynth(received context, func, ...args)", sinon.test(function() {
         this.stub(_, "NeuSynth");
 
-        var spec = { a: 10, b : 20 };
-        var def  = new NeuSynthDef(context, spec);
+        var synthDef = new NeuSynthDef(context, NOP);
         var newContext = new window.AudioContext();
 
         newContext.marked = true;
 
-        def(newContext, "d", "e", "f");
+        synthDef(newContext, "d", "e", "f");
 
         assert(_.NeuSynth.calledWithNew() === true);
-        assert.deepEqual(_.NeuSynth.args[0], [ newContext, spec, [ "d", "e", "f" ] ]);
+        assert.deepEqual(_.NeuSynth.args[0], [ newContext, NOP, [ "d", "e", "f" ] ]);
       }));
 
     });
   });
 
-  describe("(context, func)", function() {
-    it("converts the received function into a spec object", sinon.test(function() {
-      this.stub(_, "NeuSynth");
-
-      var def = new NeuSynthDef(context, it);
-
-      def();
-
-      assert.deepEqual(_.NeuSynth.args[0][1], {
-        def   : it,
-        params: []
+  describe("(context, notAFunc)", function() {
+    it("throws an error", function() {
+      assert.throws(function() {
+        new NeuSynthDef(context, null);
       });
-    }));
+    });
   });
 
 });
