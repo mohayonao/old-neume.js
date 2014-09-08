@@ -11,7 +11,7 @@ var INIT  = 0;
 var START = 1;
 var STOP  = 2;
 
-function NeuSynth(context, spec, args) {
+function NeuSynth(context, func, args) {
   var _this = this;
 
   this.$context = context;
@@ -56,7 +56,7 @@ function NeuSynth(context, spec, args) {
     return param;
   };
 
-  this.$outlet = _.findAudioNode(spec.def.apply(null, [ $ ].concat(args)));
+  this.$outlet = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
   this._db = _.isAudioNode(this.$outlet) ? db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "init";

@@ -20,11 +20,9 @@ describe("NeuSynth", function() {
     osc = context.createOscillator();
   });
 
-  describe("(context, spec, args)", function() {
+  describe("(context, func, args)", function() {
     it("returns an instance of NeuSynth", function() {
-      var spec = { def: NOP, params: {} };
-
-      assert(new NeuSynth(context, spec, []) instanceof NeuSynth);
+      assert(new NeuSynth(context, NOP, []) instanceof NeuSynth);
     });
     describe("$", function() {
       it("works", sinon.test(function() {
@@ -34,11 +32,8 @@ describe("NeuSynth", function() {
           return { id: count++ };
         });
 
-        var synth = new NeuSynth(context, {
-          def: function($) {
-            return $("sin", { freq: 880 }, 1, 2, 3);
-          },
-          params: {}
+        var synth = new NeuSynth(context, function($) {
+          return $("sin", { freq: 880 }, 1, 2, 3);
         }, []);
 
         assert(stub.calledOnce === true);
@@ -46,65 +41,44 @@ describe("NeuSynth", function() {
           synth, "sin", { freq: 880 }, [ 1, 2, 3 ]
         ]);
       }));
-      it("works without a spec object", sinon.test(function() {
-        var count = 0;
+      describe(".params(name, defaultValue)", function() {
+        it("works", function() {
+          var params = {};
 
-        var stub = this.stub(_.NeuUGen, "build", function() {
-          return { id: count++ };
-        });
-
-        var synth = new NeuSynth(context, {
-          def: function($) {
-            return $("sin", /* { freq: 880 }, */ 1, 2, 3);
-          },
-          params: {}
-        }, []);
-
-        assert(stub.calledOnce === true);
-        assert.deepEqual(stub.firstCall.args, [
-          synth, "sin", {}, [ 1, 2, 3 ]
-        ]);
-      }));
-    });
-    describe("spec.params(name, defaultValue)", function() {
-      it("works", function() {
-        var params = {};
-
-        var synth = new NeuSynth(context, {
-          def: function($) {
+          var synth = new NeuSynth(context, function($) {
             params.freq = $.param("freq", 440);
             params.amp  = $.param("amp", 0.25);
             params.amp2 = $.param("amp");
-          }
-        }, []);
+          }, []);
 
-        assert(params.freq instanceof NeuParam);
-        assert(params.amp  instanceof NeuParam);
-        assert(params.freq === synth.freq);
-        assert(params.amp  === synth.amp );
-        assert(params.amp  === params.amp2);
+          assert(params.freq instanceof NeuParam);
+          assert(params.amp  instanceof NeuParam);
+          assert(params.freq === synth.freq);
+          assert(params.amp  === synth.amp );
+          assert(params.amp  === params.amp2);
 
-        synth.freq = 220;
-        synth.amp  = 0.1;
+          synth.freq = 220;
+          synth.amp  = 0.1;
 
-        assert(params.freq.valueOf() === 220);
-        assert(params.amp .valueOf() === 0.1);
-      });
-      it("throw an error if given an invalid name", function() {
-        var spec = { def: function($) {
-          $.param("*", Infinity);
-        } };
+          assert(params.freq.valueOf() === 220);
+          assert(params.amp .valueOf() === 0.1);
+        });
+        it("throw an error if given an invalid name", function() {
+          var func = function($) {
+            $.param("*", Infinity);
+          };
 
-        assert.throws(function() {
-          new NeuSynth(context, spec, []);
-        }, TypeError);
+          assert.throws(function() {
+            new NeuSynth(context, func, []);
+          }, TypeError);
+        });
       });
     });
   });
 
   describe("#context", function() {
     it("is an instance of AudioContext", function() {
-      var synth = new NeuSynth(context, { def: NOP, params: {} }, []);
+      var synth = new NeuSynth(context, NOP, []);
 
       assert(synth.context instanceof window.AudioContext);
     });
@@ -116,9 +90,9 @@ describe("NeuSynth", function() {
         return { $outlet: osc };
       });
 
-      var synth = new NeuSynth(context, { def: function($) {
+      var synth = new NeuSynth(context, function($) {
         return $("sin");
-      }, params: {} }, []);
+      }, []);
 
       assert(synth.outlet instanceof window.AudioNode);
     }));
@@ -126,7 +100,7 @@ describe("NeuSynth", function() {
 
   describe("#start(t)", function() {
     it("returns self", function() {
-      var synth = new NeuSynth(context, { def: NOP, params: {} }, []);
+      var synth = new NeuSynth(context, NOP, []);
 
       assert(synth.start() === synth);
     });
@@ -139,11 +113,8 @@ describe("NeuSynth", function() {
         return ugen;
       });
 
-      var synth = new NeuSynth(context, {
-        def: function($) {
-          return $("+", $("sin"), $("sin"), $("sin"));
-        },
-        params: {}
+      var synth = new NeuSynth(context, function($) {
+        return $("+", $("sin"), $("sin"), $("sin"));
       }, []);
 
       assert(synth.state === "init", "00:00.000");
@@ -177,7 +148,7 @@ describe("NeuSynth", function() {
 
   describe("#stop(t)", function() {
     it("returns self", function() {
-      var synth = new NeuSynth(context, { def: NOP, params: {} }, []);
+      var synth = new NeuSynth(context, NOP, []);
 
       assert(synth.stop() === synth);
     });
@@ -190,11 +161,8 @@ describe("NeuSynth", function() {
         return ugen;
       });
 
-      var synth = new NeuSynth(context, {
-        def: function($) {
-          return $("+", $("sin"), $("sin"), $("sin"));
-        },
-        params: {}
+      var synth = new NeuSynth(context, function($) {
+        return $("+", $("sin"), $("sin"), $("sin"));
       }, []);
 
       assert(synth.state === "init", "00:00.000");
@@ -260,15 +228,12 @@ describe("NeuSynth", function() {
     });
 
     beforeEach(function() {
-      synth = new NeuSynth(context, {
-        def: function($) {
-          ugen1 = $("line", { id: "ugen1", class: "amp" });
-          ugen2 = $("adsr", { id: "ugen2", class: "amp" });
-          ugen3 = $("line", { id: "ugen3", class: "lfo" });
-          ugen4 = $("adsr", { id: "ugen4", class: "lfo" });
-          return $("+", ugen1, ugen2, ugen3, ugen4);
-        },
-        params: {}
+      synth = new NeuSynth(context, function($) {
+        ugen1 = $("line", { id: "ugen1", class: "amp" });
+        ugen2 = $("adsr", { id: "ugen2", class: "amp" });
+        ugen3 = $("line", { id: "ugen3", class: "lfo" });
+        ugen4 = $("adsr", { id: "ugen4", class: "lfo" });
+        return $("+", ugen1, ugen2, ugen3, ugen4);
       }, []);
     });
 
