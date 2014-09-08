@@ -251,6 +251,122 @@ describe("NeuSynth", function() {
     }));
   });
 
+  describe("#connect(destination, output, input)", function() {
+    it("returns self", function() {
+      var synth = new NeuSynth(context, NOP, []);
+
+      assert(synth.connect() === synth);
+    });
+    it("works", function() {
+      var synth1 = new NeuSynth(context, function($) {
+        $.out(0, $("sin", { freq: 440 }));
+        $.out(1, $("sin", { freq: 660 }));
+        $.out(2, $("sin", { freq: 880 }));
+      }, []);
+      var synth2 = new NeuSynth(context, function($) {
+        $.out(0, $("+", $.in(0), $.in(1), $.in(2)));
+      }, []);
+
+      synth1.connect(synth2, 0, 1);
+      synth1.connect(synth2, 0, 2);
+      synth1.connect(synth2, 1, 0);
+      synth1.connect(synth2, 2, 0);
+      synth1.start();
+      synth2.start();
+
+      audioContext.$process(0.1);
+
+      assert.deepEqual(synth2.outlet.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 660,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              },
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 880,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          },
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          },
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
   describe("events", function() {
     var synth = null;
     var ugen1 = null;

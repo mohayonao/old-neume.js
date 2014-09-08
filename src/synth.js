@@ -86,6 +86,7 @@ function NeuSynth(context, func, args) {
 
   this.$inputs  = inputs;
   this.$outputs = outputs;
+  this._routing = [];
   this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "init";
@@ -118,8 +119,15 @@ NeuSynth.prototype.start = function(t) {
     this.$context.sched(t, function(t) {
       this._stateString = "start";
 
-      // TODO: fix 'to'
-      _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
+      if (this._routing.length === 0) {
+        _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
+      } else {
+        this._routing.forEach(function(destinations, output) {
+          destinations.forEach(function(destination) {
+            _.connect({ from: this.$outputs[output], to: destination });
+          }, this);
+        }, this);
+      }
 
       _.each(this._db.all(), function(ugen) {
         ugen.start(t);
@@ -151,6 +159,20 @@ NeuSynth.prototype.stop = function(t) {
         ugen.stop(t);
       });
     }, this);
+  }
+
+  return this;
+};
+
+NeuSynth.prototype.connect = function(destination, output, input) {
+  output = Math.max(0, _.int(output));
+  input  = Math.max(0, _.int(input));
+
+  if (destination instanceof NeuSynth && this.$outputs[output] && destination.$inputs[input]) {
+    if (!this._routing[output]) {
+      this._routing[output] = [];
+    }
+    this._routing[output].push(destination.$inputs[input]);
   }
 
   return this;
