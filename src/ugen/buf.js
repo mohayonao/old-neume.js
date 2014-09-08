@@ -16,8 +16,11 @@ module.exports = function(neuma, _) {
     var buffer = _.findAudioBuffer(spec.buffer);
     var bufSrc = ugen.$context.createBufferSource();
 
-    bufSrc.buffer = buffer;
-    bufSrc.loop = !!spec.loop;
+    /* istanbul ignore else */
+    if (buffer != null) {
+      bufSrc.buffer = buffer;
+    }
+    bufSrc.loop = !!_.defaults(spec.loop, false);
     bufSrc.loopStart = _.finite(_.defaults(spec.loopStart, 0));
     bufSrc.loopEnd   = _.finite(_.defaults(spec.loopEnd  , 0));
 
