@@ -29,7 +29,8 @@ function NeuSynth(context, func, args) {
     return ugen;
   }
 
-  var params = {};
+  var params  = {};
+  var outputs = [];
 
   $.param = function(name, defaultValue) {
     if (_.has(params, name)) {
@@ -56,8 +57,14 @@ function NeuSynth(context, func, args) {
     return param;
   };
 
-  this.$outlet = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
-  this._db = _.isAudioNode(this.$outlet) ? db : EMPTY_DB;
+  var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
+
+  if (outputs[0] == null && _.isAudioNode(result)) {
+    outputs[0] = result;
+  }
+
+  this._outputs = outputs;
+  this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "init";
 
@@ -67,7 +74,7 @@ function NeuSynth(context, func, args) {
       enumerable: true
     },
     outlet: {
-      value: _.findAudioNode(this.$outlet),
+      value: _.findAudioNode(this._outputs[0]),
       enumerable: true
     },
     state: {
@@ -90,7 +97,7 @@ NeuSynth.prototype.start = function(t) {
       this._stateString = "start";
 
       // TODO: fix 'to'
-      _.connect({ from: this, to: this.$context.$outlet });
+      _.connect({ from: this._outputs[0], to: this.$context.$outlet });
 
       _.each(this._db.all(), function(ugen) {
         ugen.start(t);
@@ -113,7 +120,9 @@ NeuSynth.prototype.stop = function(t) {
       this._stateString = "stop";
 
       this.$context.nextTick(function() {
-        _.disconnect({ from: this });
+        this._outputs.forEach(function(output) {
+          _.disconnect({ from: output });
+        });
       }, this);
 
       _.each(this._db.all(), function(ugen) {
