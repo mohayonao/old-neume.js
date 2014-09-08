@@ -73,6 +73,26 @@ describe("NeuSynth", function() {
           }, TypeError);
         });
       });
+      describe(".in(index)", function() {
+        it("works", function() {
+          var in0 = null;
+          var in1 = null;
+          var in2 = null;
+
+          var synth = new NeuSynth(context, function($) {
+            in0 = $.in(0);
+            in1 = $.in(1);
+            in2 = $.in(0);
+          }, []);
+
+          assert(in0 instanceof window.GainNode);
+          assert(in1 instanceof window.GainNode);
+          assert(in0 !== in1);
+          assert(in0 === in2);
+          assert(synth.$inputs[0] === in0);
+          assert(synth.$inputs[1] === in1);
+        });
+      });
       describe(".out(index, ugen)", function() {
         it("works", function() {
           var ugen0 = null;

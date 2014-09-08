@@ -30,6 +30,7 @@ function NeuSynth(context, func, args) {
   }
 
   var params  = {};
+  var inputs  = [];
   var outputs = [];
 
   $.param = function(name, defaultValue) {
@@ -57,6 +58,16 @@ function NeuSynth(context, func, args) {
     return param;
   };
 
+  $.in = function(index) {
+    index = Math.max(0, _.int(index));
+
+    if (!inputs[index]) {
+      inputs[index] = context.createGain();
+    }
+
+    return inputs[index];
+  };
+
   $.out = function(index, ugen) {
     index = Math.max(0, _.int(index));
 
@@ -73,6 +84,7 @@ function NeuSynth(context, func, args) {
     outputs[0] = result;
   }
 
+  this.$inputs  = inputs;
   this.$outputs = outputs;
   this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
