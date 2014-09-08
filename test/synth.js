@@ -73,6 +73,30 @@ describe("NeuSynth", function() {
           }, TypeError);
         });
       });
+      describe(".out(index, ugen)", function() {
+        it("works", function() {
+          var ugen0 = null;
+          var ugen1 = null;
+          var ugen2 = null;
+          var ugen3 = null;
+
+          var synth = new NeuSynth(context, function($) {
+            ugen0 = $("sin");
+            ugen1 = $("sin");
+            // ugen2 is null
+            ugen3 = $("sin");
+            assert($.out( 0, ugen0) === null);
+            assert($.out( 1, ugen1) === null);
+            assert($.out( 2, ugen2) === null);
+            assert($.out( 3, ugen3) === null);
+          }, []);
+
+          assert(synth.$outputs[0] === ugen0);
+          assert(synth.$outputs[1] === ugen1);
+          assert(synth.$outputs[2] === undefined);
+          assert(synth.$outputs[3] === ugen3);
+        });
+      });
     });
   });
 
