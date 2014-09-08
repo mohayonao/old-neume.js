@@ -22,7 +22,10 @@ function NeuSynth(context, func, args) {
     var args = _.toArray(arguments);
     var key  = args.shift();
     var spec = _.isDictionary(_.first(args)) ? args.shift() : {};
-    var ugen = _.NeuUGen.build(_this, key, spec, args);
+    var inputs = args.reduce(function(a, b) {
+      return a.concat(b);
+    }, []);
+    var ugen = _.NeuUGen.build(_this, key, spec, inputs);
 
     db.append(ugen);
 
