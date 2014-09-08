@@ -9,6 +9,8 @@ require("espower-loader")({
   pattern: "test/**/*.js"
 });
 
+global.navigator = {};
+
 global.Promise = require("promise");
 
 global.XMLHttpRequest = (function() {
