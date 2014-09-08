@@ -1,7 +1,20 @@
 module.exports = function(neuma, _) {
   "use strict";
 
-  var curve = new Float32Array([ -1, +1 ]);
+  var curve = null;
+
+  if (/safari/i.test(window.navigator.userAgent)) {
+    // Safari 7.0.6 does not support interpolation
+    curve = (function() {
+      var data = new Float32Array(8192);
+      for (var i = 0; i < data.length; i++) {
+        data[i] = ((i / data.length) - 0.5) * 2;
+      }
+      return data;
+    })();
+  } else {
+    curve = new Float32Array([ -1, +1 ]);
+  }
 
   /**
    * +------------+
