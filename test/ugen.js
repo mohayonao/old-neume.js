@@ -10,7 +10,7 @@ var NOP = function() {};
 describe("NeuUGen", function() {
   var context = null;
   var synth = null;
-  var unit0 = null;
+  var ugen0 = null;
   var registered = null;
 
   function make(id) {
@@ -45,7 +45,7 @@ describe("NeuUGen", function() {
     synth = {
       $context: audioContext
     };
-    unit0 = new NeuUGen(synth, "sin.kr.lfo#unit0", {}, []);
+    ugen0 = new NeuUGen(synth, "sin.kr.lfo#ugen0", {}, []);
   });
 
   after(function() {
@@ -54,16 +54,16 @@ describe("NeuUGen", function() {
 
   describe("(synth, key, spec, inputs)", function() {
     it("returns an instance of NeuUGen", function() {
-      assert(unit0 instanceof NeuUGen);
+      assert(ugen0 instanceof NeuUGen);
     });
     it("has been inherited from Emitter", function() {
-      assert(unit0 instanceof Emitter);
+      assert(ugen0 instanceof Emitter);
     });
     it("should set id from the key", function() {
-      assert(unit0.$id === "unit0");
+      assert(ugen0.$id === "ugen0");
     });
     it("should set classes from the key", function() {
-      assert.deepEqual(unit0.$class, [ "kr", "lfo" ]);
+      assert.deepEqual(ugen0.$class, [ "kr", "lfo" ]);
     });
     it("throw an error if given invalid key", function() {
       assert.throws(function() {
@@ -124,24 +124,24 @@ describe("NeuUGen", function() {
 
   describe("#context", function() {
     it("is an instance of AudioContext", function() {
-      assert(unit0.context instanceof window.AudioContext);
+      assert(ugen0.context instanceof window.AudioContext);
     });
   });
 
   describe("#outlet", function() {
     it("is an instance of AudioNode", function() {
-      assert(unit0.outlet instanceof window.AudioNode);
+      assert(ugen0.outlet instanceof window.AudioNode);
     });
   });
 
   describe("#start(t)", function() {
     it("returns self", function() {
-      assert(unit0.start(0) === unit0);
+      assert(ugen0.start(0) === ugen0);
     });
-    it("calls ugen.start(t)", function() {
-      var spy = sinon.spy(unit0.$unit, "start");
+    it("calls unit.start(t)", function() {
+      var spy = sinon.spy(ugen0.$unit, "start");
 
-      unit0.start(10);
+      ugen0.start(10);
 
       assert(spy.calledOnce === true);
       assert.deepEqual(spy.firstCall.args, [ 10 ]);
@@ -150,12 +150,12 @@ describe("NeuUGen", function() {
 
   describe("#stop(t)", function() {
     it("returns self", function() {
-      assert(unit0.stop(0) === unit0);
+      assert(ugen0.stop(0) === ugen0);
     });
-    it("calls ugen.stop(t)", function() {
-      var spy = sinon.spy(unit0.$unit, "stop");
+    it("calls unit.stop(t)", function() {
+      var spy = sinon.spy(ugen0.$unit, "stop");
 
-      unit0.stop(10);
+      ugen0.stop(10);
 
       assert(spy.calledOnce === true);
       assert.deepEqual(spy.firstCall.args, [ 10 ]);
@@ -164,12 +164,12 @@ describe("NeuUGen", function() {
 
   describe("#apply(method, args)", function() {
     it("returns self", function() {
-      assert(unit0.apply("a", []) === unit0);
+      assert(ugen0.apply("a", []) === ugen0);
     });
-    it("calls ugen.apply(method, args)", function() {
-      var spy = sinon.spy(unit0.$unit, "apply");
+    it("calls unit.apply(method, args)", function() {
+      var spy = sinon.spy(ugen0.$unit, "apply");
 
-      unit0.apply("method", [ 10 ]);
+      ugen0.apply("method", [ 10 ]);
 
       assert(spy.calledOnce === true);
       assert.deepEqual(spy.firstCall.args, [ "method", [ 10 ]]);
@@ -178,12 +178,12 @@ describe("NeuUGen", function() {
 
   describe("#add(node)", function() {
     it("returns a new NeuUGen that is (this + node)", function() {
-      var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
-      var unit3 = unit0.add(unit2);
+      var ugen2 = new NeuUGen(synth, "sin#ugen2", {}, []);
+      var ugen3 = ugen0.add(ugen2);
 
-      assert(unit3 instanceof NeuUGen);
-      assert(unit3 !== unit0);
-      assert.deepEqual(unit3.$outlet.toJSON(), {
+      assert(ugen3 instanceof NeuUGen);
+      assert(ugen3 !== ugen0);
+      assert.deepEqual(ugen3.$outlet.toJSON(), {
         name: "GainNode#add",
         gain: {
           value: 1,
@@ -191,7 +191,7 @@ describe("NeuUGen", function() {
         },
         inputs: [
           {
-            name: "GainNode#unit0",
+            name: "GainNode#ugen0",
             gain: {
               value: 1,
               inputs: []
@@ -199,7 +199,7 @@ describe("NeuUGen", function() {
             inputs: []
           },
           {
-            name: "GainNode#unit2",
+            name: "GainNode#ugen2",
             gain: {
               value: 1,
               inputs: []
@@ -213,12 +213,12 @@ describe("NeuUGen", function() {
 
   describe("#mul(node)", function() {
     it("returns a new NeuUGen that is (this * node)", function() {
-      var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
-      var unit3 = unit0.mul(unit2);
+      var ugen2 = new NeuUGen(synth, "sin#ugen2", {}, []);
+      var ugen3 = ugen0.mul(ugen2);
 
-      assert(unit3 instanceof NeuUGen);
-      assert(unit3 !== unit0);
-      assert.deepEqual(unit3.$outlet.toJSON(), {
+      assert(ugen3 instanceof NeuUGen);
+      assert(ugen3 !== ugen0);
+      assert.deepEqual(ugen3.$outlet.toJSON(), {
         name: "GainNode#mul",
         gain: {
           value: 1,
@@ -226,7 +226,7 @@ describe("NeuUGen", function() {
         },
         inputs: [
           {
-            name: "GainNode#unit0",
+            name: "GainNode#ugen0",
             gain: {
               value: 1,
               inputs: []
@@ -234,7 +234,7 @@ describe("NeuUGen", function() {
             inputs: []
           },
           {
-            name: "GainNode#unit2",
+            name: "GainNode#ugen2",
             gain: {
               value: 1,
               inputs: []
@@ -248,13 +248,13 @@ describe("NeuUGen", function() {
 
   describe("#madd(mul, add)", function() {
     it("returns a new NeuUGen that is (this * mul + add)", function() {
-      var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
-      var unit3 = new NeuUGen(synth, "sin#unit3", {}, []);
-      var unit4 = unit0.madd(unit2, unit3);
+      var ugen2 = new NeuUGen(synth, "sin#ugen2", {}, []);
+      var ugen3 = new NeuUGen(synth, "sin#ugen3", {}, []);
+      var ugen4 = ugen0.madd(ugen2, ugen3);
 
-      assert(unit4 instanceof NeuUGen);
-      assert(unit4 !== unit0);
-      assert.deepEqual(unit4.$outlet.toJSON(), {
+      assert(ugen4 instanceof NeuUGen);
+      assert(ugen4 !== ugen0);
+      assert.deepEqual(ugen4.$outlet.toJSON(), {
         name: "GainNode#add",
         gain: {
           value: 1,
@@ -269,7 +269,7 @@ describe("NeuUGen", function() {
             },
             inputs: [
               {
-                name: "GainNode#unit0",
+                name: "GainNode#ugen0",
                 gain: {
                   value: 1,
                   inputs: []
@@ -277,7 +277,7 @@ describe("NeuUGen", function() {
                 inputs: []
               },
               {
-                name: "GainNode#unit2",
+                name: "GainNode#ugen2",
                 gain: {
                   value: 1,
                   inputs: []
@@ -287,7 +287,7 @@ describe("NeuUGen", function() {
             ]
           },
           {
-            name: "GainNode#unit3",
+            name: "GainNode#ugen3",
             gain: {
               value: 1,
               inputs: []
