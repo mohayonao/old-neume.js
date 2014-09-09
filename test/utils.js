@@ -202,6 +202,31 @@ describe("utils", function() {
     });
   });
 
+  describe(".foldAt(list, index)", function() {
+    it("gets the element with the clipped index", function() {
+      var list = [ 0, 1, 2, 3, 4, 5 ];
+      assert(_.foldAt(list, -9) === 1);
+      assert(_.foldAt(list, -8) === 2);
+      assert(_.foldAt(list, -7) === 3);
+      assert(_.foldAt(list, -6) === 4);
+      assert(_.foldAt(list, -5) === 5);
+      assert(_.foldAt(list, -4) === 4);
+      assert(_.foldAt(list, -3) === 3);
+      assert(_.foldAt(list, -2) === 2);
+      assert(_.foldAt(list, -1) === 1);
+      assert(_.foldAt(list,  0) === 0);
+      assert(_.foldAt(list,  1) === 1);
+      assert(_.foldAt(list,  2) === 2);
+      assert(_.foldAt(list,  3) === 3);
+      assert(_.foldAt(list,  4) === 4);
+      assert(_.foldAt(list,  5) === 5);
+      assert(_.foldAt(list,  6) === 4);
+      assert(_.foldAt(list,  7) === 3);
+      assert(_.foldAt(list,  8) === 2);
+      assert(_.foldAt(list,  9) === 1);
+    });
+  });
+
   describe(".rest(list)", function() {
     it("gets the rest of the elements of the list", function() {
       assert.deepEqual(_.rest([ 1, 2, 3 ]), [ 2, 3 ]);
