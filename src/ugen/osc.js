@@ -1,49 +1,115 @@
 module.exports = function(neuma, _) {
   "use strict";
 
-  _.each({
+  /**
+   * $("osc", {
+   *   type  : [string|PeriodicWave]="sin",
+   *   freq  : [number|UGen]=440,
+   *   detune: [number|UGen]=0
+   * } ... inputs)
+   *
+   * aliases:
+   *   $("sin"), $("square"), $("saw"), $("tri"), $(PeriodicWave)
+   *
+   * start:
+   *   start OscillatorNode
+   *
+   * stop:
+   *   stop OscillatorNode
+   *
+   *
+   * no inputs
+   * +------------------------+
+   * | OscillatorNode         |
+   * | - type: type           |
+   * | - frequency: freq(440) |
+   * | - detune: detune(0)    |
+   * +------------------------+
+   *   |
+   *
+   * has inputs
+   * +--------+
+   * | inputs |
+   * +--------+     +----------------------+
+   *   ||||||       | OscillatorNode       |
+   * +-----------+  | - type: type         |
+   * | GainNode  |  | - frequency: freq(2) |
+   * | - gain: 0 |--| - detune: detune(0)  |
+   * +-----------+  +----------------------+
+   *   |
+   */
+
+  var WAVE_TYPES = {
     sin   : "sine",
     square: "square",
     saw   : "sawtooth",
     tri   : "triangle"
-  }, function(type, name) {
-    /**
-     * no inputs
-     * +------------------------+
-     * | OscillatorNode         |
-     * | - type: type           |
-     * | - frequency: freq(440) |
-     * | - detune: detune(0)    |
-     * +------------------------+
-     *   |
-     *
-     * has inputs
-     * +--------+
-     * | inputs |
-     * +--------+     +----------------------+
-     *   |            | OscillatorNode       |
-     * +-----------+  | - type: type         |
-     * | GainNode  |  | - frequency: freq(2) |
-     * | - gain: 0 |--| - detune: detune(0)  |
-     * +-----------+  +----------------------+
-     *   |
-     */
-    neuma.register(name, function(ugen, spec, inputs) {
-      var out = inputs.length ?
-        hasInputs(type, ugen, spec, inputs) : noInputs(type, ugen, spec);
-      var osc = out.osc;
+  };
 
-      return new neuma.Unit({
-        outlet: out.outlet,
-        start: function(t) {
-          osc.start(t);
-        },
-        stop: function(t) {
-          osc.stop(t);
-        }
-      });
+  neuma.register("osc", function(ugen, spec, inputs) {
+    var type = spec.type;
+    var wave = null;
+
+    if (type instanceof window.PeriodicWave) {
+      wave = type;
+      type = "custom";
+    } else {
+      type = WAVE_TYPES[type] || "sine";
+    }
+
+    var osc  = setup(type, ugen, spec, inputs);
+    var ctrl = osc.ctrl;
+
+    if (wave) {
+      ctrl.setPeriodicWave(wave);
+    }
+
+    return make(osc);
+  });
+
+  neuma.register("periodicwave", function(ugen, spec, inputs) {
+    var type = "custom";
+    var wave = spec.value;
+
+    if (!(wave instanceof window.PeriodicWave)) {
+      type = "sine";
+      wave = null;
+    }
+
+    var osc  = setup(type, ugen, spec, inputs);
+    var ctrl = osc.ctrl;
+
+    if (wave) {
+      ctrl.setPeriodicWave(wave);
+    }
+
+    return make(osc);
+  });
+
+  _.each(WAVE_TYPES, function(type, name) {
+    neuma.register(name, function(ugen, spec, inputs) {
+      return make(setup(type, ugen, spec, inputs));
     });
   });
+
+  function setup(type, ugen, spec, inputs) {
+    return inputs.length ?
+      hasInputs(type, ugen, spec, inputs) : noInputs(type, ugen, spec);
+  }
+
+  function make(osc) {
+    var ctrl = osc.ctrl;
+
+    return new neuma.Unit({
+      outlet: osc.outlet,
+      start: function(t) {
+        ctrl.start(t);
+      },
+      stop: function(t) {
+        ctrl.stop(t);
+      }
+    });
+  }
 
   function noInputs(type, ugen, spec) {
     var osc = ugen.$context.createOscillator();
@@ -54,7 +120,7 @@ module.exports = function(neuma, _) {
     _.connect({ from: _.defaults(spec.freq, 440), to: osc.frequency });
     _.connect({ from: _.defaults(spec.detune, 0), to: osc.detune });
 
-    return { outlet: osc, osc: osc };
+    return { outlet: osc, ctrl: osc };
   }
 
   function hasInputs(type, ugen, spec, inputs) {
@@ -74,7 +140,7 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: gain });
     });
 
-    return { outlet: gain, osc: osc };
+    return { outlet: gain, ctrl: osc };
   }
 
 };
