@@ -128,4 +128,46 @@ describe("ugen/add", function() {
     });
   });
 
+  describe("$(+ mul:0.5 $(sin))", function() {
+    /*
+     * +----------------+
+     * | $(sin, freq:1) |
+     * +----------------+
+     *   |
+     * +-------------+
+     * | GainNode    |
+     * | - gain: 0.5 |
+     * +-------------+
+     *   |
+     */
+    it("returns a GainNode(0.5) that is connected with a $(sin)", function() {
+      var synth = neuma.Neuma(function($) {
+        return $("+", { mul: 0.5 }, $("sin"));
+      })();
+
+      assert.deepEqual(synth.outlet.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 0.5,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+  });
+
 });

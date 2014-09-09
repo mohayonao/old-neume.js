@@ -29,6 +29,8 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: outlet });
     });
 
+    outlet.$maddOptimizable = true;
+
     return new neuma.Unit({
       outlet: outlet
     });
