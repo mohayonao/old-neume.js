@@ -380,7 +380,7 @@ describe("NeuSynth", function() {
 
         ugen.$key    = key;
         ugen.$id     = spec.id;
-        ugen.$class  = spec.class;
+        ugen.$class  = [ spec.class ];
         ugen.$outlet = osc;
 
         return ugen;
