@@ -89,6 +89,10 @@ utils.last = function(list) {
   return list[list.length - 1];
 };
 
+utils.clipAt = function(list, index) {
+  return list[Math.max(0, Math.min(index|0, list.length - 1))];
+};
+
 utils.rest = function(list) {
   return list.slice(1);
 };
