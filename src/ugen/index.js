@@ -2,6 +2,8 @@ module.exports = function(neuma) {
   "use strict";
 
   neuma.use(require("./add"));
+  neuma.use(require("./adsr"));
+  neuma.use(require("./array"));
   neuma.use(require("./biquad"));
   neuma.use(require("./buf"));
   neuma.use(require("./clip"));
