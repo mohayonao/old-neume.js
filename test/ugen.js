@@ -135,20 +135,6 @@ describe("NeuUGen", function() {
   });
 
 
-  describe("#stop(t)", function() {
-    it("returns self", function() {
-      assert(ugen0.stop(0) === ugen0);
-    });
-    it("calls unit.stop(t)", function() {
-      var spy = sinon.spy(ugen0.$unit, "stop");
-
-      ugen0.stop(10);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ 10 ]);
-    });
-  });
-
   describe("#apply(method, args)", function() {
     it("returns self", function() {
       assert(ugen0.apply("a", []) === ugen0);
