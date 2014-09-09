@@ -73,6 +73,11 @@ NeuUGen.prototype.stop = function(t) {
   return this;
 };
 
+NeuUGen.prototype.apply = function(method, args) {
+  this.$unit.apply(method, args);
+  return this;
+};
+
 NeuUGen.prototype.add = function(node) {
   return new NeuUGen(this.$synth, "+", {}, [ this, _.defaults(node, 0) ]);
 };

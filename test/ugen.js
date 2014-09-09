@@ -162,6 +162,20 @@ describe("NeuUGen", function() {
     });
   });
 
+  describe("#apply(method, args)", function() {
+    it("returns self", function() {
+      assert(unit0.apply("a", []) === unit0);
+    });
+    it("calls ugen.apply(method, args)", function() {
+      var spy = sinon.spy(unit0.$unit, "apply");
+
+      unit0.apply("method", [ 10 ]);
+
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ "method", [ 10 ]]);
+    });
+  });
+
   describe("#add(node)", function() {
     it("returns a new NeuUGen that is (this + node)", function() {
       var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
