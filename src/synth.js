@@ -184,7 +184,7 @@ NeuSynth.prototype.connect = function(destination, output, input) {
 NeuSynth.prototype.hasListeners = function(event) {
   var result = false;
 
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     result = result || ugen.hasListeners(event);
   });
 
@@ -194,7 +194,7 @@ NeuSynth.prototype.hasListeners = function(event) {
 NeuSynth.prototype.listeners = function(event) {
   var listeners = [];
 
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     _.each(ugen.listeners(event), function(listener) {
       if (listeners.indexOf(listener) === -1) {
         listeners.push(listener);
@@ -206,33 +206,33 @@ NeuSynth.prototype.listeners = function(event) {
 };
 
 NeuSynth.prototype.on = function(event, listener) {
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     ugen.on(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.once = function(event, listener) {
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     ugen.once(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.off = function(event, listener) {
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     ugen.off(event, listener);
   });
   return this;
 };
 
-function iterateOverEventTargets(db, event, callback) {
+function iterateOverTargetss(db, event, callback) {
   var parsed = parseEvent(event);
 
   if (parsed) {
     var targets = parsed.selector ? db.find(parsed.selector) : db.all();
     _.each(targets, function(ugen) {
-      callback(ugen, parsed.event);
+      callback(ugen, parsed.name);
     });
   }
 }
@@ -245,10 +245,10 @@ function parseEvent(event) {
   }
 
   if (matched[3] != null) {
-    return { selector: null, event: matched[3]};
+    return { selector: null, name: matched[3]};
   }
 
-  return { selector: matched[1], event: matched[2] };
+  return { selector: matched[1], name: matched[2] };
 }
 
 function validateParam(name) {
