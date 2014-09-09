@@ -305,6 +305,21 @@ describe("NeuContext", function() {
       audioContext.$process(0.100);
       assert(passed === 5, "00:00.500");
     });
+    it("same time order", function() {
+      var passed = [];
+
+      context.start();
+      context.sched(0.100, function() { passed.push(1); });
+      context.sched(0.100, function() { passed.push(2); });
+      context.sched(0.100, function() { passed.push(3); });
+      context.sched(0.100, function() { passed.push(4); });
+      context.sched(0.100, function() { passed.push(5); });
+
+      assert.deepEqual(passed, [], "00:00.000");
+
+      audioContext.$process(0.100);
+      assert.deepEqual(passed, [ 1, 2, 3, 4, 5 ], "00:00.100");
+    });
   });
 
   describe("#unsched(id)", function() {

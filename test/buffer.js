@@ -197,4 +197,67 @@ describe("NeuBuffer", function() {
     });
   });
 
+  describe("#normalize()", function() {
+    it("returns new NeuBuffer instance that normalized", function() {
+      var normalized = buffer.normalize();
+
+      var div7 = function(x) { return x / 7; };
+
+      assert(normalized instanceof NeuBuffer);
+      assert.deepEqual(normalized[0], new Float32Array(bufferData[0].map(div7)));
+      assert.deepEqual(normalized[1], new Float32Array(bufferData[1].map(div7)));
+    });
+  });
+
+  describe("#resample(size, interpolation)", function() {
+    it("returns new NeuBuffer instance that resampled", function() {
+      var resampled = buffer.resample(12, false);
+
+      assert(resampled instanceof NeuBuffer);
+      assert.deepEqual(resampled[0], new Float32Array([ 0, 1, 1, 2, 3, 3, 4, 4, 5, 6, 6, 7 ]));
+      assert.deepEqual(resampled[1], new Float32Array([ 7, 6, 6, 5, 4, 4, 3, 3, 2, 1, 1, 0 ]));
+    });
+    it("returns new NeuBuffer instance that resampled with interpolation", function() {
+      var resampled = buffer.resample(12, true);
+
+      assert(resampled instanceof NeuBuffer);
+      assert.deepEqual(resampled[0], new Float32Array([
+        0,
+        0.6363636255264282,
+        1.2727272510528564,
+        1.9090908765792847,
+        2.545454502105713,
+        3.1818182468414307,
+        3.8181817531585693,
+        4.454545497894287,
+        5.090909004211426,
+        5.7272725105285645,
+        6.363636493682861,
+        7,
+      ]));
+      assert.deepEqual(resampled[1], new Float32Array([
+        7,
+        6.363636493682861,
+        5.7272725105285645,
+        5.090909004211426,
+        4.454545497894287,
+        3.8181817531585693,
+        3.1818182468414307,
+        2.545454502105713,
+        1.9090908765792847,
+        1.2727272510528564,
+        0.6363636255264282,
+        0,
+      ]));
+    });
+  });
+
+  describe("#toPeriodicWave()", function() {
+    it("returns an instance of PeriodicWave", function() {
+      var wave = buffer.toPeriodicWave();
+
+      assert(wave instanceof window.PeriodicWave);
+    });
+  });
+
 });

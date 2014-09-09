@@ -152,6 +152,81 @@ describe("utils", function() {
     });
   });
 
+  describe(".clipAt(list, index)", function() {
+    it("gets the element with the clipped index", function() {
+      var list = [ 0, 1, 2, 3, 4, 5 ];
+      assert(_.clipAt(list, -9) === 0);
+      assert(_.clipAt(list, -8) === 0);
+      assert(_.clipAt(list, -7) === 0);
+      assert(_.clipAt(list, -6) === 0);
+      assert(_.clipAt(list, -5) === 0);
+      assert(_.clipAt(list, -4) === 0);
+      assert(_.clipAt(list, -3) === 0);
+      assert(_.clipAt(list, -2) === 0);
+      assert(_.clipAt(list, -1) === 0);
+      assert(_.clipAt(list,  0) === 0);
+      assert(_.clipAt(list,  1) === 1);
+      assert(_.clipAt(list,  2) === 2);
+      assert(_.clipAt(list,  3) === 3);
+      assert(_.clipAt(list,  4) === 4);
+      assert(_.clipAt(list,  5) === 5);
+      assert(_.clipAt(list,  6) === 5);
+      assert(_.clipAt(list,  7) === 5);
+      assert(_.clipAt(list,  8) === 5);
+      assert(_.clipAt(list,  9) === 5);
+    });
+  });
+
+  describe(".wrapAt(list, index)", function() {
+    it("gets the element with the clipped index", function() {
+      var list = [ 0, 1, 2, 3, 4, 5 ];
+      assert(_.wrapAt(list, -9) === 3);
+      assert(_.wrapAt(list, -8) === 4);
+      assert(_.wrapAt(list, -7) === 5);
+      assert(_.wrapAt(list, -6) === 0);
+      assert(_.wrapAt(list, -5) === 1);
+      assert(_.wrapAt(list, -4) === 2);
+      assert(_.wrapAt(list, -3) === 3);
+      assert(_.wrapAt(list, -2) === 4);
+      assert(_.wrapAt(list, -1) === 5);
+      assert(_.wrapAt(list,  0) === 0);
+      assert(_.wrapAt(list,  1) === 1);
+      assert(_.wrapAt(list,  2) === 2);
+      assert(_.wrapAt(list,  3) === 3);
+      assert(_.wrapAt(list,  4) === 4);
+      assert(_.wrapAt(list,  5) === 5);
+      assert(_.wrapAt(list,  6) === 0);
+      assert(_.wrapAt(list,  7) === 1);
+      assert(_.wrapAt(list,  8) === 2);
+      assert(_.wrapAt(list,  9) === 3);
+    });
+  });
+
+  describe(".foldAt(list, index)", function() {
+    it("gets the element with the clipped index", function() {
+      var list = [ 0, 1, 2, 3, 4, 5 ];
+      assert(_.foldAt(list, -9) === 1);
+      assert(_.foldAt(list, -8) === 2);
+      assert(_.foldAt(list, -7) === 3);
+      assert(_.foldAt(list, -6) === 4);
+      assert(_.foldAt(list, -5) === 5);
+      assert(_.foldAt(list, -4) === 4);
+      assert(_.foldAt(list, -3) === 3);
+      assert(_.foldAt(list, -2) === 2);
+      assert(_.foldAt(list, -1) === 1);
+      assert(_.foldAt(list,  0) === 0);
+      assert(_.foldAt(list,  1) === 1);
+      assert(_.foldAt(list,  2) === 2);
+      assert(_.foldAt(list,  3) === 3);
+      assert(_.foldAt(list,  4) === 4);
+      assert(_.foldAt(list,  5) === 5);
+      assert(_.foldAt(list,  6) === 4);
+      assert(_.foldAt(list,  7) === 3);
+      assert(_.foldAt(list,  8) === 2);
+      assert(_.foldAt(list,  9) === 1);
+    });
+  });
+
   describe(".rest(list)", function() {
     it("gets the rest of the elements of the list", function() {
       assert.deepEqual(_.rest([ 1, 2, 3 ]), [ 2, 3 ]);

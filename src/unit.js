@@ -9,7 +9,8 @@ var STOP  = 2;
 function NeuUnit(spec) {
   this._spec   = spec;
   this._state  = INIT;
-  this.$outlet = spec.outlet || null;
+  this.$outlet  = spec.outlet || null;
+  this.$methods = spec.methods || {};
 }
 
 NeuUnit.prototype.start = function(t) {
@@ -23,6 +24,12 @@ NeuUnit.prototype.stop = function(t) {
   if (this._state === START && _.isFunction(this._spec.stop)) {
     this._state = STOP;
     this._spec.stop(_.finite(t));
+  }
+};
+
+NeuUnit.prototype.apply = function(method, args) {
+  if (this.$methods[method]) {
+    this.$methods[method].apply(null, args);
   }
 };
 

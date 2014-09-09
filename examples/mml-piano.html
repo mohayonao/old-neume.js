@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>mml-piano - neuma.js</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <style>
+    #start {
+      margin: 10px 0;
+    }
+    #canvas {
+      width: 100%;
+      height: 240px;
+      background: black;
+    }
+    #code {
+      padding: 0;
+      margin: 0;
+      background: white;
+      border: none;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="//mohayonao.github.io/MMLEmitter/build/MMLEmitter.min.js"></script>
+  <script src="../build/neuma.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>neuma.js mml-piano</h1>
+    <div id="canvas"></div>
+    <div id="app">
+      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">source</h3>
+      </div>
+      <div class="panel-body">
+        <pre class="prettyprint" id="code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script id="example">
+  var mmlData    = null;
+  var visualizer = null;
+
+  $.get("./invention.mml").then(function(data) {
+    mmlData = data;
+  });
+
+  function createReverbBuffer(spec) {
+    var data = new Float32Array(spec.length);
+
+    for (var i = 0; i < data.length; i++) {
+      data[i] = Math.random() * 2 - 1;
+      data[i] *= 1 - (i / data.length);
+      data[i] *= i < spec.room ? 1 : 0.05;
+    }
+
+    return Neuma.Buffer.from(data);
+  }
+
+  var Piano = new Neuma(function($, freq, dur) {
+    return $("xline", { start: 0.75, end: 0.01, dur: dur * 5 },
+      $("clip", $("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 10 },
+        $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
+          return $("delay", { delayTime: i * 0.000175 }, $("saw", { freq: freq * x }));
+        }))
+      ))
+    ).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+  });
+
+  var Reverb = new Neuma(function($, buffer) {
+    return $("conv", { buffer: buffer }, $.in(0));
+  });
+
+  var mml = null;
+
+  function start() {
+    var reverb = new Reverb(
+      createReverbBuffer({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 })
+    ).start();
+
+    // MMLEmitter: https://github.com/mohayonao/MMLEmitter
+    mml = new MMLEmitter(Neuma.context, mmlData);
+
+    mml.tracks.forEach(function(track) {
+      track.on("note", function(e) {
+        // routing: Piano[output:0] -> Reverb[input:0] -> destination
+        new Piano(e.frequency, e.duration).connect(reverb).start(e.playbackTime);
+        visualizer.push(e);
+      });
+    });
+
+    mml.start();
+  }
+
+  function stop() {
+    if (mml) {
+      mml.stop();
+    }
+  }
+  </script>
+
+  <script>
+  function canUseWebGL() {
+    try {
+      return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
+    } catch(e) {
+      return false;
+    }
+  }
+  $(function() {
+    "use strict";
+
+    var MMLVisualizer = (function() {
+      function MMLVisualizer(analyer, spec) {
+        this._analyer = analyer;
+
+        this.width  = spec.width;
+        this.height = spec.height;
+
+        this._scene  = new THREE.Scene();
+        this._camera = new THREE.PerspectiveCamera(70, this.width / this.height, 1, 1000);
+
+        if (canUseWebGL()) {
+          this._renderer = new THREE.WebGLRenderer();
+          this._maxPlaens = 48;
+        } else {
+          this._renderer = new THREE.CanvasRenderer();
+          this._maxPlaens = 16;
+        }
+        this._renderer.setSize(this.width, this.height);
+
+        this._state = "init";
+        this._plaens = [];
+        this._pushed = [];
+
+        Object.defineProperties(this, {
+          state: {
+            get: function() {
+              return this._state;
+            },
+            enumerable: true
+          },
+          domElement: {
+            value: this._renderer.domElement,
+            enumerable: true
+          },
+          camera: {
+            value: this._camera,
+            enumerable: true
+          }
+        })
+      }
+
+      MMLVisualizer.prototype.start = function() {
+        if (this._state !== "start") {
+          this._state = "start";
+          requestAnimationFrame(this.render.bind(this));
+        }
+        return this;
+      };
+
+      MMLVisualizer.prototype.stop = function() {
+        if (this._state === "start") {
+          this._state = "stop";
+        }
+        return this;
+      };
+
+      MMLVisualizer.prototype.push = function(e) {
+        this._pushed.push(e);
+      };
+
+      MMLVisualizer.prototype.render = function(t) {
+        this._render(t);
+
+        this._camera.lookAt(this._scene.position);
+        this._renderer.render(this._scene, this._camera);
+
+        if (this._state === "start") {
+          requestAnimationFrame(this.render.bind(this));
+        }
+      };
+
+      MMLVisualizer.prototype._render = function(t) {
+        this._pushed.splice(0).forEach(function(e) {
+          var geometry = new THREE.PlaneGeometry(40, 200);
+
+          var material = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            color: new THREE.Color().setHSL(e.midi % 48 / 48, 0.8, 0.6).getHex(),
+            opacity: 0.5, transparent: true
+          });
+
+          var wave = new THREE.Mesh(geometry, material);
+
+          wave.position.set((e.midi - 69) * -40, 100, 0);
+          wave.time = t;
+
+          this._scene.add(wave);
+          this._plaens.unshift(wave);
+        }, this);
+
+        while (this._maxPlaens <= this._plaens.length) {
+          this._scene.remove(this._plaens.pop());
+        }
+
+        this._plaens.forEach(function(wave) {
+          wave.position.z = (t - wave.time) * 0.05;
+        }, this);
+      };
+
+      return MMLVisualizer;
+    })();
+
+    var canvas = $("#canvas").on("mousemove", function(e) {
+      var x = (e.pageX - canvas.$offset.left) / visualizer.width  - 0.5;
+
+      visualizer.camera.position.set(Math.sin(x) * -100, Math.cos(x) * -100, -75);
+    });
+    canvas.$offset = canvas.offset();
+
+    visualizer = new MMLVisualizer(Neuma.analyer, { width: canvas.width(), height: 240 });
+
+    visualizer.camera.position.set(0, -100, -75);
+
+    canvas.append(visualizer.domElement);
+
+    var vue = new Vue({
+      el: "#app",
+      data: {
+        isPlaying: false,
+      },
+      methods: {
+        toggle: function() {
+          this.isPlaying = !this.isPlaying;
+          if (this.isPlaying) {
+            start();
+            visualizer.start();
+          } else {
+            stop();
+            visualizer.stop();
+          }
+        }
+      }
+    });
+
+    $("#code").text($("#example").text());
+    prettyPrint();
+  });
+  </script>
+</body>
+</html>

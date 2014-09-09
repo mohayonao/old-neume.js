@@ -80,7 +80,7 @@ NeuContext.prototype.reset = function() {
   _.connect({ from: this._masterGain, to: this._analyser });
   _.connect({ from: this._analyser  , to: this.$context.destination });
 
-  this.$outlet = this._analyser;
+  this.$outlet = this._masterGain;
 
   if (this._scriptProcessor) {
     this._scriptProcessor.disconnect();

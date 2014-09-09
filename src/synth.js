@@ -11,7 +11,7 @@ var INIT  = 0;
 var START = 1;
 var STOP  = 2;
 
-function NeuSynth(context, spec, args) {
+function NeuSynth(context, func, args) {
   var _this = this;
 
   this.$context = context;
@@ -22,19 +22,32 @@ function NeuSynth(context, spec, args) {
     var args = _.toArray(arguments);
     var key  = args.shift();
     var spec = _.isDictionary(_.first(args)) ? args.shift() : {};
-    var ugen = _.NeuUGen.build(_this, key, spec, args);
+    var inputs = args.reduce(function(a, b) {
+      return a.concat(b);
+    }, []);
+    var ugen = _.NeuUGen.build(_this, key, spec, inputs);
 
     db.append(ugen);
 
     return ugen;
   }
 
-  _.each(spec.params, function(val, key) {
-    validateParam(key, val);
+  var params  = {};
+  var inputs  = [];
+  var outputs = [];
 
-    var param = new _.NeuParam(_this, key, val);
+  $.param = function(name, defaultValue) {
+    if (_.has(params, name)) {
+      return params[name];
+    }
 
-    Object.defineProperty(this, key, {
+    defaultValue = _.finite(_.defaults(defaultValue, 0));
+
+    validateParam(name, defaultValue);
+
+    var param = new _.NeuParam(_this, name, defaultValue);
+
+    Object.defineProperty(_this, name, {
       set: function(value) {
         param.set(value);
       },
@@ -43,15 +56,55 @@ function NeuSynth(context, spec, args) {
       }
     });
 
-    Object.defineProperty($, key, {
-      value: param
-    });
-  }, this);
+    params[name] = param;
 
-  this.$outlet = _.findAudioNode(spec.def.apply(null, [ $ ].concat(args)));
-  this._db = _.isAudioNode(this.$outlet) ? db : EMPTY_DB;
+    return param;
+  };
+
+  $.in = function(index) {
+    index = Math.max(0, _.int(index));
+
+    if (!inputs[index]) {
+      inputs[index] = context.createGain();
+    }
+
+    return inputs[index];
+  };
+
+  $.out = function(index, ugen) {
+    index = Math.max(0, _.int(index));
+
+    if (ugen instanceof _.NeuUGen) {
+      outputs[index] = ugen;
+    }
+
+    return null;
+  };
+
+  var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
+
+  if (outputs[0] == null && _.isAudioNode(result)) {
+    outputs[0] = result;
+  }
+
+  this.$inputs  = inputs;
+  this.$outputs = outputs;
+  this._routing = [];
+  this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "init";
+
+  this._db.all().forEach(function(ugen) {
+    _.keys(ugen.$unit.$methods).forEach(function(method) {
+      if (!this.hasOwnProperty(method)) {
+        Object.defineProperty(this, method, {
+          value: function() {
+            return this.apply(method, _.toArray(arguments));
+          }
+        });
+      }
+    }, this);
+  }, this);
 
   Object.defineProperties(this, {
     context: {
@@ -59,7 +112,7 @@ function NeuSynth(context, spec, args) {
       enumerable: true
     },
     outlet: {
-      value: _.findAudioNode(this.$outlet),
+      value: _.findAudioNode(this.$outputs[0]),
       enumerable: true
     },
     state: {
@@ -81,11 +134,18 @@ NeuSynth.prototype.start = function(t) {
     this.$context.sched(t, function(t) {
       this._stateString = "start";
 
-      // TODO: fix 'to'
-      _.connect({ from: this, to: this.$context.$outlet });
+      if (this._routing.length === 0) {
+        _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
+      } else {
+        this._routing.forEach(function(destinations, output) {
+          destinations.forEach(function(destination) {
+            _.connect({ from: this.$outputs[output], to: destination });
+          }, this);
+        }, this);
+      }
 
       _.each(this._db.all(), function(ugen) {
-        ugen.start(t);
+        ugen.$unit.start(t);
       });
     }, this);
 
@@ -105,13 +165,43 @@ NeuSynth.prototype.stop = function(t) {
       this._stateString = "stop";
 
       this.$context.nextTick(function() {
-        _.disconnect({ from: this });
+        this.$outputs.forEach(function(output) {
+          _.disconnect({ from: output });
+        });
       }, this);
 
       _.each(this._db.all(), function(ugen) {
-        ugen.stop(t);
+        ugen.$unit.stop(t);
       });
     }, this);
+  }
+
+  return this;
+};
+
+NeuSynth.prototype.apply = function(method, args) {
+  iterateOverTargetss(this._db, method, function(ugen, method) {
+    ugen.$unit.apply(method, args);
+  });
+  return this;
+};
+
+NeuSynth.prototype.call = function() {
+  var args = _.toArray(arguments);
+  var method = args.shift();
+
+  return this.apply(method, args);
+};
+
+NeuSynth.prototype.connect = function(destination, output, input) {
+  output = Math.max(0, _.int(output));
+  input  = Math.max(0, _.int(input));
+
+  if (destination instanceof NeuSynth && this.$outputs[output] && destination.$inputs[input]) {
+    if (!this._routing[output]) {
+      this._routing[output] = [];
+    }
+    this._routing[output].push(destination.$inputs[input]);
   }
 
   return this;
@@ -120,7 +210,7 @@ NeuSynth.prototype.stop = function(t) {
 NeuSynth.prototype.hasListeners = function(event) {
   var result = false;
 
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     result = result || ugen.hasListeners(event);
   });
 
@@ -130,7 +220,7 @@ NeuSynth.prototype.hasListeners = function(event) {
 NeuSynth.prototype.listeners = function(event) {
   var listeners = [];
 
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     _.each(ugen.listeners(event), function(listener) {
       if (listeners.indexOf(listener) === -1) {
         listeners.push(listener);
@@ -142,33 +232,33 @@ NeuSynth.prototype.listeners = function(event) {
 };
 
 NeuSynth.prototype.on = function(event, listener) {
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     ugen.on(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.once = function(event, listener) {
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     ugen.once(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.off = function(event, listener) {
-  iterateOverEventTargets(this._db, event, function(ugen, event) {
+  iterateOverTargetss(this._db, event, function(ugen, event) {
     ugen.off(event, listener);
   });
   return this;
 };
 
-function iterateOverEventTargets(db, event, callback) {
+function iterateOverTargetss(db, event, callback) {
   var parsed = parseEvent(event);
 
   if (parsed) {
     var targets = parsed.selector ? db.find(parsed.selector) : db.all();
     _.each(targets, function(ugen) {
-      callback(ugen, parsed.event);
+      callback(ugen, parsed.name);
     });
   }
 }
@@ -181,25 +271,17 @@ function parseEvent(event) {
   }
 
   if (matched[3] != null) {
-    return { selector: null, event: matched[3]};
+    return { selector: null, name: matched[3]};
   }
 
-  return { selector: matched[1], event: matched[2] };
+  return { selector: matched[1], name: matched[2] };
 }
 
-function validateParam(name, value) {
+function validateParam(name) {
   if (!/^[a-z]\w*$/.test(name)) {
     throw new TypeError(_.format(
       "invalid parameter name: #{name}", {
         name: name
-      }
-    ));
-  }
-  if (!_.isNumber(value)) {
-    throw new TypeError(_.format(
-      "param '#{name}' must be a number, but got #{value}", {
-        name : name,
-        value: _.typeOf(value)
       }
     ));
   }

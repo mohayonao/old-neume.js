@@ -4,14 +4,9 @@ var _ = require("./utils");
 
 _.NeuSynth = require("./synth");
 
-function NeuSynthDef(defaultContext, spec) {
-  spec = _.defaults(spec, {});
-
-  if (_.isFunction(spec)) {
-    spec = {
-      def   : spec,
-      params: []
-    };
+function NeuSynthDef(defaultContext, func) {
+  if (!_.isFunction(func)) {
+    throw new TypeError("NeuSynthDef func is not a function");
   }
 
   function SynthDef() {
@@ -23,7 +18,7 @@ function NeuSynthDef(defaultContext, spec) {
       args = _.rest(args);
     }
 
-    return new _.NeuSynth(context, spec, args);
+    return new _.NeuSynth(context, func, args);
   }
 
   Object.defineProperties(SynthDef, {

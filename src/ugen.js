@@ -8,13 +8,19 @@ var makeOutlet = require("./ugen-makeOutlet");
 function NeuUGen(synth, key, spec, inputs) {
   Emitter.call(this);
 
+  var parsed = parseKey(key);
+
   this.$synth   = synth;
   this.$context = synth.$context;
-  this.$key = key;
-  this.$class = _.defaults(spec.class);
-  this.$id  = _.defaults(spec.id, null);
+  this.$key   = parsed.key;
+  this.$class = parsed.class;
+  this.$id    = parsed.id;
 
-  var unit = NeuUGen.registered[key](this, spec, inputs);
+  if (!NeuUGen.registered.hasOwnProperty(parsed.key)) {
+    throw new Error("unknown key: " + key);
+  }
+
+  var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   if (!(unit instanceof NeuUnit)) {
     throw new Error("invalid key: " + key);
@@ -39,9 +45,13 @@ _.inherits(NeuUGen, Emitter);
 NeuUGen.registered = {};
 
 NeuUGen.register = function(name, func) {
-  if (_.isString(name) && _.isFunction(func)) {
-    NeuUGen.registered[name] = func;
+  if (!isValidUGenName(name)) {
+    throw new Error("invalid ugen name: " + name);
   }
+  if (!_.isFunction(func)) {
+    throw new TypeError("ugen must be a function");
+  }
+  NeuUGen.registered[name] = func;
 };
 
 NeuUGen.build = function(synth, key, spec, inputs) {
@@ -50,21 +60,7 @@ NeuUGen.build = function(synth, key, spec, inputs) {
     key = _.typeOf(key);
   }
 
-  if (_.has(NeuUGen.registered, key)) {
-    return new NeuUGen(synth, key, spec, inputs);
-  }
-
-  throw new Error("unknown key: " + key);
-};
-
-NeuUGen.prototype.start = function(t) {
-  this.$unit.start(t);
-  return this;
-};
-
-NeuUGen.prototype.stop = function(t) {
-  this.$unit.stop(t);
-  return this;
+  return new NeuUGen(synth, key, spec, inputs);
 };
 
 NeuUGen.prototype.add = function(node) {
@@ -78,5 +74,34 @@ NeuUGen.prototype.mul = function(node) {
 NeuUGen.prototype.madd = function(mul, add) {
   return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
+
+function isValidUGenName(name) {
+  return /^([a-zA-Z](-?[a-zA-Z0-9]+)*|[-+*\/%<=>!?&|@]+)$/.test(name);
+}
+
+function parseKey(key) {
+  key = String(key);
+
+  var parsed = { key: "", class: [], id: null };
+
+  var keyMatched = key.match(/^([a-zA-Z](-?[a-zA-Z0-9]+)*|[-+*\/%<=>!?&|@]+)/);
+  if (keyMatched) {
+    parsed.key = keyMatched[0];
+  }
+
+  var idMatched = key.match(/#[a-zA-Z](-?[a-zA-Z0-9]+)*/);
+  if (idMatched) {
+    parsed.id = idMatched[0].substr(1);
+  }
+
+  var clsMatched = key.match(/\.[a-zA-Z](-?[a-zA-Z0-9]+)*/g);
+  if (clsMatched) {
+    parsed.class = clsMatched.map(function(cls) {
+      return cls.substr(1);
+    });
+  }
+
+  return parsed;
+}
 
 module.exports = NeuUGen;

@@ -4,7 +4,7 @@ module.exports = function(neuma, _) {
   _.each({
     lpf: "lowpass",
     hpf: "highpass",
-    bps: "bandpass",
+    bpf: "bandpass",
     lowshelf: "lowshelf",
     highshelf: "highshelf",
     peaking: "peaking",

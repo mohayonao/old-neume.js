@@ -136,6 +136,32 @@ describe("makeOutlet", function() {
     });
   });
 
+  describe("(context, node[gain:1], { mul: 0.5 })", function() {
+    it("changes GainNode.value if has a $maddOptimizable option", function() {
+      /**
+      *    |
+       * +-----------------+
+       * | (node) GainNode |
+       * | - gain: 0.5     |
+       * +-----------------+
+       *   |
+       */
+      node = context.createGain();
+      node.$maddOptimizable = true;
+
+      var outlet = makeOutlet(context, node, { mul: 0.5 });
+
+      assert.deepEqual(outlet.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 0.5,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
   describe("(context, node, { add: number })", function() {
     it("returns a GainNode that is connected with the node and a DC(number)", function() {
       /*
