@@ -197,4 +197,12 @@ describe("NeuBuffer", function() {
     });
   });
 
+  describe("#toPeriodicWave()", function() {
+    it("returns an instance of PeriodicWave", function() {
+      var wave = buffer.toPeriodicWave();
+
+      assert(wave instanceof window.PeriodicWave);
+    });
+  });
+
 });

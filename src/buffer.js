@@ -1,6 +1,7 @@
 "use strict";
 
 var _ = require("./utils");
+var FFT = require("./fft");
 
 function NeuBuffer(context, buffer) {
   this.$context = context;
@@ -181,6 +182,15 @@ NeuBuffer.prototype.split = function(n) {
   }
 
   return result;
+};
+
+NeuBuffer.prototype.toPeriodicWave = function() {
+  var buffer = this.$buffer.getChannelData(0);
+  var fft = FFT.forward(buffer);
+
+  // TODO: buffer size <= 4096 (need resample)
+
+  return this.$context.createPeriodicWave(fft.real, fft.imag);
 };
 
 module.exports = NeuBuffer;
