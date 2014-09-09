@@ -45,11 +45,16 @@ function makeOutlet(context, ugen, spec) {
      * +--------------+
      *   |
      */
-    outlet = context.createGain();
-    outlet.gain.value = 0;
+    if (node.$maddOptimizable && node.gain.value === 1) {
+      outlet = node;
+      node.$maddOptimizable = false;
+    } else {
+      outlet = context.createGain();
+      _.connect({ from: node, to: outlet });
+    }
 
+    outlet.gain.value = 0;
     _.connect({ from: mul , to: outlet.gain });
-    _.connect({ from: node, to: outlet      });
 
     node = outlet;
   }
