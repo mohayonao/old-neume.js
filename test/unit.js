@@ -10,7 +10,10 @@ describe("NeuUnit", function() {
     spec = {
       outlet: {},
       start : function() {},
-      stop  : function() {}
+      stop  : function() {},
+      methods: {
+        bang: function() {}
+      }
     };
     unit = new NeuUnit(spec);
   });
@@ -45,5 +48,16 @@ describe("NeuUnit", function() {
     });
   });
 
+  describe("#apply(method, args)", function() {
+    it("apply spec.method", function() {
+      var spy = sinon.spy(spec.methods, "bang");
+
+      unit.apply("bang", [ 1, 2, 3 ]);
+      unit.apply("bong", [ 4, 5, 6 ]);
+
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
+    });
+  });
 
 });
