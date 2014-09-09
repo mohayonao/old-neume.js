@@ -94,6 +94,18 @@ function NeuSynth(context, func, args) {
   this._state = INIT;
   this._stateString = "init";
 
+  this._db.all().forEach(function(ugen) {
+    _.keys(ugen.$unit.$methods).forEach(function(method) {
+      if (!this.hasOwnProperty(method)) {
+        Object.defineProperty(this, method, {
+          value: function() {
+            return this.apply(method, _.toArray(arguments));
+          }
+        });
+      }
+    }, this);
+  }, this);
+
   Object.defineProperties(this, {
     context: {
       value: _.findAudioContext(this.$context),

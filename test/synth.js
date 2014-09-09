@@ -8,6 +8,7 @@ var Emitter = require("../src/emitter");
 var NeuUGen  = _.NeuUGen;
 var NeuParam = _.NeuParam;
 var NOP = function() {};
+var unitStub = { $methods: {} };
 
 describe("NeuSynth", function() {
   var audioContext = null;
@@ -131,7 +132,7 @@ describe("NeuSynth", function() {
   describe("#outlet", function() {
     it("is an instance of AudioNode", sinon.test(function() {
       this.stub(NeuUGen, "build", function() {
-        return { $outlet: osc };
+        return { $outlet: osc, $unit: unitStub };
       });
 
       var synth = new NeuSynth(context, function($) {
@@ -152,7 +153,7 @@ describe("NeuSynth", function() {
       var ugens = [];
 
       this.stub(NeuUGen, "build", function() {
-        var ugen = { $outlet: osc, start: sinon.spy() };
+        var ugen = { $outlet: osc, start: sinon.spy(), $unit: unitStub  };
         ugens.push(ugen);
         return ugen;
       });
@@ -200,7 +201,7 @@ describe("NeuSynth", function() {
       var ugens = [];
 
       this.stub(NeuUGen, "build", function() {
-        var ugen = { $outlet: osc, start: function() {}, stop: sinon.spy() };
+        var ugen = { $outlet: osc, start: function() {}, stop: sinon.spy(), $unit: unitStub  };
         ugens.push(ugen);
         return ugen;
       });
@@ -400,6 +401,7 @@ describe("NeuSynth", function() {
         ugen.$id     = spec.id;
         ugen.$class  = [ spec.class ];
         ugen.$outlet = osc;
+        ugen.$unit   = unitStub;
         ugen.apply = function(method, args) {
           passed.push([ spec.id, method, args ]);
         };
