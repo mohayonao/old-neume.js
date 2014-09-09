@@ -5,6 +5,7 @@ var NeuContext = require("../src/context");
 var NeuUGen = require("../src/ugen");
 var NeuUnit = require("../src/unit");
 var Emitter = require("../src/emitter");
+var NOP = function() {};
 
 describe("NeuUGen", function() {
   var context = null;
@@ -34,7 +35,6 @@ describe("NeuUGen", function() {
     NeuUGen.register("sin"    , make("sin"));
     NeuUGen.register("+"      , make("add"));
     NeuUGen.register("*"      , make("mul"));
-    NeuUGen.register("unknown", null);
     NeuUGen.register("invalid", function() {
       return null;
     });
@@ -83,6 +83,32 @@ describe("NeuUGen", function() {
       assert.throws(function() {
         NeuUGen.build(synth, "invalid", {}, []);
       }, Error);
+    });
+  });
+
+  describe(".register(name, func)", function() {
+    it("throw an error if given invalid name", function() {
+      [
+        "fb-sin", "DX7", "OD-1", "<@-@>"
+      ].forEach(function(ok) {
+        assert.doesNotThrow(function() {
+          NeuUGen.register(ok, NOP);
+        });
+      });
+
+      [
+        "0", "sin.kr", "sin#lfo",
+        "-fb", "fb-", "fb--sin", "<@-@>b"
+      ].forEach(function(ng) {
+        assert.throws(function() {
+          NeuUGen.register(ng, NOP);
+        }, Error);
+      });
+    });
+    it("throw an error if given not a function", function() {
+      assert.throws(function() {
+        NeuUGen.register("not-a-function", { call: NOP, apply: NOP });
+      }, TypeError);
     });
   });
 

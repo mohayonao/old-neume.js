@@ -39,9 +39,13 @@ _.inherits(NeuUGen, Emitter);
 NeuUGen.registered = {};
 
 NeuUGen.register = function(name, func) {
-  if (_.isString(name) && _.isFunction(func)) {
-    NeuUGen.registered[name] = func;
+  if (!isValidUGenName(name)) {
+    throw new Error("invalid ugen name: " + name);
   }
+  if (!_.isFunction(func)) {
+    throw new TypeError("ugen must be a function");
+  }
+  NeuUGen.registered[name] = func;
 };
 
 NeuUGen.build = function(synth, key, spec, inputs) {
@@ -78,5 +82,9 @@ NeuUGen.prototype.mul = function(node) {
 NeuUGen.prototype.madd = function(mul, add) {
   return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
+
+function isValidUGenName(name) {
+  return /^([a-zA-Z](-?[a-zA-Z0-9]+)*|[-+*\/%<=>!?&|@]+)$/.test(name);
+}
 
 module.exports = NeuUGen;
