@@ -197,6 +197,18 @@ describe("NeuBuffer", function() {
     });
   });
 
+  describe("#normalize()", function() {
+    it("returns new NeuBuffer instance that normalized", function() {
+      var normalized = buffer.normalize();
+
+      var div7 = function(x) { return x / 7; };
+
+      assert(normalized instanceof NeuBuffer);
+      assert.deepEqual(normalized[0], new Float32Array(bufferData[0].map(div7)));
+      assert.deepEqual(normalized[1], new Float32Array(bufferData[1].map(div7)));
+    });
+  });
+
   describe("#toPeriodicWave()", function() {
     it("returns an instance of PeriodicWave", function() {
       var wave = buffer.toPeriodicWave();

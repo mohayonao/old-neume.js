@@ -184,6 +184,17 @@ NeuBuffer.prototype.split = function(n) {
   return result;
 };
 
+NeuBuffer.prototype.normalize = function() {
+  var channels = this.numberOfChannels;
+  var buffer = this.$context.createBuffer(channels, this.length, this.sampleRate);
+
+  for (var i = 0; i < channels; i++) {
+    buffer.getChannelData(i).set(normalize(this[i]));
+  }
+
+  return new NeuBuffer(this.$context, buffer);
+};
+
 NeuBuffer.prototype.toPeriodicWave = function() {
   var buffer = this.$buffer.getChannelData(0);
   var fft = FFT.forward(buffer);
@@ -192,5 +203,31 @@ NeuBuffer.prototype.toPeriodicWave = function() {
 
   return this.$context.createPeriodicWave(fft.real, fft.imag);
 };
+
+function normalize(data) {
+  var maxamp = peak(data);
+
+  if (maxamp !== 0 && maxamp !== 1) {
+    var ampfac = 1 / maxamp;
+    for (var i = 0, imax = data.length; i < imax; ++i) {
+      data[i] *= ampfac;
+    }
+  }
+
+  return data;
+}
+
+function peak(data) {
+  var maxamp = 0;
+
+  for (var i = 0, imax = data.length; i < imax; ++i) {
+    var absamp = Math.abs(data[i]);
+    if (maxamp < absamp) {
+      maxamp = absamp;
+    }
+  }
+
+  return maxamp;
+}
 
 module.exports = NeuBuffer;
