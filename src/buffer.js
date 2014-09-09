@@ -195,6 +195,20 @@ NeuBuffer.prototype.normalize = function() {
   return new NeuBuffer(this.$context, buffer);
 };
 
+NeuBuffer.prototype.resample = function(size, interpolation) {
+  size = Math.max(0, _.int(_.defaults(size, this.length)));
+  interpolation = !interpolation;
+
+  var channels = this.numberOfChannels;
+  var buffer = this.$context.createBuffer(channels, size, this.sampleRate);
+
+  for (var i = 0; i < channels; i++) {
+    buffer.getChannelData(i).set(resample(this[i], size, interpolation));
+  }
+
+  return new NeuBuffer(this.$context, buffer);
+};
+
 NeuBuffer.prototype.toPeriodicWave = function() {
   var buffer = this.$buffer.getChannelData(0);
   var fft = FFT.forward(buffer);
@@ -228,6 +242,44 @@ function peak(data) {
   }
 
   return maxamp;
+}
+
+function resample(data, size, interpolation) {
+  if (data.length === size) {
+    return new Float32Array(data);
+  }
+
+  if (interpolation) {
+    return resample0(data, size);
+  }
+
+  return resample1(data, size);
+}
+
+function resample0(data, size) {
+  var factor = (data.length - 1) / (size - 1);
+  var result = new Float32Array(size);
+
+  for (var i = 0; i < size; i++) {
+    result[i] = data[Math.round(i * factor)];
+  }
+
+  return result;
+}
+
+function resample1(data, size) {
+  var factor = (data.length - 1) / (size - 1);
+  var result = new Float32Array(size);
+  var len = data.length - 1;
+
+  for (var i = 0; i < size; i++) {
+    var x  = i * factor;
+    var x0 = x|0;
+    var x1 = Math.min(x0 + 1, len);
+    result[i] = data[x0] + Math.abs(x - x0) * (data[x1] - data[x0]);
+  }
+
+  return result;
 }
 
 module.exports = NeuBuffer;
