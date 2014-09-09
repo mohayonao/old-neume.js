@@ -167,6 +167,20 @@ NeuSynth.prototype.stop = function(t) {
   return this;
 };
 
+NeuSynth.prototype.apply = function(method, args) {
+  iterateOverTargetss(this._db, method, function(ugen, method) {
+    ugen.apply(method, args);
+  });
+  return this;
+};
+
+NeuSynth.prototype.call = function() {
+  var args = _.toArray(arguments);
+  var method = args.shift();
+
+  return this.apply(method, args);
+};
+
 NeuSynth.prototype.connect = function(destination, output, input) {
   output = Math.max(0, _.int(output));
   input  = Math.max(0, _.int(input));

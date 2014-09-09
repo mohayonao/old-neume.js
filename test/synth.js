@@ -251,6 +251,23 @@ describe("NeuSynth", function() {
     }));
   });
 
+  describe("#call(method, ...args)", function() {
+    it("returns self", function() {
+      var synth = new NeuSynth(context, NOP, []);
+
+      assert(synth.call() === synth);
+    });
+    it("calls #apply(method, args)", function() {
+      var synth = new NeuSynth(context, NOP, []);
+      var spy = sinon.spy(synth, "apply");
+
+      synth.call("method", 1, 2, 3);
+
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ "method", [ 1, 2, 3 ] ]);
+    });
+  });
+
   describe("#connect(destination, output, input)", function() {
     it("returns self", function() {
       var synth = new NeuSynth(context, NOP, []);
@@ -367,12 +384,13 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("events", function() {
+  describe("works", function() {
     var synth = null;
     var ugen1 = null;
     var ugen2 = null;
     var ugen3 = null;
     var ugen4 = null;
+    var passed = null;
 
     before(function() {
       sinon.stub(NeuUGen, "build", function(synth, key, spec) {
@@ -382,12 +400,16 @@ describe("NeuSynth", function() {
         ugen.$id     = spec.id;
         ugen.$class  = [ spec.class ];
         ugen.$outlet = osc;
+        ugen.apply = function(method, args) {
+          passed.push([ spec.id, method, args ]);
+        };
 
         return ugen;
       });
     });
 
     beforeEach(function() {
+      passed = [];
       synth = new NeuSynth(context, function($) {
         ugen1 = $("line", { id: "ugen1", class: "amp" });
         ugen2 = $("adsr", { id: "ugen2", class: "amp" });
@@ -399,6 +421,22 @@ describe("NeuSynth", function() {
 
     after(function() {
       NeuUGen.build.restore();
+    });
+
+    describe("#apply(method, args)", function() {
+
+      it("returns self", function() {
+        assert(synth.apply() === synth);
+      });
+
+      it("calls ugen.apply(method, args)", function() {
+        synth.apply(".amp:release", [ 10, 20 ]);
+
+        assert.deepEqual(passed, [
+          [ "ugen1", "release", [ 10, 20 ]],
+          [ "ugen2", "release", [ 10, 20 ]],
+        ]);
+      });
     });
 
     describe("#hasListeners(event)", function() {
