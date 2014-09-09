@@ -63,10 +63,6 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
-NeuUGen.prototype.start = function(t) {
-  this.$unit.start(t);
-  return this;
-};
 
 NeuUGen.prototype.stop = function(t) {
   this.$unit.stop(t);

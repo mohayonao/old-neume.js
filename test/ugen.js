@@ -134,19 +134,6 @@ describe("NeuUGen", function() {
     });
   });
 
-  describe("#start(t)", function() {
-    it("returns self", function() {
-      assert(ugen0.start(0) === ugen0);
-    });
-    it("calls unit.start(t)", function() {
-      var spy = sinon.spy(ugen0.$unit, "start");
-
-      ugen0.start(10);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ 10 ]);
-    });
-  });
 
   describe("#stop(t)", function() {
     it("returns self", function() {
