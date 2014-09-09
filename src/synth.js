@@ -145,7 +145,7 @@ NeuSynth.prototype.start = function(t) {
       }
 
       _.each(this._db.all(), function(ugen) {
-        ugen.start(t);
+        ugen.$unit.start(t);
       });
     }, this);
 
@@ -171,7 +171,7 @@ NeuSynth.prototype.stop = function(t) {
       }, this);
 
       _.each(this._db.all(), function(ugen) {
-        ugen.stop(t);
+        ugen.$unit.stop(t);
       });
     }, this);
   }
@@ -181,7 +181,7 @@ NeuSynth.prototype.stop = function(t) {
 
 NeuSynth.prototype.apply = function(method, args) {
   iterateOverTargetss(this._db, method, function(ugen, method) {
-    ugen.apply(method, args);
+    ugen.$unit.apply(method, args);
   });
   return this;
 };

@@ -8,7 +8,15 @@ var Emitter = require("../src/emitter");
 var NeuUGen  = _.NeuUGen;
 var NeuParam = _.NeuParam;
 var NOP = function() {};
-var unitStub = { $methods: {} };
+
+function unitStub() {
+  return {
+    $methods: {},
+    apply: sinon.spy(),
+    start: sinon.spy(),
+    stop : sinon.spy()
+  };
+}
 
 describe("NeuSynth", function() {
   var audioContext = null;
@@ -132,7 +140,7 @@ describe("NeuSynth", function() {
   describe("#outlet", function() {
     it("is an instance of AudioNode", sinon.test(function() {
       this.stub(NeuUGen, "build", function() {
-        return { $outlet: osc, $unit: unitStub };
+        return { $outlet: osc, $unit: unitStub() };
       });
 
       var synth = new NeuSynth(context, function($) {
@@ -149,11 +157,11 @@ describe("NeuSynth", function() {
 
       assert(synth.start() === synth);
     });
-    it("calls each ugen.start(t) only once", sinon.test(function() {
+    it("calls each ugen.$unit.start(t) only once", sinon.test(function() {
       var ugens = [];
 
       this.stub(NeuUGen, "build", function() {
-        var ugen = { $outlet: osc, start: sinon.spy(), $unit: unitStub  };
+        var ugen = { $outlet: osc, $unit: unitStub() };
         ugens.push(ugen);
         return ugen;
       });
@@ -164,7 +172,7 @@ describe("NeuSynth", function() {
 
       assert(synth.state === "init", "00:00.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.start.called === false, "00:00.000");
+        assert(ugen.$unit.start.called === false, "00:00.000");
       });
 
       synth.start(1.000);
@@ -173,20 +181,20 @@ describe("NeuSynth", function() {
       audioContext.$process(0.5);
       assert(synth.state === "ready", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.start.called === false, "00:00.500");
+        assert(ugen.$unit.start.called === false, "00:00.500");
       });
 
       audioContext.$process(0.5);
       assert(synth.state === "start", "00:01.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.start.calledOnce === true, "00:01.000");
-        assert.deepEqual(ugen.start.firstCall.args, [ 1 ]);
+        assert(ugen.$unit.start.calledOnce === true, "00:01.000");
+        assert.deepEqual(ugen.$unit.start.firstCall.args, [ 1 ]);
       });
 
       audioContext.$process(0.5);
       assert(synth.state === "start", "00:01.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.start.calledTwice === false, "00:01.500");
+        assert(ugen.$unit.start.calledTwice === false, "00:01.500");
       });
     }));
   });
@@ -197,11 +205,11 @@ describe("NeuSynth", function() {
 
       assert(synth.stop() === synth);
     });
-    it("calls each ugen.stop(t) only once with calling start first", sinon.test(function() {
+    it("calls each ugen.$unit.stop(t) only once with calling start first", sinon.test(function() {
       var ugens = [];
 
       this.stub(NeuUGen, "build", function() {
-        var ugen = { $outlet: osc, start: function() {}, stop: sinon.spy(), $unit: unitStub  };
+        var ugen = { $outlet: osc, start: function() {}, $unit: unitStub()  };
         ugens.push(ugen);
         return ugen;
       });
@@ -212,7 +220,7 @@ describe("NeuSynth", function() {
 
       assert(synth.state === "init", "00:00.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.stop.called === false, "00:00.000");
+        assert(ugen.$unit.stop.called === false, "00:00.000");
       });
 
       synth.stop(0.000);
@@ -222,26 +230,26 @@ describe("NeuSynth", function() {
       audioContext.$process(0.5);
       assert(synth.state === "ready", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.stop.called === false, "00:00.500");
+        assert(ugen.$unit.stop.called === false, "00:00.500");
       });
 
       audioContext.$process(0.5);
       assert(synth.state === "start", "00:01.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.stop.called === false, "00:01.000");
+        assert(ugen.$unit.stop.called === false, "00:01.000");
       });
 
       audioContext.$process(0.5);
       assert(synth.state === "start", "00:01.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.stop.called === false, "00:01.500");
+        assert(ugen.$unit.stop.called === false, "00:01.500");
       });
 
       audioContext.$process(0.5);
       assert(synth.state === "stop", "00:02.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.stop.calledOnce === true, "00:02.000");
-        assert.deepEqual(ugen.stop.firstCall.args, [ 2 ]);
+        assert(ugen.$unit.stop.calledOnce === true, "00:02.000");
+        assert.deepEqual(ugen.$unit.stop.firstCall.args, [ 2 ]);
       });
 
       var destination = _.findAudioNode(context);
@@ -401,8 +409,8 @@ describe("NeuSynth", function() {
         ugen.$id     = spec.id;
         ugen.$class  = [ spec.class ];
         ugen.$outlet = osc;
-        ugen.$unit   = unitStub;
-        ugen.apply = function(method, args) {
+        ugen.$unit   = unitStub();
+        ugen.$unit.apply = function(method, args) {
           passed.push([ spec.id, method, args ]);
         };
 
@@ -431,7 +439,7 @@ describe("NeuSynth", function() {
         assert(synth.apply() === synth);
       });
 
-      it("calls ugen.apply(method, args)", function() {
+      it("calls ugen.$unit.apply(method, args)", function() {
         synth.apply(".amp:release", [ 10, 20 ]);
 
         assert.deepEqual(passed, [
