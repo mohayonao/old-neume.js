@@ -93,6 +93,17 @@ utils.clipAt = function(list, index) {
   return list[Math.max(0, Math.min(index|0, list.length - 1))];
 };
 
+utils.wrapAt = function(list, index) {
+  index = index|0;
+
+  index %= list.length;
+  if (index < 0) {
+    index += list.length;
+  }
+
+  return list[index];
+};
+
 utils.rest = function(list) {
   return list.slice(1);
 };
