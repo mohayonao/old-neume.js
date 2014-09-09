@@ -24,23 +24,28 @@ NeuSynthDB.prototype.all = function() {
 NeuSynthDB.prototype.find = function(selector) {
   var result = null;
 
-  var id = (selector.match(/#\w+/) || [ "" ])[0].substr(1);
-  if (id !== "") {
+  var id = selector.match(/#[a-zA-Z](-?[a-zA-Z0-9]+)*/);
+  if (id) {
+    id = id[0].substr(1);
     result = this._ids[id] ? [ this._ids[id] ] : [];
   } else {
     result = this._all;
   }
 
-  var cls = (selector.match(/\.\w+/) || [ "" ])[0].substr(1);
-  if (cls !== "") {
-    result = _.select(result, function(obj) {
-      return obj.$class === cls;
+  var cls = selector.match(/\.[a-zA-Z](-?[a-zA-Z0-9]+)*/g);
+  if (cls) {
+    cls.forEach(function(cls) {
+      cls = cls.substr(1);
+      result = result.filter(function(obj) {
+        return obj.$class.indexOf(cls) !== -1;
+      });
     });
   }
 
-  var key = (selector.match(/^\w*/))[0];
-  if (key !== "") {
-    result = _.select(result, function(obj) {
+  var key = selector.match(/^[a-zA-Z](-?[a-zA-Z0-9]+)*/);
+  if (key) {
+    key = key[0];
+    result = result.filter(function(obj) {
       return obj.$key === key;
     });
   }
