@@ -63,12 +63,6 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
-
-NeuUGen.prototype.apply = function(method, args) {
-  this.$unit.apply(method, args);
-  return this;
-};
-
 NeuUGen.prototype.add = function(node) {
   return new NeuUGen(this.$synth, "+", {}, [ this, _.defaults(node, 0) ]);
 };

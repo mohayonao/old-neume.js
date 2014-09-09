@@ -134,21 +134,6 @@ describe("NeuUGen", function() {
     });
   });
 
-
-  describe("#apply(method, args)", function() {
-    it("returns self", function() {
-      assert(ugen0.apply("a", []) === ugen0);
-    });
-    it("calls unit.apply(method, args)", function() {
-      var spy = sinon.spy(ugen0.$unit, "apply");
-
-      ugen0.apply("method", [ 10 ]);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ "method", [ 10 ]]);
-    });
-  });
-
   describe("#add(node)", function() {
     it("returns a new NeuUGen that is (this + node)", function() {
       var ugen2 = new NeuUGen(synth, "sin#ugen2", {}, []);
