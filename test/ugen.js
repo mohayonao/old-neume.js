@@ -27,7 +27,6 @@ describe("NeuUGen", function() {
     };
   }
 
-
   before(function() {
     registered = NeuUGen.registered;
     NeuUGen.registered = {};
@@ -46,7 +45,7 @@ describe("NeuUGen", function() {
     synth = {
       $context: audioContext
     };
-    unit0 = new NeuUGen(synth, "sin", { id: "unit0" }, []);
+    unit0 = new NeuUGen(synth, "sin.kr.lfo#unit0", {}, []);
   });
 
   after(function() {
@@ -59,6 +58,17 @@ describe("NeuUGen", function() {
     });
     it("has been inherited from Emitter", function() {
       assert(unit0 instanceof Emitter);
+    });
+    it("should set id from the key", function() {
+      assert(unit0.$id === "unit0");
+    });
+    it("should set classes from the key", function() {
+      assert.deepEqual(unit0.$class, [ "kr", "lfo" ]);
+    });
+    it("throw an error if given invalid key", function() {
+      assert.throws(function() {
+        new NeuUGen(synth, "#id", {}, []);
+      }, Error);
     });
   });
 
@@ -154,7 +164,7 @@ describe("NeuUGen", function() {
 
   describe("#add(node)", function() {
     it("returns a new NeuUGen that is (this + node)", function() {
-      var unit2 = new NeuUGen(synth, "sin", { id: "unit2" }, []);
+      var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
       var unit3 = unit0.add(unit2);
 
       assert(unit3 instanceof NeuUGen);
@@ -189,7 +199,7 @@ describe("NeuUGen", function() {
 
   describe("#mul(node)", function() {
     it("returns a new NeuUGen that is (this * node)", function() {
-      var unit2 = new NeuUGen(synth, "sin", { id: "unit2" }, []);
+      var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
       var unit3 = unit0.mul(unit2);
 
       assert(unit3 instanceof NeuUGen);
@@ -224,8 +234,8 @@ describe("NeuUGen", function() {
 
   describe("#madd(mul, add)", function() {
     it("returns a new NeuUGen that is (this * mul + add)", function() {
-      var unit2 = new NeuUGen(synth, "sin", { id: "unit2" }, []);
-      var unit3 = new NeuUGen(synth, "sin", { id: "unit3" }, []);
+      var unit2 = new NeuUGen(synth, "sin#unit2", {}, []);
+      var unit3 = new NeuUGen(synth, "sin#unit3", {}, []);
       var unit4 = unit0.madd(unit2, unit3);
 
       assert(unit4 instanceof NeuUGen);
