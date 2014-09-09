@@ -26,6 +26,12 @@ var neuma = function(context) {
       value: audioContext.sampleRate,
       enumerable: true
     },
+    currentTime: {
+      get: function() {
+        return context.currentTime;
+      },
+      enumerable: true
+    },
     Buffer: {
       value: Object.defineProperties({}, {
         create: {
