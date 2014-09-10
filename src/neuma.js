@@ -40,6 +40,12 @@ var neuma = function(context) {
           },
           enumerable: true
         },
+        fill: {
+          value: function(length, func) {
+            return neuma.Buffer.fill(context, func);
+          },
+          enumerable: true
+        },
         from: {
           value: function(data) {
             return neuma.Buffer.from(context, data);
