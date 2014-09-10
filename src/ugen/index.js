@@ -15,6 +15,5 @@ module.exports = function(neuma) {
   neuma.use(require("./number"));
   neuma.use(require("./osc"));
   neuma.use(require("./white"));
-  neuma.use(require("./xline"));
 
 };
