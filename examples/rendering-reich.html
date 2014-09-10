@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>rendering-reich - neuma.js</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <style>
+    #start {
+      margin: 10px 0;
+    }
+    #canvas {
+      width: 100%;
+      height: 240px;
+      background: black;
+    }
+    #code {
+      padding: 0;
+      margin: 0;
+      background: white;
+      border: none;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
+  <script src="../build/neuma.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>neuma.js rendering-reich</h1>
+    <div id="canvas"></div>
+    <div id="app">
+      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">source</h3>
+      </div>
+      <div class="panel-body">
+        <pre class="prettyprint" id="code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script id="example">
+  var score  = [ 0, 0, 1, 1, 2, 2, 3, 3 ];
+  var plucks = [ 69, 71, 72, 76 ].map(function(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }).map(function(frequency) {
+    return new KarplusStrong(Neuma.sampleRate, frequency, 2.000);
+  });
+
+  function minimal(Neuma) {
+    var Synth = new Neuma(function($, buffer) {
+      var adsr = $("adsr", { d: 0.1, s: 0.4, r: 0.750, curve: 0.15, mul: 0.15 },
+        $("+", { mul: 0.4 }, [ 0.999, 1.001 ].map(function(rate) {
+          return $(buffer, { rate: rate });
+        })),
+        $("line", { dur: 0.025, mul: 0.4 }, $("white"))
+      ).on("end", function(e) {
+        this.stop(e.playbackTime);
+      });
+
+      $.timeout(0.125, adsr.release);
+
+      return $("lpf", { freq: 3200, Q: 5 }, adsr);
+    });
+
+    var buffers = score.map(function(i) {
+      return Neuma.Buffer.from(plucks[i]);
+    });
+
+    new Neuma.Interval(0.250, function(e) {
+      new Synth(buffers[e.count % buffers.length]).start(e.playbackTime);
+    }).start();
+  }
+
+  var Tape = new Neuma(function($, buffer, rate) {
+    return $(buffer, { rate: rate, loop: true });
+  });
+
+  var Comp = new Neuma(function($) {
+    return $("comp", $.in(0));
+  });
+
+  var comp = null;
+
+  function start() {
+    score = _.shuffle(score);
+
+    comp = new Comp().start();
+
+    Neuma.render(2.000, minimal).then(function(buffer) {
+      new Tape(buffer, 300/300).connect(comp).start(0);
+      new Tape(buffer, 299/300).connect(comp).start(0);
+    }).catch(function(e) {
+      console.error(e);
+    });
+  }
+
+  function stop() {
+    if (comp) {
+      comp.stop();
+    }
+  }
+
+  // http://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis
+  function KarplusStrong(sampleRate, frequency, duration) {
+    var buffer = new Float32Array(sampleRate * duration);
+
+    var length = Math.round(sampleRate / frequency);
+    var table  = new Float32Array(length);
+    for (var i = 0; i < length; ++i) {
+      table[i] = Math.random() * 2 - 1;
+    }
+
+    var next, prev = 0;
+    for (var j = 0, k = 0, jmax = buffer.length; j < jmax; j++, k++, prev = next) {
+      buffer[j] = next = table[k % length];
+      table[k % length] = (prev + next) * 0.5;
+    }
+
+    return buffer;
+  }
+  </script>
+
+  <script>
+  function canUseWebGL() {
+    try {
+      return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
+    } catch(e) {
+      return false;
+    }
+  }
+  $(function() {
+    "use strict";
+
+    var WaveVisualizer = (function() {
+      function WaveVisualizer(analyer, spec) {
+        this._analyer = analyer;
+
+        this._scene  = new THREE.Scene();
+        this._camera = new THREE.PerspectiveCamera(75, spec.width / spec.height, 0.1, 1000);
+
+        if (canUseWebGL()) {
+          this._analyer.fftSize = 256;
+          this._renderer = new THREE.WebGLRenderer();
+          this._maxWaves = 128;
+        } else {
+          this._analyer.fftSize = 128;
+          this._renderer = new THREE.CanvasRenderer();
+          this._maxWaves = 32;
+        }
+        this._renderer.setSize(spec.width, spec.height);
+
+        this._state = "init";
+        this._timeData = new Uint8Array(analyer.frequencyBinCount);
+        this._freqData = new Uint8Array(analyer.frequencyBinCount);
+        this._waves = [];
+
+        Object.defineProperties(this, {
+          width: {
+            value: spec.width,
+            enumerable: true
+          },
+          height: {
+            value: spec.height,
+            enumerable: true
+          },
+          state: {
+            get: function() {
+              return this._state;
+            },
+            enumerable: true
+          },
+          domElement: {
+            value: this._renderer.domElement,
+            enumerable: true
+          },
+          camera: {
+            value: this._camera,
+            enumerable: true
+          }
+        })
+      }
+
+      WaveVisualizer.prototype.start = function() {
+        if (this._state !== "start") {
+          this._state = "start";
+          requestAnimationFrame(this.render.bind(this));
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.stop = function() {
+        if (this._state === "start") {
+          this._state = "stop";
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.render = function(t) {
+        this._analyer.getByteTimeDomainData(this._timeData);
+        this._analyer.getByteFrequencyData(this._freqData);
+
+        this._render(t);
+
+        this._camera.lookAt(this._scene.position);
+        this._renderer.render(this._scene, this._camera);
+
+        if (this._state === "start") {
+          requestAnimationFrame(this.render.bind(this));
+        }
+      };
+
+      WaveVisualizer.prototype._render = function(t) {
+        if (this._maxWaves <= this._waves.length) {
+          this._scene.remove(this._waves.pop());
+        }
+
+        var geometry = new THREE.Geometry();
+        geometry.vertices = getVertices(this._timeData);
+
+        var material = new THREE.LineBasicMaterial({
+          color: new THREE.Color().setHSL(calcHue(this._freqData), 0.8, 0.6).getHex()
+        });
+
+        var wave = new THREE.Line(geometry, material);
+        wave.rotation.set(Math.cos(t * 0.25), 0, Math.sin(t * 0.25));
+
+        this._scene.add(wave);
+        this._waves.unshift(wave);
+
+        var r = this.width / this._timeData.length;
+
+        this._waves.forEach(function(wave, index, list) {
+          var scaleR = (index + 1) * r;
+          var scaleY = (list.length - index) * 32;
+
+          wave.scale.set(scaleR, scaleY, scaleR);
+        }, this);
+      };
+
+      function calcHue(freqData) {
+        var maxIndex = 0;
+        for (var i = 0, imax = freqData.length * 0.5; i < imax; i += 4) {
+          if (112 <= freqData[i]) {
+            maxIndex = i * 2;
+          }
+        }
+        return maxIndex / freqData.length;
+      }
+
+      function getVertices(data) {
+        var result = new Array(data.length + 1);
+
+        for (var i = 0, imax = data.length; i <= imax; i++) {
+          var x = Math.cos(Math.PI * 2 * (i / imax));
+          var y = ((data[i % imax] / 256) - 0.5) * 2;
+          var z = Math.sin(Math.PI * 2 * (i / imax));
+          result[i] = new THREE.Vector3(x, y, z);
+        }
+
+        return result;
+      }
+
+      return WaveVisualizer;
+    })();
+
+    var canvas = $("#canvas").on("mousemove", function(e) {
+      var x = (e.pageX - canvas.$offset.left) / visualizer.width  - 0.5;
+      var y = (e.pageY - canvas.$offset.top ) / visualizer.height - 0.5;
+
+      visualizer.camera.position.set(
+        Math.sin(x * 2 * Math.PI) * -300,
+        y * 250,
+        Math.cos(x * 2 * Math.PI) * -300
+      );
+    });
+    canvas.$offset = canvas.offset();
+
+    var visualizer = new WaveVisualizer(Neuma.analyer, { width: canvas.width(), height: 240 });
+
+    visualizer.camera.position.set(0, 0, -300);
+
+    canvas.append(visualizer.domElement);
+
+    var vue = new Vue({
+      el: "#app",
+      data: {
+        isPlaying: false,
+      },
+      methods: {
+        toggle: function() {
+          this.isPlaying = !this.isPlaying;
+          if (this.isPlaying) {
+            start(this.$data.score);
+            visualizer.start();
+          } else {
+            stop();
+            visualizer.stop();
+          }
+        }
+      }
+    });
+
+    $("#code").text($("#example").text());
+    prettyPrint();
+  });
+  </script>
+</body>
+</html>
