@@ -2,6 +2,7 @@
 
 var NeuContext = require("../src/context");
 var NeuBuffer = require("../src/buffer");
+var FFT = require("../src/fft");
 
 describe("NeuBuffer", function() {
   var audioContext = null;
@@ -116,6 +117,13 @@ describe("NeuBuffer", function() {
     });
   });
 
+  describe("#getChannelData(ch)", function() {
+    it("points to AudioBuffer#getChannelData(ch)", function() {
+      assert(buffer.getChannelData(0) === audioBuffer.getChannelData(0));
+      assert(buffer.getChannelData(1) === audioBuffer.getChannelData(1));
+    });
+  });
+
   describe("#concat(...buffer)", function() {
     it("return new NeuBuffer instance that concatenates this + ...buffer", function() {
       var a = NeuBuffer.from(context, [ 1, 2, 3 ]);
@@ -217,6 +225,16 @@ describe("NeuBuffer", function() {
       assert.deepEqual(resampled[0], new Float32Array([ 0, 1, 1, 2, 3, 3, 4, 4, 5, 6, 6, 7 ]));
       assert.deepEqual(resampled[1], new Float32Array([ 7, 6, 6, 5, 4, 4, 3, 3, 2, 1, 1, 0 ]));
     });
+    it("returns new NeuBuffer instance that non-resampled (same size)", function() {
+      var resampled = buffer.resample(8, false);
+
+      assert(resampled instanceof NeuBuffer);
+      assert(resampled !== buffer);
+      assert(resampled[0] !== bufferData[0]);
+      assert(resampled[1] !== bufferData[1]);
+      assert.deepEqual(resampled[0], new Float32Array(bufferData[0]));
+      assert.deepEqual(resampled[1], new Float32Array(bufferData[1]));
+    });
     it("returns new NeuBuffer instance that resampled with interpolation", function() {
       var resampled = buffer.resample(12, true);
 
@@ -258,6 +276,14 @@ describe("NeuBuffer", function() {
 
       assert(wave instanceof window.PeriodicWave);
     });
+    it("clip a buffer if over 4096", sinon.test(function() {
+      var spy = this.spy(FFT, "forward");
+      var buffer = NeuBuffer.from(context, new Float32Array(8192));
+      var wave = buffer.toPeriodicWave();
+
+      assert(wave instanceof window.PeriodicWave);
+      assert(spy.firstCall.args[0].length === 4096);
+    }));
   });
 
 });
