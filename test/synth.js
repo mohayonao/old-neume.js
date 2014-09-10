@@ -7,6 +7,7 @@ var Emitter = require("../src/emitter");
 
 var NeuUGen  = _.NeuUGen;
 var NeuParam = _.NeuParam;
+var NeuIn    = _.NeuIn;
 var NOP = function() {};
 
 function unitStub() {
@@ -94,8 +95,8 @@ describe("NeuSynth", function() {
             in2 = $.in(0);
           }, []);
 
-          assert(in0 instanceof window.GainNode);
-          assert(in1 instanceof window.GainNode);
+          assert(in0 instanceof _.NeuIn);
+          assert(in1 instanceof _.NeuIn);
           assert(in0 !== in1);
           assert(in0 === in2);
           assert(synth.$inputs[0] === in0);

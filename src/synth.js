@@ -4,6 +4,7 @@ var _ = require("./utils");
 
 _.NeuUGen    = require("./ugen");
 _.NeuParam   = require("./param");
+_.NeuIn      = require("./in");
 _.NeuSynthDB = require("./synthdb");
 
 var EMPTY_DB = new _.NeuSynthDB();
@@ -66,7 +67,7 @@ function NeuSynth(context, func, args) {
     index = Math.max(0, _.int(index));
 
     if (!inputs[index]) {
-      inputs[index] = context.createGain();
+      inputs[index] = new _.NeuIn(_this);
     }
 
     return inputs[index];
@@ -268,7 +269,7 @@ NeuSynth.prototype.connect = function(destination, output, input) {
     if (!this._routing[output]) {
       this._routing[output] = [];
     }
-    this._routing[output].push(destination.$inputs[input]);
+    this._routing[output].push(_.findAudioNode(destination.$inputs[input]));
   }
 
   return this;
