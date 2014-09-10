@@ -153,6 +153,7 @@ function NeuSynth(context, func, args) {
   this._state = INIT;
   this._stateString = "init";
   this._timers = timers;
+  this._methods = [];
 
   Object.defineProperties(this, {
     context: {
@@ -173,14 +174,23 @@ function NeuSynth(context, func, args) {
 
   this._db.all().forEach(function(ugen) {
     _.keys(ugen.$unit.$methods).forEach(function(method) {
-      _.definePropertyIfNotExists(this, method, {
-        value: function() {
-          return this.apply(method, _.toArray(arguments));
-        }
-      });
+      if (!this.hasOwnProperty(method)) {
+        this._methods.push(method);
+        Object.defineProperty(this, method, {
+          value: function() {
+            return this.apply(method, _.toArray(arguments));
+          }
+        });
+      }
     }, this);
   }, this);
+
+  this._methods = this._methods.sort();
 }
+
+NeuSynth.prototype.getMethods = function() {
+  return this._methods.slice();
+};
 
 NeuSynth.prototype.start = function(t) {
   t = _.defaults(t, this.$context.currentTime);

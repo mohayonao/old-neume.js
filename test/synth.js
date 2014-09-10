@@ -12,7 +12,10 @@ var NOP = function() {};
 
 function unitStub() {
   return {
-    $methods: {},
+    $methods: {
+      fizz: NOP,
+      buzz: NOP,
+    },
     apply: sinon.spy(),
     start: sinon.spy(),
     stop : sinon.spy()
@@ -198,6 +201,20 @@ describe("NeuSynth", function() {
       }, []);
 
       assert(synth.outlet instanceof window.AudioNode);
+    }));
+  });
+
+  describe("#getMethods()", function() {
+    it("returns method names", sinon.test(function() {
+      this.stub(NeuUGen, "build", function() {
+        return { $outlet: osc, $unit: unitStub() };
+      });
+
+      var synth = new NeuSynth(context, function($) {
+        return $("sin", $("sin"));
+      }, []);
+
+      assert.deepEqual(synth.getMethods(), [ "buzz", "fizz" ]);
     }));
   });
 
