@@ -35,6 +35,7 @@ function NeuSynth(context, func, args) {
   var params  = {};
   var inputs  = [];
   var outputs = [];
+  var timers  = [];
 
   $.param = function(name, defaultValue) {
     if (_.has(params, name)) {
@@ -93,6 +94,7 @@ function NeuSynth(context, func, args) {
   this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "init";
+  this._timers = timers;
 
   this._db.all().forEach(function(ugen) {
     _.keys(ugen.$unit.$methods).forEach(function(method) {
@@ -147,6 +149,10 @@ NeuSynth.prototype.start = function(t) {
       _.each(this._db.all(), function(ugen) {
         ugen.$unit.start(t);
       });
+
+      this._timers.forEach(function(timer) {
+        timer.start(t);
+      });
     }, this);
 
     this.$context.start(); // auto start(?)
@@ -172,6 +178,10 @@ NeuSynth.prototype.stop = function(t) {
 
       _.each(this._db.all(), function(ugen) {
         ugen.$unit.stop(t);
+      });
+
+      this._timers.forEach(function(timer) {
+        timer.stop(t);
       });
     }, this);
   }
