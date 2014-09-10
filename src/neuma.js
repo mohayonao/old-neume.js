@@ -42,7 +42,7 @@ var neuma = function(context) {
         },
         fill: {
           value: function(length, func) {
-            return neuma.Buffer.fill(context, func);
+            return neuma.Buffer.fill(context, length, func);
           },
           enumerable: true
         },
@@ -83,30 +83,6 @@ neuma.DC       = require("./dc");
 neuma.Buffer   = require("./buffer");
 neuma.Interval = require("./interval");
 
-var context = new neuma.Context(new window.AudioContext());
-
-neuma.Neuma = Object.defineProperties(
-  neuma(context), {
-    use: {
-      value: neuma.use,
-      enumerable: true
-    },
-    render: {
-      value: neuma.render,
-      enumerable: true
-    },
-    master: {
-      value: context.getMasterGain(),
-      enumerable: true
-    },
-    analyer: {
-      value: context.getAnalyser(),
-      enumerable: true
-    }
-  }
-);
-
-
 neuma.build = function(context, spec) {
   return new neuma.SynthDef(context, spec);
 };
@@ -126,18 +102,43 @@ neuma.use = function(fn) {
 };
 neuma.use.used = [];
 
-neuma.render = function(duration, func) {
-  var sampleRate = neuma.Neuma.audioContext.sampleRate;
-  var length = _.int(sampleRate * duration);
+neuma.render = function(context, duration, func) {
+  var sampleRate = context.sampleRate;
+  var length     = _.int(sampleRate * duration);
 
   return new Promise(function(resolve) {
     var audioContext = new window.OfflineAudioContext(2, length, sampleRate);
     audioContext.oncomplete = function(e) {
-      resolve(new neuma.Buffer(e.renderedBuffer));
+      resolve(new neuma.Buffer(context, e.renderedBuffer));
     };
+    func(neuma(new neuma.Context(audioContext, duration)));
     audioContext.startRendering();
-    func(neuma(new neuma.Context(audioContext)));
   });
 };
+
+var context = new neuma.Context(new window.AudioContext());
+
+neuma.Neuma = Object.defineProperties(
+  neuma(context), {
+    render: {
+      value: function(duration, func) {
+        return neuma.render(context, duration, func);
+      },
+      enumerable: true
+    },
+    use: {
+      value: neuma.use,
+      enumerable: true
+    },
+    master: {
+      value: context.getMasterGain(),
+      enumerable: true
+    },
+    analyer: {
+      value: context.getAnalyser(),
+      enumerable: true
+    }
+  }
+);
 
 module.exports = neuma;
