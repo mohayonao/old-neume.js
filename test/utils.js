@@ -339,6 +339,17 @@ describe("utils", function() {
     });
   });
 
+  describe(".definePropertyIfNotExists(obj, prop, descriptor)", function() {
+    it("defines a property if not exists", function() {
+      var obj = {};
+
+      _.definePropertyIfNotExists(obj, "value", { value: 100 });
+      _.definePropertyIfNotExists(obj, "value", { value: 200 });
+
+      assert(obj.value === 100);
+    });
+  });
+
   describe(".format(fmt, dict)", function() {
     it("should format with an array", function() {
       assert(_.format("#{0} is #{1}", [
