@@ -82,6 +82,32 @@ function NeuSynth(context, func, args) {
     return null;
   };
 
+  $.timeout = function(timeout) {
+    timeout = Math.max(0, _.finite(timeout));
+
+    var schedId   = 0;
+    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
+
+    function sched(t) {
+      schedId = context.sched(t, function(t) {
+        schedId = 0;
+        callbacks.forEach(function(func) {
+          func.call(_this, t, 1);
+        });
+      });
+    }
+
+    timers.push({
+      start: function(t) {
+        sched(t + timeout);
+      },
+      stop: function() {
+        context.unsched(schedId);
+        schedId = 0;
+      }
+    });
+  };
+
   var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
 
   if (outputs[0] == null && _.isAudioNode(result)) {

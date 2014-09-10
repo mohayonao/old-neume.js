@@ -126,6 +126,31 @@ describe("NeuSynth", function() {
           assert(synth.$outputs[3] === ugen3);
         });
       });
+      describe(".timeout(timeout, ... callbacks)", function() {
+        it("works", function() {
+          var passed = [];
+          var synth = new NeuSynth(context, function($) {
+            $.timeout(0.030, function(t, i) {
+              passed.push([ "fizz", t, i ]);
+            });
+            $.timeout(0.050, function(t, i) {
+              passed.push([ "buzz", t, i ]);
+            });
+            $.timeout(0.150, function(t, i) {
+              passed.push([ "fizzbuzz", t, i ]);
+            });
+          }, []);
+
+          synth.start(0.010);
+          synth.stop(0.100);
+          audioContext.$process(0.200);
+
+          assert.deepEqual(passed, [
+            [ "fizz", 0.040, 1 ],
+            [ "buzz", 0.060000000000000005, 1 ],
+          ]);
+        });
+      });
     });
   });
 
