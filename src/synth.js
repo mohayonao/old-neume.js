@@ -203,7 +203,7 @@ NeuSynth.prototype.start = function(t) {
         }, this);
       }
 
-      _.each(this._db.all(), function(ugen) {
+      this._db.all().forEach(function(ugen) {
         ugen.$unit.start(t);
       });
 
@@ -233,7 +233,7 @@ NeuSynth.prototype.stop = function(t) {
         });
       }, this);
 
-      _.each(this._db.all(), function(ugen) {
+      this._db.all().forEach(function(ugen) {
         ugen.$unit.stop(t);
       });
 
@@ -288,7 +288,7 @@ NeuSynth.prototype.listeners = function(event) {
   var listeners = [];
 
   iterateOverTargetss(this._db, event, function(ugen, event) {
-    _.each(ugen.listeners(event), function(listener) {
+    ugen.listeners(event).forEach(function(listener) {
       if (listeners.indexOf(listener) === -1) {
         listeners.push(listener);
       }
@@ -324,7 +324,7 @@ function iterateOverTargetss(db, event, callback) {
 
   if (parsed) {
     var targets = parsed.selector ? db.find(parsed.selector) : db.all();
-    _.each(targets, function(ugen) {
+    targets.forEach(function(ugen) {
       callback(ugen, parsed.name);
     });
   }
