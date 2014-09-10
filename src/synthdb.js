@@ -1,6 +1,7 @@
 "use strict";
 
 var _ = require("./utils");
+var selectorParser = require("./selector-parser");
 
 function NeuSynthDB() {
   this._all = [];
@@ -23,30 +24,23 @@ NeuSynthDB.prototype.all = function() {
 
 NeuSynthDB.prototype.find = function(selector) {
   var result = null;
+  var parsed = selectorParser.parse(selector);
 
-  var id = selector.match(/#[a-zA-Z](-?[a-zA-Z0-9]+)*/);
-  if (id) {
-    id = id[0].substr(1);
-    result = this._ids[id] ? [ this._ids[id] ] : [];
+  if (parsed.id) {
+    result = this._ids[parsed.id] ? [ this._ids[parsed.id] ] : [];
   } else {
     result = this._all;
   }
 
-  var cls = selector.match(/\.[a-zA-Z](-?[a-zA-Z0-9]+)*/g);
-  if (cls) {
-    cls.forEach(function(cls) {
-      cls = cls.substr(1);
-      result = result.filter(function(obj) {
-        return obj.$class.indexOf(cls) !== -1;
-      });
-    });
-  }
-
-  var key = selector.match(/^[a-zA-Z](-?[a-zA-Z0-9]+)*/);
-  if (key) {
-    key = key[0];
+  parsed.class.forEach(function(cls) {
     result = result.filter(function(obj) {
-      return obj.$key === key;
+      return obj.$class.indexOf(cls) !== -1;
+    });
+  });
+
+  if (parsed.key) {
+    result = result.filter(function(obj) {
+      return obj.$key === parsed.key;
     });
   }
 
