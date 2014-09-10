@@ -373,4 +373,21 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("offline-rendering", function() {
+    it("works", function() {
+      var audioContext = new window.OfflineAudioContext(2, 44100 * 0.5, 44100);
+      var context = new NeuContext(audioContext, 2);
+      var passed = [ ];
+
+      context.sched(0.100, function() { passed.push(1); });
+      context.sched(0.500, function() { passed.push(5); });
+      context.sched(0.200, function() { passed.push(2); });
+      context.sched(0.400, function() { passed.push(4); });
+      context.sched(0.300, function() { passed.push(3); });
+      context.start();
+
+      assert.deepEqual(passed, [ 1, 2, 3, 4, 5 ]);
+    });
+  });
+
 });
