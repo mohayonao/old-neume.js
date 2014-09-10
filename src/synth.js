@@ -36,6 +36,7 @@ function NeuSynth(context, func, args) {
   var params  = {};
   var inputs  = [];
   var outputs = [];
+  var methods = {};
   var timers  = [];
 
   $.param = function(name, defaultValue) {
@@ -81,6 +82,12 @@ function NeuSynth(context, func, args) {
     }
 
     return null;
+  };
+
+  $.method = function(methodName, func) {
+    if (/^[a-z]\w*$/.test(methodName) && _.isFunction(func)) {
+      methods[methodName] = func;
+    }
   };
 
   $.timeout = function(timeout) {
@@ -153,7 +160,7 @@ function NeuSynth(context, func, args) {
   this._state = INIT;
   this._stateString = "init";
   this._timers = timers;
-  this._methods = [];
+  this._methodNames = [];
 
   Object.defineProperties(this, {
     context: {
@@ -172,24 +179,33 @@ function NeuSynth(context, func, args) {
     },
   });
 
+  _.each(methods, function(method, methodName) {
+    this._methodNames.push(methodName);
+    Object.defineProperty(this, methodName, {
+      value: function() {
+        method.apply(this, _.toArray(arguments));
+      }
+    });
+  }, this);
+
   this._db.all().forEach(function(ugen) {
-    _.keys(ugen.$unit.$methods).forEach(function(method) {
-      if (!this.hasOwnProperty(method)) {
-        this._methods.push(method);
-        Object.defineProperty(this, method, {
+    _.keys(ugen.$unit.$methods).forEach(function(methodName) {
+      if (!this.hasOwnProperty(methodName)) {
+        this._methodNames.push(methodName);
+        Object.defineProperty(this, methodName, {
           value: function() {
-            return this.apply(method, _.toArray(arguments));
+            return this.apply(methodName, _.toArray(arguments));
           }
         });
       }
     }, this);
   }, this);
 
-  this._methods = this._methods.sort();
+  this._methodNames = this._methodNames.sort();
 }
 
 NeuSynth.prototype.getMethods = function() {
-  return this._methods.slice();
+  return this._methodNames.slice();
 };
 
 NeuSynth.prototype.start = function(t) {

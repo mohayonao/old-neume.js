@@ -130,6 +130,24 @@ describe("NeuSynth", function() {
           assert(synth.$outputs[3] === ugen3);
         });
       });
+      describe(".method(methodName, func)", function() {
+        it("works", function() {
+          var passed = null;
+          var synth = new NeuSynth(context, function($) {
+            $.method("func", function(a, b) {
+              passed = [ "func", a, b ];
+            });
+            $.method("****", function( a, b) {
+              passed = [ "****", a, b ];
+            });
+          });
+
+          assert.deepEqual(synth.getMethods(), [ "func" ]);
+
+          synth.func(1, 2);
+          assert.deepEqual(passed, [ "func", 1, 2 ]);
+        });
+      });
       describe(".timeout(timeout, ... callbacks)", function() {
         it("works", function() {
           var passed = [];
