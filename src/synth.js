@@ -108,6 +108,37 @@ function NeuSynth(context, func, args) {
     });
   };
 
+  $.interval = function(interval) {
+    interval = Math.max(1 / context.sampleRate, _.finite(interval));
+
+    var schedId   = 0;
+    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
+    var startTime = 0;
+    var count     = 0;
+
+    function sched(t) {
+      schedId = context.sched(t, function(t) {
+        schedId = 0;
+        count  += 1;
+        callbacks.forEach(function(func) {
+          func.call(_this, t, count);
+        });
+        sched(startTime + interval * (count + 1));
+      });
+    }
+
+    timers.push({
+      start: function(t) {
+        startTime = t;
+        sched(t + interval);
+      },
+      stop: function() {
+        context.unsched(schedId);
+        schedId = 0;
+      }
+    });
+  };
+
   var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
 
   if (outputs[0] == null && _.isAudioNode(result)) {

@@ -151,6 +151,30 @@ describe("NeuSynth", function() {
           ]);
         });
       });
+      describe(".interval(interval, ... callbacks)", function() {
+        it("works", function() {
+          var passed = [];
+          var synth = new NeuSynth(context, function($) {
+            $.interval(0.030, function(t, i) {
+              passed.push([ "fizz", t, i ]);
+            });
+            $.interval(0.050, function(t, i) {
+              passed.push([ "buzz", t, i ]);
+            });
+          }, []);
+
+          synth.start(0.010);
+          synth.stop(0.100);
+          audioContext.$process(0.200);
+
+          assert.deepEqual(passed, [
+            [ "fizz", 0.04, 1 ],
+            [ "buzz", 0.060000000000000005, 1 ],
+            [ "fizz", 0.06999999999999999, 2 ],
+            [ "fizz", 0.09999999999999999, 3 ]
+          ]);
+        });
+      });
     });
   });
 
