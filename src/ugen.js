@@ -40,6 +40,14 @@ function NeuUGen(synth, key, spec, inputs) {
       enumerable: true
     },
   });
+
+  _.each(unit.$methods, function(method, name) {
+    if (!this.hasOwnProperty(name)) {
+      Object.defineProperty(this, name, {
+        value: method
+      });
+    }
+  }, this);
 }
 _.inherits(NeuUGen, Emitter);
 
