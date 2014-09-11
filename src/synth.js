@@ -356,7 +356,7 @@ function iterateOverTargetss(db, event, callback) {
 }
 
 function parseEvent(event) {
-  var matched = /^(?:(.*?):([a-z]+)|([a-z]+))$/.exec(event);
+  var matched = /^(?:(.*?):([a-z]\w+)|([a-z]\w+))$/.exec(event);
 
   if (!matched) {
     return null;
