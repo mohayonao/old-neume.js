@@ -69,12 +69,6 @@ describe("NeuSynth", function() {
           assert(params.freq === synth.freq);
           assert(params.amp  === synth.amp );
           assert(params.amp  === params.amp2);
-
-          synth.freq = 220;
-          synth.amp  = 0.1;
-
-          assert(params.freq.valueOf() === 220);
-          assert(params.amp .valueOf() === 0.1);
         });
         it("throw an error if given an invalid name", function() {
           var func = function($) {
