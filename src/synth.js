@@ -167,6 +167,12 @@ function NeuSynth(context, func, args) {
       value: _.findAudioContext(this.$context),
       enumerable: true
     },
+    currentTime: {
+      get: function() {
+        return this.$context.currentTime;
+      },
+      enumerable: true
+    },
     outlet: {
       value: _.findAudioNode(this.$outputs[0]),
       enumerable: true

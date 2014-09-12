@@ -202,6 +202,14 @@ describe("NeuSynth", function() {
     });
   });
 
+  describe("#currentTime", function() {
+    it("points to context.currentTime", function() {
+      var synth = new NeuSynth(context, NOP, []);
+
+      assert(synth.currentTime === context.currentTime);
+    });
+  });
+
   describe("#outlet", function() {
     it("is an instance of AudioNode", sinon.test(function() {
       this.stub(NeuUGen, "build", function() {
