@@ -32,7 +32,7 @@
 <body>
   <div class="container">
     <h1>neume.js rendering-reich</h1>
-    <div id="canvas"></div>
+    <canvas id="canvas"></canvas>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
     </div>
@@ -47,7 +47,8 @@
   </div>
 
   <script id="example">
-  var score  = [ 0, 0, 1, 1, 2, 2, 3, 3 ];
+  var rates  = [ 300/300, 299/300 ];
+  var score  = _.range(8);
   var plucks = [ 69, 71, 72, 76 ].map(function(midi) {
     return 440 * Math.pow(2, (midi - 69) / 12);
   }).map(function(frequency) {
@@ -71,7 +72,7 @@
     });
 
     var buffers = score.map(function(i) {
-      return Neume.Buffer.from(plucks[i]);
+      return Neume.Buffer.from(plucks[i >> 1]);
     });
 
     new Neume.Interval(0.250, function(e) {
@@ -95,8 +96,9 @@
     comp = new Comp().start();
 
     Neume.render(2.000, minimal).then(function(buffer) {
-      new Tape(buffer, 300/300).connect(comp).start(0);
-      new Tape(buffer, 299/300).connect(comp).start(0);
+      rates.forEach(function(rate) {
+        new Tape(buffer, rate).connect(comp).start();
+      });
     }).catch(function(e) {
       console.error(e);
     });
@@ -129,13 +131,6 @@
   </script>
 
   <script>
-  function canUseWebGL() {
-    try {
-      return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
-    } catch(e) {
-      return false;
-    }
-  }
   $(function() {
     "use strict";
 
@@ -143,54 +138,36 @@
       function WaveVisualizer(analyer, spec) {
         this._analyer = analyer;
 
-        this._scene  = new THREE.Scene();
-        this._camera = new THREE.PerspectiveCamera(75, spec.width / spec.height, 0.1, 1000);
+        this.canvas = spec.canvas;
+        this.width  = this.canvas.width  = spec.width;
+        this.height = this.canvas.height = spec.height;
+        this.context = this.canvas.getContext("2d");
 
-        if (canUseWebGL()) {
-          this._analyer.fftSize = 256;
-          this._renderer = new THREE.WebGLRenderer();
-          this._maxWaves = 128;
-        } else {
-          this._analyer.fftSize = 128;
-          this._renderer = new THREE.CanvasRenderer();
-          this._maxWaves = 32;
-        }
-        this._renderer.setSize(spec.width, spec.height);
-
-        this._state = "init";
-        this._timeData = new Uint8Array(analyer.frequencyBinCount);
-        this._freqData = new Uint8Array(analyer.frequencyBinCount);
-        this._waves = [];
-
-        Object.defineProperties(this, {
-          width: {
-            value: spec.width,
-            enumerable: true
-          },
-          height: {
-            value: spec.height,
-            enumerable: true
-          },
-          state: {
-            get: function() {
-              return this._state;
-            },
-            enumerable: true
-          },
-          domElement: {
-            value: this._renderer.domElement,
-            enumerable: true
-          },
-          camera: {
-            value: this._camera,
-            enumerable: true
-          }
-        })
+        this._startTime = 0;
+        this._fps = 40;
       }
 
       WaveVisualizer.prototype.start = function() {
         if (this._state !== "start") {
           this._state = "start";
+
+          var w = this.width  / score.length;
+          var h = this.height / rates.length;
+
+          this.objects = _.flatten(rates.map(function(rate, i) {
+            return score.map(function(j, k) {
+              return {
+                x: w * j + w * 0.5,
+                y: h * i + h * 0.5,
+                r: Math.min(w, h) * 0.45,
+                index: k,
+                rate : rate,
+              };
+            });
+          }));
+          this._startTime = Date.now();
+          this._prevT     = this._startTime;
+
           requestAnimationFrame(this.render.bind(this));
         }
         return this;
@@ -203,14 +180,14 @@
         return this;
       };
 
-      WaveVisualizer.prototype.render = function(t) {
-        this._analyer.getByteTimeDomainData(this._timeData);
-        this._analyer.getByteFrequencyData(this._freqData);
+      WaveVisualizer.prototype.render = function() {
+        var t = Date.now();
+        var dt = (t - this._prevT) * 0.001;
 
-        this._render(t);
-
-        this._camera.lookAt(this._scene.position);
-        this._renderer.render(this._scene, this._camera);
+        if (1 / this._fps < dt) {
+          this._prevT = t;
+          this._render(t);
+        }
 
         if (this._state === "start") {
           requestAnimationFrame(this.render.bind(this));
@@ -218,76 +195,40 @@
       };
 
       WaveVisualizer.prototype._render = function(t) {
-        if (this._maxWaves <= this._waves.length) {
-          this._scene.remove(this._waves.pop());
-        }
+        t = (t - this._startTime) * 0.001;
 
-        var geometry = new THREE.Geometry();
-        geometry.vertices = getVertices(this._timeData);
+        this.context.save();
 
-        var material = new THREE.LineBasicMaterial({
-          color: new THREE.Color().setHSL(calcHue(this._freqData), 0.8, 0.6).getHex()
-        });
+        this.context.fillStyle = "rgba(16, 16, 16, 0.2)";
+        this.context.fillRect(0, 0, this.width, this.height);
 
-        var wave = new THREE.Line(geometry, material);
-        wave.rotation.set(Math.cos(t * 0.25), 0, Math.sin(t * 0.25));
+        this.objects.map(function(o) {
+          var i  = (t / (0.250 * o.rate)) % score.length;
+          var d1 = Math.abs(o.index - i);
+          var d2 = score.length - d1;
 
-        this._scene.add(wave);
-        this._waves.unshift(wave);
+          o.d = Math.min(d1, d2) / score.length;
 
-        var r = this.width / this._timeData.length;
-
-        this._waves.forEach(function(wave, index, list) {
-          var scaleR = (index + 1) * r;
-          var scaleY = (list.length - index) * 32;
-
-          wave.scale.set(scaleR, scaleY, scaleR);
+          return o;
+        }).sort(function(a, b) {
+          return a.d - b.d;
+        }).slice(0, 2).forEach(function(o) {
+          this.context.fillStyle = "rgba(189, 195, 199, " + (1 - o.d) + ")";
+          this.context.beginPath();
+          this.context.arc(o.x, o.y, o.r, 0, 2 * Math.PI, true);
+          this.context.fill();
         }, this);
+
+        this.context.restore();
       };
-
-      function calcHue(freqData) {
-        var maxIndex = 0;
-        for (var i = 0, imax = freqData.length * 0.5; i < imax; i += 4) {
-          if (112 <= freqData[i]) {
-            maxIndex = i * 2;
-          }
-        }
-        return maxIndex / freqData.length;
-      }
-
-      function getVertices(data) {
-        var result = new Array(data.length + 1);
-
-        for (var i = 0, imax = data.length; i <= imax; i++) {
-          var x = Math.cos(Math.PI * 2 * (i / imax));
-          var y = ((data[i % imax] / 256) - 0.5) * 2;
-          var z = Math.sin(Math.PI * 2 * (i / imax));
-          result[i] = new THREE.Vector3(x, y, z);
-        }
-
-        return result;
-      }
 
       return WaveVisualizer;
     })();
 
-    var canvas = $("#canvas").on("mousemove", function(e) {
-      var x = (e.pageX - canvas.$offset.left) / visualizer.width  - 0.5;
-      var y = (e.pageY - canvas.$offset.top ) / visualizer.height - 0.5;
-
-      visualizer.camera.position.set(
-        Math.sin(x * 2 * Math.PI) * -300,
-        y * 250,
-        Math.cos(x * 2 * Math.PI) * -300
-      );
+    var canvas = document.getElementById("canvas");
+    var visualizer = new WaveVisualizer(Neume.analyer, {
+      canvas: canvas, width: $(canvas).width(), height: 240
     });
-    canvas.$offset = canvas.offset();
-
-    var visualizer = new WaveVisualizer(Neume.analyer, { width: canvas.width(), height: 240 });
-
-    visualizer.camera.position.set(0, 0, -300);
-
-    canvas.append(visualizer.domElement);
 
     var vue = new Vue({
       el: "#app",
@@ -298,7 +239,7 @@
         toggle: function() {
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
-            start(this.$data.score);
+            start();
             visualizer.start();
           } else {
             stop();

@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>test - neume.js</title>
+  <title>snippets - neume.js</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.4.0/codemirror.min.css">
   <style>
     .CodeMirror {
       border: solid 1px #bdc3c7;
+      font-family: 'Courier', monospace;
     }
-    #start {
+    button {
       margin: 10px 0;
+      width: 110px;
     }
     #canvas {
       width: 100%;
@@ -28,14 +30,15 @@
 </head>
 <body>
   <div class="container">
-    <h1>neume.js test</h1>
+    <h1>neume.js snippets</h1>
     <canvas id="canvas"></canvas>
     <div id="app">
       <div class="row">
         <div class="col-md-8">
           <div class="row">
             <div class="col-md-2">
-              <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+              <button v-on="click: start" class="btn btn-default btn-sm">Start</button>
+              <button v-on="click: stop" class="btn btn-default btn-sm">Stop</button>
             </div>
             <div class="col-md-10">
               <div class="form-group">
@@ -51,8 +54,8 @@
           <textarea id="editor"></textarea>
         </div>
         <div class="col-md-4">
-          <label>TEST</label>
-          <ul>
+          <label>SNIPPETS</label>
+          <ul class="list-inline">
             <li v-repeat="examples">
               <a href="#gistid:{{ gistid }}:{{ encodeURIComponent(title) }}" v-on="click: setCode(source)">{{ title }}</a>
             </li>
@@ -105,19 +108,19 @@
         setCode: function(code) {
           editor.setValue(code);
         },
-        toggle: function() {
-          this.isPlaying = !this.isPlaying;
-          if (this.isPlaying) {
-            this.isPlaying = start();
-            if (this.isPlaying) {
-              visualizer.start()
-            }
-          } else {
-            if (synth && synth.stop) {
-              synth.stop()
-            }
-            visualizer.stop();
+        start: function() {
+          if (synth && synth.stop) {
+            synth.stop()
           }
+          if (start()) {
+            visualizer.start();
+          }
+        },
+        stop: function() {
+          if (synth && synth.stop) {
+            synth.stop()
+          }
+          visualizer.stop();
         },
         updateFPS: _.throttle(function(e) {
           var FPS_LIST = [
