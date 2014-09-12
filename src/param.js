@@ -13,23 +13,28 @@ function NeuParam(synth, name, value) {
   this.$outlet  = null;
 
   this._params = [];
-  this._value  = _.finite(value);
+  this._connected = [];
+  this._value = _.finite(value);
 }
 _.inherits(NeuParam, _.NeuUGen);
 
 NeuParam.prototype._connect = function(to) {
-  var param;
-
-  if (_.isAudioParam(to)) {
-    param = to;
-  } else {
-    this.$outlet = this.$context.createGain();
-    _.connect({ from: new _.NeuDC(this.$context, 1), to: this.$outlet });
-    param = this.$outlet.gain;
+  // FIXME: test!!!
+  if (this._connected.indexOf(to) === -1) {
+    this._connected.push(to);
+    if (_.isAudioParam(to)) {
+      this._params.push(to);
+      to.setValueAtTime(this._value, 0);
+    } else {
+      if (this.$outlet == null) {
+        this.$outlet = this.$context.createGain();
+        _.connect({ from: new _.NeuDC(this.$context, 1), to: this.$outlet });
+        this._params.push(this.$outlet.gain);
+        this.$outlet.gain.setValueAtTime(this._value, 0);
+      }
+      _.connect({ from: this.$outlet, to: to });
+    }
   }
-
-  this._params.push(param);
-  param.setValueAtTime(this._value, 0);
 };
 
 NeuParam.prototype.valueOf = function() {
