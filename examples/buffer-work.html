@@ -56,7 +56,7 @@
   });
 
   var Granular = new Neuma(function($, buffer, depth) {
-    return $("xline", { start: 0.2, end: _.random(50, 500) * 0.001, dur: 2.0 },
+    return $("xline", { start: 0.2, end: _.random(50, 750) * 0.001, dur: _.sample([ 0.25, 0.5, 1.0, 2.0, 4.0 ]) },
       $("buf", { buffer: glitch(buffer, depth), loop: true })
     ).on("end", function(e) {
       this.stop(e.playbackTime);
