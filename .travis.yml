@@ -3,7 +3,7 @@ node_js:
   - "0.10"
 env:
   global:
-    - secure: "yfYmZPyHiQpHCS+2DerItaVGdCVAK13lzZhL+eBqxadMnV4ZqhiSJTLbRc4sxZdETNREo++xxFD7pEb6J23redLV3KggVofHN05QmIQGalIc1wbFGr2sHFVO3TFJD3T/m68IIhtBHaHlyWNv8MCgW64d38iytPiagIVESt+jgac="
+    - secure: "HOdDp2doi4EqKAfbzkTZtRg+MWWJGA1t7xWQfvJyTG5A6Kvi0mhr6NAl0sUG8Q+1/Cbw0y2Mbag0Sq7xX8RZULfEAOU2DkoxN5vlNr7puKBjnDC3qJFrAxAKctooNTf6d77Tx3P9tlOR3yaFQRkc5cC2tHB8ttg6dxro5FeAs/A="
 before_install:
   - npm install -g gulp
   - npm install -g coveralls

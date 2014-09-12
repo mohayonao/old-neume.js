@@ -35,13 +35,13 @@ gulp.task("cover", function(cb) {
 
 gulp.task("build", function() {
   return gulp.src("index.js")
-    /* neuma.js */
+    /* neume.js */
     .pipe(browerify())
-    .pipe(rename("neuma.js"))
+    .pipe(rename("neume.js"))
     .pipe(gulp.dest("build"))
-    /* neuma.min.js */
+    /* neume.min.js */
     .pipe(uglify())
-    .pipe(rename("neuma.min.js"))
+    .pipe(rename("neume.min.js"))
     .pipe(gulp.dest("build"));
 });
 

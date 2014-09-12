@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -16,7 +16,7 @@ module.exports = function(neuma, _) {
    * +-----------------------------+
    *   |
    */
-  neuma.register("comp", function(ugen, spec, inputs) {
+  neume.register("comp", function(ugen, spec, inputs) {
     var comp = ugen.$context.createDynamicsCompressor();
 
     comp.threshold.value = 0;
@@ -34,7 +34,7 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: comp });
     });
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: comp
     });
   });

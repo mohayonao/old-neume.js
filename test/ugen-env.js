@@ -1,13 +1,13 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/env"));
+neume.use(require("../src/ugen/env"));
 
 describe("ugen/env", function() {
   describe("$(env)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("env");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -23,7 +23,7 @@ describe("ugen/env", function() {
 
   describe("$(env, init:0, table:[], release:3)", function() {
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("env", {
           init: 0,
           table: [
@@ -39,7 +39,7 @@ describe("ugen/env", function() {
         });
       })();
 
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -124,7 +124,7 @@ describe("ugen/env", function() {
       assert(ended === 0.8999999999999999);
     });
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("env", {
           init: 0,
           table: [
@@ -140,7 +140,7 @@ describe("ugen/env", function() {
         });
       })();
 
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -184,7 +184,7 @@ describe("ugen/env", function() {
 
   describe("$(env, $(env), $(env))", function() {
     it("returns a GainNode that is connected with $(env) x2", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("env", $("env"), $("env"));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -217,7 +217,7 @@ describe("ugen/env", function() {
 
   describe("$(adsr)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("adsr");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

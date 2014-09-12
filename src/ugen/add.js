@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -12,7 +12,7 @@ module.exports = function(neuma, _) {
    * +------------+
    *   |
    */
-  neuma.register("+", function(ugen, spec, inputs) {
+  neume.register("+", function(ugen, spec, inputs) {
     var parts = _.partition(inputs, _.isNumber);
     var nodes = _.second(parts);
     var offset = _.reduce(_.first(parts), function(a, b) {
@@ -20,7 +20,7 @@ module.exports = function(neuma, _) {
     }, 0);
 
     if (offset !== 0) {
-      nodes.push(new neuma.DC(ugen.$context, offset));
+      nodes.push(new neume.DC(ugen.$context, offset));
     }
 
     var outlet = ugen.$context.createGain();
@@ -31,7 +31,7 @@ module.exports = function(neuma, _) {
 
     outlet.$maddOptimizable = true;
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: outlet
     });
   });

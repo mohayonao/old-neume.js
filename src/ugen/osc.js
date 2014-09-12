@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -46,7 +46,7 @@ module.exports = function(neuma, _) {
     tri   : "triangle"
   };
 
-  neuma.register("osc", function(ugen, spec, inputs) {
+  neume.register("osc", function(ugen, spec, inputs) {
     var type = spec.type;
     var wave = null;
 
@@ -67,7 +67,7 @@ module.exports = function(neuma, _) {
     return make(osc);
   });
 
-  neuma.register("periodicwave", function(ugen, spec, inputs) {
+  neume.register("periodicwave", function(ugen, spec, inputs) {
     var type = "custom";
     var wave = spec.value;
 
@@ -87,7 +87,7 @@ module.exports = function(neuma, _) {
   });
 
   _.each(WAVE_TYPES, function(type, name) {
-    neuma.register(name, function(ugen, spec, inputs) {
+    neume.register(name, function(ugen, spec, inputs) {
       return make(setup(type, ugen, spec, inputs));
     });
   });
@@ -100,7 +100,7 @@ module.exports = function(neuma, _) {
   function make(osc) {
     var ctrl = osc.ctrl;
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: osc.outlet,
       start: function(t) {
         ctrl.start(t);

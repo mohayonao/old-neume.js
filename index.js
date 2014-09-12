@@ -1,11 +1,11 @@
 "use strict";
 
-var neuma = require("./src/neuma");
+var neume = require("./src/neume");
 
-neuma.use(require("./src/ugen/index"));
+neume.use(require("./src/ugen/index"));
 
 if (typeof window !== "undefined") {
-  window.Neuma = neuma.Neuma;
+  window.Neume = neume.Neume;
 }
 
-module.exports = neuma;
+module.exports = neume;

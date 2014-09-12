@@ -1,10 +1,10 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /* istanbul ignore next */
   var NOP = function() {};
 
-  neuma.register("function", function(ugen, spec, inputs) {
+  neume.register("function", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gain  = context.createGain();
@@ -14,7 +14,7 @@ module.exports = function(neuma, _) {
     var count = 0;
 
     if (_.isEmpty(inputs)) {
-      inputs = [ new neuma.DC(context, 1) ];
+      inputs = [ new neume.DC(context, 1) ];
     }
 
     inputs.forEach(function(node) {
@@ -38,7 +38,7 @@ module.exports = function(neuma, _) {
       prevValue = v1;
     }
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: gain,
       methods: {
         setValue: function(t, value) {

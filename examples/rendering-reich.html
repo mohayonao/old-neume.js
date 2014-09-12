@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>rendering-reich - neuma.js</title>
+  <title>rendering-reich - neume.js</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
@@ -27,11 +27,11 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
-  <script src="../build/neuma.js"></script>
+  <script src="../build/neume.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>neuma.js rendering-reich</h1>
+    <h1>neume.js rendering-reich</h1>
     <div id="canvas"></div>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -51,11 +51,11 @@
   var plucks = [ 69, 71, 72, 76 ].map(function(midi) {
     return 440 * Math.pow(2, (midi - 69) / 12);
   }).map(function(frequency) {
-    return new KarplusStrong(Neuma.sampleRate, frequency, 2.000);
+    return new KarplusStrong(Neume.sampleRate, frequency, 2.000);
   });
 
-  function minimal(Neuma) {
-    var Synth = new Neuma(function($, buffer) {
+  function minimal(Neume) {
+    var Synth = new Neume(function($, buffer) {
       var adsr = $("adsr", { d: 0.1, s: 0.4, r: 0.750, curve: 0.15, mul: 0.15 },
         $("+", { mul: 0.4 }, [ 0.999, 1.001 ].map(function(rate) {
           return $(buffer, { rate: rate });
@@ -71,19 +71,19 @@
     });
 
     var buffers = score.map(function(i) {
-      return Neuma.Buffer.from(plucks[i]);
+      return Neume.Buffer.from(plucks[i]);
     });
 
-    new Neuma.Interval(0.250, function(e) {
+    new Neume.Interval(0.250, function(e) {
       new Synth(buffers[e.count % buffers.length]).start(e.playbackTime);
     }).start();
   }
 
-  var Tape = new Neuma(function($, buffer, rate) {
+  var Tape = new Neume(function($, buffer, rate) {
     return $(buffer, { rate: rate, loop: true });
   });
 
-  var Comp = new Neuma(function($) {
+  var Comp = new Neume(function($) {
     return $("comp", $.in(0));
   });
 
@@ -94,7 +94,7 @@
 
     comp = new Comp().start();
 
-    Neuma.render(2.000, minimal).then(function(buffer) {
+    Neume.render(2.000, minimal).then(function(buffer) {
       new Tape(buffer, 300/300).connect(comp).start(0);
       new Tape(buffer, 299/300).connect(comp).start(0);
     }).catch(function(e) {
@@ -283,7 +283,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    var visualizer = new WaveVisualizer(Neuma.analyer, { width: canvas.width(), height: 240 });
+    var visualizer = new WaveVisualizer(Neume.analyer, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, 0, -300);
 

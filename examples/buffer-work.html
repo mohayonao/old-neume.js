@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>buffer-work - neuma.js</title>
+  <title>buffer-work - neume.js</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
@@ -27,11 +27,11 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
-  <script src="../build/neuma.js"></script>
+  <script src="../build/neume.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>neuma.js buffer-work</h1>
+    <h1>neume.js buffer-work</h1>
     <div id="canvas"></div>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -49,13 +49,13 @@
   <script id="example">
   var buffer = null;
 
-  Neuma.Buffer.load("./amen.wav").then(function(result) {
+  Neume.Buffer.load("./amen.wav").then(function(result) {
     buffer = result;
   }).catch(function(e) {
-    console.error("Neuma.Buffer.load: failed");
+    console.error("Neume.Buffer.load: failed");
   });
 
-  var Granular = new Neuma(function($, buffer, depth) {
+  var Granular = new Neume(function($, buffer, depth) {
     return $("xline", { start: 0.2, end: _.random(50, 750) * 0.001, dur: _.sample([ 0.25, 0.5, 1.0, 2.0, 4.0 ]) },
       $("buf", { buffer: glitch(buffer, depth), loop: true })
     ).on("end", function(e) {
@@ -112,7 +112,7 @@
 
   function start() {
     if (buffer) {
-      timer = new Neuma.Interval(0.500, function(e) {
+      timer = new Neume.Interval(0.500, function(e) {
         new Granular(buffer, 4).start(e.playbackTime);
       }).start();
     }
@@ -280,7 +280,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    var visualizer = new WaveVisualizer(Neuma.analyer, { width: canvas.width(), height: 240 });
+    var visualizer = new WaveVisualizer(Neume.analyer, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, 0, -300);
 

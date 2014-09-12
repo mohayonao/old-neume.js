@@ -1,4 +1,4 @@
-# neuma.js
+# neume.js
 
 > Web Audio Framework
 
@@ -10,4 +10,4 @@
 
 ## License
 
-Neuma.js is available under the The MIT License.
+Neume.js is available under the The MIT License.

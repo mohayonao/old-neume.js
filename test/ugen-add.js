@@ -1,9 +1,9 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/osc"));
-neuma.use(require("../src/ugen/add"));
+neume.use(require("../src/ugen/osc"));
+neume.use(require("../src/ugen/add"));
 
 describe("ugen/add", function() {
   describe("$(+ 0)", function() {
@@ -15,7 +15,7 @@ describe("ugen/add", function() {
      *   |
      */
     it("returns a GainNode", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("+", 0);
       })();
 
@@ -43,7 +43,7 @@ describe("ugen/add", function() {
      *   |
      */
     it("return a GainNode that is connected with a DC(6)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("+", 1, 2, 3);
       })();
 
@@ -73,7 +73,7 @@ describe("ugen/add", function() {
      *   |
      */
     it("returns a GainNode that is connected with $(sin) x 3", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("+", $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
       })();
 
@@ -141,7 +141,7 @@ describe("ugen/add", function() {
      *   |
      */
     it("returns a GainNode(0.5) that is connected with a $(sin)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("+", { mul: 0.5 }, $("sin"));
       })();
 

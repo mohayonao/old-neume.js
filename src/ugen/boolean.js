@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -21,7 +21,7 @@ module.exports = function(neuma, _) {
    * +-----------------------+
    *   |
    */
-  neuma.register("boolean", function(ugen, spec, inputs) {
+  neume.register("boolean", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gain  = context.createGain();
@@ -30,7 +30,7 @@ module.exports = function(neuma, _) {
     var curve = _.finite(spec.curve);
 
     if (_.isEmpty(inputs)) {
-      inputs = [ new neuma.DC(context, 1) ];
+      inputs = [ new neume.DC(context, 1) ];
     }
 
     inputs.forEach(function(node) {
@@ -48,7 +48,7 @@ module.exports = function(neuma, _) {
       data = nextData;
     }
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: gain,
       methods: {
         setValue: function(t, value) {

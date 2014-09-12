@@ -1,9 +1,9 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/osc"));
-neuma.use(require("../src/ugen/conv"));
+neume.use(require("../src/ugen/osc"));
+neume.use(require("../src/ugen/conv"));
 
 describe("ugen/conv", function() {
   describe("$(conv $(sin))", function() {
@@ -20,10 +20,10 @@ describe("ugen/conv", function() {
      *   |
      */
     it("return a ConvolverNode that is connected with $(sin)", function() {
-      var context = new neuma.Context(new window.AudioContext());
-      var buffer = neuma.Buffer.from(context, [ 1, 2, 3, 4 ]);
+      var context = new neume.Context(new window.AudioContext());
+      var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
 
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("conv", { buffer: buffer, normalize: false }, $("sin"));
       })();
 

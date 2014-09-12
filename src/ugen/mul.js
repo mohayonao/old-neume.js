@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /*
@@ -22,7 +22,7 @@ module.exports = function(neuma, _) {
    * +-----------------------------------+
    *   |
    */
-  neuma.register("*", function(ugen, spec, inputs) {
+  neume.register("*", function(ugen, spec, inputs) {
     var outlet = null;
 
     var context = ugen.$context;
@@ -33,10 +33,10 @@ module.exports = function(neuma, _) {
     }, 1);
 
     if (multiple === 0) {
-      outlet = new neuma.DC(context, 0);
+      outlet = new neume.DC(context, 0);
       nodes  = [];
     } else {
-      outlet = _.first(nodes) || new neuma.DC(context, 1);
+      outlet = _.first(nodes) || new neume.DC(context, 1);
       nodes  = _.rest(nodes);
     }
 
@@ -60,7 +60,7 @@ module.exports = function(neuma, _) {
       _.connect({ from: tmp, to: outlet });
     }
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: outlet
     });
 

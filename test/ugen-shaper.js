@@ -1,13 +1,13 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/shaper"));
+neume.use(require("../src/ugen/shaper"));
 
 describe("ugen/shaper", function() {
   describe("$(shaper)", function() {
     it("return a WaveShaperNode", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("shaper");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -20,7 +20,7 @@ describe("ugen/shaper", function() {
 
   describe("$(shaper curve:curve)", function() {
     it("return a WaveShaperNode", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("shaper", { curve: new Float32Array([ -1, +1 ]) });
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -31,13 +31,13 @@ describe("ugen/shaper", function() {
       assert.deepEqual(synth.outlet.curve, new Float32Array([ -1, +1 ]));
     });
     it("return a WaveShaperNode with curve number", function() {
-      var synth1 = neuma.Neuma(function($) {
+      var synth1 = neume.Neume(function($) {
         return $("shaper", { curve: 1 });
       })();
-      var synth2 = neuma.Neuma(function($) {
+      var synth2 = neume.Neume(function($) {
         return $("shaper", { curve: 1 });
       })();
-      var synth3 = neuma.Neuma(function($) {
+      var synth3 = neume.Neume(function($) {
         return $("shaper", { curve: 0.5 });
       })();
       assert.deepEqual(synth1.outlet.toJSON(), {
@@ -52,7 +52,7 @@ describe("ugen/shaper", function() {
 
   describe("$(shaper, $(shaper), $(shaper))", function() {
     it("return a WaveShaperNode", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("shaper", $("shaper"), $("shaper"));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -76,10 +76,10 @@ describe("ugen/shaper", function() {
 
   describe("$(clip)", function() {
     it("return a WaveShaperNode", function() {
-      var synth1 = neuma.Neuma(function($) {
+      var synth1 = neume.Neume(function($) {
         return $("clip");
       })();
-      var synth2 = neuma.Neuma(function($) {
+      var synth2 = neume.Neume(function($) {
         return $("clip");
       })();
       assert.deepEqual(synth1.outlet.toJSON(), {

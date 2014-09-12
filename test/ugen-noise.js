@@ -1,8 +1,8 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/noise"));
+neume.use(require("../src/ugen/noise"));
 
 describe("ugen/white", function() {
   var synth = null;
@@ -15,7 +15,7 @@ describe("ugen/white", function() {
      *   |
      */
     beforeEach(function() {
-      synth = neuma.Neuma(function($) {
+      synth = neume.Neume(function($) {
         return $("white");
       })();
     });
@@ -40,7 +40,7 @@ describe("ugen/white", function() {
       });
     });
     it("works", function() {
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
 
       audioContext.$reset();

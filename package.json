@@ -1,6 +1,6 @@
 {
-  "name": "neuma",
-  "version": "0.0.4",
+  "name": "neume",
+  "version": "0.0.5",
   "description": "Web Audio Framework",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "license": "MIT",

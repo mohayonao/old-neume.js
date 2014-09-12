@@ -1,7 +1,7 @@
-module.exports = function(neuma) {
+module.exports = function(neume) {
   "use strict";
 
-  neuma.register("media-stream", function(ugen, spec) {
+  neume.register("media-stream", function(ugen, spec) {
     return make(setup(ugen, spec.stream));
   });
 
@@ -13,7 +13,7 @@ module.exports = function(neuma) {
   }
 
   function make(outlet) {
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: outlet
     });
   }

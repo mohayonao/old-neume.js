@@ -1,15 +1,15 @@
-module.exports = function(neuma) {
+module.exports = function(neume) {
   "use strict";
 
-  neuma.register("media", function(ugen, spec) {
+  neume.register("media", function(ugen, spec) {
     return make(setup(ugen, spec.media));
   });
 
-  neuma.register("htmlaudioelement", function(ugen, spec) {
+  neume.register("htmlaudioelement", function(ugen, spec) {
     return make(setup(ugen, spec.value));
   });
 
-  neuma.register("htmlvideoelement", function(ugen, spec) {
+  neume.register("htmlvideoelement", function(ugen, spec) {
     return make(setup(ugen, spec.value));
   });
 
@@ -21,7 +21,7 @@ module.exports = function(neuma) {
   }
 
   function make(outlet) {
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: outlet
     });
   }

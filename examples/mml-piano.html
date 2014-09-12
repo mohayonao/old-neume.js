@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>mml-piano - neuma.js</title>
+  <title>mml-piano - neume.js</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
@@ -27,11 +27,11 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//mohayonao.github.io/MMLEmitter/build/MMLEmitter.min.js"></script>
-  <script src="../build/neuma.js"></script>
+  <script src="../build/neume.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>neuma.js mml-piano</h1>
+    <h1>neume.js mml-piano</h1>
     <div id="canvas"></div>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -63,10 +63,10 @@
       data[i] *= i < spec.room ? 1 : 0.05;
     }
 
-    return Neuma.Buffer.from(data);
+    return Neume.Buffer.from(data);
   }
 
-  var Piano = new Neuma(function($, freq, dur) {
+  var Piano = new Neume(function($, freq, dur) {
     return $("xline", { start: 0.75, end: 0.01, dur: dur * 5 },
       $("clip", $("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 10 },
         $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
@@ -78,7 +78,7 @@
     });
   });
 
-  var Reverb = new Neuma(function($, buffer) {
+  var Reverb = new Neume(function($, buffer) {
     return $("conv", { buffer: buffer }, $.in(0));
   });
 
@@ -90,7 +90,7 @@
     ).start();
 
     // MMLEmitter: https://github.com/mohayonao/MMLEmitter
-    mml = new MMLEmitter(Neuma.context, mmlData);
+    mml = new MMLEmitter(Neume.context, mmlData);
 
     mml.tracks.forEach(function(track) {
       track.on("note", function(e) {
@@ -230,7 +230,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    visualizer = new MMLVisualizer(Neuma.analyer, { width: canvas.width(), height: 240 });
+    visualizer = new MMLVisualizer(Neume.analyer, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, -100, -75);
 

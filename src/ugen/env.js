@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
 
@@ -31,7 +31,7 @@ module.exports = function(neuma, _) {
    * +---------------+
    *   |
    */
-  neuma.register("env", function(ugen, spec, inputs) {
+  neume.register("env", function(ugen, spec, inputs) {
     var init  = _.finite(_.defaults(spec.init, 0));
     var table = _.isArray(spec.table) ? spec.table : [];
     var releaseNode = _.num(_.defaults(spec.release, Infinity));
@@ -39,7 +39,7 @@ module.exports = function(neuma, _) {
     return make(init, table, releaseNode, ugen, spec, inputs);
   });
 
-  neuma.register("adsr", function(ugen, spec, inputs) {
+  neume.register("adsr", function(ugen, spec, inputs) {
     var a = _.finite(_.defaults(spec.a, 0.01));
     var d = _.finite(_.defaults(spec.d, 0.30));
     var s = _.finite(_.defaults(spec.s, 0.50));
@@ -69,7 +69,7 @@ module.exports = function(neuma, _) {
     var schedId = 0;
 
     if (_.isEmpty(inputs)) {
-      inputs = [ new neuma.DC(context, 1) ];
+      inputs = [ new neume.DC(context, 1) ];
     }
 
     inputs.forEach(function(node) {
@@ -102,7 +102,7 @@ module.exports = function(neuma, _) {
       });
     }
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: env,
       start : start,
       stop  : stop,

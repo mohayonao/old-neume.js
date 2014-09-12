@@ -6,14 +6,14 @@ window.OfflineAudioContext = window.OfflineAudioContext || /* istanbul ignore ne
 
 var _ = require("./utils");
 
-var neuma = function(context) {
-  function Neuma(spec) {
-    return neuma.build(context, spec);
+var neume = function(context) {
+  function Neume(spec) {
+    return neume.build(context, spec);
   }
 
   var audioContext = _.findAudioContext(context);
 
-  Object.defineProperties(Neuma, {
+  Object.defineProperties(Neume, {
     context: {
       value: audioContext,
       enumerable: true
@@ -36,25 +36,25 @@ var neuma = function(context) {
       value: Object.defineProperties({}, {
         create: {
           value: function(channels, length, sampleRate) {
-            return neuma.Buffer.create(context, channels, length, sampleRate);
+            return neume.Buffer.create(context, channels, length, sampleRate);
           },
           enumerable: true
         },
         fill: {
           value: function(length, func) {
-            return neuma.Buffer.fill(context, length, func);
+            return neume.Buffer.fill(context, length, func);
           },
           enumerable: true
         },
         from: {
           value: function(data) {
-            return neuma.Buffer.from(context, data);
+            return neume.Buffer.from(context, data);
           },
           enumerable: true
         },
         load: {
           value: function(url) {
-            return neuma.Buffer.load(context, url);
+            return neume.Buffer.load(context, url);
           },
           enumerable: true
         }
@@ -63,71 +63,71 @@ var neuma = function(context) {
     },
     Interval: {
       value: function(interval, callback) {
-        return new neuma.Interval(context, interval, callback);
+        return new neume.Interval(context, interval, callback);
       },
       enumerable: true
     },
   });
 
-  return Neuma;
+  return Neume;
 };
 
-neuma._ = _;
-neuma.Context  = require("./context");
-neuma.SynthDef = require("./synthdef");
-neuma.Synth    = require("./synth");
-neuma.UGen     = require("./ugen");
-neuma.Param    = require("./param");
-neuma.Unit     = require("./unit");
-neuma.DC       = require("./dc");
-neuma.Buffer   = require("./buffer");
-neuma.Interval = require("./interval");
+neume._ = _;
+neume.Context  = require("./context");
+neume.SynthDef = require("./synthdef");
+neume.Synth    = require("./synth");
+neume.UGen     = require("./ugen");
+neume.Param    = require("./param");
+neume.Unit     = require("./unit");
+neume.DC       = require("./dc");
+neume.Buffer   = require("./buffer");
+neume.Interval = require("./interval");
 
-neuma.build = function(context, spec) {
-  return new neuma.SynthDef(context, spec);
+neume.build = function(context, spec) {
+  return new neume.SynthDef(context, spec);
 };
 
-neuma.register = function(name, func) {
-  neuma.UGen.register(name, func);
-  return neuma;
+neume.register = function(name, func) {
+  neume.UGen.register(name, func);
+  return neume;
 };
 
-neuma.use = function(fn) {
+neume.use = function(fn) {
   /* istanbul ignore else */
-  if (neuma.use.used.indexOf(fn) === -1) {
-    fn(neuma, _);
-    neuma.use.used.push(fn);
+  if (neume.use.used.indexOf(fn) === -1) {
+    fn(neume, _);
+    neume.use.used.push(fn);
   }
-  return neuma;
+  return neume;
 };
-neuma.use.used = [];
+neume.use.used = [];
 
-neuma.render = function(context, duration, func) {
+neume.render = function(context, duration, func) {
   var sampleRate = context.sampleRate;
   var length     = _.int(sampleRate * duration);
 
   return new Promise(function(resolve) {
     var audioContext = new window.OfflineAudioContext(2, length, sampleRate);
     audioContext.oncomplete = function(e) {
-      resolve(new neuma.Buffer(context, e.renderedBuffer));
+      resolve(new neume.Buffer(context, e.renderedBuffer));
     };
-    func(neuma(new neuma.Context(audioContext, duration)));
+    func(neume(new neume.Context(audioContext, duration)));
     audioContext.startRendering();
   });
 };
 
-var context = new neuma.Context(new window.AudioContext());
+var context = new neume.Context(new window.AudioContext());
 
-neuma.Neuma = Object.defineProperties(
-  neuma(context), {
+neume.Neume = Object.defineProperties(
+  neume(context), {
     render: {
       value: function(duration, func) {
-        return neuma.render(context, duration, func);
+        return neume.render(context, duration, func);
       },
       enumerable: true
     },
     use: {
-      value: neuma.use,
+      value: neume.use,
       enumerable: true
     },
     master: {
@@ -141,4 +141,4 @@ neuma.Neuma = Object.defineProperties(
   }
 );
 
-module.exports = neuma;
+module.exports = neume;

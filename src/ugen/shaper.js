@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   var WS_CURVE_SIZE = 4096;
@@ -22,7 +22,7 @@ module.exports = function(neuma, _) {
    * +--------------------------+
    *   |
    */
-  neuma.register("shaper", function(ugen, spec, inputs) {
+  neume.register("shaper", function(ugen, spec, inputs) {
     var curve = null;
     if (_.isNumber(spec.curve)) {
       curve = createCurve(spec.curve);
@@ -32,7 +32,7 @@ module.exports = function(neuma, _) {
     return make(setup(curve, ugen, spec, inputs));
   });
 
-  neuma.register("clip", function(ugen, spec, inputs) {
+  neume.register("clip", function(ugen, spec, inputs) {
     var curve = createCurve(0);
     return make(setup(curve, ugen, spec, inputs));
   });
@@ -53,7 +53,7 @@ module.exports = function(neuma, _) {
   }
 
   function make(outlet) {
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: outlet
     });
   }

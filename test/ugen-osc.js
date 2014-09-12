@@ -1,8 +1,8 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/osc"));
+neume.use(require("../src/ugen/osc"));
 
 describe("ugen/osc", function() {
   describe("$(sin)", function() {
@@ -17,7 +17,7 @@ describe("ugen/osc", function() {
      *   |
      */
     beforeEach(function() {
-      synth = neuma.Neuma(function($) {
+      synth = neume.Neume(function($) {
         return $("sin");
       })();
     });
@@ -37,7 +37,7 @@ describe("ugen/osc", function() {
       });
     });
     it("works", function() {
-      var audioContext = neuma.Neuma.context;
+      var audioContext = neume.Neume.context;
       var outlet = synth.outlet;
 
       audioContext.$reset();
@@ -78,7 +78,7 @@ describe("ugen/osc", function() {
      *  |
      */
     it("returns a GainNode that is connected with a OscillatorNode", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("sin", $("saw"));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -122,40 +122,40 @@ describe("ugen/osc", function() {
 
   describe("type", function() {
     it("(default) -> sine", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("osc");
       })();
       assert(synth.outlet.type === "sine");
     });
     it("sin -> sine", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("osc", { type: "sin" });
       })();
       assert(synth.outlet.type === "sine");
     });
     it("square -> square", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("osc", { type: "square" });
       })();
       assert(synth.outlet.type === "square");
     });
     it("saw -> sawtooth", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("osc", { type: "saw" });
       })();
       assert(synth.outlet.type === "sawtooth");
     });
     it("tri -> triangle", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("osc", { type: "tri" });
       })();
       assert(synth.outlet.type === "triangle");
     });
     it("PeriodicWave -> custom", function() {
-      var wave = neuma.Neuma.context.createPeriodicWave(
+      var wave = neume.Neume.context.createPeriodicWave(
         new Float32Array(128), new Float32Array(128)
       );
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("osc", { type: wave });
       })();
       assert(synth.outlet.type === "custom");
@@ -164,40 +164,40 @@ describe("ugen/osc", function() {
 
   describe("aliases", function() {
     it("sin -> sine", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("sin");
       })();
       assert(synth.outlet.type === "sine");
     });
     it("square -> square", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("square");
       })();
       assert(synth.outlet.type === "square");
     });
     it("saw -> sawtooth", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("saw");
       })();
       assert(synth.outlet.type === "sawtooth");
     });
     it("tri -> triangle", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("tri");
       })();
       assert(synth.outlet.type === "triangle");
     });
     it("PeriodicWave -> custom", function() {
-      var wave = neuma.Neuma.context.createPeriodicWave(
+      var wave = neume.Neume.context.createPeriodicWave(
         new Float32Array(128), new Float32Array(128)
       );
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $(wave);
       })();
       assert(synth.outlet.type === "custom");
     });
     it("invalid periodicwave -> sine", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("periodicwave");
       })();
       assert(synth.outlet.type === "sine");
