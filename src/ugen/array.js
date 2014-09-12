@@ -2,10 +2,22 @@ module.exports = function(neuma, _) {
   "use strict";
 
   /**
+   * $([], {}
+   *   mode : enum[ clip, wrap, fold ] = wrap
+   *   lag  : number = 0
+   *   curve: number = 0
+   * } ... inputs)
+   *
+   * methods:
+   *   setValue(t, value)
+   *   at(t, index)
+   *   next(t)
+   *   prev(t)
+   *
    * +--------+      +-------+
    * | inputs |  or  | DC(1) |
    * +--------+      +-------+
-   *   |
+   *   ||||||
    * +----------------------+
    * | GainNode             |
    * | - gain: array[index] |
@@ -15,26 +27,19 @@ module.exports = function(neuma, _) {
   neuma.register("array", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var gain = ugen.$context.createGain();
-
+    var gain  = context.createGain();
     var index = 0;
-    var data = spec.value.map(_.finite);
+    var data  = spec.value;
+    var mode  = {
+      clip: _.clipAt,
+      fold: _.foldAt,
+    }[spec.mode] || /* istanbul ignore next*/ _.wrapAt;
+    var lag   = _.finite(spec.lag);
+    var curve = _.finite(spec.lag);
 
-    if (data.length === 0)  {
+    if (!_.isArray(data) || data.length === 0)  {
       data = [ 0 ];
     }
-
-    var mode = {
-      wrap: _.wrapAt,
-      fold: _.foldAt,
-    }[spec.mode] || /* istanbul ignore next*/ _.clipAt;
-
-    var curve = {
-      lin: "linearRampToValueAtTime",
-      exp: "exponentialRampToValueAtTime"
-    }[spec.curve] || /* istanbul ignore next*/ "setValueAtTime";
-
-    var lag = _.finite(spec.lag);
 
     if (_.isEmpty(inputs)) {
       inputs = [ new neuma.DC(context, 1) ];
@@ -44,36 +49,57 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: gain });
     });
 
-    gain.gain.setValueAtTime(data[0], 0);
+    var prevValue = _.finite(data[0]);
 
-    function setValueAtTime(t, index) {
-      var t0 = ugen.$context.currentTime;
-      var t1 = _.finite(_.defaults(t, t0));
-      var t2 = t1 + lag;
-      var value = mode(data, index);
-      ugen.$context.sched(t1, function() {
-        gain.gain.cancelScheduledValues(0);
-        gain.gain.setValueAtTime(gain.gain.value, t1);
-        gain.gain[curve](value, t2);
-      });
+    gain.gain.setValueAtTime(prevValue, 0);
+
+    function update(t0, nextIndex) {
+      var v0 = prevValue;
+      var v1 = _.finite(mode(data, nextIndex));
+
+      if (lag <= 0 || curve < 0 || 1 <= curve) {
+        gain.gain.setValueAtTime(v1, t0);
+      } else {
+        gain.gain.setTargetAtTime(v1, t0, timeConstant(lag, v0, v1, curve));
+      }
+
+      prevValue = v1;
+      index = nextIndex;
     }
 
     return new neuma.Unit({
       outlet: gain,
       methods: {
+        setValue: function(t, value) {
+          if (_.isArray(value)) {
+            context.sched(t, function() {
+              data = value;
+            });
+          }
+        },
         at: function(t, index) {
-          index = _.int(index);
-          setValueAtTime(t, index);
+          context.sched(t, function() {
+            update(t, _.int(index));
+          });
         },
         next: function(t) {
-          index += 1;
-          setValueAtTime(t, index);
+          context.sched(t, function() {
+            update(t, index + 1);
+          });
         },
         prev: function(t) {
-          index -= 1;
-          setValueAtTime(t, index);
+          context.sched(t, function() {
+            update(t, index - 1);
+          });
         }
       }
     });
   });
+
+  function timeConstant(duration, startValue, endValue, curve) {
+    var targetValue = startValue + (endValue - startValue) * (1 - curve);
+
+    return -duration / Math.log((targetValue - endValue) / (startValue - endValue));
+  }
+
 };

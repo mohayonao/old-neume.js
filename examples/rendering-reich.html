@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>buffer-work - neuma.js</title>
+  <title>rendering-reich - neuma.js</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
@@ -31,7 +31,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>neuma.js buffer-work</h1>
+    <h1>neuma.js rendering-reich</h1>
     <div id="canvas"></div>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -47,81 +47,84 @@
   </div>
 
   <script id="example">
-  var buffer = null;
-
-  Neuma.Buffer.load("./amen.wav").then(function(result) {
-    buffer = result;
-  }).catch(function(e) {
-    console.error("Neuma.Buffer.load: failed");
+  var score  = [ 0, 0, 1, 1, 2, 2, 3, 3 ];
+  var plucks = [ 69, 71, 72, 76 ].map(function(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }).map(function(frequency) {
+    return new KarplusStrong(Neuma.sampleRate, frequency, 2.000);
   });
 
-  var Granular = new Neuma(function($, buffer, depth) {
-    return $("xline", { start: 0.2, end: _.random(50, 750) * 0.001, dur: _.sample([ 0.25, 0.5, 1.0, 2.0, 4.0 ]) },
-      $("buf", { buffer: glitch(buffer, depth), loop: true })
-    ).on("end", function(e) {
-      this.stop(e.playbackTime);
+  function minimal(Neuma) {
+    var Synth = new Neuma(function($, buffer) {
+      var adsr = $("adsr", { d: 0.1, s: 0.4, r: 0.750, curve: 0.15, mul: 0.15 },
+        $("+", { mul: 0.4 }, [ 0.999, 1.001 ].map(function(rate) {
+          return $(buffer, { rate: rate });
+        })),
+        $("line", { dur: 0.025, mul: 0.4 }, $("white"))
+      ).on("end", function(e) {
+        this.stop(e.playbackTime);
+      });
+
+      $.timeout(0.125, adsr.release);
+
+      return $("lpf", { freq: 3200, Q: 5 }, adsr);
     });
-  });
 
-  function glitch(buffer, n) {
-    if (n === 0) {
-      return buffer;
-    }
-    return glitch(_.sample(glitch.fn)(buffer), n - 1);
+    var buffers = score.map(function(i) {
+      return Neuma.Buffer.from(plucks[i]);
+    });
+
+    new Neuma.Interval(0.250, function(e) {
+      new Synth(buffers[e.count % buffers.length]).start(e.playbackTime);
+    }).start();
   }
-  glitch.fn = [];
 
-  glitch.fn.push(function beep(buffer) {
-    if (Math.random() < 0.6 || buffer.length < 128) {
-      return buffer;
-    }
-    var a = _.random(0, buffer.length);
-    var b = a + _.random(128, 1024);
-    return buffer.slice(a, b);
+  var Tape = new Neuma(function($, buffer, rate) {
+    return $(buffer, { rate: rate, loop: true });
   });
 
-  glitch.fn.push(function reverse(buffer) {
-    if (buffer.length < 2048) {
-      return buffer;
-    }
-    return buffer.reverse();
+  var Comp = new Neuma(function($) {
+    return $("comp", $.in(0));
   });
 
-  glitch.fn.push(function slice(buffer) {
-    if (buffer.length < 1024) {
-      return buffer;
-    }
-    var a = _.random(0, buffer.length);
-    var b = _.random(a, buffer.length);
-    return buffer.slice(a, b);
-  });
-
-  glitch.fn.push(function shuffle(buffer) {
-    if (buffer.length < 1024) {
-      return buffer;
-    }
-    var list = _.shuffle(buffer.split(16));
-    return buffer.concat.apply(_.first(list), _.rest(list));
-  });
-
-  glitch.fn.push(function nop(buffer) {
-    return buffer;
-  });
-
-  var timer = null;
+  var comp = null;
 
   function start() {
-    if (buffer) {
-      timer = new Neuma.Interval(0.500, function(e) {
-        new Granular(buffer, 4).start(e.playbackTime);
-      }).start();
-    }
+    score = _.shuffle(score);
+
+    comp = new Comp().start();
+
+    Neuma.render(2.000, minimal).then(function(buffer) {
+      new Tape(buffer, 300/300).connect(comp).start(0);
+      new Tape(buffer, 299/300).connect(comp).start(0);
+    }).catch(function(e) {
+      console.error(e);
+    });
   }
 
   function stop() {
-    if (timer) {
-      timer.stop();
+    if (comp) {
+      comp.stop();
     }
+  }
+
+  // http://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis
+  function KarplusStrong(sampleRate, frequency, duration) {
+    var buffer = new Float32Array(sampleRate * duration);
+
+    var length = Math.round(sampleRate / frequency);
+    var table  = new Float32Array(length);
+    for (var i = 0; i < length; ++i) {
+      table[i] = Math.random() * 2 - 1;
+    }
+
+    var next, prev = 0;
+    for (var j = 0, k = 0, jmax = buffer.length; j < jmax; j++, k++, prev = next) {
+      buffer[j] = next = table[k % length];
+      table[k % length] = (prev + next) * 0.5;
+    }
+
+    return buffer;
   }
   </script>
 

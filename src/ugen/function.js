@@ -1,32 +1,17 @@
 module.exports = function(neuma, _) {
   "use strict";
 
-  /**
-   * $(number, {
-   *   lag  : number = 0
-   *   curve: number = 0
-   * } ... inputs)
-   *
-   * methods:
-   *   setValue(t, value)
-   *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +---------------+
-   * | GainNode      |
-   * | - gain: value |
-   * +---------------+
-   *   |
-   */
-  neuma.register("number", function(ugen, spec, inputs) {
+  /* istanbul ignore next */
+  var NOP = function() {};
+
+  neuma.register("function", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gain  = context.createGain();
-    var data  = _.finite(spec.value);
+    var data  = _.isFunction(spec.value) ? spec.value : /* istanbul ignore next */ NOP;
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
+    var count = 0;
 
     if (_.isEmpty(inputs)) {
       inputs = [ new neuma.DC(context, 1) ];
@@ -36,26 +21,37 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: gain });
     });
 
-    gain.gain.setValueAtTime(data, 0);
+    var prevValue = _.finite(data(0, count++));
 
-    function update(t0, v0, v1, nextData) {
+    gain.gain.setValueAtTime(prevValue, 0);
+
+    function update(t0) {
+      var v0 = prevValue;
+      var v1 = _.finite(data(t0, count++));
+
       if (lag <= 0 || curve < 0 || 1 <= curve) {
         gain.gain.setValueAtTime(v1, t0);
       } else {
         gain.gain.setTargetAtTime(v1, t0, timeConstant(lag, v0, v1, curve));
       }
-      data = nextData;
+
+      prevValue = v1;
     }
 
     return new neuma.Unit({
       outlet: gain,
       methods: {
         setValue: function(t, value) {
-          if (_.isFinite(value)) {
+          if (_.isFunction(value)) {
             context.sched(t, function() {
-              update(t, data, value, value);
+              data = value;
             });
           }
+        },
+        execute: function(t) {
+          context.sched(t, function() {
+            update(t);
+          });
         }
       }
     });

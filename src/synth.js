@@ -4,6 +4,7 @@ var _ = require("./utils");
 
 _.NeuUGen    = require("./ugen");
 _.NeuParam   = require("./param");
+_.NeuIn      = require("./in");
 _.NeuSynthDB = require("./synthdb");
 
 var EMPTY_DB = new _.NeuSynthDB();
@@ -35,6 +36,8 @@ function NeuSynth(context, func, args) {
   var params  = {};
   var inputs  = [];
   var outputs = [];
+  var methods = {};
+  var timers  = [];
 
   $.param = function(name, defaultValue) {
     if (_.has(params, name)) {
@@ -65,7 +68,7 @@ function NeuSynth(context, func, args) {
     index = Math.max(0, _.int(index));
 
     if (!inputs[index]) {
-      inputs[index] = context.createGain();
+      inputs[index] = new _.NeuIn(_this);
     }
 
     return inputs[index];
@@ -81,6 +84,69 @@ function NeuSynth(context, func, args) {
     return null;
   };
 
+  $.method = function(methodName, func) {
+    if (/^[a-z]\w*$/.test(methodName) && _.isFunction(func)) {
+      methods[methodName] = func;
+    }
+  };
+
+  $.timeout = function(timeout) {
+    timeout = Math.max(0, _.finite(timeout));
+
+    var schedId   = 0;
+    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
+
+    function sched(t) {
+      schedId = context.sched(t, function(t) {
+        schedId = 0;
+        callbacks.forEach(function(func) {
+          func.call(_this, t, 1);
+        });
+      });
+    }
+
+    timers.push({
+      start: function(t) {
+        sched(t + timeout);
+      },
+      stop: function() {
+        context.unsched(schedId);
+        schedId = 0;
+      }
+    });
+  };
+
+  $.interval = function(interval) {
+    interval = Math.max(1 / context.sampleRate, _.finite(interval));
+
+    var schedId   = 0;
+    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
+    var startTime = 0;
+    var count     = 0;
+
+    function sched(t) {
+      schedId = context.sched(t, function(t) {
+        schedId = 0;
+        count  += 1;
+        callbacks.forEach(function(func) {
+          func.call(_this, t, count);
+        });
+        sched(startTime + interval * (count + 1));
+      });
+    }
+
+    timers.push({
+      start: function(t) {
+        startTime = t;
+        sched(t + interval);
+      },
+      stop: function() {
+        context.unsched(schedId);
+        schedId = 0;
+      }
+    });
+  };
+
   var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
 
   if (outputs[0] == null && _.isAudioNode(result)) {
@@ -93,18 +159,8 @@ function NeuSynth(context, func, args) {
   this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "init";
-
-  this._db.all().forEach(function(ugen) {
-    _.keys(ugen.$unit.$methods).forEach(function(method) {
-      if (!this.hasOwnProperty(method)) {
-        Object.defineProperty(this, method, {
-          value: function() {
-            return this.apply(method, _.toArray(arguments));
-          }
-        });
-      }
-    }, this);
-  }, this);
+  this._timers = timers;
+  this._methodNames = [];
 
   Object.defineProperties(this, {
     context: {
@@ -122,7 +178,35 @@ function NeuSynth(context, func, args) {
       enumerable: true
     },
   });
+
+  _.each(methods, function(method, methodName) {
+    this._methodNames.push(methodName);
+    Object.defineProperty(this, methodName, {
+      value: function() {
+        method.apply(this, _.toArray(arguments));
+      }
+    });
+  }, this);
+
+  this._db.all().forEach(function(ugen) {
+    _.keys(ugen.$unit.$methods).forEach(function(methodName) {
+      if (!this.hasOwnProperty(methodName)) {
+        this._methodNames.push(methodName);
+        Object.defineProperty(this, methodName, {
+          value: function() {
+            return this.apply(methodName, _.toArray(arguments));
+          }
+        });
+      }
+    }, this);
+  }, this);
+
+  this._methodNames = this._methodNames.sort();
 }
+
+NeuSynth.prototype.getMethods = function() {
+  return this._methodNames.slice();
+};
 
 NeuSynth.prototype.start = function(t) {
   t = _.defaults(t, this.$context.currentTime);
@@ -144,8 +228,12 @@ NeuSynth.prototype.start = function(t) {
         }, this);
       }
 
-      _.each(this._db.all(), function(ugen) {
+      this._db.all().forEach(function(ugen) {
         ugen.$unit.start(t);
+      });
+
+      this._timers.forEach(function(timer) {
+        timer.start(t);
       });
     }, this);
 
@@ -170,8 +258,12 @@ NeuSynth.prototype.stop = function(t) {
         });
       }, this);
 
-      _.each(this._db.all(), function(ugen) {
+      this._db.all().forEach(function(ugen) {
         ugen.$unit.stop(t);
+      });
+
+      this._timers.forEach(function(timer) {
+        timer.stop(t);
       });
     }, this);
   }
@@ -201,7 +293,7 @@ NeuSynth.prototype.connect = function(destination, output, input) {
     if (!this._routing[output]) {
       this._routing[output] = [];
     }
-    this._routing[output].push(destination.$inputs[input]);
+    this._routing[output].push(_.findAudioNode(destination.$inputs[input]));
   }
 
   return this;
@@ -221,7 +313,7 @@ NeuSynth.prototype.listeners = function(event) {
   var listeners = [];
 
   iterateOverTargetss(this._db, event, function(ugen, event) {
-    _.each(ugen.listeners(event), function(listener) {
+    ugen.listeners(event).forEach(function(listener) {
       if (listeners.indexOf(listener) === -1) {
         listeners.push(listener);
       }
@@ -257,14 +349,14 @@ function iterateOverTargetss(db, event, callback) {
 
   if (parsed) {
     var targets = parsed.selector ? db.find(parsed.selector) : db.all();
-    _.each(targets, function(ugen) {
+    targets.forEach(function(ugen) {
       callback(ugen, parsed.name);
     });
   }
 }
 
 function parseEvent(event) {
-  var matched = /^(?:(.*?):([a-z]+)|([a-z]+))$/.exec(event);
+  var matched = /^(?:(.*?):([a-z]\w+)|([a-z]\w+))$/.exec(event);
 
   if (!matched) {
     return null;

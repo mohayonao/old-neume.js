@@ -5,10 +5,11 @@ var _ = require("./utils");
 var INIT  = 0;
 var START = 1;
 var BUFFER_SIZE = 1024;
+var MAX_RENDERING_SEC = 180;
 
 var schedId = 1;
 
-function NeuContext(context) {
+function NeuContext(context, duration) {
   this.$context = _.findAudioContext(context);
 
   Object.defineProperties(this, {
@@ -32,7 +33,7 @@ function NeuContext(context) {
     }
   });
 
-  this._currentTimeIncr = BUFFER_SIZE / context.sampleRate;
+  this._duration = duration;
   this.reset();
 }
 
@@ -97,19 +98,35 @@ NeuContext.prototype.reset = function() {
 NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
-
-    this._scriptProcessor = this.$context.createScriptProcessor(BUFFER_SIZE, 1, 1);
-    this._scriptProcessor.onaudioprocess = onaudioprocess.bind(this);
-    this._scriptProcessor.connect(this.$context.destination);
-
-    // This is needed for iOS Safari
-    this._bufSrc = this.$context.createBufferSource();
-    this._bufSrc.start(0);
-
-    _.connect({ from: this._bufSrc, to: this._scriptProcessor });
+    if (this.$context instanceof window.OfflineAudioContext) {
+      startRendering.call(this);
+    } else {
+      startAudioTimer.call(this);
+    }
   }
   return this;
 };
+
+function startRendering() {
+  this._currentTimeIncr = Math.max(0, Math.min(_.finite(this._duration), MAX_RENDERING_SEC));
+  onaudioprocess.call(this, { playbackTime: 0 });
+}
+
+function startAudioTimer() {
+  var context = this.$context;
+  var scriptProcessor = context.createScriptProcessor(BUFFER_SIZE, 1, 1);
+  var bufferSource    = context.createBufferSource();
+
+  this._currentTimeIncr = BUFFER_SIZE / context.sampleRate;
+  this._scriptProcessor = scriptProcessor;
+  scriptProcessor.onaudioprocess = onaudioprocess.bind(this);
+
+  // this is needed for iOS Safari
+  bufferSource.start(0);
+  _.connect({ from: bufferSource, to: scriptProcessor });
+
+  _.connect({ from: scriptProcessor, to: context.destination });
+}
 
 NeuContext.prototype.stop = function() {
   return this;
@@ -167,7 +184,7 @@ NeuContext.prototype.nextTick = function(callback, ctx) {
 
 function onaudioprocess(e) {
   // Safari 7.0.6 does not support e.playbackTime
-  var currentTime     = e.playbackTime || /* istanbul ignore next */ this._scriptProcessor.context.currentTime;
+  var currentTime     = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;
   var nextCurrentTime = currentTime + this._currentTimeIncr;
   var events = this._events;
 

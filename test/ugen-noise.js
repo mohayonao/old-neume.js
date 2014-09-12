@@ -2,7 +2,7 @@
 
 var neuma = require("../src/neuma");
 
-neuma.use(require("../src/ugen/white"));
+neuma.use(require("../src/ugen/noise"));
 
 describe("ugen/white", function() {
   var synth = null;

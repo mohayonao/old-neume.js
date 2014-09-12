@@ -41,6 +41,26 @@ NeuBuffer.create = function(context, channels, length, sampleRate) {
   return new NeuBuffer(context, context.createBuffer(channels, length, sampleRate));
 };
 
+NeuBuffer.fill = function(context, length, func) {
+  length = _.int(_.defaults(length, 0));
+
+  if (!_.isFunction(func)) {
+    var value = _.finite(func);
+    func = function() {
+      return value;
+    };
+  }
+
+  var buffer = context.createBuffer(1, length, context.sampleRate);
+  var chData = buffer.getChannelData(0);
+
+  for (var i = 0, imax = length; i < imax; i++) {
+    chData[i] = func(i, imax);
+  }
+
+  return new NeuBuffer(context, buffer);
+};
+
 NeuBuffer.from = function(context, data) {
   var buffer = context.createBuffer(1, data.length, context.sampleRate);
   var chData = buffer.getChannelData(0);
@@ -92,6 +112,12 @@ function decodeAudioData(context, audioData) {
     });
   });
 }
+
+NeuBuffer.prototype.getChannelData = function(ch) {
+  ch = Math.max(0, Math.min(_.int(ch), this.numberOfChannels - 1));
+
+  return this.$buffer.getChannelData(ch);
+};
 
 NeuBuffer.prototype.concat = function() {
   var args = _.toArray(arguments).filter(function(elem) {
@@ -209,11 +235,16 @@ NeuBuffer.prototype.resample = function(size, interpolation) {
   return new NeuBuffer(this.$context, buffer);
 };
 
-NeuBuffer.prototype.toPeriodicWave = function() {
-  var buffer = this.$buffer.getChannelData(0);
-  var fft = FFT.forward(buffer);
+NeuBuffer.prototype.toPeriodicWave = function(ch) {
+  ch = Math.max(0, Math.min(_.int(ch), this.numberOfChannels - 1));
 
-  // TODO: buffer size <= 4096 (need resample)
+  var buffer = this.$buffer.getChannelData(ch);
+
+  if (4096 < buffer.length) {
+    buffer = buffer.subarray(0, 4096);
+  }
+
+  var fft = FFT.forward(buffer);
 
   return this.$context.createPeriodicWave(fft.real, fft.imag);
 };
@@ -221,7 +252,8 @@ NeuBuffer.prototype.toPeriodicWave = function() {
 function normalize(data) {
   var maxamp = peak(data);
 
-  if (maxamp !== 0 && maxamp !== 1) {
+  /* istanbul ignore else */
+  if (maxamp !== 0) {
     var ampfac = 1 / maxamp;
     for (var i = 0, imax = data.length; i < imax; ++i) {
       data[i] *= ampfac;

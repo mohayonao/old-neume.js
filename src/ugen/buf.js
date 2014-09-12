@@ -2,6 +2,23 @@ module.exports = function(neuma, _) {
   "use strict";
 
   /**
+   * $("buf", {
+   *   buffer      : AudioBuffer|NeuBuffer = null,
+   *   playbackRate: number|UGen = 1
+   *   loop        : boolean = false
+   *   loopStart   : number = 0
+   *   loopEnd     : number = 0
+   * })
+   *
+   * aliases:
+   *   $(AudioBuffer), $(NeuBuffer)
+   *
+   * start:
+   *   start BufferSourceNode
+   *
+   * stop:
+   *   stop BufferSourceNode
+   *
    * +---------------------------+
    * | BufferSourceNode          |
    * | - buffer: buffer(null)    |
@@ -13,8 +30,22 @@ module.exports = function(neuma, _) {
    *   |
    */
   neuma.register("buf", function(ugen, spec) {
-    var buffer = _.findAudioBuffer(spec.buffer);
-    var bufSrc = ugen.$context.createBufferSource();
+    return make(spec.buffer, ugen, spec);
+  });
+
+  neuma.register("audiobuffer", function(ugen, spec) {
+    return make(spec.value, ugen, spec);
+  });
+
+  neuma.register("neubuffer", function(ugen, spec) {
+    return make(spec.value, ugen, spec);
+  });
+
+  function make(buffer, ugen, spec) {
+    buffer = _.findAudioBuffer(buffer);
+
+    var context = ugen.$context;
+    var bufSrc  = context.createBufferSource();
 
     /* istanbul ignore else */
     if (buffer != null) {
@@ -33,25 +64,28 @@ module.exports = function(neuma, _) {
       duration = _.finite(duration);
     }
 
+    function start(t) {
+      if (duration != null) {
+        bufSrc.start(t, offset, duration);
+      } else {
+        bufSrc.start(t, offset);
+      }
+      bufSrc.onended = function() {
+        ugen.emit("end", {
+          playbackTime: context.currentTime
+        }, ugen.$synth);
+      };
+    }
+
+    function stop(t) {
+      bufSrc.stop(t);
+    }
+
     return new neuma.Unit({
       outlet: bufSrc,
-      start: function(t) {
-        if (duration != null) {
-          bufSrc.start(t, offset, duration);
-        } else {
-          bufSrc.start(t, offset);
-        }
-        bufSrc.onended = function() {
-          ugen.emit("end", {
-            // TODO: calculate end time
-            playbackTime: ugen.$context.currentTime
-          }, ugen.$synth);
-        };
-      },
-      stop: function(t) {
-        bufSrc.stop(t);
-      }
+      start : start,
+      stop  : stop
     });
-  });
+  }
 
 };

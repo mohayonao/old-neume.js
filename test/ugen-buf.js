@@ -5,7 +5,12 @@ var neuma = require("../src/neuma");
 neuma.use(require("../src/ugen/buf"));
 
 describe("ugen/buf", function() {
+  var context = null;
   var buffer = null;
+
+  beforeEach(function() {
+    context = new neuma.Context(new window.AudioContext());
+  });
 
   describe("$(buf buffer:buffer)", function() {
     /*
@@ -15,7 +20,6 @@ describe("ugen/buf", function() {
      *   |
      */
     beforeEach(function() {
-      var context = new neuma.Context(new window.AudioContext());
       buffer = neuma.Buffer.from(context, [ 1, 2, 3, 4 ]);
     });
 
@@ -116,6 +120,60 @@ describe("ugen/buf", function() {
       assert.deepEqual(spy.firstCall.args, [ 0.100, 5, 10 ]);
     });
 
+  });
+
+  describe("$(AudioBuffer)", function() {
+    it("returns a BufferSourceNode", function() {
+      var audioBuffer = context.createBuffer(1, 128, 44100);
+      var synth = neuma.Neuma(function($) {
+        return $(audioBuffer);
+      })();
+      assert.deepEqual(synth.outlet.toJSON(), {
+        name: "AudioBufferSourceNode",
+        buffer: {
+          name: "AudioBuffer",
+          length: 128,
+          duration: 128 / 44100,
+          sampleRate: 44100,
+          numberOfChannels: 1
+        },
+        playbackRate: {
+          value: 1,
+          inputs: []
+        },
+        loop: false,
+        loopStart: 0,
+        loopEnd: 0,
+        inputs: []
+      });
+    });
+  });
+
+  describe("$(NeuBuffer)", function() {
+    it("returns a BufferSourceNode", function() {
+      var buffer = neuma.Buffer.from(context, [ 1, 2, 3, 4 ]);
+      var synth = neuma.Neuma(function($) {
+        return $(buffer);
+      })();
+      assert.deepEqual(synth.outlet.toJSON(), {
+        name: "AudioBufferSourceNode",
+        buffer: {
+          name: "AudioBuffer",
+          length: 4,
+          duration: 4 / 44100,
+          sampleRate: 44100,
+          numberOfChannels: 1
+        },
+        playbackRate: {
+          value: 1,
+          inputs: []
+        },
+        loop: false,
+        loopStart: 0,
+        loopEnd: 0,
+        inputs: []
+      });
+    });
   });
 
 });

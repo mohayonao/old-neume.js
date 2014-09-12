@@ -233,6 +233,13 @@ utils.pairs = function(obj) {
   });
 };
 
+utils.definePropertyIfNotExists = function(obj, prop, descriptor) {
+  if (!obj.hasOwnProperty(prop)) {
+    Object.defineProperty(obj, prop, descriptor);
+  }
+  return obj;
+};
+
 utils.format = function(fmt, dict) {
   utils.each(dict, function(val, key) {
     if (/^\w+$/.test(key)) {
@@ -340,8 +347,15 @@ utils.connect = function(spec) {
   var from = spec.from;
   var to   = spec.to;
 
-  if (utils.isFinite(from) && utils.isAudioParam(to)) {
-    return to.setValueAtTime(from, 0);
+  // FIXME: umm..
+  if (utils.NeuParam && from instanceof utils.NeuParam) {
+    return from._connect(to);
+  }
+
+  if (utils.isAudioParam(to)) {
+    if (utils.isNumber(from)) {
+      return to.setValueAtTime(utils.finite(from), 0);
+    }
   }
 
   if (utils.isAudioNode(to) || utils.isAudioParam(to)) {

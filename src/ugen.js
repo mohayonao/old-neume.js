@@ -4,11 +4,12 @@ var _ = require("./utils");
 var Emitter = require("./emitter");
 var NeuUnit = require("./unit");
 var makeOutlet = require("./ugen-makeOutlet");
+var selectorParser = require("./selector-parser");
 
 function NeuUGen(synth, key, spec, inputs) {
   Emitter.call(this);
 
-  var parsed = parseKey(key);
+  var parsed = selectorParser.parse(key);
 
   this.$synth   = synth;
   this.$context = synth.$context;
@@ -39,13 +40,19 @@ function NeuUGen(synth, key, spec, inputs) {
       enumerable: true
     },
   });
+
+  _.each(unit.$methods, function(method, name) {
+    _.definePropertyIfNotExists(this, name, {
+      value: method
+    });
+  }, this);
 }
 _.inherits(NeuUGen, Emitter);
 
 NeuUGen.registered = {};
 
 NeuUGen.register = function(name, func) {
-  if (!isValidUGenName(name)) {
+  if (!selectorParser.isValidUGenName(name)) {
     throw new Error("invalid ugen name: " + name);
   }
   if (!_.isFunction(func)) {
@@ -74,34 +81,5 @@ NeuUGen.prototype.mul = function(node) {
 NeuUGen.prototype.madd = function(mul, add) {
   return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
-
-function isValidUGenName(name) {
-  return /^([a-zA-Z](-?[a-zA-Z0-9]+)*|[-+*\/%<=>!?&|@]+)$/.test(name);
-}
-
-function parseKey(key) {
-  key = String(key);
-
-  var parsed = { key: "", class: [], id: null };
-
-  var keyMatched = key.match(/^([a-zA-Z](-?[a-zA-Z0-9]+)*|[-+*\/%<=>!?&|@]+)/);
-  if (keyMatched) {
-    parsed.key = keyMatched[0];
-  }
-
-  var idMatched = key.match(/#[a-zA-Z](-?[a-zA-Z0-9]+)*/);
-  if (idMatched) {
-    parsed.id = idMatched[0].substr(1);
-  }
-
-  var clsMatched = key.match(/\.[a-zA-Z](-?[a-zA-Z0-9]+)*/g);
-  if (clsMatched) {
-    parsed.class = clsMatched.map(function(cls) {
-      return cls.substr(1);
-    });
-  }
-
-  return parsed;
-}
 
 module.exports = NeuUGen;

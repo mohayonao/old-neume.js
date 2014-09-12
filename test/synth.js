@@ -7,11 +7,15 @@ var Emitter = require("../src/emitter");
 
 var NeuUGen  = _.NeuUGen;
 var NeuParam = _.NeuParam;
+var NeuIn    = _.NeuIn;
 var NOP = function() {};
 
 function unitStub() {
   return {
-    $methods: {},
+    $methods: {
+      fizz: NOP,
+      buzz: NOP,
+    },
     apply: sinon.spy(),
     start: sinon.spy(),
     stop : sinon.spy()
@@ -65,12 +69,6 @@ describe("NeuSynth", function() {
           assert(params.freq === synth.freq);
           assert(params.amp  === synth.amp );
           assert(params.amp  === params.amp2);
-
-          synth.freq = 220;
-          synth.amp  = 0.1;
-
-          assert(params.freq.valueOf() === 220);
-          assert(params.amp .valueOf() === 0.1);
         });
         it("throw an error if given an invalid name", function() {
           var func = function($) {
@@ -94,8 +92,8 @@ describe("NeuSynth", function() {
             in2 = $.in(0);
           }, []);
 
-          assert(in0 instanceof window.GainNode);
-          assert(in1 instanceof window.GainNode);
+          assert(in0 instanceof _.NeuIn);
+          assert(in1 instanceof _.NeuIn);
           assert(in0 !== in1);
           assert(in0 === in2);
           assert(synth.$inputs[0] === in0);
@@ -126,6 +124,73 @@ describe("NeuSynth", function() {
           assert(synth.$outputs[3] === ugen3);
         });
       });
+      describe(".method(methodName, func)", function() {
+        it("works", function() {
+          var passed = null;
+          var synth = new NeuSynth(context, function($) {
+            $.method("func", function(a, b) {
+              passed = [ "func", a, b ];
+            });
+            $.method("****", function( a, b) {
+              passed = [ "****", a, b ];
+            });
+          });
+
+          assert.deepEqual(synth.getMethods(), [ "func" ]);
+
+          synth.func(1, 2);
+          assert.deepEqual(passed, [ "func", 1, 2 ]);
+        });
+      });
+      describe(".timeout(timeout, ... callbacks)", function() {
+        it("works", function() {
+          var passed = [];
+          var synth = new NeuSynth(context, function($) {
+            $.timeout(0.030, function(t, i) {
+              passed.push([ "fizz", t, i ]);
+            });
+            $.timeout(0.050, function(t, i) {
+              passed.push([ "buzz", t, i ]);
+            });
+            $.timeout(0.150, function(t, i) {
+              passed.push([ "fizzbuzz", t, i ]);
+            });
+          }, []);
+
+          synth.start(0.010);
+          synth.stop(0.100);
+          audioContext.$process(0.200);
+
+          assert.deepEqual(passed, [
+            [ "fizz", 0.040, 1 ],
+            [ "buzz", 0.060000000000000005, 1 ],
+          ]);
+        });
+      });
+      describe(".interval(interval, ... callbacks)", function() {
+        it("works", function() {
+          var passed = [];
+          var synth = new NeuSynth(context, function($) {
+            $.interval(0.030, function(t, i) {
+              passed.push([ "fizz", t, i ]);
+            });
+            $.interval(0.050, function(t, i) {
+              passed.push([ "buzz", t, i ]);
+            });
+          }, []);
+
+          synth.start(0.010);
+          synth.stop(0.100);
+          audioContext.$process(0.200);
+
+          assert.deepEqual(passed, [
+            [ "fizz", 0.04, 1 ],
+            [ "buzz", 0.060000000000000005, 1 ],
+            [ "fizz", 0.06999999999999999, 2 ],
+            [ "fizz", 0.09999999999999999, 3 ]
+          ]);
+        });
+      });
     });
   });
 
@@ -148,6 +213,20 @@ describe("NeuSynth", function() {
       }, []);
 
       assert(synth.outlet instanceof window.AudioNode);
+    }));
+  });
+
+  describe("#getMethods()", function() {
+    it("returns method names", sinon.test(function() {
+      this.stub(NeuUGen, "build", function() {
+        return { $outlet: osc, $unit: unitStub() };
+      });
+
+      var synth = new NeuSynth(context, function($) {
+        return $("sin", $("sin"));
+      }, []);
+
+      assert.deepEqual(synth.getMethods(), [ "buzz", "fizz" ]);
     }));
   });
 

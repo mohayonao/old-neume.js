@@ -2,29 +2,30 @@ module.exports = function(neuma, _) {
   "use strict";
 
   /**
-   * $(number, {
+   * $(boolean, {
    *   lag  : number = 0
    *   curve: number = 0
    * } ... inputs)
    *
    * methods:
    *   setValue(t, value)
+   *   toggle(t)
    *
    * +--------+      +-------+
    * | inputs |  or  | DC(1) |
    * +--------+      +-------+
    *   ||||||
-   * +---------------+
-   * | GainNode      |
-   * | - gain: value |
-   * +---------------+
+   * +-----------------------+
+   * | GainNode              |
+   * | - gain: value ? 0 : 1 |
+   * +-----------------------+
    *   |
    */
-  neuma.register("number", function(ugen, spec, inputs) {
+  neuma.register("boolean", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gain  = context.createGain();
-    var data  = _.finite(spec.value);
+    var data  = !!spec.value;
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
 
@@ -36,7 +37,7 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: gain });
     });
 
-    gain.gain.setValueAtTime(data, 0);
+    gain.gain.setValueAtTime(data ? 1 : 0, 0);
 
     function update(t0, v0, v1, nextData) {
       if (lag <= 0 || curve < 0 || 1 <= curve) {
@@ -51,11 +52,20 @@ module.exports = function(neuma, _) {
       outlet: gain,
       methods: {
         setValue: function(t, value) {
-          if (_.isFinite(value)) {
+          if (_.isBoolean(value)) {
             context.sched(t, function() {
-              update(t, data, value, value);
+              var v0 = data  ? 1 : 0;
+              var v1 = value ? 1 : 0;
+              update(t, v0, v1, value);
             });
           }
+        },
+        toggle: function(t) {
+          context.sched(t, function() {
+            var v0 = data ? 1 : 0;
+            var v1 = data ? 0 : 1;
+            update(t, v0, v1, !data);
+          });
         }
       }
     });

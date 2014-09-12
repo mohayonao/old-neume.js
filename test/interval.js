@@ -25,7 +25,8 @@ describe("NeuInterval", function() {
       });
 
       audioContext.$reset();
-      interval.$context.reset();
+      context.reset();
+      context.start();
 
       assert(interval.state === "init", "00:00.000");
       assert(passed === null);
@@ -65,29 +66,13 @@ describe("NeuInterval", function() {
 
       audioContext.$process(0.050);
       assert(interval.state === "stop", "00:00.400");
-      assert.deepEqual(passed, { playbackTime: 0.400, count: 2 }, "00:00.400");
+      assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 1 }, "00:00.400");
 
       audioContext.$process(0.050);
       assert(interval.state === "stop", "00:00.450");
-      assert.deepEqual(passed, { playbackTime: 0.400, count: 2 }, "00:00.450");
+      assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 1 }, "00:00.450");
     });
     describe("invalid case", function() {
-      it("interval <= 0", function() {
-        var interval = new NeuInterval(context, 0, NOP);
-
-        audioContext.$reset();
-        interval.$context.reset();
-
-        assert(interval.state === "init", "00:00.000");
-
-        interval.start(0.000);
-
-        audioContext.$process(0.010);
-        assert(interval.state === "ready", "00:00.010");
-
-        audioContext.$process(0.020);
-        assert(interval.state === "ready", "00:00.020");
-      });
       it("callback is not a function", function() {
         var interval = new NeuInterval(context, 1, "INVALID");
 

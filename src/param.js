@@ -5,101 +5,111 @@ var _ = require("./utils");
 _.NeuUGen = require("./ugen");
 _.NeuDC   = require("./dc");
 
-/**
- *
- * @param {NeuSynth} synth
- * @param {string}   name
- * @param {number}   value
- */
 function NeuParam(synth, name, value) {
   this.name = name;
 
   this.$synth   = synth;
   this.$context = synth.$context;
-  this.$outlet  = this.$context.createGain();
+  this.$outlet  = null;
 
-  this._param = this.$outlet.gain;
-
-  _.connect({ from: new _.NeuDC(this.$context, 1), to: this.$outlet });
-
-  this.set(value);
+  this._params = [];
+  this._value  = _.finite(value);
 }
 _.inherits(NeuParam, _.NeuUGen);
 
+NeuParam.prototype._connect = function(to) {
+  var param;
+
+  if (_.isAudioParam(to)) {
+    param = to;
+  } else {
+    this.$outlet = this.$context.createGain();
+    _.connect({ from: new _.NeuDC(this.$context, 1), to: this.$outlet });
+    param = this.$outlet.gain;
+  }
+
+  this._params.push(param);
+  param.setValueAtTime(this._value, 0);
+};
+
 NeuParam.prototype.valueOf = function() {
-  return this._param.value;
+  return this._params.length ? this._params[0].value : /* istanbul ignore next */ 0;
 };
 
-/**
- * Change the value immediately
- *
- * @param {number} value
- * @return {NeuParam} self
- */
 NeuParam.prototype.set = function(value) {
-  var t0 = this.$context.currentTime;
+  value = _.finite(value);
 
-  this._param.setValueAtTime(_.num(value), t0);
+  var startTime = this.$context.currentTime;
 
-  return this;
-};
-
-/**
- * Schedules the value change after the duration
- *
- * @param {number} value
- * @param {number} duration
- * @return {NeuParam} self
- */
-NeuParam.prototype.setAt = function(value, duration) {
-  var t0 = this.$context.currentTime;
-  var t1 = t0 + _.defaults(duration, 0);
-
-  this._param.setValueAtTime(_.num(value), t1);
+  this._params.forEach(function(param) {
+    param.setValueAtTime(value, startTime);
+  });
 
   return this;
 };
 
-/**
- * Schedules the value change linearly
- *
- * @param {number} value
- * @param {number} duration
- * @return {NeuParam} self
- */
-NeuParam.prototype.linTo = function(value, duration) {
-  var t0 = this.$context.currentTime;
-  var t1 = t0 + _.defaults(duration, 0);
+NeuParam.prototype.setAt = function(value, startTime) {
+  value     = _.finite(value);
+  startTime = _.finite(startTime);
 
-  this._param.setValueAtTime(this._param.value, t0);
-  this._param.linearRampToValueAtTime(_.num(value), t1);
+  this._params.forEach(function(param) {
+    param.setValueAtTime(value, startTime);
+  });
 
   return this;
 };
 
-/**
- * Schedules the value change exponentially
- *
- * @param {number} value
- * @param {number} duration
- * @return {NeuParam} self
- */
-NeuParam.prototype.expTo = function(value, duration) {
-  var t0 = this.$context.currentTime;
-  var t1 = t0 + _.defaults(duration, 0);
+NeuParam.prototype.linTo = function(value, endTime) {
+  value   = _.finite(value);
+  endTime = _.finite(endTime);
 
-  this._param.setValueAtTime(this._param.value, t0);
-  this._param.exponentialRampToValueAtTime(_.num(value), t1);
+  this._params.forEach(function(param) {
+    param.linearRampToValueAtTime(value, endTime);
+  });
 
   return this;
 };
 
-/**
- * Cancels all schedules
- * @return {NeuParam} self
- */
-NeuParam.prototype.cancel = function() {
-  this._param.cancelScheduledValues(0);
+NeuParam.prototype.expTo = function(value, endTime) {
+  value   = _.finite(value);
+  endTime = _.finite(endTime);
+
+  this._params.forEach(function(param) {
+    param.exponentialRampToValueAtTime(value, endTime);
+  });
+
+  return this;
+};
+
+NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
+  target       = _.finite(target);
+  startTime    = _.finite(startTime);
+  timeConstant = _.finite(timeConstant);
+
+  this._params.forEach(function(param) {
+    param.setTargetAtTime(target, startTime, timeConstant);
+  });
+
+  return this;
+};
+
+NeuParam.prototype.curveAt = function(values, startTime, duration) {
+  startTime = _.finite(startTime);
+  duration  = _.finite(duration);
+
+  this._params.forEach(function(param) {
+    param.setValueCurveAtTime(values, startTime, duration);
+  });
+
+  return this;
+};
+
+NeuParam.prototype.cancel = function(startTime) {
+  startTime = _.finite(startTime);
+
+  this._params.forEach(function(param) {
+    param.cancelScheduledValues(startTime);
+  });
 
   return this;
 };

@@ -9,8 +9,8 @@ var STOP  = 2;
 function NeuUnit(spec) {
   this._spec   = spec;
   this._state  = INIT;
-  this.$outlet  = spec.outlet || null;
-  this.$methods = spec.methods || {};
+  this.$outlet  = _.defaults(spec.outlet, null);
+  this.$methods = _.defaults(spec.methods, {});
 }
 
 NeuUnit.prototype.start = function(t) {

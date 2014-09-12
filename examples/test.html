@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>test - neuma.js</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.4.0/codemirror.min.css">
+  <style>
+    .CodeMirror {
+      border: solid 1px #bdc3c7;
+    }
+    #start {
+      margin: 10px 0;
+    }
+    #canvas {
+      width: 100%;
+      height: 320px;
+      background: #2c3e50;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.4.0/codemirror.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.5.0/mode/javascript/javascript.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
+  <script src="../build/neuma.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>neuma.js test</h1>
+    <canvas id="canvas"></canvas>
+    <div id="app">
+      <div class="row">
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-2">
+              <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+            </div>
+            <div class="col-md-10">
+              <div class="form-group">
+                <label>FPS</label> {{ fpsValue }}
+                <input type="range" min="0" max="6" value="4" v-on="change:updateFPS">
+              </div>
+              <div class="form-group">
+                <label>FFT SIZE</label> {{ fftSizeValue }}
+                <input type="range" min="0" max="6" value="4" v-on="change:updateFFTSize">
+              </div>
+            </div>
+          </div>
+          <textarea id="editor"></textarea>
+        </div>
+        <div class="col-md-4">
+          <label>TEST</label>
+          <ul>
+            <li v-repeat="examples">
+              <a href="#gistid:{{ gistid }}:{{ encodeURIComponent(title) }}" v-on="click: setCode(source)">{{ title }}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  var synth = null;
+
+  $(function() {
+    "use strict";
+
+    var GISTID = "2366c2e6674bc5a86aa6";
+
+    function start() {
+      var code = editor.getValue();
+
+      try {
+        synth = eval.call(null, code);
+        localStorage.setItem("examples.test.code", code);
+        return true;
+      } catch (e) {
+        console.error(e);
+      }
+
+      return false;
+    }
+
+    var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      mode: "javascript",
+      indentUnit: 2,
+      tabSize: 2,
+      lineWrapping: true,
+      lineNumbers: true,
+      showCursorWhenSelecting: true,
+    });
+
+    var vue = new Vue({
+      el: "#app",
+      data: {
+        isPlaying: false,
+        fpsValue: 20,
+        fftSizeValue: 512,
+        examples: []
+      },
+      methods: {
+        setCode: function(code) {
+          editor.setValue(code);
+        },
+        toggle: function() {
+          this.isPlaying = !this.isPlaying;
+          if (this.isPlaying) {
+            this.isPlaying = start();
+            if (this.isPlaying) {
+              visualizer.start()
+            }
+          } else {
+            if (synth && synth.stop) {
+              synth.stop()
+            }
+            visualizer.stop();
+          }
+        },
+        updateFPS: _.throttle(function(e) {
+          var FPS_LIST = [
+            0, 1, 5, 10, 20, 40, 60
+          ];
+          this.fpsValue = FPS_LIST[e.target.value] || 0;
+          visualizer.fps = this.fpsValue;
+        }, 250),
+        updateFFTSize: _.throttle(function(e) {
+          var FFT_SIZE_LIST = [
+            32, 64, 128, 256, 512, 1024, 2048
+          ];
+          this.fftSizeValue = FFT_SIZE_LIST[e.target.value] || 512;
+          Neuma.analyer.fftSize = this.fftSizeValue;
+        }, 250),
+        encodeURIComponent: window.encodeURIComponent
+      }
+    });
+
+    var WaveVisualizer = (function() {
+      function WaveVisualizer(analyer, spec) {
+        this._analyer = analyer;
+
+        this._state = "init";
+        this._freqData = new Uint8Array(1024);
+        this._timeData = new Uint8Array(1024);
+        this._canvas   = spec.canvas;
+        this._canvas.width  = spec.width;
+        this._canvas.height = spec.height;
+        this._context = this._canvas.getContext("2d");
+        this._prevT = 0;
+
+        this.fps = 40;
+
+        Object.defineProperties(this, {
+          width: {
+            value: spec.width,
+            enumerable: true
+          },
+          height: {
+            value: spec.height,
+            enumerable: true
+          },
+          state: {
+            get: function() {
+              return this._state;
+            },
+            enumerable: true
+          },
+        })
+      }
+
+      WaveVisualizer.prototype.start = function() {
+        if (this._state !== "start") {
+          this._state = "start";
+          requestAnimationFrame(this.render.bind(this));
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.stop = function() {
+        if (this._state === "start") {
+          this._state = "stop";
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.render = function(t) {
+        var dt = (t - this._prevT) * 0.001;
+
+        if (1 / this.fps < dt) {
+          this._prevT = t;
+
+          this._analyer.getByteFrequencyData(this._freqData);
+          this._analyer.getByteTimeDomainData(this._timeData);
+
+          this._context.fillStyle = "#2c3e50";
+          this._context.fillRect(0, 0, this.width, this.height);
+
+          var length = this._analyer.frequencyBinCount;
+
+          drawSpectrum(this._context, this._freqData, length, this.width, this.height);
+          drawWave(this._context, this._timeData, length, this.width, this.height);
+        }
+
+        if (this._state === "start") {
+          requestAnimationFrame(this.render.bind(this));
+        }
+      };
+
+      function calcY(value, height) {
+        return (height * 0.5) - ((value - 128) / 256 * height);
+      }
+
+      function drawWave(context, data, length, width, height) {
+        var dx = width / (length - 1);
+
+        height = height * 0.5;
+
+        context.save();
+        context.strokeStyle = "#2ecc71";
+        context.lineWidth   = 2;
+
+        context.beginPath();
+        context.moveTo(0, calcY(data[0], height))
+
+        for (var i = 1; i < length; i++) {
+          context.lineTo(i * dx, calcY(data[i], height));
+        }
+
+        context.stroke();
+        context.restore();
+      }
+
+      function drawSpectrum(context, data, length, width, height) {
+        var dw = width / length;
+
+        context.save();
+        context.fillStyle = "#3498db";
+
+        for (var i = 0; i < length; i++) {
+          var x0 = i * dw;
+          var x1 = x0 + dw;
+          var y0 = height - (data[i] / 512) * height;
+          var y1 = height;
+
+          context.fillRect(x0, y0, x1 - x0, y1 - y0);
+        }
+
+        context.restore();
+      }
+
+      return WaveVisualizer;
+    })();
+
+    var canvas     = document.getElementById("canvas");
+    var visualizer = new WaveVisualizer(Neuma.analyer, {
+      canvas: canvas, width: $(canvas).width(), height: 320
+    });
+
+    function readFromGist(gistid, callback) {
+      var url = "https://api.github.com/gists/" + gistid;
+      $.ajax({ url: url, type: "GET", dataType: "jsonp" }).then(function(result) {
+        if (result.data.files) {
+          callback(result.data.files);
+        } else {
+          console.warn("gist:" + gistid + " not found");
+        }
+      });
+    }
+
+    function updateExamples(gistid) {
+      readFromGist(gistid, function(files) {
+        var examples = _.chain(files).filter(function(file) {
+          return /^(.+)\.js$/.test(file.filename);
+        }).map(function(file) {
+          return {
+            title : file.filename.match(/^(.+)\.js$/)[1],
+            source: file.content,
+            gistid: gistid
+          };
+        }).value();
+
+        vue.examples = examples;
+      });
+    }
+
+    var prevGistId = "";
+
+    window.onhashchange = function() {
+      var matched = /^#gistid:([a-f\d]+)(?::(.+))?$/.exec(location.hash);
+      if (matched) {
+        matched[2] = decodeURIComponent(matched[2]);
+
+        if (prevGistId !== matched[1]) {
+          prevGistId = matched[1];
+          updateExamples(matched[1], matched[2]);
+        }
+      }
+    };
+
+    if (location.hash) {
+      window.onhashchange();
+    } else {
+      window.location.replace("#gistid:" + GISTID);
+    }
+
+    editor.setValue(localStorage.getItem("examples.test.code") || "");
+  });
+  </script>
+</body>
+</html>
