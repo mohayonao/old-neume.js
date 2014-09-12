@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -43,13 +43,13 @@ module.exports = function(neuma, _) {
     bpf      : "bandpass",
   };
 
-  neuma.register("biquad", function(ugen, spec, inputs) {
+  neume.register("biquad", function(ugen, spec, inputs) {
     var type = FILTER_TYPES[spec.type] || "lowpass";
     return make(setup(type, ugen, spec, inputs));
   });
 
   _.each(FILTER_TYPES, function(type, name) {
-    neuma.register(name, function(ugen, spec, inputs) {
+    neume.register(name, function(ugen, spec, inputs) {
       return make(setup(type, ugen, spec, inputs));
     });
   });
@@ -75,7 +75,7 @@ module.exports = function(neuma, _) {
   }
 
   function make(biquad) {
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: biquad
     });
   }

@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   var WEB_AUDIO_MAX_DELAY_TIME = 180;
@@ -14,7 +14,7 @@ module.exports = function(neuma, _) {
    * +------------------------+
    *   |
    */
-  neuma.register("delay", function(ugen, spec, inputs) {
+  neume.register("delay", function(ugen, spec, inputs) {
     var delayTime = _.defaults(spec.delayTime, 0);
     var maxDelayTime;
 
@@ -35,7 +35,7 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: delay });
     });
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: delay
     });
   });

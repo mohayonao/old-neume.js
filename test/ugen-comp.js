@@ -1,9 +1,9 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/osc"));
-neuma.use(require("../src/ugen/comp"));
+neume.use(require("../src/ugen/osc"));
+neume.use(require("../src/ugen/comp"));
 
 describe("ugen/comp", function() {
   describe("$(comp threshold:-20 knee:25 ratio:10 attack:0.05 release:0.1 $(sin))", function() {
@@ -23,7 +23,7 @@ describe("ugen/comp", function() {
      *   |
      */
     it("return a DynamicsCompressorNode that is connected with $(sin)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("comp", {
           threshold: -20, knee: 25, ratio: 10, attack: 0.05, release: 0.1
         }, $("sin"));

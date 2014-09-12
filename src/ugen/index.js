@@ -1,23 +1,23 @@
-module.exports = function(neuma) {
+module.exports = function(neume) {
   "use strict";
 
-  neuma.use(require("./add"));
-  neuma.use(require("./array"));
-  neuma.use(require("./biquad"));
-  neuma.use(require("./boolean"));
-  neuma.use(require("./buf"));
-  neuma.use(require("./comp"));
-  neuma.use(require("./conv"));
-  neuma.use(require("./delay"));
-  neuma.use(require("./env"));
-  neuma.use(require("./function"));
-  neuma.use(require("./line"));
-  neuma.use(require("./media-stream"));
-  neuma.use(require("./media"));
-  neuma.use(require("./mul"));
-  neuma.use(require("./noise"));
-  neuma.use(require("./number"));
-  neuma.use(require("./osc"));
-  neuma.use(require("./shaper"));
+  neume.use(require("./add"));
+  neume.use(require("./array"));
+  neume.use(require("./biquad"));
+  neume.use(require("./boolean"));
+  neume.use(require("./buf"));
+  neume.use(require("./comp"));
+  neume.use(require("./conv"));
+  neume.use(require("./delay"));
+  neume.use(require("./env"));
+  neume.use(require("./function"));
+  neume.use(require("./line"));
+  neume.use(require("./media-stream"));
+  neume.use(require("./media"));
+  neume.use(require("./mul"));
+  neume.use(require("./noise"));
+  neume.use(require("./number"));
+  neume.use(require("./osc"));
+  neume.use(require("./shaper"));
 
 };

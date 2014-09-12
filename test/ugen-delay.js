@@ -1,9 +1,9 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/osc"));
-neuma.use(require("../src/ugen/delay"));
+neume.use(require("../src/ugen/osc"));
+neume.use(require("../src/ugen/delay"));
 
 describe("ugen/delay", function() {
   describe("$(delay delayTime:0.5 $(sin))", function() {
@@ -19,7 +19,7 @@ describe("ugen/delay", function() {
      *   |
      */
     it("return a DelayNode that is connected with $(sin)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("delay", { delayTime: 0.5 }, $("sin"));
       })();
 

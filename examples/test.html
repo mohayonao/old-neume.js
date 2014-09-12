@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>test - neuma.js</title>
+  <title>test - neume.js</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.4.0/codemirror.min.css">
@@ -24,11 +24,11 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.4.0/codemirror.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.5.0/mode/javascript/javascript.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
-  <script src="../build/neuma.js"></script>
+  <script src="../build/neume.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>neuma.js test</h1>
+    <h1>neume.js test</h1>
     <canvas id="canvas"></canvas>
     <div id="app">
       <div class="row">
@@ -131,7 +131,7 @@
             32, 64, 128, 256, 512, 1024, 2048
           ];
           this.fftSizeValue = FFT_SIZE_LIST[e.target.value] || 512;
-          Neuma.analyer.fftSize = this.fftSizeValue;
+          Neume.analyer.fftSize = this.fftSizeValue;
         }, 250),
         encodeURIComponent: window.encodeURIComponent
       }
@@ -254,7 +254,7 @@
     })();
 
     var canvas     = document.getElementById("canvas");
-    var visualizer = new WaveVisualizer(Neuma.analyer, {
+    var visualizer = new WaveVisualizer(Neume.analyer, {
       canvas: canvas, width: $(canvas).width(), height: 320
     });
 

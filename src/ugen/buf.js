@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -29,15 +29,15 @@ module.exports = function(neuma, _) {
    * +---------------------------+
    *   |
    */
-  neuma.register("buf", function(ugen, spec) {
+  neume.register("buf", function(ugen, spec) {
     return make(spec.buffer, ugen, spec);
   });
 
-  neuma.register("audiobuffer", function(ugen, spec) {
+  neume.register("audiobuffer", function(ugen, spec) {
     return make(spec.value, ugen, spec);
   });
 
-  neuma.register("neubuffer", function(ugen, spec) {
+  neume.register("neubuffer", function(ugen, spec) {
     return make(spec.value, ugen, spec);
   });
 
@@ -81,7 +81,7 @@ module.exports = function(neuma, _) {
       bufSrc.stop(t);
     }
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: bufSrc,
       start : start,
       stop  : stop

@@ -1,15 +1,15 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/buf"));
+neume.use(require("../src/ugen/buf"));
 
 describe("ugen/buf", function() {
   var context = null;
   var buffer = null;
 
   beforeEach(function() {
-    context = new neuma.Context(new window.AudioContext());
+    context = new neume.Context(new window.AudioContext());
   });
 
   describe("$(buf buffer:buffer)", function() {
@@ -20,11 +20,11 @@ describe("ugen/buf", function() {
      *   |
      */
     beforeEach(function() {
-      buffer = neuma.Buffer.from(context, [ 1, 2, 3, 4 ]);
+      buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
     });
 
     it("returns a BufferSourceNode", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("buf", { buffer: buffer });
       })();
 
@@ -49,11 +49,11 @@ describe("ugen/buf", function() {
     });
 
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("buf", { buffer: buffer });
       })();
 
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
 
       audioContext.$reset();
@@ -81,11 +81,11 @@ describe("ugen/buf", function() {
     });
 
     it("works without duration", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("buf", { buffer: buffer, offset: 5 });
       })();
 
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var spy = sinon.spy(outlet, "start");
 
@@ -101,11 +101,11 @@ describe("ugen/buf", function() {
     });
 
     it("works duration", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("buf", { buffer: buffer, offset: 5, duration: 10 });
       })();
 
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var spy = sinon.spy(outlet, "start");
 
@@ -125,7 +125,7 @@ describe("ugen/buf", function() {
   describe("$(AudioBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var audioBuffer = context.createBuffer(1, 128, 44100);
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $(audioBuffer);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -151,8 +151,8 @@ describe("ugen/buf", function() {
 
   describe("$(NeuBuffer)", function() {
     it("returns a BufferSourceNode", function() {
-      var buffer = neuma.Buffer.from(context, [ 1, 2, 3, 4 ]);
-      var synth = neuma.Neuma(function($) {
+      var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
+      var synth = neume.Neume(function($) {
         return $(buffer);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

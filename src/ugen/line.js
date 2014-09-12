@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /*
@@ -24,11 +24,11 @@ module.exports = function(neuma, _) {
    * +---------------+
    *   |
    */
-  neuma.register("line", function(ugen, spec, inputs) {
+  neume.register("line", function(ugen, spec, inputs) {
     return make("linearRampToValueAtTime", ugen, spec, inputs);
   });
 
-  neuma.register("xline", function(ugen, spec, inputs) {
+  neume.register("xline", function(ugen, spec, inputs) {
     return make("exponentialRampToValueAtTime", ugen, spec, inputs);
   });
 
@@ -43,7 +43,7 @@ module.exports = function(neuma, _) {
     var schedId = 0;
 
     if (_.isEmpty(inputs)) {
-      inputs = [ new neuma.DC(context, 1) ];
+      inputs = [ new neume.DC(context, 1) ];
     }
 
     inputs.forEach(function(input) {
@@ -69,7 +69,7 @@ module.exports = function(neuma, _) {
       context.unsched(schedId);
     }
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: line,
       start : start,
       stop  : stop

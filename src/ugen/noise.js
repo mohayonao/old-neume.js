@@ -1,4 +1,4 @@
-module.exports = function(neuma) {
+module.exports = function(neume) {
   "use strict";
 
   /**
@@ -8,12 +8,12 @@ module.exports = function(neuma) {
    * +------------------+
    *   |
    */
-  neuma.register("white", function(ugen) {
+  neume.register("white", function(ugen) {
     whiteNoise = whiteNoise || generateWhiteNoise(ugen.$context.sampleRate);
     return make(whiteNoise, ugen);
   });
 
-  neuma.register("pink", function(ugen) {
+  neume.register("pink", function(ugen) {
     pinkNoise = pinkNoise || generatePinkNoise(ugen.$context.sampleRate);
     return make(pinkNoise, ugen);
   });
@@ -27,7 +27,7 @@ module.exports = function(neuma) {
     bufSrc.buffer = buf;
     bufSrc.loop   = true;
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: bufSrc,
       start: function(t) {
         bufSrc.start(t);

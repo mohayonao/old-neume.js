@@ -1,13 +1,13 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/line"));
+neume.use(require("../src/ugen/line"));
 
 describe("ugen/line", function() {
   describe("$(line)", function() {
     it("returns a GainNode that is connected with DC(1)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("line");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -20,10 +20,10 @@ describe("ugen/line", function() {
       });
     });
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       })();
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -62,11 +62,11 @@ describe("ugen/line", function() {
       assert(ended === 0.30000000000000004);
     });
     it("works with stop", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       })();
 
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -110,7 +110,7 @@ describe("ugen/line", function() {
 
   describe("$(xline)", function() {
     it("returns a GainNode that is connected with DC(1)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("xline");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -123,10 +123,10 @@ describe("ugen/line", function() {
       });
     });
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("xline", { start: 880, end: 440, dur: 0.200 });
       })();
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -168,7 +168,7 @@ describe("ugen/line", function() {
 
   describe("$(line $(line) $(line))", function() {
     it("returns a GainNode that is connected inputs", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $("line", $("line"), $("line"));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -214,7 +214,7 @@ describe("ugen/line", function() {
   //    *   |
   //    */
   //   beforeEach(function() {
-  //     synth = neuma.Neuma(function($) {
+  //     synth = neume.Neume(function($) {
   //       return $("line", { start: 880, end: 440, dur: 0.200 });
   //     })();
   //   });
@@ -229,7 +229,7 @@ describe("ugen/line", function() {
   //     });
   //   });
   //   it("works", function() {
-  //     var audioContext = neuma._.findAudioContext(synth);
+  //     var audioContext = neume._.findAudioContext(synth);
   //     var outlet = synth.outlet;
   //     var ended = 0;
   //
@@ -268,7 +268,7 @@ describe("ugen/line", function() {
   //     assert(ended === 0.30000000000000004);
   //   });
   //   it("works with stop", function() {
-  //     var audioContext = neuma._.findAudioContext(synth);
+  //     var audioContext = neume._.findAudioContext(synth);
   //     var outlet = synth.outlet;
   //     var ended = 0;
   //
@@ -323,7 +323,7 @@ describe("ugen/line", function() {
   //    *   |
   //    */
   //   beforeEach(function() {
-  //     synth = neuma.Neuma(function($) {
+  //     synth = neume.Neume(function($) {
   //       return $("line", $("sin"), $("sin"));
   //     })();
   //   });

@@ -1,13 +1,13 @@
 "use strict";
 
-var neuma = require("../src/neuma");
+var neume = require("../src/neume");
 
-neuma.use(require("../src/ugen/number"));
+neume.use(require("../src/ugen/number"));
 
 describe("ugen/number", function() {
   describe("$(440)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $(0);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -20,10 +20,10 @@ describe("ugen/number", function() {
       });
     });
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $(0);
       })();
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
 
       audioContext.$reset();
@@ -70,10 +70,10 @@ describe("ugen/number", function() {
 
   describe("$(0 lag:0.1, curve:0.1)", function() {
     it("works", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $(0, { lag: 0.1, curve: 0.1 });
       })();
-      var audioContext = neuma._.findAudioContext(synth);
+      var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
 
       audioContext.$reset();
@@ -120,7 +120,7 @@ describe("ugen/number", function() {
 
   describe("$(1, $(2), $(3))", function() {
     it("returns a GainNode that is connected with inputs", function() {
-      var synth = neuma.Neuma(function($) {
+      var synth = neume.Neume(function($) {
         return $(1, $(2), $(3));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

@@ -1,4 +1,4 @@
-module.exports = function(neuma, _) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
@@ -13,7 +13,7 @@ module.exports = function(neuma, _) {
    * +------------------------------+
    *   |
    */
-  neuma.register("conv", function(ugen, spec, inputs) {
+  neume.register("conv", function(ugen, spec, inputs) {
     var buffer = _.findAudioBuffer(spec.buffer);
     var conv = ugen.$context.createConvolver();
 
@@ -27,7 +27,7 @@ module.exports = function(neuma, _) {
       _.connect({ from: node, to: conv });
     });
 
-    return new neuma.Unit({
+    return new neume.Unit({
       outlet: conv
     });
   });
