@@ -22,6 +22,6 @@
     "jshint-stylish": "^0.4.0",
     "power-assert": "^0.9.0",
     "sinon": "^1.10.3",
-    "web-audio-mock": "^0.1.9"
+    "web-audio-test-api": "^0.1.11"
   }
 }

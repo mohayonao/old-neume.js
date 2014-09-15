@@ -55,4 +55,4 @@ global.DC = function(/* value */) {
   };
 };
 
-require("web-audio-mock");
+require("web-audio-test-api");
