@@ -46,22 +46,14 @@ describe("ugen/osc", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      assert(outlet.$state === "init", "00:00.000");
+      audioContext.$process(0.300);
 
-      audioContext.$process(0.050);
-      assert(outlet.$state === "init", "00:00.050");
-
-      audioContext.$process(0.050);
-      assert(outlet.$state === "start", "00:00.100");
-
-      audioContext.$process(0.050);
-      assert(outlet.$state === "start", "00:00.150");
-
-      audioContext.$process(0.050);
-      assert(outlet.$state === "stop", "00:00.200");
-
-      audioContext.$process(0.050);
-      assert(outlet.$state === "stop", "00:00.250");
+      assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
+      assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
+      assert(outlet.$stateAtTime(0.100) === "PLAYING");
+      assert(outlet.$stateAtTime(0.150) === "PLAYING");
+      assert(outlet.$stateAtTime(0.200) === "FINISHED");
+      assert(outlet.$stateAtTime(0.250) === "FINISHED");
     });
   });
 

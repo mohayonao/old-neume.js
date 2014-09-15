@@ -31,42 +31,22 @@ describe("ugen/boolean", function() {
 
       synth.start(0);
 
-      assert(outlet.gain.value === 0, "00:00.000");
-
       synth.toggle(0.100);
       synth.toggle(0.300);
       synth.setValue(0.400, 0);
       synth.setValue(0.400, true);
 
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.050");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.100");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.150");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.200");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.250");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.300");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.350");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.400");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.450");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.500");
+      audioContext.$process(0.500);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 1);
+      assert(outlet.gain.$valueAtTime(0.150) === 1);
+      assert(outlet.gain.$valueAtTime(0.200) === 1);
+      assert(outlet.gain.$valueAtTime(0.250) === 1);
+      assert(outlet.gain.$valueAtTime(0.300) === 0);
+      assert(outlet.gain.$valueAtTime(0.350) === 0);
+      assert(outlet.gain.$valueAtTime(0.400) === 1);
+      assert(outlet.gain.$valueAtTime(0.450) === 1);
+      assert(outlet.gain.$valueAtTime(0.500) === 1);
     });
   });
 
@@ -90,35 +70,17 @@ describe("ugen/boolean", function() {
       synth.setValue(0.400, 0);
       synth.setValue(0.400, false);
 
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.050");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 1, "00:00.100");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.31622776601683783, "00:00.150");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.09999999999999998, "00:00.200");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.0316227766016838, "00:00.250");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.010000000000000004, "00:00.300");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.6869345116433303, "00:00.350");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.9009999999999999, "00:00.400");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.28531107413817314, "00:00.450");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 0.09022328359457893, "00:00.500");
+      audioContext.$process(0.500);
+      assert(outlet.gain.$valueAtTime(0.050) === 1);
+      assert(outlet.gain.$valueAtTime(0.100) === 1);
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.31622776601683783 , 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.09999999999999998 , 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.0316227766016838  , 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.010000000000000004, 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.6869345116433303  , 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.9009999999999999  , 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.2849212171811714  , 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.09010000000000014 , 1e-6));
     });
   });
 
