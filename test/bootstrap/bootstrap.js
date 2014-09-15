@@ -9,6 +9,10 @@ require("espower-loader")({
   pattern: "test/**/*.js"
 });
 
+global.closeTo = function(actual, expected, delta) {
+  return Math.abs(actual - expected) <= delta;
+};
+
 global.navigator = {};
 
 global.Promise = require("promise");

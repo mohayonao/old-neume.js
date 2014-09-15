@@ -18,6 +18,7 @@
     "afterEach" : true,
     "after"     : true,
     "assert"    : true,
+    "closeTo"   : true,
     "sinon"     : true,
     "DC"        : true
   }
