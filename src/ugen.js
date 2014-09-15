@@ -2,6 +2,7 @@
 
 var _ = require("./utils");
 var Emitter = require("./emitter");
+var NeuDC = require("./dc");
 var NeuUnit = require("./unit");
 var makeOutlet = require("./ugen-makeOutlet");
 var selectorParser = require("./selector-parser");
@@ -69,6 +70,17 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   }
 
   return new NeuUGen(synth, key, spec, inputs);
+};
+
+NeuUGen.prototype._connect = function(to) {
+  _.connect({ from: this.$outlet, to: to });
+  if (this.$offset !== 0) {
+    if (to instanceof window.AudioParam) {
+      to.value = this.$offset;
+    } else if (to instanceof window.AudioNode) {
+      _.connect({ from: new NeuDC(this.$context, this.$offset), to: to });
+    }
+  }
 };
 
 NeuUGen.prototype.add = function(node) {
