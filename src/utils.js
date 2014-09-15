@@ -347,8 +347,7 @@ utils.connect = function(spec) {
   var from = spec.from;
   var to   = spec.to;
 
-  // FIXME: umm..
-  if (utils.NeuParam && from instanceof utils.NeuParam) {
+  if (from && from._connect) {
     return from._connect(to);
   }
 

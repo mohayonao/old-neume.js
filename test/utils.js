@@ -631,6 +631,18 @@ describe("utils", function() {
         inputs: []
       });
     });
+    it("call defined connect function", function() {
+      var audioContext = new window.AudioContext();
+      var osc = {
+        _connect: sinon.spy()
+      };
+      var amp = audioContext.createGain();
+
+      _.connect({ from: osc, to: amp });
+
+      assert(osc._connect.calledOnce);
+      assert.deepEqual(osc._connect.firstCall.args, [ amp ]);
+    });
     it("do nothing if else", function() {
       var audioContext = new window.AudioContext();
       var osc = audioContext.createOscillator();
