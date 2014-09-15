@@ -29,6 +29,7 @@ function NeuUGen(synth, key, spec, inputs) {
 
   this.$unit   = unit;
   this.$outlet = makeOutlet(this.$context, unit, spec);
+  this.$offset = 0;
 
   Object.defineProperties(this, {
     context: {

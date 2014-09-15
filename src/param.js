@@ -11,6 +11,7 @@ function NeuParam(synth, name, value) {
   this.$synth   = synth;
   this.$context = synth.$context;
   this.$outlet  = null;
+  this.$offset  = 0;
 
   this._params = [];
   this._connected = [];
