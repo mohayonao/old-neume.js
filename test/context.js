@@ -43,199 +43,201 @@ describe("NeuContext", function() {
 
   describe("#cureateBuffer()", function() {
     it("call AudioContext#createBuffer()", function() {
-      var stub = sinon.stub(context, "createBuffer");
+      var spy = sinon.spy(context, "createBuffer");
 
       context.createBuffer(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createBufferSource()", function() {
     it("call AudioContext#createBufferSource()", function() {
-      var stub = sinon.stub(context, "createBufferSource");
+      var spy = sinon.spy(context, "createBufferSource");
 
       context.createBufferSource(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createMediaElementSource()", function() {
     it("call AudioContext#createMediaElementSource()", function() {
-      var stub = sinon.stub(context, "createMediaElementSource");
+      var spy = sinon.spy(context, "createMediaElementSource");
 
       context.createMediaElementSource(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createMediaStreamSource()", function() {
     it("call AudioContext#createMediaStreamSource()", function() {
-      var stub = sinon.stub(context, "createMediaStreamSource");
+      var spy = sinon.spy(context, "createMediaStreamSource");
 
       context.createMediaStreamSource(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createMediaStreamDestination()", function() {
     it("call AudioContext#createMediaStreamDestination()", function() {
-      var stub = sinon.stub(context, "createMediaStreamDestination");
+      var spy = sinon.spy(context, "createMediaStreamDestination");
 
       context.createMediaStreamDestination(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createScriptProcessor()", function() {
     it("call AudioContext#createScriptProcessor()", function() {
-      var stub = sinon.stub(context, "createScriptProcessor");
+      var spy = sinon.spy(context, "createScriptProcessor");
 
-      context.createScriptProcessor(1, 2, 3);
+      context.createScriptProcessor(1024, 0, 1);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1024, 0, 1 ]);
     });
   });
 
   describe("#createAnalyser()", function() {
     it("call AudioContext#createAnalyser()", function() {
-      var stub = sinon.stub(context, "createAnalyser");
+      var spy = sinon.spy(context, "createAnalyser");
 
       context.createAnalyser(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createGain()", function() {
     it("call AudioContext#createGain()", function() {
-      var stub = sinon.stub(context, "createGain");
+      var spy = sinon.spy(context, "createGain");
 
       context.createGain(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createDelay()", function() {
     it("call AudioContext#createDelay()", function() {
-      var stub = sinon.stub(context, "createDelay");
+      var spy = sinon.spy(context, "createDelay");
 
       context.createDelay(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createBiquadFilter()", function() {
     it("call AudioContext#createBiquadFilter()", function() {
-      var stub = sinon.stub(context, "createBiquadFilter");
+      var spy = sinon.spy(context, "createBiquadFilter");
 
       context.createBiquadFilter(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createWaveShaper()", function() {
     it("call AudioContext#createWaveShaper()", function() {
-      var stub = sinon.stub(context, "createWaveShaper");
+      var spy = sinon.spy(context, "createWaveShaper");
 
       context.createWaveShaper(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createPanner()", function() {
     it("call AudioContext#createPanner()", function() {
-      var stub = sinon.stub(context, "createPanner");
+      var spy = sinon.spy(context, "createPanner");
 
       context.createPanner(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createConvolver()", function() {
     it("call AudioContext#createConvolver()", function() {
-      var stub = sinon.stub(context, "createConvolver");
+      var spy = sinon.spy(context, "createConvolver");
 
       context.createConvolver(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createChannelSplitter()", function() {
     it("call AudioContext#createChannelSplitter()", function() {
-      var stub = sinon.stub(context, "createChannelSplitter");
+      var spy = sinon.spy(context, "createChannelSplitter");
 
       context.createChannelSplitter(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createChannelMerger()", function() {
     it("call AudioContext#createChannelMerger()", function() {
-      var stub = sinon.stub(context, "createChannelMerger");
+      var spy = sinon.spy(context, "createChannelMerger");
 
       context.createChannelMerger(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createDynamicsCompressor()", function() {
     it("call AudioContext#createDynamicsCompressor()", function() {
-      var stub = sinon.stub(context, "createDynamicsCompressor");
+      var spy = sinon.spy(context, "createDynamicsCompressor");
 
       context.createDynamicsCompressor(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createOscillator()", function() {
     it("call AudioContext#createOscillator()", function() {
-      var stub = sinon.stub(context, "createOscillator");
+      var spy = sinon.spy(context, "createOscillator");
 
       context.createOscillator(1, 2, 3);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
     });
   });
 
   describe("#createPeriodicWave()", function() {
     it("call AudioContext#createPeriodicWave()", function() {
-      var stub = sinon.stub(context, "createPeriodicWave");
+      var spy = sinon.spy(context, "createPeriodicWave");
+      var imag = new Float32Array([ 1, 2, 3, 4 ]);
+      var real = new Float32Array([ 5, 6, 7, 8 ]);
 
-      context.createPeriodicWave(1, 2, 3);
+      context.createPeriodicWave(imag, real);
 
-      assert(stub.calledOnce === true);
-      assert.deepEqual(stub.firstCall.args, [ 1, 2, 3 ]);
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ imag, real ]);
     });
   });
 
