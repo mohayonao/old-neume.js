@@ -16,52 +16,41 @@ module.exports = function(neume, _) {
    * | - gain: 0 |--| inputs[2] |
    * +-----------+  +-----------+
    *   |
-   * +-----------------------------------+
-   * | GainNode                          |
-   * | - gain: mul extracted from inputs |
-   * +-----------------------------------+
+   * +------------------+
+   * | GainNode         |
+   * | - gain: multiple |
+   * +------------------+
    *   |
    */
-  neume.register("*", function(ugen, spec, inputs) {
-    var outlet = null;
-
+  neume.register("*", function(ugen, spec, inputs, multiple) {
     var context = ugen.$context;
-    var parts  = _.partition(inputs, _.isNumber);
-    var nodes  = _.second(parts);
-    var multiple = _.reduce(_.first(parts), function(a, b) {
-      return a * b;
-    }, 1);
+    var outlet  = null;
 
-    if (multiple === 0) {
-      outlet = new neume.DC(context, 0);
-      nodes  = [];
-    } else {
-      outlet = _.first(nodes) || new neume.DC(context, 1);
-      nodes  = _.rest(nodes);
-    }
+    if (inputs.length && multiple !== 0) {
+      outlet = _.rest(inputs).reduce(function(outlet, node) {
+        var gain = context.createGain();
 
-    outlet = _.reduce(nodes, function(outlet, node) {
-      var gain = context.createGain();
+        gain.gain.value = 0;
 
-      gain.gain.value = 0;
+        _.connect({ from: node, to: gain.gain });
+        _.connect({ from: outlet, to: gain });
 
-      _.connect({ from: node, to: gain.gain });
-      _.connect({ from: outlet, to: gain });
+        return gain;
+      }, _.first(inputs));
 
-      return gain;
-    }, outlet);
+      if (multiple !== 1) {
+        var tmp = outlet;
 
-    if (multiple !== 0 && multiple !== 1) {
-      var tmp = outlet;
+        outlet = context.createGain();
 
-      outlet = context.createGain();
-
-      outlet.gain.value = multiple;
-      _.connect({ from: tmp, to: outlet });
+        outlet.gain.value = multiple;
+        _.connect({ from: tmp, to: outlet });
+      }
     }
 
     return new neume.Unit({
-      outlet: outlet
+      outlet: outlet,
+      offset: 0
     });
 
   });
