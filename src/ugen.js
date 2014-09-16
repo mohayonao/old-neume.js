@@ -7,7 +7,7 @@ var NeuUnit = require("./unit");
 var makeOutlet = require("./ugen-makeOutlet");
 var selectorParser = require("./selector-parser");
 
-function NeuUGen(synth, key, spec, inputs) {
+function NeuUGen(synth, key, spec, _inputs) {
   Emitter.call(this);
 
   var parsed = selectorParser.parse(key);
@@ -22,15 +22,29 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
-  var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
+  var inputs = [];
+  var offset = 0;
+
+  for (var i = 0, imax = _inputs.length; i < imax; i++) {
+    if (typeof _inputs[i] === "number") {
+      offset += _inputs[i];
+    } else {
+      inputs.push(_inputs[i]);
+    }
+  }
+
+  var unit = NeuUGen.registered[parsed.key](this, spec, inputs, offset);
 
   if (!(unit instanceof NeuUnit)) {
     throw new Error("invalid key: " + key);
   }
 
-  this.$unit   = unit;
-  this.$outlet = makeOutlet(this.$context, unit, spec);
-  this.$offset = 0;
+  this.$unit = unit;
+
+  var outlet = makeOutlet(this.$context, unit, spec);
+
+  this.$outlet = outlet.outlet;
+  this.$offset = outlet.offset;
 
   Object.defineProperties(this, {
     context: {
