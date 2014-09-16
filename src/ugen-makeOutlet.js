@@ -8,16 +8,16 @@ _.NeuDC = require("./dc");
  * Apply mul, add
  *
  * @param {AudioContext} context
- * @param {NeuUGen}      ugen
+ * @param {NeuUnit}      unit
  * @param {object}       spec
  * @return {AudioNode}   applied mul, add
  */
-function makeOutlet(context, ugen, spec) {
+function makeOutlet(context, unit, spec) {
   var outlet;
 
   var mul = spec.mul;
   var add = spec.add;
-  var node = _.findAudioNode(ugen);
+  var node = _.findAudioNode(unit);
 
   if (!_.isAudioNode(node)) {
     return null;
