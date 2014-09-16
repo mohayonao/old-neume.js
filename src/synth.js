@@ -2,6 +2,7 @@
 
 var _ = require("./utils");
 
+_.NeuDC      = require("./dc");
 _.NeuUGen    = require("./ugen");
 _.NeuParam   = require("./param");
 _.NeuIn      = require("./in");
@@ -145,9 +146,9 @@ function NeuSynth(context, func, args) {
     });
   };
 
-  var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
+  var result = makeOutlet(context, func.apply(null, [ $ ].concat(args)));
 
-  if (outputs[0] == null && _.isAudioNode(result)) {
+  if (outputs[0] == null) {
     outputs[0] = result;
   }
 
@@ -381,6 +382,31 @@ function validateParam(name) {
       }
     ));
   }
+}
+
+function makeOutlet(context, ugen) {
+  if (!(ugen instanceof _.NeuUGen)) {
+    return context.createGain(); // FIXME: ???
+  }
+
+  var outlet = ugen.$outlet;
+  var offset = ugen.$offset;
+  var gain;
+
+  if (offset !== 0) {
+    var dc = new _.NeuDC(context, offset);
+    if (outlet) {
+      gain = context.createGain();
+      gain.$id = "synth-outlet";
+      _.connect({ from: outlet, to: gain });
+      _.connect({ from: dc    , to: gain });
+      outlet = gain;
+    } else {
+      outlet = dc.$outlet;
+    }
+  }
+
+  return outlet;
 }
 
 module.exports = NeuSynth;
