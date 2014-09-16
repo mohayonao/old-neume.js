@@ -4,86 +4,42 @@ var _ = require("./utils");
 
 _.NeuDC = require("./dc");
 
-/**
- * Apply mul, add
- *
- * @param {AudioContext} context
- * @param {NeuUnit}      unit
- * @param {object}       spec
- * @return {AudioNode}   applied mul, add
- */
 function makeOutlet(context, unit, spec) {
-  var outlet;
+  unit = unit || {};
 
-  var mul = spec.mul;
-  var add = spec.add;
-  var node = _.findAudioNode(unit);
+  var outlet = null;
+  var offset = _.finite(unit.$offset);
+  var gain;
 
-  if (!_.isAudioNode(node)) {
-    return null;
-  }
+  var mul = _.defaults(spec.mul, 1);
+  var add = _.defaults(spec.add, 0);
 
-  if (mul === 0) {
-    if (_.isValidInput(add)) {
-      if (_.isNumber(add)) {
-        add = _.findAudioNode(new _.NeuDC(context, add));
-      }
-      return add;
-    }
-    return _.findAudioNode(new _.NeuDC(context, 0));
-  }
+  outlet = (mul === 0) ? null : _.findAudioNode(unit.$outlet);
 
-  if (_.isValidInput(mul) && mul !== 0 && mul !== 1) {
-    /*
-     * +------+
-     * | node |
-     * +------+
-     *   |
-     * +--------------+
-     * | GainNode     |
-     * | - gain: mul  |
-     * +--------------+
-     *   |
-     */
-    if (node.$maddOptimizable && node.gain.value === 1) {
-      outlet = node;
-      node.$maddOptimizable = false;
+  if (outlet && mul !== 1) {
+    if (outlet.$maddOptimizable) {
+      outlet.gain.value = mul;
+      outlet.$maddOptimizable = false;
     } else {
-      outlet = context.createGain();
-      _.connect({ from: node, to: outlet });
+      gain = context.createGain();
+      _.connect({ from: outlet, to: gain });
+      _.connect({ from: mul, to: gain.gain });
+      outlet = gain;
     }
-
-    outlet.gain.value = 0;
-    _.connect({ from: mul , to: outlet.gain });
-
-    node = outlet;
   }
 
-  if (_.isValidInput(add) && add !== 0) {
-    /*
-     * +------+  +-----+
-     * | node |  | add |
-     * +------+  +-----+
-     *   |         |
-     * +---------------+
-     * | GainNode      |
-     * | - gain: 1     |
-     * +---------------+
-     *   |
-     */
-    outlet = context.createGain();
-
-    if (_.isNumber(add)) {
-      add = new _.NeuDC(context, add);
-    }
-
-    _.connect({ from: node, to: outlet });
-    _.connect({ from: add , to: outlet });
-
-    node = outlet;
+  if (typeof add === "number") {
+    offset += add;
+  } else if (outlet) {
+    gain = context.createGain();
+    _.connect({ from: outlet, to: gain });
+    _.connect({ from: add   , to: gain });
+    outlet = gain;
+  } else {
+    outlet = add;
   }
 
-  return node;
+  return { outlet: outlet, offset: offset };
 }
 
 module.exports = makeOutlet;
