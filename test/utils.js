@@ -416,6 +416,14 @@ describe("utils", function() {
       assert(_.typeOf(NaN) === "nan");
       assert(_.typeOf(new Float32Array()) === "float32array");
       assert(_.typeOf({ constructor: null }) === "object");
+      assert(_.typeOf({ constructor: true }) === "object");
+
+      function A() {} // minified
+      A.$name = "NeuBuffer";
+
+      var a = new A();
+
+      assert(_.typeOf(a) === "neubuffer");
     });
   });
 

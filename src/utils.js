@@ -294,8 +294,13 @@ utils.typeOf = function(value) {
   if (utils.isNaN(value)) {
     return "nan";
   }
-  if (value.constructor && utils.isString(value.constructor.name)) {
-    return value.constructor.name.toLowerCase();
+  if (value.constructor) {
+    if (typeof value.constructor.$name === "string") {
+      return value.constructor.$name.toLowerCase();
+    }
+    if (typeof value.constructor.name === "string") {
+      return value.constructor.name.toLowerCase();
+    }
   }
   return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
 };
