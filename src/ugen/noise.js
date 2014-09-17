@@ -2,6 +2,10 @@ module.exports = function(neume) {
   "use strict";
 
   /**
+   * $("white")
+   *
+   * $("pink")
+   *
    * +------------------+
    * | BufferSourceNode |
    * | - loop: true     |
@@ -54,13 +58,7 @@ module.exports = function(neume) {
   function generatePinkNoise(sampleRate) {
     var noise = new Float32Array(sampleRate);
 
-    var whites = new Uint8Array([
-      (Math.random() * 1073741824) % 25,
-      (Math.random() * 1073741824) % 25,
-      (Math.random() * 1073741824) % 25,
-      (Math.random() * 1073741824) % 25,
-      (Math.random() * 1073741824) % 25,
-    ]);
+    var whites = new Uint8Array([ rand(), rand(), rand(), rand(), rand() ]);
 
     var MAX_KEY = 31;
     var key = 0;
@@ -75,7 +73,7 @@ module.exports = function(neume) {
       var sum = 0;
       for (var j = 0; j < 5; ++j) {
         if (diff & (1 << j)) {
-          whites[j] = (Math.random() * 1073741824) % 25;
+          whites[j] = rand();
         }
         sum += whites[j];
       }
@@ -84,6 +82,10 @@ module.exports = function(neume) {
     }
 
     return noise;
+  }
+
+  function rand() {
+    return ((Math.random() * 1073741824)|0) % 25;
   }
 
 };
