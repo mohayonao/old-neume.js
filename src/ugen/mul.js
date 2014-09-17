@@ -28,31 +28,29 @@ module.exports = function(neume, _) {
 
     var nodes    = [];
     var multiple = 1;
-    var i, imax;
 
-    for (i = 0, imax = inputs.length; i < imax; i++) {
-      if (typeof inputs[i] === "number")  {
-        multiple *= inputs[i];
+    inputs.forEach(function(node) {
+      if (typeof node === "number") {
+        multiple *= node;
       } else {
-        nodes.push(inputs[i]);
+        nodes.push(node);
       }
-    }
-
+    });
     multiple = _.finite(multiple);
 
     if (nodes.length && multiple !== 0) {
       outlet = nodes.shift();
 
-      for (i = 0, imax = nodes.length; i < imax; i++) {
+      outlet = nodes.reduce(function(outlet, node) {
         var gain = context.createGain();
 
         gain.gain.value = 0;
 
-        _.connect({ from: nodes[i], to: gain.gain });
-        _.connect({ from: outlet  , to: gain });
+        _.connect({ from: node  , to: gain.gain });
+        _.connect({ from: outlet, to: gain });
 
-        outlet = gain;
-      }
+        return gain;
+      }, outlet);
 
       if (multiple !== 1) {
         var tmp = outlet;
