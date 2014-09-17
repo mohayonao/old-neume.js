@@ -9,7 +9,6 @@ var selectorParser = require("./selector-parser");
 
 function NeuUGen(synth, key, spec, _inputs) {
   Emitter.call(this);
-
   var parsed = selectorParser.parse(key);
 
   this.$synth   = synth;
@@ -33,7 +32,7 @@ function NeuUGen(synth, key, spec, _inputs) {
     }
   }
 
-  var unit = NeuUGen.registered[parsed.key](this, spec, inputs, offset);
+  var unit = NeuUGen.registered[parsed.key](this, spec, inputs, offset, _inputs);
 
   if (!(unit instanceof NeuUnit)) {
     throw new Error("invalid key: " + key);
