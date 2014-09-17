@@ -40,12 +40,6 @@ var neume = function(context) {
           },
           enumerable: true
         },
-        fill: {
-          value: function(length, func) {
-            return neume.Buffer.fill(context, length, func);
-          },
-          enumerable: true
-        },
         from: {
           value: function(data) {
             return neume.Buffer.from(context, data);
