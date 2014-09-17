@@ -43,9 +43,16 @@ describe("ugen/add", function() {
       synth.start(0);
       audioContext.$process(0.100);
 
-      assert.deepEqual(synth.outlet.toJSON(), DC(6));
+      assert.deepEqual(synth.outlet.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 6,
+          inputs: []
+        },
+        inputs: [ DC(1) ]
+      });
 
-      assert(synth.outlet.buffer.getChannelData(0)[0] === 6);
+      assert(synth.outlet.$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
   });
 
