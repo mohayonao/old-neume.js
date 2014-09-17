@@ -3,15 +3,15 @@ module.exports = function(neume, _) {
 
   /*
    * $("line", {
-   *   start: number=1
-   *   end  : number=1e-6
-   *   dur  : number=1
+   *   start: [number] = 1
+   *   end  : [number] = 0
+   *   dur  : [number] = 1
    * } ... inputs)
    *
    * $("xline", {
-   *   start: number=1
-   *   end  : number=1e-6
-   *   dur  : number=1
+   *   start: [number] = 1
+   *   end  : [number] = 0
+   *   dur  : [number] = 1
    * } ... inputs)
    *
    * +--------+      +-------+
@@ -25,24 +25,27 @@ module.exports = function(neume, _) {
    *   |
    */
   neume.register("line", function(ugen, spec, inputs) {
-    return make("linearRampToValueAtTime", ugen, spec, inputs);
+    var startValue = _.finite(_.defaults(spec.start, 1));
+    var endValue   = _.finite(_.defaults(spec.end  , 0));
+    var duration   = _.finite(_.defaults(spec.dur  , 1));
+    return make("linearRampToValueAtTime", ugen, startValue, endValue, duration, inputs);
   });
 
   neume.register("xline", function(ugen, spec, inputs) {
-    return make("exponentialRampToValueAtTime", ugen, spec, inputs);
+    var startValue = Math.max(1e-6, _.finite(_.defaults(spec.start, 1)));
+    var endValue   = Math.max(1e-6, _.finite(_.defaults(spec.end  , 0)));
+    var duration   = _.finite(_.defaults(spec.dur  , 1));
+    return make("exponentialRampToValueAtTime", ugen, startValue, endValue, duration, inputs);
   });
 
-  function make(curve, ugen, spec, inputs) {
+  function make(curve, ugen, startValue, endValue, duration, inputs) {
     var context = ugen.$context;
 
     var line  = context.createGain();
     var gain  = line.gain;
-    var startValue = _.finite(_.defaults(spec.start, 1));
-    var endValue   = _.finite(_.defaults(spec.end  , 1e-6));
-    var duration   = _.finite(_.defaults(spec.dur  , 1));
     var schedId = 0;
 
-    if (_.isEmpty(inputs)) {
+    if (inputs.length === 0) {
       inputs = [ new neume.DC(context, 1) ];
     }
 
