@@ -227,11 +227,15 @@ describe("NeuUGen", function() {
       var ugen3 = NeuUGen.build(synth, "sin#ugen3", {}, []);
       var ugen4 = ugen0.madd(ugen2, ugen3);
 
+      _.findAudioNode(ugen2).$id = "ugen2";
+      _.findAudioNode(ugen3).$id = "ugen3";
+      _.findAudioNode(ugen4).$id = "ugen4";
+
       assert(ugen4 instanceof NeuUGen);
       assert(ugen4 !== ugen0);
 
       assert.deepEqual(ugen4.$outlet.toJSON(), {
-        name: "GainNode",
+        name: "GainNode#ugen4",
         gain: {
           value: 1,
           inputs: []
@@ -243,7 +247,7 @@ describe("NeuUGen", function() {
               value: 0,
               inputs: [
                 {
-                  name: "OscillatorNode",
+                  name: "OscillatorNode#ugen2",
                   type: "sine",
                   frequency: {
                     value: 440,
@@ -274,7 +278,7 @@ describe("NeuUGen", function() {
             ]
           },
           {
-            name: "OscillatorNode",
+            name: "OscillatorNode#ugen3",
             type: "sine",
             frequency: {
               value: 440,
@@ -287,6 +291,146 @@ describe("NeuUGen", function() {
             inputs: []
           }
         ]
+      });
+    });
+  });
+
+  describe("#_connect(to)", function() {
+    it("connect to an AudioNode without offset", function() {
+      var ugen0 = NeuUGen.build(synth, "sin#ugen0", {}, []);
+      var gain  = context.createGain();
+
+      _.findAudioNode(ugen0).$id = "ugen0";
+
+      ugen0._connect(gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode#ugen0",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+    it("connect to an AudioNode with offset", function() {
+      var ugen0 = NeuUGen.build(synth, "sin#ugen0", { add: 880 }, []);
+      var gain  = context.createGain();
+
+      _.findAudioNode(ugen0).$id = "ugen0";
+
+      ugen0._connect(gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode#ugen0",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          },
+          {
+            name: "GainNode",
+            gain: {
+              value: 880,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
+      });
+      assert(gain.$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
+    });
+    it("connect to an AudioParam without offset", function() {
+      var ugen0 = NeuUGen.build(synth, "sin#ugen0", {}, []);
+      var gain  = context.createGain();
+
+      gain.gain.value = 0;
+
+      _.findAudioNode(ugen0).$id = "ugen0";
+
+      ugen0._connect(gain.gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 0,
+          inputs: [
+            {
+              name: "OscillatorNode#ugen0",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        },
+        inputs: []
+      });
+    });
+    it("connect to an AudioParam with offset", function() {
+      var ugen0 = NeuUGen.build(synth, "sin#ugen0", { add: 880 }, []);
+      var gain  = context.createGain();
+
+      gain.gain.value = 0;
+
+      _.findAudioNode(ugen0).$id = "ugen0";
+
+      ugen0._connect(gain.gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 880,
+          inputs: [
+            {
+              name: "OscillatorNode#ugen0",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        },
+        inputs: []
       });
     });
   });

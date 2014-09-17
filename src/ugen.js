@@ -85,17 +85,6 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
-NeuUGen.prototype._connect = function(to) {
-  _.connect({ from: this.$outlet, to: to });
-  if (this.$offset !== 0) {
-    if (to instanceof window.AudioParam) {
-      to.value = this.$offset;
-    } else if (to instanceof window.AudioNode) {
-      _.connect({ from: new NeuDC(this.$context, this.$offset), to: to });
-    }
-  }
-};
-
 NeuUGen.prototype.add = function(node) {
   return new NeuUGen(this.$synth, "+", {}, [ this, _.defaults(node, 0) ]);
 };
@@ -107,5 +96,26 @@ NeuUGen.prototype.mul = function(node) {
 NeuUGen.prototype.madd = function(mul, add) {
   return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
+
+NeuUGen.prototype._connect = function(to) {
+  _.connect({ from: this.$outlet, to: to });
+  if (this.$offset !== 0) {
+    if (to instanceof window.AudioParam) {
+      to.value = this.$offset;
+    } else {
+      _.connect({ from: createGainDC(this.$context, this.$offset), to: to });
+    }
+  }
+};
+
+function createGainDC(context, offset) {
+  var gain = context.createGain();
+
+  gain.gain.value = offset;
+
+  _.connect({ from: new NeuDC(context, 1), to: gain });
+
+  return gain;
+}
 
 module.exports = NeuUGen;
