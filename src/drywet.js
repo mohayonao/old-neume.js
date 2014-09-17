@@ -43,7 +43,7 @@ function DryWetNode(context, inputs, wetNode, mix) {
 }
 
 function DryWetNumber(context, inputs, wetNode, mix) {
-  mix = Math.max(0, Math.min(mix, 1));
+  mix = _.clip(mix, 0, 1);
 
   var wet = mix;
   var dry = 1 - mix;
