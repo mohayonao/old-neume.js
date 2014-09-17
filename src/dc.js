@@ -32,6 +32,7 @@ function NeuDC(context, value) {
   this.$context = this._bufSrc.context;
   this.$outlet  = this._bufSrc;
 }
+NeuDC.$name = "NeuDC";
 
 /**
  * @return {number} value

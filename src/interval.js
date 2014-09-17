@@ -37,6 +37,7 @@ function NeuInterval(context, interval, callback) {
     },
   });
 }
+NeuInterval.$name = "NeuInterval";
 
 NeuInterval.prototype.start = function(t) {
   t = _.defaults(t, this.$context.currentTime);

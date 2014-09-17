@@ -36,6 +36,7 @@ function NeuContext(context, duration) {
   this._duration = duration;
   this.reset();
 }
+NeuContext.$name = "NeuContext";
 
 _.each([
   "createBuffer",

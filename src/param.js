@@ -19,6 +19,8 @@ function NeuParam(synth, name, value) {
 }
 _.inherits(NeuParam, NeuUGen);
 
+NeuParam.$name = "NeuParam";
+
 NeuParam.prototype.valueOf = function() {
   return this._params.length ? this._params[0].value : /* istanbul ignore next */ 0;
 };

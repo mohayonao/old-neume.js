@@ -54,6 +54,8 @@ function NeuUGen(synth, key, spec, inputs) {
 }
 _.inherits(NeuUGen, Emitter);
 
+NeuUGen.$name = "NeuUGen";
+
 NeuUGen.registered = {};
 
 NeuUGen.register = function(name, func) {

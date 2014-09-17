@@ -210,6 +210,7 @@ function NeuSynth(context, func, args) {
 
   this._methodNames = this._methodNames.sort();
 }
+NeuSynth.$name = "NeuSynth";
 
 NeuSynth.prototype.getMethods = function() {
   return this._methodNames.slice();

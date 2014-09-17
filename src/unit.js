@@ -13,6 +13,7 @@ function NeuUnit(spec) {
   this.$offset  = _.finite(spec.offset);
   this.$methods = _.defaults(spec.methods, {});
 }
+NeuUnit.$name = "NeuUnit";
 
 NeuUnit.prototype.start = function(t) {
   if (this._state === INIT && _.isFunction(this._spec.start)) {

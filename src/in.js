@@ -12,4 +12,6 @@ function NeuIn(synth) {
 }
 _.inherits(NeuIn, _.NeuUGen);
 
+NeuIn.$name = "NeuIn";
+
 module.exports = NeuIn;

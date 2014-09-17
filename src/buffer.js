@@ -32,6 +32,7 @@ function NeuBuffer(context, buffer) {
     });
   }
 }
+NeuBuffer.$name = "NeuBuffer";
 
 NeuBuffer.create = function(context, channels, length, sampleRate) {
   channels   = _.int(_.defaults(channels, 1));

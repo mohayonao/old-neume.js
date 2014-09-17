@@ -17,6 +17,7 @@ NeuSynthDB.prototype.append = function(obj) {
   }
   return this;
 };
+NeuSynthDB.$name = "NeuSynthDB";
 
 NeuSynthDB.prototype.all = function() {
   return this._all;
