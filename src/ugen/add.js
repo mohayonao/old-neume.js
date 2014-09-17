@@ -2,6 +2,8 @@ module.exports = function(neume, _) {
   "use strict";
 
   /**
+   * $("+" ... inputs)
+   *
    * +--------+
    * | inputs |
    * +--------+
@@ -13,23 +15,23 @@ module.exports = function(neume, _) {
    *   |
    */
   neume.register("+", function(ugen, spec, inputs) {
-    var outlet = null;
+    var context = ugen.$context;
+    var outlet  = null;
 
     var nodes  = [];
     var offset = 0;
 
-    for (var i = 0, imax = inputs.length; i < imax; i++) {
-      if (typeof inputs[i] === "number")  {
-        offset += inputs[i];
+    inputs.forEach(function(node) {
+      if (typeof node === "number") {
+        offset += node;
       } else {
-        nodes.push(inputs[i]);
+        nodes.push(node);
       }
-    }
-
+    });
     offset = _.finite(offset);
 
     if (nodes.length) {
-      outlet = ugen.$context.createGain();
+      outlet = context.createGain();
 
       nodes.forEach(function(node) {
         _.connect({ from: node, to: outlet });
