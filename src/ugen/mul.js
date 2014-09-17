@@ -22,9 +22,16 @@ module.exports = function(neume, _) {
    * +------------------+
    *   |
    */
-  neume.register("*", function(ugen, spec, inputs, multiple) {
+  neume.register("*", function(ugen, spec, inputs, multiple, rawInputs) {
     var context = ugen.$context;
     var outlet  = null;
+
+    multiple = rawInputs.reduce(function(a, b) {
+      if (typeof b === "number") {
+        return a * b;
+      }
+      return a;
+    }, 1);
 
     if (inputs.length && multiple !== 0) {
       outlet = _.rest(inputs).reduce(function(outlet, node) {
