@@ -8,6 +8,8 @@ _.NeuParam   = require("./param");
 _.NeuIn      = require("./in");
 _.NeuSynthDB = require("./synthdb");
 
+var makeOutlet = require("./synth-makeOutlet");
+
 var EMPTY_DB = new _.NeuSynthDB();
 var INIT  = 0;
 var START = 1;
@@ -382,31 +384,6 @@ function validateParam(name) {
       }
     ));
   }
-}
-
-function makeOutlet(context, ugen) {
-  if (!(ugen instanceof _.NeuUGen)) {
-    return context.createGain(); // FIXME: ???
-  }
-
-  var outlet = ugen.$outlet;
-  var offset = ugen.$offset;
-  var gain;
-
-  if (offset !== 0) {
-    var dc = new _.NeuDC(context, offset);
-    if (outlet) {
-      gain = context.createGain();
-      gain.$id = "synth-outlet";
-      _.connect({ from: outlet, to: gain });
-      _.connect({ from: dc    , to: gain });
-      outlet = gain;
-    } else {
-      outlet = dc.$outlet;
-    }
-  }
-
-  return outlet;
 }
 
 module.exports = NeuSynth;
