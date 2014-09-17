@@ -5,7 +5,7 @@ module.exports = function(neume, _) {
 
   /**
    * $("shaper", {
-   *   curve: Float32Array|number = 0
+   *   curve: [Float32Array|number] = 0
    * } ... inputs)
    *
    * aliases:
@@ -24,8 +24,8 @@ module.exports = function(neume, _) {
    */
   neume.register("shaper", function(ugen, spec, inputs) {
     var curve = null;
-    if (_.isNumber(spec.curve)) {
-      curve = createCurve(spec.curve);
+    if (typeof spec.curve === "number") {
+      curve = createCurve(_.finite(spec.curve));
     } else {
       curve = spec.curve;
     }
@@ -61,7 +61,7 @@ module.exports = function(neume, _) {
   var curves = {};
 
   function createCurve(amount) {
-    amount = Math.max(0, Math.min(amount, 1));
+    amount = _.clip(amount, 0, 1);
 
     if (!curves[amount]) {
       curves[amount] = (amount === 1) ? createSquare() : createWSCurve(amount);
