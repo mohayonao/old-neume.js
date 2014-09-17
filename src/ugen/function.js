@@ -4,16 +4,36 @@ module.exports = function(neume, _) {
   /* istanbul ignore next */
   var NOP = function() {};
 
+  /**
+   * $(function, {
+   *   lag  : [number] = 0
+   *   curve: [number] = 0
+   * } ... inputs)
+   *
+   * methods:
+   *   setValue(t, value)
+   *   execute(t)
+   *
+   * +--------+      +-------+
+   * | inputs |  or  | DC(1) |
+   * +--------+      +-------+
+   *   ||||||
+   * +-------------------------+
+   * | GainNode                |
+   * | - gain: evaluated value |
+   * +-------------------------+
+   *   |
+   */
   neume.register("function", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gain  = context.createGain();
-    var data  = _.isFunction(spec.value) ? spec.value : /* istanbul ignore next */ NOP;
+    var data  = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
     var count = 0;
 
-    if (_.isEmpty(inputs)) {
+    if (inputs.length === 0) {
       inputs = [ new neume.DC(context, 1) ];
     }
 
@@ -42,7 +62,7 @@ module.exports = function(neume, _) {
       outlet: gain,
       methods: {
         setValue: function(t, value) {
-          if (_.isFunction(value)) {
+          if (typeof value === "function") {
             context.sched(t, function() {
               data = value;
             });
