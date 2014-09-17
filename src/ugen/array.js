@@ -2,10 +2,10 @@ module.exports = function(neume, _) {
   "use strict";
 
   /**
-   * $([], {}
+   * $([], {
    *   mode : enum[ clip, wrap, fold ] = wrap
-   *   lag  : number = 0
-   *   curve: number = 0
+   *   lag  : [number] = 0
+   *   curve: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -35,13 +35,13 @@ module.exports = function(neume, _) {
       fold: _.foldAt,
     }[spec.mode] || /* istanbul ignore next*/ _.wrapAt;
     var lag   = _.finite(spec.lag);
-    var curve = _.finite(spec.lag);
+    var curve = _.finite(spec.curve);
 
-    if (!_.isArray(data) || data.length === 0)  {
+    if (!Array.isArray(data) || data.length === 0)  {
       data = [ 0 ];
     }
 
-    if (_.isEmpty(inputs)) {
+    if (inputs.length === 0) {
       inputs = [ new neume.DC(context, 1) ];
     }
 
@@ -71,7 +71,7 @@ module.exports = function(neume, _) {
       outlet: gain,
       methods: {
         setValue: function(t, value) {
-          if (_.isArray(value)) {
+          if (Array.isArray(value)) {
             context.sched(t, function() {
               data = value;
             });
