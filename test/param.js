@@ -175,4 +175,96 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#_connect(to)", function() {
+    it("works", function() {
+      param = new NeuParam({ $context: context }, "freq", 440);
+
+      var to1 = context.createGain();
+      var to2 = context.createGain();
+      var to3 = context.createGain();
+      var to4 = context.createGain();
+
+      to1.$id = "to1";
+      to2.$id = "to2";
+      to3.$id = "to3";
+      to4.$id = "to4";
+
+      param._connect(to1);
+      param._connect(to1);
+      param._connect(to2);
+      param._connect(to2);
+      param._connect(to3.gain);
+      param._connect(to3.gain);
+      param._connect(to4.gain);
+      param._connect(to4.gain);
+
+      assert.deepEqual(to1.toJSON(), {
+        name: "GainNode#to1",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 440,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
+      });
+      assert(to1.$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
+      assert.deepEqual(to2.toJSON(), {
+        name: "GainNode#to2",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 440,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
+      });
+      assert(to2.$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
+      assert.deepEqual(to3.toJSON(), {
+        name: "GainNode#to3",
+        gain: {
+          value: 440,
+          inputs: []
+        },
+        inputs: []
+      });
+      assert(to3.gain.value === 440);
+
+      assert.deepEqual(to4.toJSON(), {
+        name: "GainNode#to4",
+        gain: {
+          value: 440,
+          inputs: []
+        },
+        inputs: []
+      });
+
+      assert(to1.$inputs[0].gain.value === 440);
+      assert(to2.$inputs[0].gain.value === 440);
+      assert(to3.gain.value === 440);
+      assert(to4.gain.value === 440);
+
+      param.set(220);
+
+      assert(to1.$inputs[0].gain.value === 220);
+      assert(to2.$inputs[0].gain.value === 220);
+      assert(to3.gain.value === 220);
+      assert(to4.gain.value === 220);
+    });
+  });
+
 });

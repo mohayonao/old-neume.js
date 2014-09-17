@@ -19,25 +19,6 @@ function NeuParam(synth, name, value) {
 }
 _.inherits(NeuParam, _.NeuUGen);
 
-NeuParam.prototype._connect = function(to) {
-  // FIXME: test!!!
-  if (this._connected.indexOf(to) === -1) {
-    this._connected.push(to);
-    if (_.isAudioParam(to)) {
-      this._params.push(to);
-      to.setValueAtTime(this._value, 0);
-    } else {
-      if (this.$outlet == null) {
-        this.$outlet = this.$context.createGain();
-        _.connect({ from: new _.NeuDC(this.$context, 1), to: this.$outlet });
-        this._params.push(this.$outlet.gain);
-        this.$outlet.gain.setValueAtTime(this._value, 0);
-      }
-      _.connect({ from: this.$outlet, to: to });
-    }
-  }
-};
-
 NeuParam.prototype.valueOf = function() {
   return this._params.length ? this._params[0].value : /* istanbul ignore next */ 0;
 };
@@ -118,6 +99,26 @@ NeuParam.prototype.cancel = function(startTime) {
   });
 
   return this;
+};
+
+NeuParam.prototype._connect = function(to) {
+  if (this._connected.indexOf(to) !== -1) {
+    return; // if already connected
+  }
+  this._connected.push(to);
+
+  if (to instanceof window.AudioParam) {
+    to.setValueAtTime(this._value, 0);
+    this._params.push(to);
+  } else {
+    if (this.$outlet == null) {
+      this.$outlet = this.$context.createGain();
+      this.$outlet.gain.setValueAtTime(this._value, 0);
+      this._params.push(this.$outlet.gain);
+      _.connect({ from: new _.NeuDC(this.$context, 1), to: this.$outlet });
+    }
+    _.connect({ from: this.$outlet, to: to });
+  }
 };
 
 module.exports = NeuParam;
