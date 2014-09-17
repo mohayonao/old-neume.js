@@ -395,6 +395,15 @@ describe("utils", function() {
     });
   });
 
+  describe(".clip(value, min, max)", function() {
+    it("clip a value", function() {
+      assert(_.clip(-1.5, -1, +1) === -1);
+      assert(_.clip(-0.5, -1, +1) === -0.5);
+      assert(_.clip(+0.5, -1, +1) === +0.5);
+      assert(_.clip(+1.5, -1, +1) === +1);
+    });
+  });
+
   describe(".typeOf(value)", function() {
     it("returns type name", function() {
       assert(_.typeOf(10) === "number");

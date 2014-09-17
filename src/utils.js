@@ -265,6 +265,10 @@ utils.finite = function(value) {
   return value;
 };
 
+utils.clip = function(value, min, max) {
+  return Math.max(min, Math.min(value, max));
+};
+
 utils.typeOf = function(value) {
   if (utils.isNumber(value)) {
     return "number";
