@@ -22,28 +22,37 @@ module.exports = function(neume, _) {
    * +------------------+
    *   |
    */
-  neume.register("*", function(ugen, spec, inputs, multiple, rawInputs) {
+  neume.register("*", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet  = null;
 
-    multiple = rawInputs.reduce(function(a, b) {
-      if (typeof b === "number") {
-        return a * b;
-      }
-      return a;
-    }, 1);
+    var nodes    = [];
+    var multiple = 1;
+    var i, imax;
 
-    if (inputs.length && multiple !== 0) {
-      outlet = _.rest(inputs).reduce(function(outlet, node) {
+    for (i = 0, imax = inputs.length; i < imax; i++) {
+      if (typeof inputs[i] === "number")  {
+        multiple *= inputs[i];
+      } else {
+        nodes.push(inputs[i]);
+      }
+    }
+
+    multiple = _.finite(multiple);
+
+    if (nodes.length && multiple !== 0) {
+      outlet = nodes.shift();
+
+      for (i = 0, imax = nodes.length; i < imax; i++) {
         var gain = context.createGain();
 
         gain.gain.value = 0;
 
-        _.connect({ from: node, to: gain.gain });
-        _.connect({ from: outlet, to: gain });
+        _.connect({ from: nodes[i], to: gain.gain });
+        _.connect({ from: outlet  , to: gain });
 
-        return gain;
-      }, _.first(inputs));
+        outlet = gain;
+      }
 
       if (multiple !== 1) {
         var tmp = outlet;

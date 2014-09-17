@@ -12,13 +12,26 @@ module.exports = function(neume, _) {
    * +------------+
    *   |
    */
-  neume.register("+", function(ugen, spec, inputs, offset) {
+  neume.register("+", function(ugen, spec, inputs) {
     var outlet = null;
 
-    if (inputs.length) {
+    var nodes  = [];
+    var offset = 0;
+
+    for (var i = 0, imax = inputs.length; i < imax; i++) {
+      if (typeof inputs[i] === "number")  {
+        offset += inputs[i];
+      } else {
+        nodes.push(inputs[i]);
+      }
+    }
+
+    offset = _.finite(offset);
+
+    if (nodes.length) {
       outlet = ugen.$context.createGain();
 
-      inputs.forEach(function(node) {
+      nodes.forEach(function(node) {
         _.connect({ from: node, to: outlet });
       });
 

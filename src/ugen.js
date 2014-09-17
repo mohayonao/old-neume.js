@@ -23,8 +23,7 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$class = parsed.class;
   this.$id    = parsed.id;
 
-  var items = partitionSumAndElse(inputs);
-  var unit  = NeuUGen.registered[parsed.key](this, spec, items[1], items[0], inputs);
+  var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   if (!(unit instanceof NeuUnit)) {
     throw new Error("invalid key: " + key);
@@ -98,21 +97,6 @@ NeuUGen.prototype._connect = function(to) {
     }
   }
 };
-
-function partitionSumAndElse(inputs) {
-  var sum = 0;
-  var els = [];
-
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    if (typeof inputs[i] === "number") {
-      sum += inputs[i];
-    } else {
-      els.push(inputs[i]);
-    }
-  }
-
-  return [ sum, els ];
-}
 
 function createGainDC(context, offset) {
   var gain = context.createGain();
