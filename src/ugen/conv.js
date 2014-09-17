@@ -14,8 +14,11 @@ module.exports = function(neume, _) {
    *   |
    */
   neume.register("conv", function(ugen, spec, inputs) {
+    var context = ugen.$context;
     var buffer = _.findAudioBuffer(spec.buffer);
-    var conv = ugen.$context.createConvolver();
+    var conv = context.createConvolver();
+
+    var mix = _.defaults(spec.mix, 1);
 
     /* istanbul ignore else */
     if (buffer != null) {
@@ -23,12 +26,10 @@ module.exports = function(neume, _) {
     }
     conv.normalize = !!_.defaults(spec.normalize, true);
 
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: conv });
-    });
+    var outlet = new neume.DryWet(context, inputs, conv, mix);
 
     return new neume.Unit({
-      outlet: conv
+      outlet: outlet
     });
   });
 
