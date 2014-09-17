@@ -81,6 +81,7 @@ neume.Param    = require("./param");
 neume.Unit     = require("./unit");
 neume.DC       = require("./dc");
 neume.Buffer   = require("./buffer");
+neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
 
 neume.build = function(context, spec) {
