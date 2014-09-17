@@ -41,26 +41,6 @@ NeuBuffer.create = function(context, channels, length, sampleRate) {
   return new NeuBuffer(context, context.createBuffer(channels, length, sampleRate));
 };
 
-NeuBuffer.fill = function(context, length, func) {
-  length = _.int(_.defaults(length, 0));
-
-  if (!_.isFunction(func)) {
-    var value = _.finite(func);
-    func = function() {
-      return value;
-    };
-  }
-
-  var buffer = context.createBuffer(1, length, context.sampleRate);
-  var chData = buffer.getChannelData(0);
-
-  for (var i = 0, imax = length; i < imax; i++) {
-    chData[i] = func(i, imax);
-  }
-
-  return new NeuBuffer(context, buffer);
-};
-
 NeuBuffer.from = function(context, data) {
   var buffer = context.createBuffer(1, data.length, context.sampleRate);
   var chData = buffer.getChannelData(0);
@@ -114,7 +94,7 @@ function decodeAudioData(context, audioData) {
 }
 
 NeuBuffer.prototype.getChannelData = function(ch) {
-  ch = Math.max(0, Math.min(_.int(ch), this.numberOfChannels - 1));
+  ch = _.clip(_.int(ch), 0, this.numberOfChannels - 1);
 
   return this.$buffer.getChannelData(ch);
 };

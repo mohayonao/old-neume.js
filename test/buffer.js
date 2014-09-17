@@ -38,31 +38,6 @@ describe("NeuBuffer", function() {
     });
   });
 
-  describe(".fill(context, length, func)", function() {
-    it("returns an instance of NeuBuffer", function() {
-      var buffer = NeuBuffer.fill(context, 4, [ 1 ]);
-
-      assert(buffer instanceof NeuBuffer);
-      assert(buffer.sampleRate === audioContext.sampleRate);
-      assert(buffer.length === 4);
-      assert(buffer.duration === 4 / audioContext.sampleRate);
-      assert(buffer.numberOfChannels === 1);
-      assert.deepEqual(buffer[0], new Float32Array([ 1, 1, 1, 1 ]));
-    });
-    it("returns an instance of NeuBuffer", function() {
-      var buffer = NeuBuffer.fill(context, 4, function(i) {
-        return i;
-      });
-
-      assert(buffer instanceof NeuBuffer);
-      assert(buffer.sampleRate === audioContext.sampleRate);
-      assert(buffer.length === 4);
-      assert(buffer.duration === 4 / audioContext.sampleRate);
-      assert(buffer.numberOfChannels === 1);
-      assert.deepEqual(buffer[0], new Float32Array([ 0, 1, 2, 3 ]));
-    });
-  });
-
   describe(".from(context, from)", function() {
     it("returns an instance of NeuBuffer", function() {
       var buffer = NeuBuffer.from(context, [ 1, 2, 3, 4, 5, 6, 7, 8 ]);
