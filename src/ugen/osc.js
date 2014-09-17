@@ -136,7 +136,7 @@ module.exports = function(neume, _) {
     gain.gain.value = 0;
     _.connect({ from: osc, to: gain.gain });
 
-    _.each(inputs, function(node) {
+    inputs.forEach(function(node) {
       _.connect({ from: node, to: gain });
     });
 
