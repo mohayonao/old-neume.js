@@ -1,6 +1,16 @@
 module.exports = function(neume) {
   "use strict";
 
+  /**
+   * $("media", {
+   *   media: [HTMLMediaElement] = null
+   * })
+   *
+   * $(HTMLAudioElement)
+   *
+   * $(HTMLVideoElement)
+   *
+   */
   neume.register("media", function(ugen, spec) {
     return make(setup(ugen, spec.media));
   });
