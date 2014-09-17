@@ -2,10 +2,18 @@ module.exports = function(neume, _) {
   "use strict";
 
   /**
-   * +------------+
-   * | ...inputs  |
-   * +------------+
-   *   |
+   * $("comp", {
+   *   threshold: [number|UGen] = -24
+   *   knee     : [number|UGen] =  30
+   *   ratio    : [number|UGen] =  12
+   *   attack   : [number|UGen] =  0.003
+   *   release  : [number|UGen] =  0.250
+   * } ... inputs)
+   *
+   * +--------+
+   * | inputs |
+   * +--------+
+   *   ||||||
    * +-----------------------------+
    * | DynamicsCompressorNode      |
    * | - threshold: threshold(-24) |
