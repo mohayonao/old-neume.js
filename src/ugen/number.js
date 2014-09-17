@@ -28,7 +28,7 @@ module.exports = function(neume, _) {
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
 
-    if (_.isEmpty(inputs)) {
+    if (inputs.length === 0) {
       inputs = [ new neume.DC(context, 1) ];
     }
 
