@@ -2,19 +2,30 @@ module.exports = function(neume, _) {
   "use strict";
 
   /**
-   * +------------+
-   * | ...inputs  |
-   * +------------+
-   *   |
-   * +------------------------------+
-   * | ConvolverNode                |
-   * | - buffer: buffer(null)       |
-   * | - normalize: normalize(true) |
-   * +------------------------------+
+   * $("conv", {
+   *   buffer   : [AudioBuffer|NeuBuffer] = null
+   *   normalize: [boolean]               = true
+   *   mix      : [number|UGen]           = 1
+   * } ... inputs)
+   *
+   * +--------+
+   * | inputs |
+   * +--------+
+   *   |    |
+   *   |  +------------------------------+
+   *   |  | ConvolverNode                |
+   *   |  | - buffer: buffer(null)       |
+   *   |  | - normalize: normalize(true) |
+   *   |  +------------------------------+
+   *   |    |
+   * +--------+
+   * | DryWet |
+   * +--------+
    *   |
    */
   neume.register("conv", function(ugen, spec, inputs) {
     var context = ugen.$context;
+
     var buffer = _.findAudioBuffer(spec.buffer);
     var conv = context.createConvolver();
 
