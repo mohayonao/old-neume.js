@@ -1,23 +1,12 @@
 "use strict";
 
 global.window = global;
-global.assert = require("power-assert");
-global.sinon  = require("sinon");
 
-require("espower-loader")({
-  cwd: process.cwd(),
-  pattern: "test/**/*.js"
-});
+global.window.navigator = {};
 
-global.closeTo = function(actual, expected, delta) {
-  return Math.abs(actual - expected) <= delta;
-};
+global.window.Promise = require("promise");
 
-global.navigator = {};
-
-global.Promise = require("promise");
-
-global.XMLHttpRequest = (function() {
+global.window.XMLHttpRequest = (function() {
   function XMLHttpRequest() {
   }
   XMLHttpRequest.prototype.open = function(method, url) {
@@ -37,6 +26,20 @@ global.XMLHttpRequest = (function() {
   };
   return XMLHttpRequest;
 })();
+
+require("web-audio-test-api");
+
+global.assert = require("power-assert");
+global.sinon  = require("sinon");
+
+require("espower-loader")({
+  cwd: process.cwd(),
+  pattern: "test/**/*.js"
+});
+
+global.closeTo = function(actual, expected, delta) {
+  return Math.abs(actual - expected) <= delta;
+};
 
 global.DC = function(/* value */) {
   return {
@@ -58,5 +61,3 @@ global.DC = function(/* value */) {
     inputs: []
   };
 };
-
-require("web-audio-test-api");
