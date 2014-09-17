@@ -108,7 +108,7 @@ NeuContext.prototype.start = function() {
 };
 
 function startRendering() {
-  this._currentTimeIncr = Math.max(0, Math.min(_.finite(this._duration), MAX_RENDERING_SEC));
+  this._currentTimeIncr = _.clip(_.finite(this._duration), 0, MAX_RENDERING_SEC);
   onaudioprocess.call(this, { playbackTime: 0 });
 }
 
