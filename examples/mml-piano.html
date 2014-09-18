@@ -122,8 +122,8 @@
     "use strict";
 
     var MMLVisualizer = (function() {
-      function MMLVisualizer(analyer, spec) {
-        this._analyer = analyer;
+      function MMLVisualizer(analyser, spec) {
+        this._analyser = analyser;
 
         this.width  = spec.width;
         this.height = spec.height;
@@ -230,7 +230,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    visualizer = new MMLVisualizer(Neume.analyer, { width: canvas.width(), height: 240 });
+    visualizer = new MMLVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, -100, -75);
 

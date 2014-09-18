@@ -156,11 +156,11 @@
   $(function() {
     "use strict";
     var WaveVisualizer = (function() {
-      function WaveVisualizer(analyer, spec) {
-        this._analyer = analyer;
+      function WaveVisualizer(analyser, spec) {
+        this._analyser = analyser;
 
         this._state = "init";
-        this._timeData = new Uint8Array(analyer.frequencyBinCount);
+        this._timeData = new Uint8Array(analyser.frequencyBinCount);
         this._canvas   = spec.canvas;
         this._canvas.width  = spec.width;
         this._canvas.height = spec.height;
@@ -204,7 +204,7 @@
       };
 
       WaveVisualizer.prototype.render = function(t) {
-        this._analyer.getByteTimeDomainData(this._timeData);
+        this._analyser.getByteTimeDomainData(this._timeData);
         this._context.fillRect(0, 0, this.width, this.height);
 
         var imageData = this._context.getImageData(0, 0, this.width, this.height);
@@ -244,7 +244,7 @@
 
     var canvas = document.getElementById("canvas");
 
-    var visualizer = new WaveVisualizer(Neume.analyer, {
+    var visualizer = new WaveVisualizer(Neume.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
