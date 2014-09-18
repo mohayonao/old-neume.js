@@ -230,7 +230,7 @@ describe("NeuSynth", function() {
         sinon.spy(ugen.$unit, "start");
       });
 
-      assert(synth.state === "init", "00:00.000");
+      assert(synth.state === "UNSCHEDULED", "00:00.000");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.start.called === false, "00:00.000");
       });
@@ -239,20 +239,20 @@ describe("NeuSynth", function() {
       synth.start(1.250);
 
       audioContext.$process(0.5);
-      assert(synth.state === "ready", "00:00.500");
+      assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.called === false, "00:00.500");
+        assert(ugen.$unit.start.called === true, "00:00.500");
       });
 
       audioContext.$process(0.5);
-      assert(synth.state === "start", "00:01.000");
+      assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.start.calledOnce === true, "00:01.000");
         assert.deepEqual(ugen.$unit.start.firstCall.args, [ 1 ]);
       });
 
       audioContext.$process(0.5);
-      assert(synth.state === "start", "00:01.500");
+      assert(synth.state === "PLAYING", "00:01.500");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.start.calledTwice === false, "00:01.500");
       });
@@ -275,7 +275,7 @@ describe("NeuSynth", function() {
         sinon.spy(ugen.$unit, "stop");
       });
 
-      assert(synth.state === "init", "00:00.000");
+      assert(synth.state === "UNSCHEDULED", "00:00.000");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.stop.called === false, "00:00.000");
       });
@@ -285,25 +285,25 @@ describe("NeuSynth", function() {
       synth.stop(2.000);
 
       audioContext.$process(0.5);
-      assert(synth.state === "ready", "00:00.500");
+      assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.stop.called === false, "00:00.500");
       });
 
       audioContext.$process(0.5);
-      assert(synth.state === "start", "00:01.000");
+      assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.stop.called === false, "00:01.000");
       });
 
       audioContext.$process(0.5);
-      assert(synth.state === "start", "00:01.500");
+      assert(synth.state === "PLAYING", "00:01.500");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.stop.called === false, "00:01.500");
       });
 
       audioContext.$process(0.5);
-      assert(synth.state === "stop", "00:02.000");
+      assert(synth.state === "FINISHED", "00:02.000");
       ugens.forEach(function(ugen) {
         assert(ugen.$unit.stop.calledOnce === true, "00:02.000");
         assert.deepEqual(ugen.$unit.stop.firstCall.args, [ 2 ]);

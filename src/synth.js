@@ -159,7 +159,7 @@ function NeuSynth(context, func, args) {
   this._routing = [];
   this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
-  this._stateString = "init";
+  this._stateString = "UNSCHEDULED";
   this._timers = timers;
   this._methodNames = [];
 
@@ -221,29 +221,29 @@ NeuSynth.prototype.start = function(t) {
 
   if (this._state === INIT) {
     this._state = START;
-    this._stateString = "ready";
+    this._stateString = "SCHEDULED";
 
-    this.$context.sched(t, function(t) {
-      this._stateString = "start";
-
-      if (this._routing.length === 0) {
-        _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
-      } else {
-        this._routing.forEach(function(destinations, output) {
-          destinations.forEach(function(destination) {
-            _.connect({ from: this.$outputs[output], to: destination });
-          }, this);
-        }, this);
-      }
-
-      this._db.all().forEach(function(ugen) {
-        ugen.$unit.start(t);
-      });
-
-      this._timers.forEach(function(timer) {
-        timer.start(t);
-      });
+    this.$context.sched(t, function() {
+      this._stateString = "PLAYING";
     }, this);
+
+    if (this._routing.length === 0) {
+      _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
+    } else {
+      this._routing.forEach(function(destinations, output) {
+        destinations.forEach(function(destination) {
+          _.connect({ from: this.$outputs[output], to: destination });
+        }, this);
+      }, this);
+    }
+
+    this._db.all().forEach(function(ugen) {
+      ugen.$unit.start(t);
+    });
+
+    this._timers.forEach(function(timer) {
+      timer.start(t);
+    });
 
     this.$context.start(); // auto start(?)
   }
@@ -258,7 +258,7 @@ NeuSynth.prototype.stop = function(t) {
     this._state = STOP;
 
     this.$context.sched(t, function(t) {
-      this._stateString = "stop";
+      this._stateString = "FINISHED";
 
       this.$context.nextTick(function() {
         this.$outputs.forEach(function(output) {
