@@ -48,7 +48,8 @@
 
   <script id="example">
   var mmlData    = null;
-  var visualizer = null;
+  var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/MMLEmitter/
+  var visualizer = null; // three.js  : http://threejs.org/
 
   $.get("./invention.mml").then(function(data) {
     mmlData = data;
@@ -70,7 +71,7 @@
     return $("xline", { start: 0.75, end: 0.01, dur: dur * 5 },
       $("clip", $("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 10 },
         $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
-          return $("delay", { delayTime: i * 0.000175 }, $("saw", { freq: freq * x }));
+          return $("saw", { freq: freq * x });
         }))
       ))
     ).on("end", function(e) {
@@ -79,20 +80,17 @@
   });
 
   var Reverb = new Neume(function($, buffer) {
-    return $("conv", { buffer: buffer }, $.in(0));
+    return $("conv", { buffer: buffer, mix: 0.75 }, $.in(0));
   });
-
-  var mml = null;
 
   function start() {
     var reverb = new Reverb(
       createReverbBuffer({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 })
     ).start();
 
-    // MMLEmitter: https://github.com/mohayonao/MMLEmitter
-    mml = new MMLEmitter(Neume.context, mmlData);
+    mmlEmitter = new MMLEmitter(Neume.context, mmlData);
 
-    mml.tracks.forEach(function(track) {
+    mmlEmitter.tracks.forEach(function(track) {
       track.on("note", function(e) {
         // routing: Piano[output:0] -> Reverb[input:0] -> destination
         new Piano(e.frequency, e.duration).connect(reverb).start(e.playbackTime);
@@ -100,13 +98,15 @@
       });
     });
 
-    mml.start();
+    mmlEmitter.start();
+    visualizer.start();
   }
 
   function stop() {
-    if (mml) {
-      mml.stop();
+    if (mmlEmitter) {
+      mmlEmitter.stop();
     }
+    visualizer.stop();
   }
   </script>
 
@@ -246,10 +246,8 @@
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start();
-            visualizer.start();
           } else {
             stop();
-            visualizer.stop();
           }
         }
       }
