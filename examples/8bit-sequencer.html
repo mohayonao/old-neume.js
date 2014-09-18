@@ -14,11 +14,11 @@
       -ms-user-select: none;
       margin-top: 10px;
     }
-    .pattern li:nth-child(4n+1) {
-      margin-left: 10px;
+    .pattern li:nth-child(4n+2) {
+      margin-left: 6px;
     }
-    .pattern li:nth-child(16n+1) {
-      margin-left: 16px;
+    .pattern li:nth-child(16n+2) {
+      margin-left: 10px;
     }
     #start {
       margin: 10px 0;
@@ -39,7 +39,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
-  <script src="http://mohayonao.github.io/gretro/build/gretro.min.js"></script>
+  <script src="//mohayonao.github.io/gretro/build/gretro.min.js"></script>
   <script src="../build/neume.js"></script>
 </head>
 <body>
@@ -49,6 +49,7 @@
     <div id="app">
       <div class="pattern">
         <ul class="list-inline" v-repeat="score">
+          <li style="width:40px">{{ $root.$data.caption[$index] }}</li>
           <li v-repeat="$data" v-on="click: $data.checked = 1 - $data.checked">{{ $data.checked ? 'O' : '-' }}</li>
         </ul>
       </div>
@@ -65,12 +66,16 @@
   </div>
 
   <script id="example">
+  var visualizer = null; // gretro: http://mohayonao.github.io/gretro/
+
+  // create a PeriodicWave from the array
   var famiconTriangle = Neume.Buffer.from([
     +0.000, +0.125, +0.250, +0.375, +0.500, +0.625, +0.750, +0.875,
     +0.875, +0.750, +0.625, +0.500, +0.375, +0.250, +0.125, +0.000,
     -0.125, -0.250, -0.375, -0.500, -0.625, -0.750, -0.875, -1.000,
     -1.000, -0.875, -0.750, -0.625, -0.500, -0.375, -0.250, -0.125 ]).resample(4096, false).toPeriodicWave();
 
+  // define synth
   var Seq1 = new Neume(function($, freq) {
     return $("xline", { start: 0.05, dur: 0.250 },
       $(famiconTriangle, { freq: freq * 0.99 }), $(famiconTriangle, { freq: freq * 1.01 })
@@ -99,7 +104,7 @@
 
   var Snare = new Neume(function($, dur) {
     return $("xline", { start: 0.1, dur: dur * 0.1 },
-      $("lpf", { freq: 2400, Q: 10 }, $("white"))
+      $("lpf", { freq: 2400, Q: 10 }, $("pink"))
     ).on("end", function(e) {
       this.stop(e.playbackTime);
     });
@@ -109,7 +114,7 @@
     return $("xline", { start: 0.8, dur: 0.100 },
       $("lowshelf", { freq: 120, gain: 10 },
         $("clip", { mul: 0.4 }, $("tri", { freq: 80, mul: 2 })),
-        $("white", { mul: 0.05 })
+        $("pink", { mul: 0.05 })
       )
     ).on("end", function(e) {
       this.stop(e.playbackTime);
@@ -130,21 +135,24 @@
     timer = new Neume.Interval(0.125, function(e) {
       var index = e.count % 32;
 
-      _.each(instruments, function(instrument, i) {
-        var arg = wrapAt(instrument.arg, index);
-
+      instruments.forEach(function(instrument, i) {
         if (score[i][index].checked) {
-          new instrument.Synth(arg).start(e.playbackTime);
+          var arg  = wrapAt(instrument.arg, index);
+          var when = e.playbackTime;
+
+          new instrument.Synth(arg).start(when);
         }
       });
 
     }).start();
+    visualizer.start();
   }
 
   function stop() {
     if (timer) {
       timer.stop();
     }
+    visualizer.stop();
   }
 
   function wrapAt(list, index) {
@@ -157,8 +165,11 @@
     "use strict";
     var WaveVisualizer = (function() {
       function WaveVisualizer(analyser, spec) {
-        this._analyser = analyser;
+        this.width  = spec.width;
+        this.height = spec.height;
 
+        this._analyser = analyser
+        this._analyser.fftSize = 512;
         this._state = "init";
         this._timeData = new Uint8Array(analyser.frequencyBinCount);
         this._canvas   = spec.canvas;
@@ -167,25 +178,8 @@
         this._context = this._canvas.getContext("2d");
         this._context.fillStyle = "rgb(0, 0, 32)";
         this._context.fillRect(0, 0, spec.width, spec.height);
-        this._context.fillStyle = "rgba(0, 0, 32, 0.05)";
+        this._context.fillStyle = "rgba(0, 0, 32, 0.075)";
         this._drawX = 0;
-
-        Object.defineProperties(this, {
-          width: {
-            value: spec.width,
-            enumerable: true
-          },
-          height: {
-            value: spec.height,
-            enumerable: true
-          },
-          state: {
-            get: function() {
-              return this._state;
-            },
-            enumerable: true
-          },
-        })
       }
 
       WaveVisualizer.prototype.start = function() {
@@ -223,17 +217,18 @@
         var data = this._timeData;
         var tile = ((t * 0.005)|0) % 16;
 
-        grCanvas.stroke([ 4, 13, tile ]);
+        grCanvas.noStroke().fill([ 4, 13, tile ]);
 
         for (var i = 0, imax = data.length; i < imax; i += 4) {
-          var x1 = this._drawX;
-          var y1 = this.height * 0.5;
-          var x2 = x1;
-          var y2 = y1 - ((data[i] / 256) - 0.5) * 8 * this.height;
+          var x = this._drawX;
+          var y = this.height * 0.5;
+          var w = 8;
+          var h = ((data[i] / 256) - 0.5) * 8 * this.height;
 
-          grCanvas.line(x1, y1, x2, y2);
+          grCanvas.rect(x, y, w, -h);
 
-          if (this.width <= ++this._drawX) {
+          this._drawX += w;
+          if (this.width <= this._drawX) {
             this._drawX = 0;
           }
         }
@@ -244,7 +239,7 @@
 
     var canvas = document.getElementById("canvas");
 
-    var visualizer = new WaveVisualizer(Neume.analyser, {
+    visualizer = new WaveVisualizer(Neume.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
@@ -252,6 +247,7 @@
       el: "#app",
       data: {
         isPlaying: false,
+        caption: [ "Seq1", "Seq2", "HH", "SD", "BD" ],
         score: _.map([
           [ 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
             0, 1, 0, 0,  1, 0, 1, 0,  0, 0, 1, 0,  1, 0, 1, 1, ],
@@ -274,10 +270,8 @@
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);
-            visualizer.start();
           } else {
             stop();
-            visualizer.stop();
           }
         }
       }
