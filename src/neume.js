@@ -8,7 +8,7 @@ var _ = require("./utils");
 
 var neume = function(context) {
   function Neume(spec) {
-    return neume.build(context, spec);
+    return new neume.SynthDef(context, spec);
   }
 
   var audioContext = _.findAudioContext(context);
@@ -33,13 +33,9 @@ var neume = function(context) {
       enumerable: true
     },
     Buffer: {
-      value: Object.defineProperties({}, {
-        create: {
-          value: function(channels, length, sampleRate) {
-            return neume.Buffer.create(context, channels, length, sampleRate);
-          },
-          enumerable: true
-        },
+      value: Object.defineProperties(function(channels, length, sampleRate) {
+        return neume.Buffer.create(context, channels, length, sampleRate);
+      }, {
         from: {
           value: function(data) {
             return neume.Buffer.from(context, data);
@@ -78,10 +74,6 @@ neume.Buffer   = require("./buffer");
 neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
 
-neume.build = function(context, spec) {
-  return new neume.SynthDef(context, spec);
-};
-
 neume.register = function(name, func) {
   neume.UGen.register(name, func);
   return neume;
@@ -115,22 +107,26 @@ var context = new neume.Context(new window.AudioContext());
 
 neume.Neume = Object.defineProperties(
   neume(context), {
+    use: {
+      value: neume.use,
+      enumerable: true
+    },
     render: {
       value: function(duration, func) {
         return neume.render(context, duration, func);
       },
       enumerable: true
     },
-    use: {
-      value: neume.use,
-      enumerable: true
-    },
     master: {
-      value: context.getMasterGain(),
+      get: function() {
+        return context.getMasterGain();
+      },
       enumerable: true
     },
-    analyer: {
-      value: context.getAnalyser(),
+    analyser: {
+      get: function() {
+        return context.getAnalyser();
+      },
       enumerable: true
     }
   }
