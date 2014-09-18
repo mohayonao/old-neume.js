@@ -47,8 +47,9 @@
   </div>
 
   <script id="example">
-  var buffer = null;
+  var visualizer = null; // three.js: http://threejs.org/
 
+  var buffer = null;
   Neume.Buffer.load("./amen.wav").then(function(result) {
     buffer = result;
   }).catch(function(e) {
@@ -116,12 +117,14 @@
         new Granular(buffer, 4).start(e.playbackTime);
       }).start();
     }
+    visualizer.start();
   }
 
   function stop() {
     if (timer) {
       timer.stop();
     }
+    visualizer.stop();
   }
   </script>
 
@@ -138,6 +141,9 @@
 
     var WaveVisualizer = (function() {
       function WaveVisualizer(analyser, spec) {
+        this.width  = spec.width;
+        this.height = spec.height;
+
         this._analyser = analyser;
 
         this._scene  = new THREE.Scene();
@@ -154,35 +160,13 @@
         }
         this._renderer.setSize(spec.width, spec.height);
 
+        this.domElement = this._renderer.domElement;
+        this.camera     = this._camera;
+
         this._state = "init";
         this._timeData = new Uint8Array(analyser.frequencyBinCount);
         this._freqData = new Uint8Array(analyser.frequencyBinCount);
         this._waves = [];
-
-        Object.defineProperties(this, {
-          width: {
-            value: spec.width,
-            enumerable: true
-          },
-          height: {
-            value: spec.height,
-            enumerable: true
-          },
-          state: {
-            get: function() {
-              return this._state;
-            },
-            enumerable: true
-          },
-          domElement: {
-            value: this._renderer.domElement,
-            enumerable: true
-          },
-          camera: {
-            value: this._camera,
-            enumerable: true
-          }
-        })
       }
 
       WaveVisualizer.prototype.start = function() {
@@ -280,7 +264,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    var visualizer = new WaveVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
+    visualizer = new WaveVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, 0, -300);
 
@@ -296,10 +280,8 @@
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);
-            visualizer.start();
           } else {
             stop();
-            visualizer.stop();
           }
         }
       }
