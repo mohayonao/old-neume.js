@@ -28,7 +28,7 @@ describe("NeuInterval", function() {
       context.reset();
       context.start();
 
-      assert(interval.state === "init", "00:00.000");
+      assert(interval.state === "UNSCHEDULED", "00:00.000");
       assert(passed === null);
 
       interval.stop(0.100);
@@ -37,39 +37,39 @@ describe("NeuInterval", function() {
       interval.stop(0.400);
 
       audioContext.$process(0.050);
-      assert(interval.state === "ready", "00:00.050");
+      assert(interval.state === "SCHEDULED", "00:00.050");
       assert(passed === null, "00:00.050");
 
       audioContext.$process(0.050);
-      assert(interval.state === "ready", "00:00.100");
+      assert(interval.state === "SCHEDULED", "00:00.100");
       assert(passed === null, "00:00.100");
 
       audioContext.$process(0.050);
-      assert(interval.state === "ready", "00:00.150");
+      assert(interval.state === "SCHEDULED", "00:00.150");
       assert(passed === null, "00:00.150");
 
       audioContext.$process(0.050);
-      assert(interval.state === "start", "00:00.200");
+      assert(interval.state === "PLAYING", "00:00.200");
       assert.deepEqual(passed, { playbackTime: 0.200, count: 0 }, "00:00.200");
 
       audioContext.$process(0.050);
-      assert(interval.state === "start", "00:00.250");
+      assert(interval.state === "PLAYING", "00:00.250");
       assert.deepEqual(passed, { playbackTime: 0.200, count: 0 }, "00:02.500");
 
       audioContext.$process(0.055);
-      assert(interval.state === "start", "00:00.305");
+      assert(interval.state === "PLAYING", "00:00.305");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 1 }, "00:00.305");
 
       audioContext.$process(0.045);
-      assert(interval.state === "start", "00:00.350");
+      assert(interval.state === "PLAYING", "00:00.350");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 1 }, "00:00.350");
 
       audioContext.$process(0.050);
-      assert(interval.state === "stop", "00:00.400");
+      assert(interval.state === "FINISHED", "00:00.400");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 1 }, "00:00.400");
 
       audioContext.$process(0.050);
-      assert(interval.state === "stop", "00:00.450");
+      assert(interval.state === "FINISHED", "00:00.450");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 1 }, "00:00.450");
     });
     describe("invalid case", function() {
@@ -79,15 +79,15 @@ describe("NeuInterval", function() {
         audioContext.$reset();
         interval.$context.reset();
 
-        assert(interval.state === "init", "00:00.000");
+        assert(interval.state === "UNSCHEDULED", "00:00.000");
 
         interval.start(0.000);
 
         audioContext.$process(0.010);
-        assert(interval.state === "ready", "00:00.010");
+        assert(interval.state === "SCHEDULED", "00:00.010");
 
         audioContext.$process(0.020);
-        assert(interval.state === "ready", "00:00.020");
+        assert(interval.state === "SCHEDULED", "00:00.020");
       });
     });
 
