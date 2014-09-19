@@ -22,7 +22,7 @@ _.inherits(NeuParam, NeuUGen);
 NeuParam.$name = "NeuParam";
 
 NeuParam.prototype.valueOf = function() {
-  return this._params.length ? this._params[0].value : /* istanbul ignore next */ 0;
+  return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
 };
 
 NeuParam.prototype.set = function(value) {
@@ -31,7 +31,10 @@ NeuParam.prototype.set = function(value) {
   var startTime = this.$context.currentTime;
   var params = this._params;
 
+  this._value = value;
+
   for (var i = 0, imax = params.length; i < imax; i++) {
+    params[i].value = value;
     params[i].setValueAtTime(value, startTime);
   }
 
@@ -123,6 +126,7 @@ NeuParam.prototype._connect = function(to, output, input) {
   this._connected.push(to);
 
   if (to instanceof window.AudioParam) {
+    to.value = this._value;
     to.setValueAtTime(this._value, 0);
     this._params.push(to);
   } else {
