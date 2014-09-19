@@ -11,19 +11,17 @@ var neume = function(context) {
     return new neume.SynthDef(context, spec);
   }
 
-  var audioContext = _.findAudioContext(context);
-
   Object.defineProperties(Neume, {
     context: {
-      value: audioContext,
+      value: context.$context,
       enumerable: true
     },
-    outlet: {
-      value: _.findAudioNode(context),
+    destination: {
+      value: context.$destination,
       enumerable: true
     },
     sampleRate: {
-      value: audioContext.sampleRate,
+      value: context.sampleRate,
       enumerable: true
     },
     currentTime: {
@@ -98,38 +96,47 @@ neume.render = function(context, duration, func) {
     audioContext.oncomplete = function(e) {
       resolve(new neume.Buffer(context, e.renderedBuffer));
     };
-    func(neume(new neume.Context(audioContext, duration)));
+    func(neume(new neume.Context(audioContext.destination, duration)));
     audioContext.startRendering();
   });
 };
 
-var context = new neume.Context(new window.AudioContext());
-
-neume.Neume = Object.defineProperties(
-  neume(context), {
-    use: {
-      value: neume.use,
-      enumerable: true
-    },
-    render: {
-      value: function(duration, func) {
-        return neume.render(context, duration, func);
-      },
-      enumerable: true
-    },
-    master: {
-      get: function() {
-        return context.getMasterGain();
-      },
-      enumerable: true
-    },
-    analyser: {
-      get: function() {
-        return context.getAnalyser();
-      },
-      enumerable: true
-    }
+neume.exports = function(destination) {
+  if (destination instanceof window.AudioContext) {
+    destination = destination.destination;
   }
-);
+  if (!(destination instanceof window.AudioNode)) {
+    throw new TypeError("neume(): illegal argument");
+  }
+
+  var context = new neume.Context(destination);
+
+  return Object.defineProperties(
+    neume(context), {
+      use: {
+        value: neume.use,
+        enumerable: true
+      },
+      render: {
+        value: function(duration, func) {
+          return neume.render(context, duration, func);
+        },
+        enumerable: true
+      },
+      master: {
+        get: function() {
+          return context.getMasterGain();
+        },
+        enumerable: true
+      },
+      analyser: {
+        get: function() {
+          return context.getAnalyser();
+        },
+        enumerable: true
+      }
+    }
+  );
+};
 
 module.exports = neume;

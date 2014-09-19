@@ -9,8 +9,9 @@ var MAX_RENDERING_SEC = 180;
 
 var schedId = 1;
 
-function NeuContext(context, duration) {
-  this.$context = _.findAudioContext(context);
+function NeuContext(destination, duration) {
+  this.$context = destination.context;
+  this.$destination = destination;
 
   Object.defineProperties(this, {
     sampleRate: {
@@ -24,7 +25,7 @@ function NeuContext(context, duration) {
       enumarable: true
     },
     destination: {
-      value: this.$context.destination,
+      value: destination,
       enumerable: true
     },
     listener: {
@@ -84,7 +85,7 @@ NeuContext.prototype.reset = function() {
   this._analyser   = this.$context.createAnalyser();
 
   _.connect({ from: this._masterGain, to: this._analyser });
-  _.connect({ from: this._analyser  , to: this.$context.destination });
+  _.connect({ from: this._analyser  , to: this.$destination });
 
   this.$outlet = this._masterGain;
 

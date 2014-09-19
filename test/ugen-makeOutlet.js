@@ -9,7 +9,7 @@ describe("makeOutlet", function() {
   var unit = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext());
+    context = new NeuContext(new window.AudioContext().destination);
     node = context.createOscillator();
     unit = { $outlet: node, $offset: 0 };
   });

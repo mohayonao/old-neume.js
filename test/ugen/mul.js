@@ -1,11 +1,17 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/osc"));
-neume.use(require("../src/ugen/mul"));
+neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/mul"));
 
 describe("ugen/mul", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(*)", function() {
     /*
      * +-------+
@@ -14,7 +20,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("*");
       })();
 
@@ -30,7 +36,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a DC(0)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("*", $("sin"), 0);
       })();
 
@@ -46,7 +52,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns $(sin)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("*", $("sin"), 1);
       })();
 
@@ -79,7 +85,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a GainNode(0.5) that is connected with $(sin)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("*", $("sin"), 0.5);
       })();
 
@@ -131,7 +137,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns chain of GainNodes", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("*", 1, $("sin", { freq: 1 }), 2, $("sin", { freq: 2 }), 3, $("sin", { freq: 3 }));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

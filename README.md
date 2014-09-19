@@ -44,11 +44,13 @@ neume.js is dependent on `Web Audio API` and `Promise`.
 
 ## Usage
 
-  - `new Neume(func)` builds constructor of a synth.
+  - `new Neume(func)` builds a constructor of defined synth.
   - `$` is utility function for building a synth.
   - `$` syntax is `$(className, spec, ... inputs)`
 
 ```javascript
+var Neume = neume(new AudioContext());
+
 // define synth
 var Synth = new Neume(function($, freq) {
   // exponential decay with 5sec

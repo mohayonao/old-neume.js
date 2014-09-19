@@ -1,13 +1,19 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/array"));
+neume.use(require("../../src/ugen/array"));
 
 describe("ugen/array", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$([])", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $([]);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -23,7 +29,7 @@ describe("ugen/array", function() {
 
   describe("$[ 1, 2, 3, 4, 5 ]", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $([ 1, 2, 3, 4, 5 ]);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -36,7 +42,7 @@ describe("ugen/array", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $([ 0, 1, 2, 3, 4 ]);
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -64,7 +70,7 @@ describe("ugen/array", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 3);
     });
     it("works with setValue", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $([ 0, 1, 2, 3, 4 ]);
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -97,7 +103,7 @@ describe("ugen/array", function() {
 
   describe("$[ 1, 2, 3, 4, 5 ] lag:0.1, curve:0.1)", function() {
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $([ 0, 1, 2, 3, 4 ], { lag: 0.1, curve: 0.1 });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -128,7 +134,7 @@ describe("ugen/array", function() {
 
   describe("$([], $([]), $([]))", function() {
     it("returns a GainNode that is connected with $([]) x2", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $([ 1 ], $([ 2 ]), $([ 3 ]));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

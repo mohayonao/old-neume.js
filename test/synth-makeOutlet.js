@@ -16,7 +16,7 @@ describe("NeuSynth::makeOutlet", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext());
+    context = new NeuContext(new window.AudioContext().destination);
   });
 
   it("works with non UGen", function() {

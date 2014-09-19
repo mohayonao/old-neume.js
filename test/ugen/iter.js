@@ -1,13 +1,19 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/iter"));
+neume.use(require("../../src/ugen/iter"));
 
 describe("ugen/iter", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(iter)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -35,7 +41,7 @@ describe("ugen/iter", function() {
       };
     });
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter", { init: 3, iter: iter });
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -48,7 +54,7 @@ describe("ugen/iter", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter", { iter: iter });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -86,7 +92,7 @@ describe("ugen/iter", function() {
       assert(ended === 0.500);
     });
     it("works with reset", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter", { iter: iter });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -126,7 +132,7 @@ describe("ugen/iter", function() {
     });
 
     it("works with setValue", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter", { iter: iter });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -181,7 +187,7 @@ describe("ugen/iter", function() {
       };
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter", { iter: iter, lag: 0.1, curve: 0.1 });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -214,7 +220,7 @@ describe("ugen/iter", function() {
 
   describe("$(iter, $(iter), $(iter))", function() {
     it("returns a GainNode that is connected with $(iter) x2", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("iter", $("iter"), $("iter"));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
