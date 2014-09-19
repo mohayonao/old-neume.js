@@ -26,7 +26,6 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="../build/neume.js"></script>
-  <script>var Neume = neume(new AudioContext());</script>
 </head>
 <body>
   <div class="container">
@@ -46,53 +45,58 @@
   </div>
 
   <script id="example">
+  var Neume = neume(new AudioContext());
+
   var visualizer = null;
 
   var Sine = new Neume(function($) {
+    // `$.param` is used to export the parameter to a synth.
+    // so you can operate this parameter like `synth.freq = 880` later.
+
     var mod  = $.param("mod" , exprand( 0.01,  20.0));
     var freq = $.param("freq", exprand(55.00, 880.0));
-    var amp  = $.param("amp" , exprand( 0.01,   0.1));
+    var amp  = $.param("amp" , exprand( 0.05,   0.2));
 
-    return $("sin", { freq: mod }, $("sin", { freq: freq, mul: amp }));
+    return $("sin", { freq: mod, mul: amp }, $("sin", { freq: freq, mul: amp }));
   });
 
   var Out = new Neume(function($) {
+    // `$.in` is used to input from other synth signal.
+
     return $("comp", { mul: 0.6 }, $.in(0));
   });
 
-  var timer = null;
-  var out   = null;
+  var players = [];
 
   function start() {
-    out = new Out().start();
+    var out = new Out();
 
     var sines = _.range(25).map(function() {
-      var t = 0;
       return new Sine().connect(out).start();
     });
 
-    timer = new Neume.Interval(4.000, function(e) {
+    var timer = new Neume.Interval(4.000, function(e) {
       var t = e.playbackTime;
       var sine = _.sample(sines);
-      var time = t + Math.random() * 2;
+      var startTime = t + Math.random() * 2;
       var timeConstant = _.sample([ 0.5, 5, 10, 20, 30, 60 ]);
 
-      sine.mod .targetAt(exprand( 0.01,  20.0), time, timeConstant);
-      sine.freq.targetAt(exprand(55.00, 880.0), time, timeConstant);
-      sine.amp .targetAt(exprand( 0.01,   0.1), time, timeConstant);
-    }).start();
+      sine.mod .targetAt(exprand( 0.01,  20.0), startTime, timeConstant);
+      sine.freq.targetAt(exprand(55.00, 880.0), startTime, timeConstant);
+      sine.amp .targetAt(exprand( 0.05,   0.2), startTime, timeConstant);
+    });
 
-    visualizer.start();
+    players = [ out, timer, visualizer ];
+
+    players.forEach(function(player) {
+      player.start();
+    });
   }
 
   function stop() {
-    if (timer) {
-      timer.stop();
-    }
-    if (out) {
-      out.stop();
-    }
-    visualizer.stop();
+    players.forEach(function(player) {
+      player.stop();
+    });
   }
 
   function rand2(size) {
@@ -132,7 +136,7 @@
         this._context.strokeStyle = "white";
         this._xy = X;
 
-        this.fps = 20;
+        this.fps = 15;
       }
 
       WaveVisualizer.prototype.start = function() {

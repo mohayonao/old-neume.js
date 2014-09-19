@@ -41,7 +41,6 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//mohayonao.github.io/gretro/build/gretro.min.js"></script>
   <script src="../build/neume.js"></script>
-  <script>var Neume = neume(new AudioContext());</script>
 </head>
 <body>
   <div class="container">
@@ -67,6 +66,8 @@
   </div>
 
   <script id="example">
+  var Neume = neume(new AudioContext());
+
   var visualizer = null; // gretro: http://mohayonao.github.io/gretro/
 
   // create a PeriodicWave from the array
@@ -130,10 +131,10 @@
     { Synth: Bass , arg: [] },
   ];
 
-  var timer = null;
+  var players = [];
 
   function start(score) {
-    timer = new Neume.Interval(0.125, function(e) {
+    var timer = new Neume.Interval(0.125, function(e) {
       var index = e.count % 32;
 
       instruments.forEach(function(instrument, i) {
@@ -144,16 +145,19 @@
           new instrument.Synth(arg).start(when);
         }
       });
+    });
 
-    }).start();
-    visualizer.start();
+    players = [ timer, visualizer ];
+
+    players.forEach(function(player) {
+      player.start();
+    });
   }
 
   function stop() {
-    if (timer) {
-      timer.stop();
-    }
-    visualizer.stop();
+    players.forEach(function(player) {
+      player.stop();
+    });
   }
 
   function wrapAt(list, index) {

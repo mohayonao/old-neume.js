@@ -28,7 +28,6 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="../build/neume.js"></script>
-  <script>var Neume = neume(new AudioContext());</script>
 </head>
 <body>
   <div class="container">
@@ -48,6 +47,8 @@
   </div>
 
   <script id="example">
+  var Neume = neume(new AudioContext());
+
   var visualizer = null; // three.js: http://threejs.org/
 
   var buffer = null;
@@ -110,22 +111,24 @@
     return buffer;
   });
 
-  var timer = null;
+  var players = [];
 
   function start() {
     if (buffer) {
-      timer = new Neume.Interval(0.500, function(e) {
+      players = [ new Neume.Interval(0.500, function(e) {
         new Granular(buffer, 4).start(e.playbackTime);
-      }).start();
+      }), visualizer ];
     }
-    visualizer.start();
+
+    players.forEach(function(player) {
+      player.start();
+    });
   }
 
   function stop() {
-    if (timer) {
-      timer.stop();
-    }
-    visualizer.stop();
+    players.forEach(function(player) {
+      player.stop();
+    });
   }
   </script>
 
