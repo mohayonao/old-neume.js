@@ -1,8 +1,8 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/boolean"));
+neume.use(require("../../src/ugen/boolean"));
 
 describe("ugen/boolean", function() {
   describe("$(false)", function() {

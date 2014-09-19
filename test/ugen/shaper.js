@@ -1,8 +1,8 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/shaper"));
+neume.use(require("../../src/ugen/shaper"));
 
 describe("ugen/shaper", function() {
   describe("$(shaper)", function() {

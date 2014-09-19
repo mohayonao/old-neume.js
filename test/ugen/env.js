@@ -1,8 +1,8 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/env"));
+neume.use(require("../../src/ugen/env"));
 
 describe("ugen/env", function() {
   describe("$(env)", function() {

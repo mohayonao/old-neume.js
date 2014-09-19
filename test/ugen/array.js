@@ -1,8 +1,8 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/array"));
+neume.use(require("../../src/ugen/array"));
 
 describe("ugen/array", function() {
   describe("$([])", function() {

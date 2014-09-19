@@ -1,8 +1,8 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/script"));
+neume.use(require("../../src/ugen/script"));
 
 describe("ugen/script", function() {
   describe("$(script $(script))", function() {

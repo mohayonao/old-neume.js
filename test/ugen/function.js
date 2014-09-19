@@ -1,14 +1,16 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/number"));
+neume.use(require("../../src/ugen/function"));
 
-describe("ugen/number", function() {
-  describe("$(440)", function() {
+var NOP = function() {};
+
+describe("ugen/function", function() {
+  describe("$(func)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
       var synth = neume.Neume(function($) {
-        return $(0);
+        return $(NOP);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
         name: "GainNode",
@@ -21,7 +23,7 @@ describe("ugen/number", function() {
     });
     it("works", function() {
       var synth = neume.Neume(function($) {
-        return $(0);
+        return $(function(t, count) { return count; });
       })();
       var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
@@ -33,45 +35,49 @@ describe("ugen/number", function() {
 
       assert(outlet.gain.value === 0, "00:00.000");
 
-      synth.setValue(0.100, "1");
-      synth.setValue(0.200, 2);
+      synth.evaluate(0.100);
+      synth.evaluate(0.300);
+      synth.setValue(0.200, 0);
+      synth.setValue(0.200, function(t, count) {
+        return count * 2;
+      });
 
       audioContext.$process(0.050);
       assert(outlet.gain.value === 0, "00:00.050");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.100");
+      assert(outlet.gain.value === 1, "00:00.100");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.150");
+      assert(outlet.gain.value === 1, "00:00.150");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.200");
+      assert(outlet.gain.value === 1, "00:00.200");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.250");
+      assert(outlet.gain.value === 1, "00:00.250");
+
+      audioContext.$process(0.055);
+      assert(outlet.gain.value === 4, "00:00.305");
+
+      audioContext.$process(0.045);
+      assert(outlet.gain.value === 4, "00:00.350");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.300");
+      assert(outlet.gain.value === 4, "00:00.400");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.350");
+      assert(outlet.gain.value === 4, "00:00.450");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.400");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.450");
-
-      audioContext.$process(0.050);
-      assert(outlet.gain.value === 2, "00:00.500");
+      assert(outlet.gain.value === 4, "00:00.500");
     });
   });
 
-  describe("$(0 lag:0.1, curve:0.1)", function() {
+  describe("$(true lag:0.1, curve:0.1)", function() {
     it("works", function() {
       var synth = neume.Neume(function($) {
-        return $(0, { lag: 0.1, curve: 0.1 });
+        return $(function(t, count) { return count; }, { lag: 0.1, curve: 0.1 });
       })();
       var audioContext = neume._.findAudioContext(synth);
       var outlet = synth.outlet;
@@ -83,8 +89,12 @@ describe("ugen/number", function() {
 
       assert(outlet.gain.value === 0, "00:00.000");
 
-      synth.setValue(0.100, "1");
-      synth.setValue(0.200, 2);
+      synth.evaluate(0.100);
+      synth.evaluate(0.300);
+      synth.setValue(0.200, 0);
+      synth.setValue(0.200, function(t, count) {
+        return count * 2;
+      });
 
       audioContext.$process(0.050);
       assert(outlet.gain.value === 0, "00:00.050");
@@ -93,55 +103,47 @@ describe("ugen/number", function() {
       assert(outlet.gain.value === 0, "00:00.100");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.150");
+      assert(outlet.gain.value === 0.6837722339831622, "00:00.150");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 0, "00:00.200");
+      assert(outlet.gain.value === 0.9, "00:00.200");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 1.367544467966324, "00:00.250");
+      assert(outlet.gain.value === 0.9683772233983162, "00:00.250");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 1.7999999999999998, "00:00.300");
+      assert(outlet.gain.value === 0.99, "00:00.300");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 1.9367544467966324, "00:00.350");
+      assert(outlet.gain.value === 3.0481544242893177, "00:00.350");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 1.98, "00:00.400");
+      assert(outlet.gain.value === 3.699, "00:00.400");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 1.9936754446796632, "00:00.450");
+      assert(outlet.gain.value === 3.904815442428932, "00:00.450");
 
       audioContext.$process(0.050);
-      assert(outlet.gain.value === 1.998, "00:00.500");
+      assert(outlet.gain.value === 3.9699, "00:00.500");
     });
   });
 
-  describe("$(1, $(2), $(3))", function() {
+  describe("$(func, $(func))", function() {
     it("returns a GainNode that is connected with inputs", function() {
       var synth = neume.Neume(function($) {
-        return $(1, $(2), $(3));
+        return $(NOP, $(NOP));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 1,
+          value: 0,
           inputs: []
         },
         inputs: [
           {
             name: "GainNode",
             gain: {
-              value: 2,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 3,
+              value: 0,
               inputs: []
             },
             inputs: [ DC(1) ]

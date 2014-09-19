@@ -1,9 +1,9 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/osc"));
-neume.use(require("../src/ugen/conv"));
+neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/conv"));
 
 describe("ugen/conv", function() {
   describe("$(conv $(sin))", function() {

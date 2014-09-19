@@ -1,9 +1,9 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/audio-node"));
-neume.use(require("../src/ugen/osc"));
+neume.use(require("../../src/ugen/audio-node"));
+neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/audio-node", function() {
   it("$(gain, $(sin))", function() {

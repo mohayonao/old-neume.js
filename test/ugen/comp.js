@@ -1,9 +1,9 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/osc"));
-neume.use(require("../src/ugen/comp"));
+neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/comp"));
 
 describe("ugen/comp", function() {
   describe("$(comp threshold:-20 knee:25 ratio:10 attack:0.05 release:0.1 $(sin))", function() {

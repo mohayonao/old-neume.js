@@ -1,10 +1,10 @@
 "use strict";
 
-var neume = require("../src/neume");
+var neume = require("../../src/neume");
 
-neume.use(require("../src/ugen/osc"));
-neume.use(require("../src/ugen/line"));
-neume.use(require("../src/ugen/delay"));
+neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/line"));
+neume.use(require("../../src/ugen/delay"));
 
 describe("ugen/delay", function() {
   describe("$(delay delayTime:0.5 $(sin))", function() {
