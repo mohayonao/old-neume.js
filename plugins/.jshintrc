@@ -1,0 +1,23 @@
+{
+  "curly"    : true,
+  "eqeqeq"   : true,
+  "forin"    : true,
+  "immed"    : true,
+  "newcap"   : true,
+  "noarg"    : true,
+  "noempty"  : true,
+  "nonew"    : true,
+  "undef"    : true,
+  "unused"   : true,
+  "strict"   : true,
+  "quotmark" : "double",
+  "trailing" : true,
+  "validthis": true,
+  "eqnull"   : true,
+  "node"     : true,
+  "browser"  : true,
+  "globals": {
+    "define": true,
+    "Neume" : true
+  }
+}
