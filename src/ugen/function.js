@@ -68,7 +68,7 @@ module.exports = function(neume, _) {
             });
           }
         },
-        execute: function(t) {
+        evaluate: function(t) {
           context.sched(t, function() {
             update(t);
           });

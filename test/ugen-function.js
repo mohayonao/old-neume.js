@@ -35,8 +35,8 @@ describe("ugen/function", function() {
 
       assert(outlet.gain.value === 0, "00:00.000");
 
-      synth.execute(0.100);
-      synth.execute(0.300);
+      synth.evaluate(0.100);
+      synth.evaluate(0.300);
       synth.setValue(0.200, 0);
       synth.setValue(0.200, function(t, count) {
         return count * 2;
@@ -89,8 +89,8 @@ describe("ugen/function", function() {
 
       assert(outlet.gain.value === 0, "00:00.000");
 
-      synth.execute(0.100);
-      synth.execute(0.300);
+      synth.evaluate(0.100);
+      synth.evaluate(0.300);
       synth.setValue(0.200, 0);
       synth.setValue(0.200, function(t, count) {
         return count * 2;
