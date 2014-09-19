@@ -10,7 +10,7 @@ describe("NeuParam", function() {
 
   beforeEach(function() {
     audioContext = new window.AudioContext();
-    context = new NeuContext(audioContext);
+    context = new NeuContext(audioContext.destination);
     param = new NeuParam({ $context: context }, "freq", 440);
     param._connect(context.destination);
     param.$outlet.connect(context.destination);

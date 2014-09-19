@@ -10,7 +10,7 @@ describe("NeuInterval", function() {
 
   beforeEach(function() {
     audioContext = new window.AudioContext();
-    context = new NeuContext(audioContext);
+    context = new NeuContext(audioContext.destination);
   });
 
   describe("(context, interval, callback)", function() {

@@ -5,11 +5,16 @@ var neume = require("../../src/neume");
 neume.use(require("../../src/ugen/buf"));
 
 describe("ugen/buf", function() {
+  var Neume = null;
   var context = null;
   var buffer = null;
 
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   beforeEach(function() {
-    context = new neume.Context(new window.AudioContext());
+    context = new neume.Context(Neume.context.destination);
   });
 
   describe("$(buf buffer:buffer)", function() {
@@ -24,7 +29,7 @@ describe("ugen/buf", function() {
     });
 
     it("returns a BufferSourceNode", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("buf", { buffer: buffer });
       })();
 
@@ -49,7 +54,7 @@ describe("ugen/buf", function() {
     });
 
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("buf", { buffer: buffer });
       })();
 
@@ -72,7 +77,7 @@ describe("ugen/buf", function() {
     });
 
     it("works without duration", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("buf", { buffer: buffer, offset: 5 });
       })();
 
@@ -92,7 +97,7 @@ describe("ugen/buf", function() {
     });
 
     it("works duration", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("buf", { buffer: buffer, offset: 5, duration: 10 });
       })();
 
@@ -116,7 +121,7 @@ describe("ugen/buf", function() {
   describe("$(AudioBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var audioBuffer = context.createBuffer(1, 128, 44100);
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(audioBuffer);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -143,7 +148,7 @@ describe("ugen/buf", function() {
   describe("$(NeuBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(buffer);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

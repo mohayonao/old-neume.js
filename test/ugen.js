@@ -34,7 +34,7 @@ describe("NeuUGen", function() {
 
   beforeEach(function() {
     var audioContext = new window.AudioContext();
-    context = new NeuContext(audioContext);
+    context = new NeuContext(audioContext.destination);
     synth = {
       $context: audioContext
     };

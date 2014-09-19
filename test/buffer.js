@@ -13,7 +13,7 @@ describe("NeuBuffer", function() {
 
   beforeEach(function() {
     audioContext = new window.AudioContext();
-    context = new NeuContext(audioContext);
+    context = new NeuContext(audioContext.destination);
     audioBuffer = audioContext.createBuffer(2, 8, 44100);
     audioBuffer.getChannelData(0).set(new Float32Array(bufferData[0]));
     audioBuffer.getChannelData(1).set(new Float32Array(bufferData[1]));

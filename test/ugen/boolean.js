@@ -5,9 +5,15 @@ var neume = require("../../src/neume");
 neume.use(require("../../src/ugen/boolean"));
 
 describe("ugen/boolean", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(false)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(false);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -20,7 +26,7 @@ describe("ugen/boolean", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(false);
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -52,7 +58,7 @@ describe("ugen/boolean", function() {
 
   describe("$(true lag:0.1, curve:0.1)", function() {
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(true, { lag: 0.1, curve: 0.1 });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -86,7 +92,7 @@ describe("ugen/boolean", function() {
 
   describe("$(false, $(true))", function() {
     it("returns a GainNode that is connected with inputs", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(false, $(true));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

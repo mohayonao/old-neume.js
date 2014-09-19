@@ -8,7 +8,7 @@ describe("NeuDC", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext());
+    context = new NeuContext(new window.AudioContext().destination);
   });
 
   describe("(context, value)", function() {

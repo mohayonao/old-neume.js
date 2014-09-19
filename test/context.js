@@ -8,7 +8,7 @@ describe("NeuContext", function() {
 
   beforeEach(function() {
     audioContext = new window.AudioContext();
-    context = new NeuContext(audioContext);
+    context = new NeuContext(audioContext.destination);
   });
 
   describe("(audioContext)", function() {
@@ -378,7 +378,7 @@ describe("NeuContext", function() {
   describe("offline-rendering", function() {
     it("works", function() {
       var audioContext = new window.OfflineAudioContext(2, 44100 * 0.5, 44100);
-      var context = new NeuContext(audioContext, 2);
+      var context = new NeuContext(audioContext.destination, 2);
       var passed = [ ];
 
       context.sched(0.100, function() { passed.push(1); });

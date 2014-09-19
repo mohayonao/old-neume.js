@@ -5,9 +5,15 @@ var neume = require("../../src/neume");
 neume.use(require("../../src/ugen/number"));
 
 describe("ugen/number", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(440)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(0);
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -20,7 +26,7 @@ describe("ugen/number", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(0);
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -70,7 +76,7 @@ describe("ugen/number", function() {
 
   describe("$(0 lag:0.1, curve:0.1)", function() {
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(0, { lag: 0.1, curve: 0.1 });
       })();
       var audioContext = neume._.findAudioContext(synth);
@@ -120,7 +126,7 @@ describe("ugen/number", function() {
 
   describe("$(1, $(2), $(3))", function() {
     it("returns a GainNode that is connected with inputs", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $(1, $(2), $(3));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {

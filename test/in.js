@@ -12,7 +12,7 @@ describe("NeuIn", function() {
 
   beforeEach(function() {
     audioContext = new window.AudioContext();
-    context = new NeuContext(audioContext);
+    context = new NeuContext(audioContext.destination);
     _in = new NeuIn({ $context: context });
   });
 

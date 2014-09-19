@@ -5,6 +5,12 @@ var neume = require("../../src/neume");
 neume.use(require("../../src/ugen/script"));
 
 describe("ugen/script", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(script $(script))", function() {
     /*
      * +-----------+
@@ -17,10 +23,9 @@ describe("ugen/script", function() {
      *   |
      */
     it("return a ScriptProcessorNode that is connected with $(script)", function() {
-      var context = new neume.Context(new window.AudioContext());
       var NOP = function() {};
 
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("script", { audioprocess: NOP }, $("script"));
       })();
 

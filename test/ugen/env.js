@@ -5,9 +5,15 @@ var neume = require("../../src/neume");
 neume.use(require("../../src/ugen/env"));
 
 describe("ugen/env", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(env)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("env");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -23,7 +29,7 @@ describe("ugen/env", function() {
 
   describe("$(env, init:0, table:[], release:3)", function() {
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("env", {
           init: 0,
           table: [
@@ -87,7 +93,7 @@ describe("ugen/env", function() {
       assert(ended === 0.8999999999999999);
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("env", {
           init: 0,
           table: [
@@ -144,7 +150,7 @@ describe("ugen/env", function() {
 
   describe("$(env, $(env), $(env))", function() {
     it("returns a GainNode that is connected with $(env) x2", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("env", $("env"), $("env"));
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -177,7 +183,7 @@ describe("ugen/env", function() {
 
   describe("$(adsr)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("adsr");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -190,7 +196,7 @@ describe("ugen/env", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("adsr", { a: 0.1, d: 0.2, s: 0.3, r: 0.5 });
       })();
 
@@ -233,7 +239,7 @@ describe("ugen/env", function() {
 
   describe("$(dadsr)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("dadsr");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -246,7 +252,7 @@ describe("ugen/env", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("dadsr", { delay: 0.1, a: 0.1, d: 0.2, s: 0.3, r: 0.5 });
       })();
 
@@ -289,7 +295,7 @@ describe("ugen/env", function() {
 
   describe("$(asr)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("asr");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -302,7 +308,7 @@ describe("ugen/env", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("asr", { a: 0.1, s: 0.3, r: 0.5 });
       })();
 
@@ -345,7 +351,7 @@ describe("ugen/env", function() {
 
   describe("$(cutoff)", function() {
     it("return a GainNode that is connected with DC(1)", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("cutoff");
       })();
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -358,7 +364,7 @@ describe("ugen/env", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("cutoff", { releaseTime: 0.5, level: 0.8 });
       })();
 

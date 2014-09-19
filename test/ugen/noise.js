@@ -5,9 +5,15 @@ var neume = require("../../src/neume");
 neume.use(require("../../src/ugen/noise"));
 
 describe("ugen/noise", function() {
+  var Neume = null;
+
+  before(function() {
+    Neume = neume.exports(new window.AudioContext());
+  });
+
   describe("$(white)", function() {
     it("returns a OscillatorNode", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("white");
       })();
 
@@ -31,7 +37,7 @@ describe("ugen/noise", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("white");
       })();
 
@@ -55,7 +61,7 @@ describe("ugen/noise", function() {
   });
   describe("$(pink)", function() {
     it("returns a OscillatorNode", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("pink");
       })();
 
@@ -79,7 +85,7 @@ describe("ugen/noise", function() {
       });
     });
     it("works", function() {
-      var synth = neume.Neume(function($) {
+      var synth = new Neume(function($) {
         return $("pink");
       })();
 
