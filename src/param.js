@@ -116,7 +116,7 @@ NeuParam.prototype.cancel = function(startTime) {
   return this;
 };
 
-NeuParam.prototype._connect = function(to) {
+NeuParam.prototype._connect = function(to, output, input) {
   if (this._connected.indexOf(to) !== -1) {
     return; // if already connected
   }
@@ -132,7 +132,7 @@ NeuParam.prototype._connect = function(to) {
       this._params.push(this.$outlet.gain);
       _.connect({ from: new NeuDC(this.$context, 1), to: this.$outlet });
     }
-    _.connect({ from: this.$outlet, to: to });
+    _.connect({ from: this.$outlet, to: to, input: input });
   }
 };
 
