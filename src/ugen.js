@@ -89,13 +89,22 @@ NeuUGen.prototype.madd = function(mul, add) {
   return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
 
-NeuUGen.prototype._connect = function(to) {
-  _.connect({ from: this.$outlet, to: to });
+NeuUGen.prototype._connect = function(to, output, input) {
+  _.connect({
+    from  : this.$outlet,
+    to    : to,
+    output: output,
+    input : input
+  });
   if (this.$offset !== 0) {
     if (to instanceof window.AudioParam) {
       to.value = this.$offset;
     } else {
-      _.connect({ from: createGainDC(this.$context, this.$offset), to: to });
+      _.connect({
+        from : createGainDC(this.$context, this.$offset),
+        to   : to,
+        input: input
+      });
     }
   }
 };
