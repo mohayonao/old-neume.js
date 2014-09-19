@@ -2,165 +2,32 @@
 
 var _ = require("./utils");
 
-_.NeuDC      = require("./dc");
-_.NeuUGen    = require("./ugen");
-_.NeuParam   = require("./param");
-_.NeuIn      = require("./in");
-_.NeuSynthDB = require("./synthdb");
+var NeuSynthDB     = require("./synthdb");
+var NeuSynthDollar = require("./synthdollar");
+var makeOutlet     = require("./synth-makeOutlet");
 
-var makeOutlet = require("./synth-makeOutlet");
-
-var EMPTY_DB = new _.NeuSynthDB();
+var EMPTY_DB = new NeuSynthDB();
 var INIT  = 0;
 var START = 1;
 var STOP  = 2;
 
 function NeuSynth(context, func, args) {
-  var _this = this;
-
   this.$context = context;
 
-  var db = new _.NeuSynthDB();
+  var $ = new NeuSynthDollar(this);
+  var result = makeOutlet(context, func.apply(null, [ $.builder ].concat(args)));
 
-  function $() {
-    var args = _.toArray(arguments);
-    var key  = args.shift();
-    var spec = _.isDictionary(_.first(args)) ? args.shift() : {};
-    var inputs = Array.prototype.concat.apply([], args);
-    var ugen = _.NeuUGen.build(_this, key, spec, inputs);
-
-    db.append(ugen);
-
-    return ugen;
+  if ($.outputs[0] == null) {
+    $.outputs[0] = result;
   }
 
-  var params  = {};
-  var inputs  = [];
-  var outputs = [];
-  var methods = {};
-  var timers  = [];
-
-  $.param = function(name, defaultValue) {
-    if (_.has(params, name)) {
-      return params[name];
-    }
-
-    defaultValue = _.finite(_.defaults(defaultValue, 0));
-
-    validateParam(name, defaultValue);
-
-    var param = new _.NeuParam(_this, name, defaultValue);
-
-    Object.defineProperty(_this, name, {
-      set: function(value) {
-        param.set(value);
-      },
-      get: function() {
-        return param;
-      }
-    });
-
-    params[name] = param;
-
-    return param;
-  };
-
-  $.in = function(index) {
-    index = Math.max(0, _.int(index));
-
-    if (!inputs[index]) {
-      inputs[index] = new _.NeuIn(_this);
-    }
-
-    return inputs[index];
-  };
-
-  $.out = function(index, ugen) {
-    index = Math.max(0, _.int(index));
-
-    if (ugen instanceof _.NeuUGen) {
-      outputs[index] = ugen;
-    }
-
-    return null;
-  };
-
-  $.method = function(methodName, func) {
-    if (/^[a-z]\w*$/.test(methodName) && _.isFunction(func)) {
-      methods[methodName] = func;
-    }
-  };
-
-  $.timeout = function(timeout) {
-    timeout = Math.max(0, _.finite(timeout));
-
-    var schedId   = 0;
-    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
-
-    function sched(t) {
-      schedId = context.sched(t, function(t) {
-        schedId = 0;
-        callbacks.forEach(function(func) {
-          func.call(_this, t, 1);
-        });
-      });
-    }
-
-    timers.push({
-      start: function(t) {
-        sched(t + timeout);
-      },
-      stop: function() {
-        context.unsched(schedId);
-        schedId = 0;
-      }
-    });
-  };
-
-  $.interval = function(interval) {
-    interval = Math.max(1 / context.sampleRate, _.finite(interval));
-
-    var schedId   = 0;
-    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
-    var startTime = 0;
-    var count     = 0;
-
-    function sched(t) {
-      schedId = context.sched(t, function(t) {
-        schedId = 0;
-        count  += 1;
-        callbacks.forEach(function(func) {
-          func.call(_this, t, count);
-        });
-        sched(startTime + interval * (count + 1));
-      });
-    }
-
-    timers.push({
-      start: function(t) {
-        startTime = t;
-        sched(t + interval);
-      },
-      stop: function() {
-        context.unsched(schedId);
-        schedId = 0;
-      }
-    });
-  };
-
-  var result = makeOutlet(context, func.apply(null, [ $ ].concat(args)));
-
-  if (outputs[0] == null) {
-    outputs[0] = result;
-  }
-
-  this.$inputs  = inputs;
-  this.$outputs = outputs;
+  this.$inputs  = $.inputs;
+  this.$outputs = $.outputs;
   this._routing = [];
-  this._db = outputs.length ? db : EMPTY_DB;
+  this._db = $.outputs.length ? $.db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
-  this._timers = timers;
+  this._timers = $.timers;
   this._methodNames = [];
 
   Object.defineProperties(this, {
@@ -186,7 +53,7 @@ function NeuSynth(context, func, args) {
     },
   });
 
-  _.each(methods, function(method, methodName) {
+  _.each($.methods, function(method, methodName) {
     this._methodNames.push(methodName);
     Object.defineProperty(this, methodName, {
       value: function() {
@@ -375,16 +242,6 @@ function parseEvent(event) {
   }
 
   return { selector: matched[1], name: matched[2] };
-}
-
-function validateParam(name) {
-  if (!/^[a-z]\w*$/.test(name)) {
-    throw new TypeError(_.format(
-      "invalid parameter name: #{name}", {
-        name: name
-      }
-    ));
-  }
 }
 
 module.exports = NeuSynth;
