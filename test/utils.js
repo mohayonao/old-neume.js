@@ -658,7 +658,7 @@ describe("utils", function() {
       _.connect({ from: osc, to: amp });
 
       assert(osc._connect.calledOnce);
-      assert.deepEqual(osc._connect.firstCall.args, [ amp ]);
+      assert.deepEqual(osc._connect.firstCall.args, [ amp, 0, 0 ]);
     });
     it("do nothing if else", function() {
       var audioContext = new window.AudioContext();
