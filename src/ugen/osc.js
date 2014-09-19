@@ -48,49 +48,53 @@ module.exports = function(neume, _) {
 
   neume.register("osc", function(ugen, spec, inputs) {
     var type = spec.type;
-    var wave = null;
 
-    if (type instanceof window.PeriodicWave) {
-      wave = type;
-      type = "custom";
-    } else {
+    if (!isWave(type)) {
       type = WAVE_TYPES[type] || "sine";
     }
 
-    var osc  = setup(type, ugen, spec, inputs);
-    var ctrl = osc.ctrl;
+    return make(setup(type, ugen, spec, inputs));
 
-    if (wave) {
-      ctrl.setPeriodicWave(wave);
-    }
-
-    return make(osc);
   });
 
-  neume.register("periodicwave", function(ugen, spec, inputs) {
-    var type = "custom";
-    var wave = spec.value;
+  function periodicwave(ugen, spec, inputs) {
+    var type = spec.value;
 
-    if (!(wave instanceof window.PeriodicWave)) {
+    if (!isWave(type)) {
       type = "sine";
-      wave = null;
     }
 
-    var osc  = setup(type, ugen, spec, inputs);
-    var ctrl = osc.ctrl;
+    return make(setup(type, ugen, spec, inputs));
 
-    if (wave) {
-      ctrl.setPeriodicWave(wave);
-    }
+  }
 
-    return make(osc);
-  });
+  neume.register("periodicwave", periodicwave);
+  neume.register("wavetable"   , periodicwave);
 
   _.each(WAVE_TYPES, function(type, name) {
     neume.register(name, function(ugen, spec, inputs) {
       return make(setup(type, ugen, spec, inputs));
     });
   });
+
+  function isWave(wave) {
+    if (window.PeriodicWave && wave instanceof window.PeriodicWave) {
+      return true;
+    }
+    if (window.WaveTable && wave instanceof window.WaveTable) {
+      return true;
+    }
+    return false;
+  }
+
+  function setWave(osc, wave) {
+    if (osc.setPeriodicWave) {
+      return osc.setPeriodicWave(wave);
+    }
+    if (osc.setWaveTable) {
+      return osc.setWaveTable(wave);
+    }
+  }
 
   function setup(type, ugen, spec, inputs) {
     return inputs.length ?
@@ -111,32 +115,37 @@ module.exports = function(neume, _) {
     });
   }
 
-  function noInputs(type, ugen, spec) {
-    var osc = ugen.$context.createOscillator();
+  function createOscillator(context, type, spec, defaultFreq) {
+    var osc = context.createOscillator();
 
-    osc.type = type;
+    if (isWave(type)) {
+      setWave(osc, type);
+    } else {
+      osc.type = type;
+    }
     osc.frequency.value = 0;
     osc.detune.value    = 0;
-    _.connect({ from: _.defaults(spec.freq, 440), to: osc.frequency });
+    _.connect({ from: _.defaults(spec.freq, defaultFreq), to: osc.frequency });
     _.connect({ from: _.defaults(spec.detune, 0), to: osc.detune });
 
+    return osc;
+  }
+
+  function noInputs(type, ugen, spec) {
+    var osc = createOscillator(ugen.$context, type, spec, 440);
     return { outlet: osc, ctrl: osc };
   }
 
   function hasInputs(type, ugen, spec, inputs) {
-    var osc  = ugen.$context.createOscillator();
-    var gain = ugen.$context.createGain();
+    var context = ugen.$context;
 
-    osc.type = type;
-    osc.frequency.value = 0;
-    osc.detune.value    = 0;
-    _.connect({ from: _.defaults(spec.freq, 2), to: osc.frequency });
-    _.connect({ from: _.defaults(spec.detune, 0), to: osc.detune });
+    var osc  = createOscillator(context, type, spec , 2);
+    var gain = ugen.$context.createGain();
 
     gain.gain.value = 0;
     _.connect({ from: osc, to: gain.gain });
 
-    _.each(inputs, function(node) {
+    inputs.forEach(function(node) {
       _.connect({ from: node, to: gain });
     });
 

@@ -3,11 +3,11 @@ module.exports = function(neume, _) {
 
   /**
    * $("buf", {
-   *   buffer      : AudioBuffer|NeuBuffer = null,
-   *   playbackRate: number|UGen = 1
-   *   loop        : boolean = false
-   *   loopStart   : number = 0
-   *   loopEnd     : number = 0
+   *   buffer      : [AudioBuffer|NeuBuffer] = null
+   *   playbackRate: [number|UGen] = 1
+   *   loop        : [boolean] = false
+   *   loopStart   : [number] = 0
+   *   loopEnd     : [number] = 0
    * })
    *
    * aliases:
@@ -71,6 +71,7 @@ module.exports = function(neume, _) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
+        // TODO: test!!
         ugen.emit("end", {
           playbackTime: context.currentTime
         }, ugen.$synth);

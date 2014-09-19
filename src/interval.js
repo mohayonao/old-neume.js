@@ -15,7 +15,7 @@ function NeuInterval(context, interval, callback) {
   this._callback = callback;
   this._oninterval = oninterval.bind(this);
   this._state = INIT;
-  this._stateString = "init";
+  this._stateString = "UNSCHEDULED";
   this._startTime = 0;
   this._stopTime = Infinity;
   this._count = 0;
@@ -37,18 +37,19 @@ function NeuInterval(context, interval, callback) {
     },
   });
 }
+NeuInterval.$name = "NeuInterval";
 
 NeuInterval.prototype.start = function(t) {
   t = _.defaults(t, this.$context.currentTime);
 
   if (this._state === INIT) {
     this._state = START;
-    this._stateString = "ready";
+    this._stateString = "SCHEDULED";
     this._startTime = t;
 
     if (_.isFunction(this._callback)) {
       this.$context.sched(this._startTime, function(t) {
-        this._stateString = "start";
+        this._stateString = "PLAYING";
         this._oninterval(t);
       }, this);
     }
@@ -66,7 +67,7 @@ NeuInterval.prototype.stop = function(t) {
     this._state = STOP;
     this._stopTime = t;
     this.$context.sched(this._stopTime, function() {
-      this._stateString = "stop";
+      this._stateString = "FINISHED";
     }, this);
   }
 

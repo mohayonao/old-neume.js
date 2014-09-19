@@ -1,15 +1,21 @@
 "use strict";
 
 var _ = require("./utils");
+
 var Emitter = require("./emitter");
+var NeuDC   = require("./dc");
 var NeuUnit = require("./unit");
+
+var SelectorParser = require("./selector-parser");
 var makeOutlet = require("./ugen-makeOutlet");
-var selectorParser = require("./selector-parser");
 
 function NeuUGen(synth, key, spec, inputs) {
   Emitter.call(this);
+  var parsed = SelectorParser.parse(key);
 
-  var parsed = selectorParser.parse(key);
+  if (!NeuUGen.registered.hasOwnProperty(parsed.key)) {
+    throw new Error("unknown key: " + key);
+  }
 
   this.$synth   = synth;
   this.$context = synth.$context;
@@ -17,18 +23,17 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$class = parsed.class;
   this.$id    = parsed.id;
 
-  if (!NeuUGen.registered.hasOwnProperty(parsed.key)) {
-    throw new Error("unknown key: " + key);
-  }
-
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   if (!(unit instanceof NeuUnit)) {
     throw new Error("invalid key: " + key);
   }
 
+  var outlet = makeOutlet(this.$context, unit, spec);
+
   this.$unit   = unit;
-  this.$outlet = makeOutlet(this.$context, unit, spec);
+  this.$outlet = outlet.outlet;
+  this.$offset = outlet.offset;
 
   Object.defineProperties(this, {
     context: {
@@ -49,20 +54,22 @@ function NeuUGen(synth, key, spec, inputs) {
 }
 _.inherits(NeuUGen, Emitter);
 
+NeuUGen.$name = "NeuUGen";
+
 NeuUGen.registered = {};
 
 NeuUGen.register = function(name, func) {
-  if (!selectorParser.isValidUGenName(name)) {
+  if (!SelectorParser.isValidUGenName(name)) {
     throw new Error("invalid ugen name: " + name);
   }
-  if (!_.isFunction(func)) {
+  if (typeof func !== "function") {
     throw new TypeError("ugen must be a function");
   }
   NeuUGen.registered[name] = func;
 };
 
 NeuUGen.build = function(synth, key, spec, inputs) {
-  if (!_.isString(key)) {
+  if (typeof key !== "string") {
     spec.value = key;
     key = _.typeOf(key);
   }
@@ -81,5 +88,35 @@ NeuUGen.prototype.mul = function(node) {
 NeuUGen.prototype.madd = function(mul, add) {
   return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
+
+NeuUGen.prototype._connect = function(to, output, input) {
+  _.connect({
+    from  : this.$outlet,
+    to    : to,
+    output: output,
+    input : input
+  });
+  if (this.$offset !== 0) {
+    if (to instanceof window.AudioParam) {
+      to.value = this.$offset;
+    } else {
+      _.connect({
+        from : createGainDC(this.$context, this.$offset),
+        to   : to,
+        input: input
+      });
+    }
+  }
+};
+
+function createGainDC(context, offset) {
+  var gain = context.createGain();
+
+  gain.gain.value = offset;
+
+  _.connect({ from: new NeuDC(context, 1), to: gain });
+
+  return gain;
+}
 
 module.exports = NeuUGen;

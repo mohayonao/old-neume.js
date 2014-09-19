@@ -265,6 +265,10 @@ utils.finite = function(value) {
   return value;
 };
 
+utils.clip = function(value, min, max) {
+  return Math.max(min, Math.min(value, max));
+};
+
 utils.typeOf = function(value) {
   if (utils.isNumber(value)) {
     return "number";
@@ -290,8 +294,13 @@ utils.typeOf = function(value) {
   if (utils.isNaN(value)) {
     return "nan";
   }
-  if (value.constructor && utils.isString(value.constructor.name)) {
-    return value.constructor.name.toLowerCase();
+  if (value.constructor) {
+    if (typeof value.constructor.$name === "string") {
+      return value.constructor.$name.toLowerCase();
+    }
+    if (typeof value.constructor.name === "string") {
+      return value.constructor.name.toLowerCase();
+    }
   }
   return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
 };
@@ -346,22 +355,28 @@ utils.isValidInput = function(value) {
 utils.connect = function(spec) {
   var from = spec.from;
   var to   = spec.to;
+  var output = utils.int(spec.output);
+  var input  = utils.int(spec.input);
 
-  // FIXME: umm..
-  if (utils.NeuParam && from instanceof utils.NeuParam) {
-    return from._connect(to);
+  if (from && from._connect) {
+    return from._connect(to, output, input);
   }
 
   if (utils.isAudioParam(to)) {
     if (utils.isNumber(from)) {
-      return to.setValueAtTime(utils.finite(from), 0);
+      to.value = utils.finite(from);
     }
   }
 
-  if (utils.isAudioNode(to) || utils.isAudioParam(to)) {
+  if (utils.isAudioNode(to)) {
     from = utils.findAudioNode(from);
     if (from) {
-      return from.connect(to);
+      return from.connect(to, output, input);
+    }
+  } else if (utils.isAudioParam(to)) {
+    from = utils.findAudioNode(from);
+    if (from) {
+      return from.connect(to, output);
     }
   }
 };

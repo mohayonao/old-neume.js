@@ -19,14 +19,7 @@ describe("ugen/add", function() {
         return $("+", 0);
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: []
-      });
+      assert(synth.outlet === null);
     });
   });
 
@@ -36,27 +29,30 @@ describe("ugen/add", function() {
      * | DC(6) |
      * +-------+
      *   |
-     * +-----------+
-     * | GainNode  |
-     * | - gain: 1 |
-     * +-----------+
-     *   |
      */
     it("return a GainNode that is connected with a DC(6)", function() {
       var synth = neume.Neume(function($) {
         return $("+", 1, 2, 3);
       })();
 
+      var audioContext = neume._.findAudioContext(synth);
+
+      audioContext.$reset();
+      synth.$context.reset();
+
+      synth.start(0);
+      audioContext.$process(0.100);
+
       assert.deepEqual(synth.outlet.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 1,
+          value: 6,
           inputs: []
         },
-        inputs: [ DC(6) ]
+        inputs: [ DC(1) ]
       });
 
-      assert(synth.outlet.$inputs[0].buffer.getChannelData(0)[0] === 6);
+      assert(synth.outlet.$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
   });
 

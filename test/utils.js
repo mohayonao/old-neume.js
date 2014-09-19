@@ -395,6 +395,15 @@ describe("utils", function() {
     });
   });
 
+  describe(".clip(value, min, max)", function() {
+    it("clip a value", function() {
+      assert(_.clip(-1.5, -1, +1) === -1);
+      assert(_.clip(-0.5, -1, +1) === -0.5);
+      assert(_.clip(+0.5, -1, +1) === +0.5);
+      assert(_.clip(+1.5, -1, +1) === +1);
+    });
+  });
+
   describe(".typeOf(value)", function() {
     it("returns type name", function() {
       assert(_.typeOf(10) === "number");
@@ -407,6 +416,14 @@ describe("utils", function() {
       assert(_.typeOf(NaN) === "nan");
       assert(_.typeOf(new Float32Array()) === "float32array");
       assert(_.typeOf({ constructor: null }) === "object");
+      assert(_.typeOf({ constructor: true }) === "object");
+
+      function A() {} // minified
+      A.$name = "NeuBuffer";
+
+      var a = new A();
+
+      assert(_.typeOf(a) === "neubuffer");
     });
   });
 
@@ -630,6 +647,18 @@ describe("utils", function() {
         },
         inputs: []
       });
+    });
+    it("call defined connect function", function() {
+      var audioContext = new window.AudioContext();
+      var osc = {
+        _connect: sinon.spy()
+      };
+      var amp = audioContext.createGain();
+
+      _.connect({ from: osc, to: amp });
+
+      assert(osc._connect.calledOnce);
+      assert.deepEqual(osc._connect.firstCall.args, [ amp, 0, 0 ]);
     });
     it("do nothing if else", function() {
       var audioContext = new window.AudioContext();

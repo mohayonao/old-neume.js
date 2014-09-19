@@ -3,8 +3,8 @@ module.exports = function(neume, _) {
 
   /**
    * $(boolean, {
-   *   lag  : number = 0
-   *   curve: number = 0
+   *   lag  : [number] = 0
+   *   curve: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -29,7 +29,7 @@ module.exports = function(neume, _) {
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
 
-    if (_.isEmpty(inputs)) {
+    if (inputs.length === 0) {
       inputs = [ new neume.DC(context, 1) ];
     }
 
@@ -52,7 +52,7 @@ module.exports = function(neume, _) {
       outlet: gain,
       methods: {
         setValue: function(t, value) {
-          if (_.isBoolean(value)) {
+          if (typeof value === "boolean") {
             context.sched(t, function() {
               var v0 = data  ? 1 : 0;
               var v1 = value ? 1 : 0;

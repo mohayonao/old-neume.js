@@ -36,6 +36,7 @@ function NeuContext(context, duration) {
   this._duration = duration;
   this.reset();
 }
+NeuContext.$name = "NeuContext";
 
 _.each([
   "createBuffer",
@@ -55,12 +56,16 @@ _.each([
   "createChannelMerger",
   "createDynamicsCompressor",
   "createOscillator",
-  "createPeriodicWave"
 ], function(methodName) {
   NeuContext.prototype[methodName] = function() {
     return this.$context[methodName].apply(this.$context, arguments);
   };
 });
+
+NeuContext.prototype.createPeriodicWave = function() {
+  var context = this.$context;
+  return (context.createPeriodicWave || context.createWaveTable).apply(context, arguments);
+};
 
 NeuContext.prototype.getMasterGain = function() {
   return this._masterGain;
@@ -108,7 +113,7 @@ NeuContext.prototype.start = function() {
 };
 
 function startRendering() {
-  this._currentTimeIncr = Math.max(0, Math.min(_.finite(this._duration), MAX_RENDERING_SEC));
+  this._currentTimeIncr = _.clip(_.finite(this._duration), 0, MAX_RENDERING_SEC);
   onaudioprocess.call(this, { playbackTime: 0 });
 }
 

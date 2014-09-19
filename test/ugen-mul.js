@@ -18,8 +18,7 @@ describe("ugen/mul", function() {
         return $("*");
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), DC(1));
-      assert(synth.outlet.buffer.getChannelData(0)[0] === 1);
+      assert(synth.outlet === null);
     });
   });
 
@@ -35,8 +34,7 @@ describe("ugen/mul", function() {
         return $("*", $("sin"), 0);
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), DC(0));
-      assert(synth.outlet.buffer.getChannelData(0)[0] === 0);
+      assert(synth.outlet === null);
     });
   });
 

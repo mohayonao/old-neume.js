@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>sine-storm - neume.js</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <style>
+    #start {
+      margin: 10px 0;
+    }
+    #canvas {
+      width: 100%;
+      height: 240px;
+      background: black;
+    }
+    #code {
+      padding: 0;
+      margin: 0;
+      background: white;
+      border: none;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="../build/neume.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>neume.js sine-storm</h1>
+    <canvas id="canvas"></canvas>
+    <div id="app">
+      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">source</h3>
+      </div>
+      <div class="panel-body">
+        <pre class="prettyprint" id="code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script id="example">
+  var visualizer = null;
+
+  var Sine = new Neume(function($) {
+    var mod  = $.param("mod" , exprand( 0.01,  20.0));
+    var freq = $.param("freq", exprand(55.00, 880.0));
+    var amp  = $.param("amp" , exprand( 0.01,   0.1));
+
+    return $("sin", { freq: mod }, $("sin", { freq: freq, mul: amp }));
+  });
+
+  var Out = new Neume(function($) {
+    return $("comp", { mul: 0.6 }, $.in(0));
+  });
+
+  var timer = null;
+  var out   = null;
+
+  function start() {
+    out = new Out().start();
+
+    var sines = _.range(25).map(function() {
+      var t = 0;
+      return new Sine().connect(out).start();
+    });
+
+    timer = new Neume.Interval(4.000, function(e) {
+      var t = e.playbackTime;
+      var sine = _.sample(sines);
+      var time = t + Math.random() * 2;
+      var timeConstant = _.sample([ 0.5, 5, 10, 20, 30, 60 ]);
+
+      sine.mod .targetAt(exprand( 0.01,  20.0), time, timeConstant);
+      sine.freq.targetAt(exprand(55.00, 880.0), time, timeConstant);
+      sine.amp .targetAt(exprand( 0.01,   0.1), time, timeConstant);
+    }).start();
+
+    visualizer.start();
+  }
+
+  function stop() {
+    if (timer) {
+      timer.stop();
+    }
+    if (out) {
+      out.stop();
+    }
+    visualizer.stop();
+  }
+
+  function rand2(size) {
+    return (Math.random() * 2 - 1) * size;
+  }
+
+  function exprand(min, max) {
+    return linexp(Math.random(), 0, 1, min, max);
+  }
+
+  function linexp(value, inMin, inMax, outMin, outMax) {
+    return Math.pow(outMax / outMin, (value - inMin) / (inMax - inMin)) * outMin;
+  }
+  </script>
+
+  <script>
+  $(function() {
+    "use strict";
+
+    var WaveVisualizer = (function() {
+      var X = 0, Y = 1;
+
+      function WaveVisualizer(analyser, spec) {
+        this.width  = spec.width;
+        this.height = spec.height;
+
+        this._analyser = analyser
+        this._analyser.fftSize = 512;
+        this._state = "init";
+        this._timeData = new Uint8Array(analyser.frequencyBinCount);
+
+        this._canvas = spec.canvas;
+        this._canvas.width  = this.width;
+        this._canvas.height = this.height;
+        this._context = this._canvas.getContext("2d");
+        this._context.fillStyle   = "rgba(0, 0, 0, 0.05)";
+        this._context.strokeStyle = "white";
+        this._xy = X;
+
+        this.fps = 20;
+      }
+
+      WaveVisualizer.prototype.start = function() {
+        if (this._state !== "start") {
+          this._state = "start";
+          this._prevT = Date.now();
+          requestAnimationFrame(this.render.bind(this));
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.stop = function() {
+        if (this._state === "start") {
+          this._state = "stop";
+        }
+        return this;
+      };
+
+      WaveVisualizer.prototype.render = function() {
+        var t = Date.now();
+        var dt = (t - this._prevT) * 0.001;
+
+        if (1 / this.fps < dt) {
+          this._prevT = t;
+          this._analyser.getByteTimeDomainData(this._timeData);
+          this._render(t);
+        }
+
+        if (this._state === "start") {
+          requestAnimationFrame(this.render.bind(this));
+        }
+      };
+
+      WaveVisualizer.prototype._render = function(t) {
+        this._context.fillRect(0, 0, this.width, this.height);
+
+        var data = this._timeData;
+        var maxValue = 0, minValue = 256;
+        var maxIndex = 0, minIndex = 0;
+
+        for (var i = 0, imax = data.length; i < imax; i++) {
+          if (maxValue < data[i]) {
+            maxValue = data[i];
+            maxIndex = i;
+          }
+          if (data[i] < minValue) {
+            minValue = data[i];
+            minIndex = i;
+          }
+        }
+
+        var x = ((maxIndex / data.length) * this.width)|0;
+        this._context.beginPath();
+        this._context.moveTo(x, 0);
+        this._context.lineTo(x, this.height);
+        this._context.stroke();
+
+        var y = ((minIndex / data.length) * this.height)|0;
+        this._context.beginPath();
+        this._context.moveTo(0, y);
+        this._context.lineTo(this.width, y);
+        this._context.stroke();
+      };
+
+      return WaveVisualizer;
+    })();
+
+    var canvas = document.getElementById("canvas");
+
+    visualizer = new WaveVisualizer(Neume.analyser, {
+      canvas: canvas, width: $(canvas).width(), height: 240
+    });
+
+    var vue = new Vue({
+      el: "#app",
+      data: {
+        isPlaying: false
+      },
+      methods: {
+        toggle: function() {
+          this.isPlaying = !this.isPlaying;
+          if (this.isPlaying) {
+            start(this.$data.score);
+          } else {
+            stop();
+          }
+        }
+      }
+    });
+
+    $("#code").text($("#example").text());
+    prettyPrint();
+  });
+  </script>
+</body>
+</html>

@@ -4,21 +4,43 @@ module.exports = function(neume, _) {
 
   /**
    * $("env", {
-   *   init   : number           = 0
-   *   table  : array<env-table> = []
-   *   release: number           = Infinity
+   *   init   : [number]    = 0
+   *   table  : [env-table] = []
+   *   release: [number]    = Infinity
    * })
    *
    * env-table:
-   *   [ duration, target, curve ]
+   *   [ [ duration, target, curve ], ... ]
    *
    * aliases:
    *   $("adsr", {
-   *     a    : number = 0.01   attackTime
-   *     d    : number = 0.30   decayTime
-   *     s    : number = 0.50   sustainLevel
-   *     r    : number = 1.00   releaseTime
-   *     curve: number = 0.001  curve
+   *     a    : [number] = 0.01   attackTime
+   *     d    : [number] = 0.30   decayTime
+   *     s    : [number] = 0.50   sustainLevel
+   *     r    : [number] = 1.00   releaseTime
+   *     curve: [number] = 0.01  curve
+   *   })
+   *
+   *   $("dadsr", {
+   *     delay : [number] = 0.10   delayTime
+   *     a     : [number] = 0.01   attackTime
+   *     d     : [number] = 0.30   decayTime
+   *     s     : [number] = 0.50   sustainLevel
+   *     r     : [number] = 1.00   releaseTime
+   *     curve : [number] = 0.01  curve
+   *   })
+   *
+   *   $("asr", {
+   *     a    : [number] = 0.01   attackTime
+   *     s    : [number] = 1.00   sustainLevel
+   *     r    : [number] = 1.00   releaseTime
+   *     curve: [number] = 0.01  curve
+   *   })
+   *
+   *   $("cutoff", {
+   *     releaseTime: [number] = 0.1    releaseTime
+   *     level      : [number] = 1.00   peakLevel
+   *     curve      : [number] = 0.01  curve
    *   })
    *
    * +--------+      +-------+
@@ -44,15 +66,65 @@ module.exports = function(neume, _) {
     var d = _.finite(_.defaults(spec.d, 0.30));
     var s = _.finite(_.defaults(spec.s, 0.50));
     var r = _.finite(_.defaults(spec.r, 1.00));
-    var curve = _.finite(_.defaults(spec.curve, 0.001));
+    var curve = _.finite(_.defaults(spec.curve, 0.01));
 
     var init = 0;
     var table = [
       [ a, 1, curve ], // a
-      [ d, s, curve ], // d,
+      [ d, s, curve ], // d
       [ r, 0, curve ], // r
     ];
     var releaseNode = 2;
+
+    return make(init, table, releaseNode, ugen, spec, inputs);
+  });
+
+  neume.register("dadsr", function(ugen, spec, inputs) {
+    var delay = _.finite(_.defaults(spec.delay, 0.1));
+    var a = _.finite(_.defaults(spec.a, 0.01));
+    var d = _.finite(_.defaults(spec.d, 0.30));
+    var s = _.finite(_.defaults(spec.s, 0.50));
+    var r = _.finite(_.defaults(spec.r, 1.00));
+    var curve = _.finite(_.defaults(spec.curve, 0.01));
+
+    var init = 0;
+    var table = [
+      [ delay, 0, curve ], // d
+      [ a    , 1, curve ], // a
+      [ d    , s, curve ], // d
+      [ r    , 0, curve ], // r
+    ];
+    var releaseNode = 3;
+
+    return make(init, table, releaseNode, ugen, spec, inputs);
+  });
+
+  neume.register("asr", function(ugen, spec, inputs) {
+    var a = _.finite(_.defaults(spec.a, 0.01));
+    var s = _.finite(_.defaults(spec.s, 1.00));
+    var r = _.finite(_.defaults(spec.r, 1.00));
+    var curve = _.finite(_.defaults(spec.curve, 0.01));
+
+    var init = 0;
+    var table = [
+      [ a, s, curve ], // a
+      [ r, 0, curve ], // r
+    ];
+    var releaseNode = 1;
+
+    return make(init, table, releaseNode, ugen, spec, inputs);
+  });
+
+  neume.register("cutoff", function(ugen, spec, inputs) {
+    var releaseTime = _.finite(_.defaults(spec.releaseTime, 0.1));
+    var level = _.finite(_.defaults(spec.level, 1.00));
+    var curve = _.finite(_.defaults(spec.curve, 0.01));
+
+    var init = level;
+    var table = [
+      [ releaseTime, 0, curve ], // r
+    ];
+    var releaseNode = 0;
 
     return make(init, table, releaseNode, ugen, spec, inputs);
   });
@@ -68,7 +140,7 @@ module.exports = function(neume, _) {
     var releaseValue = startTable.length ? _.finite(_.last(startTable)[1]) : init;
     var schedId = 0;
 
-    if (_.isEmpty(inputs)) {
+    if (inputs.length === 0) {
       inputs = [ new neume.DC(context, 1) ];
     }
 

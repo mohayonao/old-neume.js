@@ -1,6 +1,11 @@
 module.exports = function(neume) {
   "use strict";
 
+  /**
+   * $("media-stream", {
+   *   stream: [MediaStream] = null
+   * })
+   */
   neume.register("media-stream", function(ugen, spec) {
     return make(setup(ugen, spec.stream));
   });

@@ -47,6 +47,8 @@
   </div>
 
   <script id="example">
+  var visualizer = null;
+
   var rates  = [ 300/300, 299/300 ];
   var score  = _.range(8);
   var plucks = [ 69, 71, 72, 76 ].map(function(midi) {
@@ -99,15 +101,18 @@
       rates.forEach(function(rate) {
         new Tape(buffer, rate).connect(comp).start();
       });
+      visualizer.start();
     }).catch(function(e) {
       console.error(e);
     });
+
   }
 
   function stop() {
     if (comp) {
       comp.stop();
     }
+    visualizer.stop();
   }
 
   // http://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis
@@ -135,8 +140,8 @@
     "use strict";
 
     var WaveVisualizer = (function() {
-      function WaveVisualizer(analyer, spec) {
-        this._analyer = analyer;
+      function WaveVisualizer(analyser, spec) {
+        this._analyser = analyser;
 
         this.canvas = spec.canvas;
         this.width  = this.canvas.width  = spec.width;
@@ -144,7 +149,7 @@
         this.context = this.canvas.getContext("2d");
 
         this._startTime = 0;
-        this._fps = 40;
+        this._fps = 60;
       }
 
       WaveVisualizer.prototype.start = function() {
@@ -154,17 +159,18 @@
           var w = this.width  / score.length;
           var h = this.height / rates.length;
 
-          this.objects = _.flatten(rates.map(function(rate, i) {
-            return score.map(function(j, k) {
-              return {
-                x: w * j + w * 0.5,
-                y: h * i + h * 0.5,
-                r: Math.min(w, h) * 0.45,
-                index: k,
-                rate : rate,
-              };
-            });
-          }));
+          this._sched = rates.map(function(rate, i) {
+            return {
+              index: 0,
+              rate : rate,
+              time : 0,
+              r: Math.min(w, h) * 0.45,
+              y: h * i + h * 0.5,
+              w: w,
+              h: h
+            };
+          });
+
           this._startTime = Date.now();
           this._prevT     = this._startTime;
 
@@ -195,29 +201,33 @@
       };
 
       WaveVisualizer.prototype._render = function(t) {
-        t = (t - this._startTime) * 0.001;
-
         this.context.save();
 
-        this.context.fillStyle = "rgba(16, 16, 16, 0.2)";
+        this.context.fillStyle = "rgba(0, 0, 0, 0.1)";
         this.context.fillRect(0, 0, this.width, this.height);
 
-        this.objects.map(function(o) {
-          var i  = (t / (0.250 * o.rate)) % score.length;
-          var d1 = Math.abs(o.index - i);
-          var d2 = score.length - d1;
+        var sched = this._sched;
 
-          o.d = Math.min(d1, d2) / score.length;
+        while (sched[0].time < t) {
+          var s = sched.shift();
+          var x = s.w * 2 * (score[s.index % score.length] >> 1) + s.w;
+          var y = s.y;
+          var r = s.r;
 
-          return o;
-        }).sort(function(a, b) {
-          return a.d - b.d;
-        }).slice(0, 2).forEach(function(o) {
-          this.context.fillStyle = "rgba(189, 195, 199, " + (1 - o.d) + ")";
+          this.context.fillStyle = "white";
           this.context.beginPath();
-          this.context.arc(o.x, o.y, o.r, 0, 2 * Math.PI, true);
+          this.context.arc(x, y, r, 0, 2 * Math.PI, true);
           this.context.fill();
-        }, this);
+
+          s.index += 1;
+          s.time = this._startTime + (250 * s.rate) * s.index;
+
+          if (sched[0].time < s.time) {
+            sched.push(s);
+          } else {
+            sched.unshift(s);
+          }
+        }
 
         this.context.restore();
       };
@@ -226,7 +236,8 @@
     })();
 
     var canvas = document.getElementById("canvas");
-    var visualizer = new WaveVisualizer(Neume.analyer, {
+
+    visualizer = new WaveVisualizer(Neume.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
@@ -240,10 +251,8 @@
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start();
-            visualizer.start();
           } else {
             stop();
-            visualizer.stop();
           }
         }
       }

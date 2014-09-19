@@ -9,7 +9,7 @@ var uglify    = require("gulp-uglify");
 var rename    = require("gulp-rename");
 
 gulp.task("lint", function() {
-  return gulp.src([ "gulpfile.js", "src/**/*.js", "test/**/*.js" ])
+  return gulp.src([ "gulpfile.js", "src/**/*.js", "test/**/*.js", "plugins/**/*.js" ])
     .pipe(jshint())
     .pipe(jshint.reporter(require("jshint-stylish")))
     .pipe(jshint.reporter("fail"));

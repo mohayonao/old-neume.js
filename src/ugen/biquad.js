@@ -3,10 +3,10 @@ module.exports = function(neume, _) {
 
   /**
    * $("biquad", {
-   *   type  : [string]="lowpass",
-   *   freq  : [number|UGen]=350,
-   *   detune: [number|UGen]=0,
-   *   Q     : [number|UGen]=1,
+   *   type  : enum[ lowpass, highpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
+   *   freq  : [number|UGen] = 350
+   *   detune: [number|UGen] = 0
+   *   Q     : [number|UGen] = 1
    *   gain  : [number|UGen] = 0
    * } ... inputs)
    *

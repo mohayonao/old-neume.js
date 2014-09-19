@@ -47,8 +47,9 @@
   </div>
 
   <script id="example">
-  var buffer = null;
+  var visualizer = null; // three.js: http://threejs.org/
 
+  var buffer = null;
   Neume.Buffer.load("./amen.wav").then(function(result) {
     buffer = result;
   }).catch(function(e) {
@@ -116,12 +117,14 @@
         new Granular(buffer, 4).start(e.playbackTime);
       }).start();
     }
+    visualizer.start();
   }
 
   function stop() {
     if (timer) {
       timer.stop();
     }
+    visualizer.stop();
   }
   </script>
 
@@ -137,52 +140,33 @@
     "use strict";
 
     var WaveVisualizer = (function() {
-      function WaveVisualizer(analyer, spec) {
-        this._analyer = analyer;
+      function WaveVisualizer(analyser, spec) {
+        this.width  = spec.width;
+        this.height = spec.height;
+
+        this._analyser = analyser;
 
         this._scene  = new THREE.Scene();
         this._camera = new THREE.PerspectiveCamera(75, spec.width / spec.height, 0.1, 1000);
 
         if (canUseWebGL()) {
-          this._analyer.fftSize = 256;
+          this._analyser.fftSize = 256;
           this._renderer = new THREE.WebGLRenderer();
           this._maxWaves = 128;
         } else {
-          this._analyer.fftSize = 128;
+          this._analyser.fftSize = 128;
           this._renderer = new THREE.CanvasRenderer();
           this._maxWaves = 32;
         }
         this._renderer.setSize(spec.width, spec.height);
 
-        this._state = "init";
-        this._timeData = new Uint8Array(analyer.frequencyBinCount);
-        this._freqData = new Uint8Array(analyer.frequencyBinCount);
-        this._waves = [];
+        this.domElement = this._renderer.domElement;
+        this.camera     = this._camera;
 
-        Object.defineProperties(this, {
-          width: {
-            value: spec.width,
-            enumerable: true
-          },
-          height: {
-            value: spec.height,
-            enumerable: true
-          },
-          state: {
-            get: function() {
-              return this._state;
-            },
-            enumerable: true
-          },
-          domElement: {
-            value: this._renderer.domElement,
-            enumerable: true
-          },
-          camera: {
-            value: this._camera,
-            enumerable: true
-          }
-        })
+        this._state = "init";
+        this._timeData = new Uint8Array(analyser.frequencyBinCount);
+        this._freqData = new Uint8Array(analyser.frequencyBinCount);
+        this._waves = [];
       }
 
       WaveVisualizer.prototype.start = function() {
@@ -201,8 +185,8 @@
       };
 
       WaveVisualizer.prototype.render = function(t) {
-        this._analyer.getByteTimeDomainData(this._timeData);
-        this._analyer.getByteFrequencyData(this._freqData);
+        this._analyser.getByteTimeDomainData(this._timeData);
+        this._analyser.getByteFrequencyData(this._freqData);
 
         this._render(t);
 
@@ -280,7 +264,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    var visualizer = new WaveVisualizer(Neume.analyer, { width: canvas.width(), height: 240 });
+    visualizer = new WaveVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, 0, -300);
 
@@ -296,10 +280,8 @@
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);
-            visualizer.start();
           } else {
             stop();
-            visualizer.stop();
           }
         }
       }

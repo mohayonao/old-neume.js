@@ -2,10 +2,13 @@
 
 var _ = require("./utils");
 
+_.NeuDC      = require("./dc");
 _.NeuUGen    = require("./ugen");
 _.NeuParam   = require("./param");
 _.NeuIn      = require("./in");
 _.NeuSynthDB = require("./synthdb");
+
+var makeOutlet = require("./synth-makeOutlet");
 
 var EMPTY_DB = new _.NeuSynthDB();
 var INIT  = 0;
@@ -23,9 +26,7 @@ function NeuSynth(context, func, args) {
     var args = _.toArray(arguments);
     var key  = args.shift();
     var spec = _.isDictionary(_.first(args)) ? args.shift() : {};
-    var inputs = args.reduce(function(a, b) {
-      return a.concat(b);
-    }, []);
+    var inputs = Array.prototype.concat.apply([], args);
     var ugen = _.NeuUGen.build(_this, key, spec, inputs);
 
     db.append(ugen);
@@ -147,9 +148,9 @@ function NeuSynth(context, func, args) {
     });
   };
 
-  var result = _.findAudioNode(func.apply(null, [ $ ].concat(args)));
+  var result = makeOutlet(context, func.apply(null, [ $ ].concat(args)));
 
-  if (outputs[0] == null && _.isAudioNode(result)) {
+  if (outputs[0] == null) {
     outputs[0] = result;
   }
 
@@ -158,7 +159,7 @@ function NeuSynth(context, func, args) {
   this._routing = [];
   this._db = outputs.length ? db : EMPTY_DB;
   this._state = INIT;
-  this._stateString = "init";
+  this._stateString = "UNSCHEDULED";
   this._timers = timers;
   this._methodNames = [];
 
@@ -209,6 +210,7 @@ function NeuSynth(context, func, args) {
 
   this._methodNames = this._methodNames.sort();
 }
+NeuSynth.$name = "NeuSynth";
 
 NeuSynth.prototype.getMethods = function() {
   return this._methodNames.slice();
@@ -219,29 +221,29 @@ NeuSynth.prototype.start = function(t) {
 
   if (this._state === INIT) {
     this._state = START;
-    this._stateString = "ready";
+    this._stateString = "SCHEDULED";
 
-    this.$context.sched(t, function(t) {
-      this._stateString = "start";
-
-      if (this._routing.length === 0) {
-        _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
-      } else {
-        this._routing.forEach(function(destinations, output) {
-          destinations.forEach(function(destination) {
-            _.connect({ from: this.$outputs[output], to: destination });
-          }, this);
-        }, this);
-      }
-
-      this._db.all().forEach(function(ugen) {
-        ugen.$unit.start(t);
-      });
-
-      this._timers.forEach(function(timer) {
-        timer.start(t);
-      });
+    this.$context.sched(t, function() {
+      this._stateString = "PLAYING";
     }, this);
+
+    if (this._routing.length === 0) {
+      _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
+    } else {
+      this._routing.forEach(function(destinations, output) {
+        destinations.forEach(function(destination) {
+          _.connect({ from: this.$outputs[output], to: destination });
+        }, this);
+      }, this);
+    }
+
+    this._db.all().forEach(function(ugen) {
+      ugen.$unit.start(t);
+    });
+
+    this._timers.forEach(function(timer) {
+      timer.start(t);
+    });
 
     this.$context.start(); // auto start(?)
   }
@@ -256,7 +258,7 @@ NeuSynth.prototype.stop = function(t) {
     this._state = STOP;
 
     this.$context.sched(t, function(t) {
-      this._stateString = "stop";
+      this._stateString = "FINISHED";
 
       this.$context.nextTick(function() {
         this.$outputs.forEach(function(output) {

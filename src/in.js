@@ -8,7 +8,10 @@ function NeuIn(synth) {
   this.$synth   = synth;
   this.$context = synth.$context;
   this.$outlet  = this.$context.createGain();
+  this.$offset  = 0;
 }
 _.inherits(NeuIn, _.NeuUGen);
+
+NeuIn.$name = "NeuIn";
 
 module.exports = NeuIn;

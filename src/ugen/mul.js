@@ -16,52 +16,55 @@ module.exports = function(neume, _) {
    * | - gain: 0 |--| inputs[2] |
    * +-----------+  +-----------+
    *   |
-   * +-----------------------------------+
-   * | GainNode                          |
-   * | - gain: mul extracted from inputs |
-   * +-----------------------------------+
+   * +------------------+
+   * | GainNode         |
+   * | - gain: multiple |
+   * +------------------+
    *   |
    */
   neume.register("*", function(ugen, spec, inputs) {
-    var outlet = null;
-
     var context = ugen.$context;
-    var parts  = _.partition(inputs, _.isNumber);
-    var nodes  = _.second(parts);
-    var multiple = _.reduce(_.first(parts), function(a, b) {
-      return a * b;
-    }, 1);
+    var outlet  = null;
 
-    if (multiple === 0) {
-      outlet = new neume.DC(context, 0);
-      nodes  = [];
-    } else {
-      outlet = _.first(nodes) || new neume.DC(context, 1);
-      nodes  = _.rest(nodes);
-    }
+    var nodes    = [];
+    var multiple = 1;
 
-    outlet = _.reduce(nodes, function(outlet, node) {
-      var gain = context.createGain();
+    inputs.forEach(function(node) {
+      if (typeof node === "number") {
+        multiple *= node;
+      } else {
+        nodes.push(node);
+      }
+    });
+    multiple = _.finite(multiple);
 
-      gain.gain.value = 0;
+    if (nodes.length && multiple !== 0) {
+      outlet = nodes.shift();
 
-      _.connect({ from: node, to: gain.gain });
-      _.connect({ from: outlet, to: gain });
+      outlet = nodes.reduce(function(outlet, node) {
+        var gain = context.createGain();
 
-      return gain;
-    }, outlet);
+        gain.gain.value = 0;
 
-    if (multiple !== 0 && multiple !== 1) {
-      var tmp = outlet;
+        _.connect({ from: node  , to: gain.gain });
+        _.connect({ from: outlet, to: gain });
 
-      outlet = context.createGain();
+        return gain;
+      }, outlet);
 
-      outlet.gain.value = multiple;
-      _.connect({ from: tmp, to: outlet });
+      if (multiple !== 1) {
+        var tmp = outlet;
+
+        outlet = context.createGain();
+
+        outlet.gain.value = multiple;
+        _.connect({ from: tmp, to: outlet });
+      }
     }
 
     return new neume.Unit({
-      outlet: outlet
+      outlet: outlet,
+      offset: 0
     });
 
   });
