@@ -1,7 +1,7 @@
 module.exports = function(neume, _) {
   "use strict";
 
-  var WEB_AUDIO_MAX_DELAY_TIME = 180;
+  var WEB_AUDIO_MAX_DELAY_TIME = neume.MAX_DELAY_SEC;
 
   /**
    * $("delay", {

@@ -73,6 +73,10 @@ neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
 neume.FFT      = require("./fft");
 
+_.each(require("./const"), function(val, key) {
+  neume[key] = val;
+});
+
 neume.register = function(name, func) {
   neume.UGen.register(name, func);
   return neume;
