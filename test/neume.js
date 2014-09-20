@@ -33,6 +33,11 @@ describe("neume", function() {
         neume.exports("NotAudioContext");
       }, TypeError);
     });
+    describe(".use(fn)", function() {
+      it("points to neume.use(fn)", function() {
+        assert(neume.exports.use === neume.use);
+      });
+    });
   });
 
   describe("Neume", function() {
@@ -42,11 +47,6 @@ describe("neume", function() {
       Neume = neume.exports(new window.AudioContext());
     });
 
-    describe(".use(fn)", function() {
-      it("points to neume.use(fn)", function() {
-        assert(Neume.use === neume.use);
-      });
-    });
     describe(".render(duration, func)", function() {
       it("points to neume.render(context, duration, func)", function() {
         var spy = sinon.spy();
