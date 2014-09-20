@@ -19,18 +19,24 @@
 })(function(neume, _) {
   "use strict";
 
+  var BUF_SIZE = neume.PLUGIN_BUF_SIZE;
+
+  var zero = new Float32Array(BUF_SIZE);
+
   neume.register("impulse", function(ugen, spec) {
     var context = ugen.$context;
-    var outlet  = context.createScriptProcessor(512, 0, 1);
+    var outlet  = context.createScriptProcessor(BUF_SIZE, 0, 1);
 
     var level = _.finite(_.defaults(spec.level, 1));
 
     var startTime  = Infinity;
     var sampleRate = context.sampleRate;
-    var processDur = 512 / sampleRate;
+    var processDur = BUF_SIZE / sampleRate;
     var ended = false;
 
     outlet.onaudioprocess = function(e) {
+      e.outputBuffer.getChannelData(0).set(zero);
+
       if (ended) {
         return;
       }
@@ -40,8 +46,7 @@
 
       if (startTime < t0 || (t0 <= startTime && startTime <= t1)) {
         var index = (startTime - t0) / (1 / sampleRate);
-
-        index = Math.max(0, Math.min(index|0, 511));
+        index = Math.max(0, Math.min(index|0, BUF_SIZE - 1));
         e.outputBuffer.getChannelData(0)[index] = level;
         ended = true;
 
