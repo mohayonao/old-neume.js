@@ -273,7 +273,7 @@
       });
     }
 
-    function updateExamples(gistid) {
+    function updateExamples(gistid, title) {
       readFromGist(gistid, function(files) {
         var examples = _.chain(files).filter(function(file) {
           return /^(.+)\.js$/.test(file.filename);
@@ -284,6 +284,15 @@
             gistid: gistid
           };
         }).value();
+
+        if (title) {
+          var selected = examples.filter(function(example) {
+            return example.title === title;
+          });
+          if (selected.length) {
+            editor.setValue(selected[0].source);
+          }
+        }
 
         vue.examples = examples;
       });
