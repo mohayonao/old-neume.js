@@ -2,7 +2,7 @@
 
 var _ = require("../src/utils");
 var NeuContext = require("../src/context");
-var NeuUGen = require("../src/ugen");
+var NeuNode = require("../src/node");
 var NeuIn = require("../src/in");
 
 describe("NeuIn", function() {
@@ -19,7 +19,7 @@ describe("NeuIn", function() {
   describe("(synth)", function() {
     it("returns an instance of NeuIn", function() {
       assert(_in instanceof NeuIn);
-      assert(_in instanceof NeuUGen);
+      assert(_in instanceof NeuNode);
     });
     it("has outlet-link", function() {
       assert(_.findAudioNode(_in) instanceof window.GainNode);

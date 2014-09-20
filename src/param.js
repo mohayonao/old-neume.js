@@ -2,22 +2,22 @@
 
 var _ = require("./utils");
 
-var NeuUGen = require("./ugen");
+var NeuNode = require("./node");
 var NeuDC   = require("./dc");
 
 function NeuParam(synth, name, value) {
+  NeuNode.call(this, synth);
+
   this.name = name;
 
-  this.$synth   = synth;
-  this.$context = synth.$context;
-  this.$outlet  = null;
-  this.$offset  = 0;
+  this.$outlet = null;
+  this.$offset = 0;
 
   this._params = [];
   this._connected = [];
   this._value = _.finite(value);
 }
-_.inherits(NeuParam, NeuUGen);
+_.inherits(NeuParam, NeuNode);
 
 NeuParam.$name = "NeuParam";
 
@@ -140,4 +140,4 @@ NeuParam.prototype._connect = function(to, output, input) {
   }
 };
 
-module.exports = NeuParam;
+module.exports = _.NeuParam = NeuParam;
