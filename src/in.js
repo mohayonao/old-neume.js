@@ -2,16 +2,16 @@
 
 var _ = require("./utils");
 
-_.NeuUGen = require("./ugen");
+var NeuNode = require("./node");
 
 function NeuIn(synth) {
-  this.$synth   = synth;
-  this.$context = synth.$context;
+  NeuNode.call(this, synth);
+
   this.$outlet  = this.$context.createGain();
   this.$offset  = 0;
 }
-_.inherits(NeuIn, _.NeuUGen);
+_.inherits(NeuIn, NeuNode);
 
 NeuIn.$name = "NeuIn";
 
-module.exports = NeuIn;
+module.exports = _.NeuIn = NeuIn;

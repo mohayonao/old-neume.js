@@ -2,7 +2,7 @@
 
 var _ = require("./utils");
 
-var Emitter = require("./emitter");
+var NeuNode = require("./node");
 var NeuDC   = require("./dc");
 var NeuUnit = require("./unit");
 
@@ -10,15 +10,14 @@ var SelectorParser = require("./selector-parser");
 var makeOutlet = require("./ugen-makeOutlet");
 
 function NeuUGen(synth, key, spec, inputs) {
-  Emitter.call(this);
+  NeuNode.call(this, synth);
+
   var parsed = SelectorParser.parse(key);
 
   if (!NeuUGen.registered.hasOwnProperty(parsed.key)) {
     throw new Error("unknown key: " + key);
   }
 
-  this.$synth   = synth;
-  this.$context = synth.$context;
   this.$key   = parsed.key;
   this.$class = parsed.class;
   this.$id    = parsed.id;
@@ -35,24 +34,13 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$outlet = outlet.outlet;
   this.$offset = outlet.offset;
 
-  Object.defineProperties(this, {
-    context: {
-      value: _.findAudioContext(this.$context),
-      enumerable: true
-    },
-    outlet: {
-      value: _.findAudioNode(this.$outlet),
-      enumerable: true
-    },
-  });
-
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
       value: method
     });
   }, this);
 }
-_.inherits(NeuUGen, Emitter);
+_.inherits(NeuUGen, NeuNode);
 
 NeuUGen.$name = "NeuUGen";
 
@@ -75,18 +63,6 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   }
 
   return new NeuUGen(synth, key, spec, inputs);
-};
-
-NeuUGen.prototype.add = function(node) {
-  return new NeuUGen(this.$synth, "+", {}, [ this, _.defaults(node, 0) ]);
-};
-
-NeuUGen.prototype.mul = function(node) {
-  return new NeuUGen(this.$synth, "*", {}, [ this, _.defaults(node, 1) ]);
-};
-
-NeuUGen.prototype.madd = function(mul, add) {
-  return this.mul(_.defaults(mul, 1)).add(_.defaults(add, 0));
 };
 
 NeuUGen.prototype._connect = function(to, output, input) {
@@ -119,4 +95,4 @@ function createGainDC(context, offset) {
   return gain;
 }
 
-module.exports = NeuUGen;
+module.exports = _.NeuUGen = NeuUGen;

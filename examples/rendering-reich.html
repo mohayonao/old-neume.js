@@ -28,7 +28,6 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="../build/neume.js"></script>
-  <script>var Neume = neume(new AudioContext());</script>
 </head>
 <body>
   <div class="container">
@@ -48,6 +47,8 @@
   </div>
 
   <script id="example">
+  var Neume = neume(new AudioContext());
+
   var visualizer = null;
 
   var rates  = [ 300/300, 299/300 ];
@@ -91,29 +92,32 @@
     return $("comp", $.in(0));
   });
 
-  var comp = null;
+  var players = [];
 
   function start() {
     score = _.shuffle(score);
 
-    comp = new Comp().start();
+    var comp = new Comp();
 
     Neume.render(2.000, minimal).then(function(buffer) {
       rates.forEach(function(rate) {
         new Tape(buffer, rate).connect(comp).start();
       });
-      visualizer.start();
+
+      players = [ comp, visualizer ];
+
+      players.forEach(function(player) {
+        player.start();
+      });
     }).catch(function(e) {
       console.error(e);
     });
-
   }
 
   function stop() {
-    if (comp) {
-      comp.stop();
-    }
-    visualizer.stop();
+    players.forEach(function(player) {
+      player.stop();
+    });
   }
 
   // http://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis
@@ -217,7 +221,7 @@
 
           this.context.fillStyle = "white";
           this.context.beginPath();
-          this.context.arc(x, y, r, 0, 2 * Math.PI, true);
+          this.context.arc(x|0, y|0, r|0, 0, 2 * Math.PI, true);
           this.context.fill();
 
           s.index += 1;

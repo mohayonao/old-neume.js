@@ -28,7 +28,6 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//mohayonao.github.io/MMLEmitter/build/MMLEmitter.min.js"></script>
   <script src="../build/neume.js"></script>
-  <script>var Neume = neume(new AudioContext());</script>
 </head>
 <body>
   <div class="container">
@@ -48,6 +47,8 @@
   </div>
 
   <script id="example">
+  var Neume = neume(new AudioContext());
+
   var mmlData    = null;
   var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/MMLEmitter/
   var visualizer = null; // three.js  : http://threejs.org/
@@ -84,10 +85,12 @@
     return $("conv", { buffer: buffer, mix: 0.75 }, $.in(0));
   });
 
+  var players = [];
+
   function start() {
     var reverb = new Reverb(
       createReverbBuffer({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 })
-    ).start();
+    );
 
     mmlEmitter = new MMLEmitter(Neume.context, mmlData);
 
@@ -99,15 +102,17 @@
       });
     });
 
-    mmlEmitter.start();
-    visualizer.start();
+    players = [ reverb, mmlEmitter, visualizer ];
+
+    players.forEach(function(player) {
+      player.start();
+    });
   }
 
   function stop() {
-    if (mmlEmitter) {
-      mmlEmitter.stop();
-    }
-    visualizer.stop();
+    players.forEach(function(player) {
+      player.stop();
+    });
   }
   </script>
 
