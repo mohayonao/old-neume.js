@@ -111,18 +111,6 @@ describe("NeuUGen", function() {
     });
   });
 
-  describe("#context", function() {
-    it("is an instance of AudioContext", function() {
-      assert(ugen0.context instanceof window.AudioContext);
-    });
-  });
-
-  describe("#outlet", function() {
-    it("is an instance of AudioNode", function() {
-      assert(ugen0.outlet instanceof window.AudioNode);
-    });
-  });
-
   describe("#add(node)", function() {
     it("returns a new NeuUGen that is (this + node)", function() {
       var ugen2 = NeuUGen.build(synth, "sin#ugen2", {}, []);

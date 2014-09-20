@@ -34,17 +34,6 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$outlet = outlet.outlet;
   this.$offset = outlet.offset;
 
-  Object.defineProperties(this, {
-    context: {
-      value: _.findAudioContext(this.$context),
-      enumerable: true
-    },
-    outlet: {
-      value: _.findAudioNode(this.$outlet),
-      enumerable: true
-    },
-  });
-
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
       value: method
