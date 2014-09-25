@@ -67,7 +67,8 @@
   </div>
 
   <script>
-  var synth = null;
+  var synth  = null;
+  var buffer = null;
 
   $(function() {
     "use strict";
@@ -76,11 +77,18 @@
     var gistId = "";
     var title  = "";
 
+    Neume.Buffer.load("./amen.wav").then(function(result) {
+      buffer = result;
+    });
+
     function start() {
       var code = editor.getValue();
 
       try {
         synth = eval.call(null, code);
+
+        play();
+
         localStorage.setItem("examples.test.code", code);
         return true;
       } catch (e) {
@@ -88,6 +96,16 @@
       }
 
       return false;
+    }
+
+    function play() {
+      if (synth) {
+        if (typeof synth === "function" && synth.name === "SynthDef") {
+          synth = new synth().start();
+        } else if (synth.state === "UNSCHEDULED") {
+          synth.start();
+        }
+      }
     }
 
     var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
@@ -314,8 +332,6 @@
       if (matched) {
         matched[2] = decodeURIComponent(matched[2] || "");
         matched[3] = decodeURIComponent(matched[3] || "");
-
-        console.log(matched)
 
         if (gistId !== matched[1]) {
           gistId = matched[1];
