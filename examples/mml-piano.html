@@ -82,7 +82,7 @@
   });
 
   var Reverb = new Neume(function($, buffer) {
-    return $("conv", { buffer: buffer, mix: 0.75 }, $.in(0));
+    return $("conv", { buf: buffer, mix: 0.75 }, $.in(0));
   });
 
   var players = [];

@@ -56,36 +56,33 @@ module.exports = function(neume) {
   }
 
   function generatePinkNoise(sampleRate) {
+    // DSP generation of Pink (1/f) Noise
+    // http://www.firstpr.com.au/dsp/pink-noise/
+
     var noise = new Float32Array(sampleRate);
 
-    var whites = new Uint8Array([ rand(), rand(), rand(), rand(), rand() ]);
-
-    var MAX_KEY = 31;
-    var key = 0;
-    var last_key, diff;
+    var white;
+    var b0 = 0;
+    var b1 = 0;
+    var b2 = 0;
+    var b3 = 0;
+    var b4 = 0;
+    var b5 = 0;
+    var b6 = 0;
 
     for (var i = 0, imax = noise.length; i < imax; i++) {
-      last_key = key++;
-      key &= MAX_KEY;
-
-      diff = last_key ^ key;
-
-      var sum = 0;
-      for (var j = 0; j < 5; ++j) {
-        if (diff & (1 << j)) {
-          whites[j] = rand();
-        }
-        sum += whites[j];
-      }
-
-      noise[i] = (sum * 0.01666666) - 1;
+      white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      noise[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+      noise[i] *= 0.12; // adjust gain
+      b6 = white * 0.115926;
     }
 
     return noise;
   }
-
-  function rand() {
-    return ((Math.random() * 1073741824)|0) % 25;
-  }
-
 };

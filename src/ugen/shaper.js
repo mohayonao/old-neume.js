@@ -1,7 +1,7 @@
 module.exports = function(neume, _) {
   "use strict";
 
-  var WS_CURVE_SIZE = 4096;
+  var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
 
   /**
    * $("shaper", {

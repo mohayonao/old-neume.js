@@ -25,7 +25,7 @@
   - [sine-storm](http://mohayonao.github.io/neume.js/examples/sine-storm.html)
     - parameters changing gradually
   - [snippets](http://mohayonao.github.io/neume.js/examples/snippets.html)
-    - tiny samples and test
+    - tiny samples and tests
 
 ## Installation
 
@@ -49,6 +49,7 @@ neume.js is dependent on `Web Audio API` and `Promise`.
   - `$` syntax is `$(className, spec, ... inputs)`
 
 ```javascript
+// initialize Neume function with your AudioContext
 var Neume = neume(new AudioContext());
 
 // define synth
@@ -109,4 +110,4 @@ when .start()
 
 ## License
 
-Neume.js is available under the The MIT License.
+neume.js is available under the The MIT License.

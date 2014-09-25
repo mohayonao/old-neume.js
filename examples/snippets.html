@@ -72,7 +72,9 @@
   $(function() {
     "use strict";
 
-    var GISTID = "2366c2e6674bc5a86aa6";
+    var DEFAULT_GISTID = "2366c2e6674bc5a86aa6";
+    var gistId = "";
+    var title  = "";
 
     function start() {
       var code = editor.getValue();
@@ -95,6 +97,13 @@
       lineWrapping: true,
       lineNumbers: true,
       showCursorWhenSelecting: true,
+    });
+    editor.on("change", function(cm, change) {
+      if (change.origin !== "setValue") {
+        window.location.replace(
+          "#gistid:" + gistId + ":" + encodeURIComponent(title) + ":" + encodeURIComponent(editor.getValue().trim())
+        );
+      }
     });
 
     var vue = new Vue({
@@ -273,7 +282,7 @@
       });
     }
 
-    function updateExamples(gistid) {
+    function updateExamples(gistid, title, source) {
       readFromGist(gistid, function(files) {
         var examples = _.chain(files).filter(function(file) {
           return /^(.+)\.js$/.test(file.filename);
@@ -285,20 +294,33 @@
           };
         }).value();
 
+        if (source) {
+          editor.setValue(source);
+        } else if (title) {
+          var selected = examples.filter(function(example) {
+            return example.title === title;
+          });
+          if (selected.length) {
+            editor.setValue(selected[0].source);
+          }
+        }
+
         vue.examples = examples;
       });
     }
 
-    var prevGistId = "";
-
     window.onhashchange = function() {
-      var matched = /^#gistid:([a-f\d]+)(?::(.+))?$/.exec(location.hash);
+      var matched = /^#gistid:([a-f\d]+)(?::(.+?))?(?::(.+))?$/.exec(location.hash);
       if (matched) {
-        matched[2] = decodeURIComponent(matched[2]);
+        matched[2] = decodeURIComponent(matched[2] || "");
+        matched[3] = decodeURIComponent(matched[3] || "");
 
-        if (prevGistId !== matched[1]) {
-          prevGistId = matched[1];
-          updateExamples(matched[1], matched[2]);
+        console.log(matched)
+
+        if (gistId !== matched[1]) {
+          gistId = matched[1];
+          title  = matched[2];
+          updateExamples(matched[1], matched[2], matched[3]);
         }
       }
     };
@@ -306,7 +328,7 @@
     if (location.hash) {
       window.onhashchange();
     } else {
-      window.location.replace("#gistid:" + GISTID);
+      window.location.replace("#gistid:" + DEFAULT_GISTID);
     }
 
     editor.setValue(localStorage.getItem("examples.test.code") || "");

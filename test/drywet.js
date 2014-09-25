@@ -186,7 +186,7 @@ describe("NeuDryWet", function() {
   });
 
   describe("(context, inputs, wetNode, node)", function() {
-    it("return mixNode", function() {
+    it("2return mixNode", function() {
       var node = audioContext.createGain();
       var inputs  = [ audioContext.createOscillator() ];
       var wetNode = audioContext.createConvolver();
@@ -208,12 +208,18 @@ describe("NeuDryWet", function() {
               value: 0,
               inputs: [
                 {
-                  name: "GainNode#mix",
-                  gain: {
-                    value: 1,
-                    inputs: []
-                  },
-                  inputs: []
+                  name: "WaveShaperNode",
+                  oversample: "none",
+                  inputs: [
+                    {
+                      name: "GainNode#mix",
+                      gain: {
+                        value: 1,
+                        inputs: []
+                      },
+                      inputs: []
+                    }
+                  ]
                 }
               ]
             },
@@ -244,13 +250,9 @@ describe("NeuDryWet", function() {
             gain: {
               value: 0,
               inputs: [
-                DC(1),
                 {
-                  name: "GainNode",
-                  gain: {
-                    value: -1,
-                    inputs: []
-                  },
+                  name: "WaveShaperNode",
+                  oversample: "none",
                   inputs: [
                     {
                       name: "GainNode#mix",

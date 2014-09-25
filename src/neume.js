@@ -71,6 +71,11 @@ neume.DC       = require("./dc");
 neume.Buffer   = require("./buffer");
 neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
+neume.FFT      = require("./fft");
+
+_.each(require("./const"), function(val, key) {
+  neume[key] = val;
+});
 
 neume.register = function(name, func) {
   neume.UGen.register(name, func);
@@ -113,10 +118,6 @@ neume.exports = function(destination) {
 
   return Object.defineProperties(
     neume(context), {
-      use: {
-        value: neume.use,
-        enumerable: true
-      },
       render: {
         value: function(duration, func) {
           return neume.render(context, duration, func);
@@ -138,5 +139,7 @@ neume.exports = function(destination) {
     }
   );
 };
+
+neume.exports.use = neume.use;
 
 module.exports = neume;

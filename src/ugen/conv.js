@@ -3,7 +3,7 @@ module.exports = function(neume, _) {
 
   /**
    * $("conv", {
-   *   buffer   : [AudioBuffer|NeuBuffer] = null
+   *   buf      : [AudioBuffer|NeuBuffer] = null
    *   normalize: [boolean]               = true
    *   mix      : [number|UGen]           = 1
    * } ... inputs)
@@ -26,7 +26,7 @@ module.exports = function(neume, _) {
   neume.register("conv", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var buffer = _.findAudioBuffer(spec.buffer);
+    var buffer = _.findAudioBuffer(spec.buf);
     var conv = context.createConvolver();
 
     var mix = _.defaults(spec.mix, 1);

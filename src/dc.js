@@ -1,10 +1,11 @@
 "use strict";
 
 var _ = require("./utils");
+var C = require("./const");
 
-var BUFLENGTH = 128;
-var filled0 = _.fill(new Float32Array(BUFLENGTH), 0);
-var filled1 = _.fill(new Float32Array(BUFLENGTH), 1);
+var DC_BUF_SIZE = C.DC_BUF_SIZE;
+var filled0 = _.fill(new Float32Array(DC_BUF_SIZE), 0);
+var filled1 = _.fill(new Float32Array(DC_BUF_SIZE), 1);
 
 /**
  * Create a constant amplitude signal
@@ -15,13 +16,13 @@ var filled1 = _.fill(new Float32Array(BUFLENGTH), 1);
 function NeuDC(context, value) {
   value = _.num(value);
 
-  var buf = context.createBuffer(1, BUFLENGTH, context.sampleRate);
+  var buf = context.createBuffer(1, DC_BUF_SIZE, context.sampleRate);
   var bufSrc = context.createBufferSource();
 
   buf.getChannelData(0).set(
     value === 0 ? filled0 :
     value === 1 ? filled1 :
-    _.fill(new Float32Array(BUFLENGTH), value)
+    _.fill(new Float32Array(DC_BUF_SIZE), value)
   );
 
   bufSrc.buffer = buf;

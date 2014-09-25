@@ -1,11 +1,12 @@
 "use strict";
 
 var _ = require("./utils");
+var C = require("./const");
 
 var INIT  = 0;
 var START = 1;
-var BUFFER_SIZE = 1024;
-var MAX_RENDERING_SEC = 180;
+var PROCESS_BUF_SIZE   = C.PROCESS_BUF_SIZE;
+var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
 
@@ -120,10 +121,10 @@ function startRendering() {
 
 function startAudioTimer() {
   var context = this.$context;
-  var scriptProcessor = context.createScriptProcessor(BUFFER_SIZE, 1, 1);
+  var scriptProcessor = context.createScriptProcessor(PROCESS_BUF_SIZE, 1, 1);
   var bufferSource    = context.createBufferSource();
 
-  this._currentTimeIncr = BUFFER_SIZE / context.sampleRate;
+  this._currentTimeIncr = PROCESS_BUF_SIZE / context.sampleRate;
   this._scriptProcessor = scriptProcessor;
   scriptProcessor.onaudioprocess = onaudioprocess.bind(this);
 

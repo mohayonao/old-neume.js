@@ -1,0 +1,10 @@
+"use strict";
+
+module.exports = {
+  PROCESS_BUF_SIZE: 1024,
+  PLUGIN_BUF_SIZE: 512,
+  DC_BUF_SIZE: 128,
+  WS_CURVE_SIZE: 4096,
+  MAX_RENDERING_SEC: 180,
+  MAX_DELAY_SEC: 180,
+};

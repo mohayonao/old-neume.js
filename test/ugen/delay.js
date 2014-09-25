@@ -11,7 +11,7 @@ describe("ugen/delay", function() {
     Neume = neume.exports(new window.AudioContext());
   });
 
-  describe("$(delay delayTime:0.5 $(delay))", function() {
+  describe("$(delay delay:0.5 $(delay))", function() {
     /*
      * +----------+
      * | $(delay) |
@@ -25,7 +25,7 @@ describe("ugen/delay", function() {
      */
     it("return a DelayNode that is connected with $(delay)", function() {
       var synth = new Neume(function($) {
-        return $("delay", { delayTime: 0.5 }, $("delay"));
+        return $("delay", { delay: 0.5 }, $("delay"));
       })();
 
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -49,10 +49,10 @@ describe("ugen/delay", function() {
       // assert(synth.outlet.$maxDelayTime === 0.5);
     });
   });
-  describe("$(delay delayTime:$(delay) $(delay))", function() {
+  describe("$(delay delay:$(delay) $(delay))", function() {
     it("return a DelayNode that is connected with $(delay)", function() {
       var synth = new Neume(function($) {
-        return $("delay", { delayTime: $("delay") }, $("delay"));
+        return $("delay", { delay: $("delay") }, $("delay"));
       })();
 
       assert.deepEqual(synth.outlet.toJSON(), {

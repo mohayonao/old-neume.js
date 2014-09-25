@@ -1,6 +1,8 @@
 module.exports = function(neume, _) {
   "use strict";
 
+  var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
+
   /**
    * $("osc", {
    *   type  : [string|PeriodicWave]="sin",
@@ -50,11 +52,14 @@ module.exports = function(neume, _) {
     var type = spec.type;
 
     if (!isWave(type)) {
-      type = WAVE_TYPES[type] || "sine";
+      if (type === "pulse") {
+        type = makePulseWave(ugen.$context, _.finite(_.defaults(spec.width, 0.5)));
+      } else {
+        type = WAVE_TYPES[type] || "sine";
+      }
     }
 
     return make(setup(type, ugen, spec, inputs));
-
   });
 
   function periodicwave(ugen, spec, inputs) {
@@ -65,7 +70,6 @@ module.exports = function(neume, _) {
     }
 
     return make(setup(type, ugen, spec, inputs));
-
   }
 
   neume.register("periodicwave", periodicwave);
@@ -75,6 +79,11 @@ module.exports = function(neume, _) {
     neume.register(name, function(ugen, spec, inputs) {
       return make(setup(type, ugen, spec, inputs));
     });
+  });
+
+  neume.register("pulse", function(ugen, spec, inputs) {
+    var type = makePulseWave(ugen.$context, _.finite(_.defaults(spec.width, 0.5)));
+    return make(setup(type, ugen, spec, inputs));
   });
 
   function isWave(wave) {
@@ -150,6 +159,31 @@ module.exports = function(neume, _) {
     });
 
     return { outlet: gain, ctrl: osc };
+  }
+
+  var _wave = new Array(256);
+
+  function makePulseWave(context, width) {
+    width = (Math.max(0, Math.min(width, 1)) * 256)|0;
+
+    if (_wave[width]) {
+      return _wave[width];
+    }
+
+    var wave = new Float32Array(WS_CURVE_SIZE);
+    var width2 = width * (WS_CURVE_SIZE / 256);
+
+    for (var i = 0; i < WS_CURVE_SIZE; i++) {
+      wave[i] = i < width2 ? -1 : +1;
+    }
+
+    var fft = neume.FFT.forward(wave);
+
+    var periodicWave = context.createPeriodicWave(fft.real, fft.imag);
+
+    _wave[width] = periodicWave;
+
+    return periodicWave;
   }
 
 };

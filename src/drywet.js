@@ -1,8 +1,20 @@
 "use strict";
 
 var _ = require("./utils");
+var C = require("./const");
 
-var NeuDC = require("./dc");
+var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
+var halfSize = WS_CURVE_SIZE >> 1;
+
+var curveWet = new Float32Array(WS_CURVE_SIZE);
+var curveDry = new Float32Array(WS_CURVE_SIZE);
+
+for (var i = 0; i < halfSize; i++) {
+  curveWet[i] = 0;
+  curveDry[i] = 1;
+  curveWet[i + halfSize] = Math.sin(i / halfSize * Math.PI * 0.5);
+  curveDry[i + halfSize] = Math.cos(i / halfSize * Math.PI * 0.5);
+}
 
 function NeuDryWet(context, inputs, wetNode, mix) {
   if (typeof mix === "number") {
@@ -12,34 +24,36 @@ function NeuDryWet(context, inputs, wetNode, mix) {
 }
 
 function DryWetNode(context, inputs, wetNode, mix) {
-  var dc1 = new NeuDC(context, 1);
+  var gainWet = context.createGain();
+  var gainDry = context.createGain();
+  var gainMix = context.createGain();
+  var wsWet = context.createWaveShaper();
+  var wsDry = context.createWaveShaper();
 
-  var wetGain = context.createGain();
-  var dryGain = context.createGain();
-  var negGain = context.createGain();
-  var mixGain = context.createGain();
+  wsWet.curve = curveWet;
+  wsDry.curve = curveDry;
 
-  wetGain.gain.value = 0;
-  dryGain.gain.value = 0;
-  negGain.gain.value = -1;
+  _.connect({ from: mix, to: wsWet });
+  _.connect({ from: mix, to: wsDry });
+
+  gainWet.gain.value = 0;
+  gainDry.gain.value = 0;
+
+  wsWet.connect(gainWet.gain);
+  wsDry.connect(gainDry.gain);
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
     _.connect({ from: inputs[i], to: wetNode });
-    _.connect({ from: inputs[i], to: dryGain });
+    _.connect({ from: inputs[i], to: gainDry });
   }
 
-  _.connect({ from: wetNode, to: wetGain });
-  _.connect({ from: wetGain, to: mixGain });
-  _.connect({ from: dryGain, to: mixGain });
+  _.connect({ from: wetNode, to: gainWet });
+  _.connect({ from: gainWet, to: gainMix });
+  _.connect({ from: gainDry, to: gainMix });
 
-  _.connect({ from: mix, to: wetGain.gain });
-  _.connect({ from: mix, to: negGain });
-  _.connect({ from: dc1    , to: dryGain.gain }); // +1
-  _.connect({ from: negGain, to: dryGain.gain }); // -mix
+  gainMix.$maddOptimizable = true;
 
-  mixGain.$maddOptimizable = true;
-
-  return mixGain;
+  return gainMix;
 }
 
 function DryWetNumber(context, inputs, wetNode, mix) {
@@ -63,24 +77,24 @@ function DryWetNumber(context, inputs, wetNode, mix) {
     return sum(context, inputs);
   }
 
-  var wetGain = context.createGain();
-  var dryGain = context.createGain();
-  var mixGain = context.createGain();
+  var gainWet = context.createGain();
+  var gainDry = context.createGain();
+  var gainMix = context.createGain();
 
-  wetGain.gain.value = wet;
-  dryGain.gain.value = dry;
+  gainWet.gain.value = wet;
+  gainDry.gain.value = dry;
 
   for (i = 0, imax = inputs.length; i < imax; i++) {
     _.connect({ from: inputs[i], to: wetNode });
-    _.connect({ from: inputs[i], to: dryGain });
+    _.connect({ from: inputs[i], to: gainDry });
   }
-  _.connect({ from: wetNode, to: wetGain });
-  _.connect({ from: wetGain, to: mixGain });
-  _.connect({ from: dryGain, to: mixGain });
+  _.connect({ from: wetNode, to: gainWet });
+  _.connect({ from: gainWet, to: gainMix });
+  _.connect({ from: gainDry, to: gainMix });
 
-  mixGain.$maddOptimizable = true;
+  gainMix.$maddOptimizable = true;
 
-  return mixGain;
+  return gainMix;
 }
 
 function sum(context, inputs) {

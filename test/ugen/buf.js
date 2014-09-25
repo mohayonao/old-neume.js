@@ -30,7 +30,7 @@ describe("ugen/buf", function() {
 
     it("returns a BufferSourceNode", function() {
       var synth = new Neume(function($) {
-        return $("buf", { buffer: buffer });
+        return $("buf", { buf: buffer });
       })();
 
       assert.deepEqual(synth.outlet.toJSON(), {
@@ -55,7 +55,7 @@ describe("ugen/buf", function() {
 
     it("works", function() {
       var synth = new Neume(function($) {
-        return $("buf", { buffer: buffer });
+        return $("buf", { buf: buffer });
       })();
 
       var audioContext = neume._.findAudioContext(synth);
@@ -78,7 +78,7 @@ describe("ugen/buf", function() {
 
     it("works without duration", function() {
       var synth = new Neume(function($) {
-        return $("buf", { buffer: buffer, offset: 5 });
+        return $("buf", { buf: buffer, offset: 5 });
       })();
 
       var audioContext = neume._.findAudioContext(synth);
@@ -98,7 +98,7 @@ describe("ugen/buf", function() {
 
     it("works duration", function() {
       var synth = new Neume(function($) {
-        return $("buf", { buffer: buffer, offset: 5, duration: 10 });
+        return $("buf", { buf: buffer, offset: 5, dur: 10 });
       })();
 
       var audioContext = neume._.findAudioContext(synth);
