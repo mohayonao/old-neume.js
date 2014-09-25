@@ -71,6 +71,7 @@ neume.DC       = require("./dc");
 neume.Buffer   = require("./buffer");
 neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
+neume.FFT      = require("./fft");
 
 neume.register = function(name, func) {
   neume.UGen.register(name, func);
