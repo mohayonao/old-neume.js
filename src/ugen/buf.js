@@ -3,11 +3,11 @@ module.exports = function(neume, _) {
 
   /**
    * $("buf", {
-   *   buffer      : [AudioBuffer|NeuBuffer] = null
-   *   playbackRate: [number|UGen] = 1
-   *   loop        : [boolean] = false
-   *   loopStart   : [number] = 0
-   *   loopEnd     : [number] = 0
+   *   buf  : [AudioBuffer|NeuBuffer] = null
+   *   rate : [number|UGen] = 1
+   *   loop : [boolean] = false
+   *   start: [number] = 0
+   *   end  : [number] = 0
    * })
    *
    * aliases:
@@ -19,18 +19,18 @@ module.exports = function(neume, _) {
    * stop:
    *   stop BufferSourceNode
    *
-   * +---------------------------+
-   * | BufferSourceNode          |
-   * | - buffer: buffer(null)    |
-   * | - playbackRate: rate(1)   |
-   * | - loop: loop(false)       |
-   * | - loopStart: loopStart(0) |
-   * | - loopEnd: loopEnd(0)     |
-   * +---------------------------+
+   * +-------------------------+
+   * | BufferSourceNode        |
+   * | - buffer: buf(null)     |
+   * | - playbackRate: rate(1) |
+   * | - loop: loop(false)     |
+   * | - loopStart: start(0)   |
+   * | - loopEnd: end(0)       |
+   * +-------------------------+
    *   |
    */
   neume.register("buf", function(ugen, spec) {
-    return make(spec.buffer, ugen, spec);
+    return make(spec.buf, ugen, spec);
   });
 
   neume.register("audiobuffer", function(ugen, spec) {
@@ -52,14 +52,14 @@ module.exports = function(neume, _) {
       bufSrc.buffer = buffer;
     }
     bufSrc.loop = !!_.defaults(spec.loop, false);
-    bufSrc.loopStart = _.finite(_.defaults(spec.loopStart, 0));
-    bufSrc.loopEnd   = _.finite(_.defaults(spec.loopEnd  , 0));
+    bufSrc.loopStart = _.finite(_.defaults(spec.start, 0));
+    bufSrc.loopEnd   = _.finite(_.defaults(spec.end  , 0));
 
     bufSrc.playbackRate.value = 0;
     _.connect({ from: _.defaults(spec.rate, 1), to: bufSrc.playbackRate });
 
     var offset = _.finite(_.defaults(spec.offset, 0));
-    var duration = _.defaults(spec.duration, null);
+    var duration = _.defaults(spec.dur, null);
     if (duration != null) {
       duration = _.finite(duration);
     }
