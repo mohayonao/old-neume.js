@@ -149,6 +149,12 @@ describe("ugen/osc", function() {
       })();
       assert(synth.outlet.type === "triangle");
     });
+    it("pulse -> custom", function() {
+      var synth = new Neume(function($) {
+        return $("osc", { type: "pulse", width: 0.25 });
+      })();
+      // assert(synth.outlet.type === "custom");
+    });
     it("PeriodicWave -> custom", function() {
       var wave = Neume.context.createPeriodicWave(
         new Float32Array(128), new Float32Array(128)
@@ -184,6 +190,12 @@ describe("ugen/osc", function() {
         return $("tri");
       })();
       assert(synth.outlet.type === "triangle");
+    });
+    it("pulse -> custom", function() {
+      var synth = new Neume(function($) {
+        return $("pulse", { width: 0.25 });
+      })();
+      // assert(synth.outlet.type === "custom");
     });
     it("PeriodicWave -> custom", function() {
       var wave = Neume.context.createPeriodicWave(
