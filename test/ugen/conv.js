@@ -30,7 +30,7 @@ describe("ugen/conv", function() {
       var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
 
       var synth = new Neume(function($) {
-        return $("conv", { buffer: buffer, normalize: false }, $("sin"));
+        return $("conv", { buf: buffer, normalize: false }, $("sin"));
       })();
 
       assert.deepEqual(synth.outlet.toJSON(), {
