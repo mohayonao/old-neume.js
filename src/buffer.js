@@ -204,7 +204,7 @@ NeuBuffer.prototype.normalize = function() {
 
 NeuBuffer.prototype.resample = function(size, interpolation) {
   size = Math.max(0, _.int(_.defaults(size, this.length)));
-  interpolation = !interpolation;
+  interpolation = !!_.defaults(interpolation, true);
 
   var channels = this.numberOfChannels;
   var buffer = this.$context.createBuffer(channels, size, this.sampleRate);
@@ -263,10 +263,10 @@ function resample(data, size, interpolation) {
   }
 
   if (interpolation) {
-    return resample0(data, size);
+    return resample1(data, size);
   }
 
-  return resample1(data, size);
+  return resample0(data, size);
 }
 
 function resample0(data, size) {
