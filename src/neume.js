@@ -55,6 +55,12 @@ var neume = function(context) {
       },
       enumerable: true
     },
+    Timeout: {
+      value: function(interval, callback) {
+        return new neume.Timeout(context, interval, callback);
+      },
+      enumerable: true
+    },
   });
 
   return Neume;
@@ -71,6 +77,7 @@ neume.DC       = require("./dc");
 neume.Buffer   = require("./buffer");
 neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
+neume.Timeout  = require("./timeout");
 neume.FFT      = require("./fft");
 
 _.each(require("./const"), function(val, key) {

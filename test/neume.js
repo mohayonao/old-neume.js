@@ -3,6 +3,7 @@
 var neume = require("../src/neume");
 var NeuBuffer   = require("../src/buffer");
 var NeuInterval = require("../src/interval");
+var NeuTimeout  = require("../src/timeout");
 
 var NOP = function() {};
 
@@ -117,6 +118,11 @@ describe("neume", function() {
     describe(".Interval(interval, callback)", function() {
       it("return NeuInterval", function() {
         assert(Neume.Interval(0, NOP) instanceof NeuInterval);
+      });
+    });
+    describe(".Timeout(interval, callback)", function() {
+      it("return NeuTimeout", function() {
+        assert(Neume.Timeout(0, NOP) instanceof NeuTimeout);
       });
     });
   });
