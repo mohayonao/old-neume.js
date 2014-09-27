@@ -6,11 +6,8 @@
 
 ![](http://upload.wikimedia.org/wikipedia/commons/a/ab/Gregorian_chant.gif)
 
-:zap: work in progress
-
 ## What is?
-
-**neume.js** is a library for Web Audio API Programming.
+**Neume.js** is a library for web music programming that is optimized for Web Audio API.
 
 ## Examples
 
@@ -42,71 +39,9 @@ neume.js is dependent on `Web Audio API` and `Promise`.
 
   - [es6-promise](https://github.com/jakearchibald/es6-promise)
 
-## Usage
-
-  - `new Neume(func)` builds a constructor of defined synth.
-  - `$` is utility function for building a synth.
-  - `$` syntax is `$(className, spec, ... inputs)`
-
-```javascript
-// initialize Neume function with your AudioContext
-var Neume = neume(new AudioContext());
-
-// define synth
-var Synth = new Neume(function($, freq) {
-  // exponential decay with 5sec
-  return $("xline", { start: 0.25, end: 0.001, dur: 5.0 },
-    // amp modulation
-    $("sin", { freq: 8 }, [ 1, 2 ].map(function(x) {
-      return $("tri", { freq: freq * x });
-    }))
-  ).on("end", function(e) {
-    // stop this tone when xline done
-    this.stop(e.playbakcTime);
-  });
-});
-
-// and use it
-var synth = new Synth(880); // this 880 is received as freq above.
-
-synth.start();
-```
-
-`new Synth()` generates audio node graph like a below.
-
-```
-+-----------------------+  +-----------------------+
-| OscillatorNode        |  | OscillatorNode        |
-| - type     : triangle |  | - type     : triangle |
-| - frequency: freq * 1 |  | - frequency: freq * 2 |
-| - detune   : 0        |  | - detune   : 0        |
-+-----------------------+  +-----------------------+
-  |                          |
-  |  +-----------------------+
-  |  |
-  |  |           +-------------------+
-  |  |           | OscillatorNode    |
-+-----------+    | - type     : sine |
-| GainNode  |    | - frequency: 8    |
-| - gain: 0 |----| - detunr   : 0    |
-+-----------+    +-------------------+
-  |
-+-------------------------------------+
-| GainNode                            |
-| - gain: exponential decay with 5sec |
-+-------------------------------------+
-  |
-when .start()
-  |
-+----------------------+
-| AudioDestinationNode |
-+----------------------+
-```
-
 ## Documents
 
-  - [日本語ドキュメント](https://github.com/mohayonao/neume.js/wiki)
-  - :construction_worker: writer later in English (somebody help me)
+  - [Getting Started](https://github.com/mohayonao/neume.js/wiki/tutorial-Getting-Started) (:construction_worker: partially Japanese)
 
 ## License
 
