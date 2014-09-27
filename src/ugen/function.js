@@ -63,12 +63,14 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (typeof value === "function") {
+            t = _.finite(_.defaults(t, context.currentTime));
             context.sched(t, function() {
               data = value;
             });
           }
         },
         evaluate: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t);
           });
