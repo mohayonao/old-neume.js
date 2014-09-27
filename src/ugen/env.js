@@ -165,7 +165,7 @@ module.exports = function(neume, _) {
 
     function release(t) {
       var v0 = releaseValue;
-      var t0 = t;
+      var t0 = _.finite(_.defaults(t, context.currentTime));
       var t1 = schedule(gain, stopTable, v0, t0);
 
       schedId = context.sched(t1, function(t) {
