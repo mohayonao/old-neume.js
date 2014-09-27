@@ -58,6 +58,7 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (typeof value === "boolean") {
+            t = _.finite(_.defaults(t, context.currentTime));
             context.sched(t, function() {
               var v0 = data  ? trueVal : falseVal;
               var v1 = value ? trueVal : falseVal;
@@ -66,6 +67,7 @@ module.exports = function(neume, _) {
           }
         },
         toggle: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             var v0 = data ? trueVal : falseVal;
             var v1 = data ? falseVal : trueVal;
