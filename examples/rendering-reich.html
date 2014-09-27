@@ -103,14 +103,14 @@
       rates.forEach(function(rate) {
         new Tape(buffer, rate).connect(comp).start();
       });
-
-      players = [ comp, visualizer ];
-
-      players.forEach(function(player) {
-        player.start();
-      });
     }).catch(function(e) {
       console.error(e);
+    });
+
+    players = [ comp, visualizer ];
+
+    players.forEach(function(player) {
+      player.start();
     });
   }
 
