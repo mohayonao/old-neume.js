@@ -73,22 +73,26 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (Array.isArray(value)) {
+            t = _.finite(_.defaults(t, context.currentTime));
             context.sched(t, function() {
               data = value;
             });
           }
         },
         at: function(t, index) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t, _.int(index));
           });
         },
         next: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t, index + 1);
           });
         },
         prev: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t, index - 1);
           });
