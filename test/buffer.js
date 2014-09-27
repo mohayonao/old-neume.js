@@ -268,6 +268,39 @@ describe("NeuBuffer", function() {
         0,
       ]));
     });
+    it("returns new NeuBuffer instance that resampled", function() {
+      var resampled = buffer.resample(12);
+
+      assert(resampled instanceof NeuBuffer);
+      assert.deepEqual(resampled[0], new Float32Array([
+        0,
+        0.6363636255264282,
+        1.2727272510528564,
+        1.9090908765792847,
+        2.545454502105713,
+        3.1818182468414307,
+        3.8181817531585693,
+        4.454545497894287,
+        5.090909004211426,
+        5.7272725105285645,
+        6.363636493682861,
+        7,
+      ]));
+      assert.deepEqual(resampled[1], new Float32Array([
+        7,
+        6.363636493682861,
+        5.7272725105285645,
+        5.090909004211426,
+        4.454545497894287,
+        3.8181817531585693,
+        3.1818182468414307,
+        2.545454502105713,
+        1.9090908765792847,
+        1.2727272510528564,
+        0.6363636255264282,
+        0,
+      ]));
+    });
   });
 
   describe("#toPeriodicWave()", function() {

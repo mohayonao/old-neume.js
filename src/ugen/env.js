@@ -38,9 +38,9 @@ module.exports = function(neume, _) {
    *   })
    *
    *   $("cutoff", {
-   *     releaseTime: [number] = 0.1    releaseTime
-   *     level      : [number] = 1.00   peakLevel
-   *     curve      : [number] = 0.01  curve
+   *     r    : [number] = 0.1    releaseTime
+   *     level: [number] = 1.00   peakLevel
+   *     curve: [number] = 0.01  curve
    *   })
    *
    * +--------+      +-------+
@@ -116,7 +116,7 @@ module.exports = function(neume, _) {
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
-    var releaseTime = _.finite(_.defaults(spec.releaseTime, 0.1));
+    var releaseTime = _.finite(_.defaults(spec.r, 0.1));
     var level = _.finite(_.defaults(spec.level, 1.00));
     var curve = _.finite(_.defaults(spec.curve, 0.01));
 
@@ -165,7 +165,7 @@ module.exports = function(neume, _) {
 
     function release(t) {
       var v0 = releaseValue;
-      var t0 = t;
+      var t0 = _.finite(_.defaults(t, context.currentTime));
       var t1 = schedule(gain, stopTable, v0, t0);
 
       schedId = context.sched(t1, function(t) {

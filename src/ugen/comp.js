@@ -3,25 +3,25 @@ module.exports = function(neume, _) {
 
   /**
    * $("comp", {
-   *   threshold: [number|UGen] = -24
-   *   knee     : [number|UGen] =  30
-   *   ratio    : [number|UGen] =  12
-   *   attack   : [number|UGen] =  0.003
-   *   release  : [number|UGen] =  0.250
+   *   thresh: [number|UGen] = -24
+   *   knee  : [number|UGen] =  30
+   *   ratio : [number|UGen] =  12
+   *   a     : [number|UGen] =  0.003
+   *   r     : [number|UGen] =  0.250
    * } ... inputs)
    *
    * +--------+
    * | inputs |
    * +--------+
    *   ||||||
-   * +-----------------------------+
-   * | DynamicsCompressorNode      |
-   * | - threshold: threshold(-24) |
-   * | - knee: knee(30)            |
-   * | - ratio: ratio(12)          |
-   * | - attack: attack(0.003)     |
-   * | - release: release(0.25)    |
-   * +-----------------------------+
+   * +------------------------+
+   * | DynamicsCompressorNode |
+   * | - threshold: thresh    |
+   * | - knee     : knee      |
+   * | - ratio    : ratio     |
+   * | - attack   : a         |
+   * | - release  : r         |
+   * +------------------------+
    *   |
    */
   neume.register("comp", function(ugen, spec, inputs) {
@@ -32,11 +32,11 @@ module.exports = function(neume, _) {
     comp.ratio.value = 0;
     comp.attack.value = 0;
     comp.release.value = 0;
-    _.connect({ from: _.defaults(spec.threshold,   -24), to: comp.threshold });
-    _.connect({ from: _.defaults(spec.knee     ,    30), to: comp.knee });
-    _.connect({ from: _.defaults(spec.ratio    ,    12), to: comp.ratio });
-    _.connect({ from: _.defaults(spec.attack   , 0.003), to: comp.attack });
-    _.connect({ from: _.defaults(spec.release  , 0.250), to: comp.release });
+    _.connect({ from: _.defaults(spec.thresh,   -24), to: comp.threshold });
+    _.connect({ from: _.defaults(spec.knee  ,    30), to: comp.knee });
+    _.connect({ from: _.defaults(spec.ratio ,    12), to: comp.ratio });
+    _.connect({ from: _.defaults(spec.a, 0.003), to: comp.attack });
+    _.connect({ from: _.defaults(spec.r, 0.250), to: comp.release });
 
     inputs.forEach(function(node) {
       _.connect({ from: node, to: comp });

@@ -3,7 +3,7 @@ module.exports = function(neume, _) {
 
   /**
    * $([], {
-   *   mode : enum[ clip, wrap, fold ] = wrap
+   *   mode : enum[ clip, wrap, fold ] = clip
    *   lag  : [number] = 0
    *   curve: [number] = 0
    * } ... inputs)
@@ -32,8 +32,9 @@ module.exports = function(neume, _) {
     var data  = spec.value;
     var mode  = {
       clip: _.clipAt,
+      wrap: _.wrapAt,
       fold: _.foldAt,
-    }[spec.mode] || /* istanbul ignore next*/ _.wrapAt;
+    }[spec.mode] || /* istanbul ignore next*/ _.clipAt;
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
 
@@ -72,22 +73,26 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (Array.isArray(value)) {
+            t = _.finite(_.defaults(t, context.currentTime));
             context.sched(t, function() {
               data = value;
             });
           }
         },
         at: function(t, index) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t, _.int(index));
           });
         },
         next: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t, index + 1);
           });
         },
         prev: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             update(t, index - 1);
           });

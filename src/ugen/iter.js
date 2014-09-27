@@ -92,16 +92,19 @@ module.exports = function(neume, _) {
       },
       methods: {
         setValue: function(t, value) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             iter = _.defaults(value, {});
           });
         },
         next: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             next(t);
           });
         },
         reset: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
             reset(t);
           });

@@ -3,6 +3,8 @@ module.exports = function(neume, _) {
 
   /**
    * $(boolean, {
+   *   true : [number] = 1
+   *   false: [number] = 0
    *   lag  : [number] = 0
    *   curve: [number] = 0
    * } ... inputs)
@@ -15,10 +17,10 @@ module.exports = function(neume, _) {
    * | inputs |  or  | DC(1) |
    * +--------+      +-------+
    *   ||||||
-   * +-----------------------+
-   * | GainNode              |
-   * | - gain: value ? 0 : 1 |
-   * +-----------------------+
+   * +------------------------------------+
+   * | GainNode                           |
+   * | - gain: value ? trueVal : falseVal |
+   * +------------------------------------+
    *   |
    */
   neume.register("boolean", function(ugen, spec, inputs) {
@@ -26,6 +28,9 @@ module.exports = function(neume, _) {
 
     var gain  = context.createGain();
     var data  = !!spec.value;
+
+    var trueVal  = _.finite(_.defaults(spec.true , 1));
+    var falseVal = _.finite(_.defaults(spec.false, 0));
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
 
@@ -37,7 +42,7 @@ module.exports = function(neume, _) {
       _.connect({ from: node, to: gain });
     });
 
-    gain.gain.setValueAtTime(data ? 1 : 0, 0);
+    gain.gain.setValueAtTime(data ? trueVal : falseVal, 0);
 
     function update(t0, v0, v1, nextData) {
       if (lag <= 0 || curve < 0 || 1 <= curve) {
@@ -53,17 +58,19 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (typeof value === "boolean") {
+            t = _.finite(_.defaults(t, context.currentTime));
             context.sched(t, function() {
-              var v0 = data  ? 1 : 0;
-              var v1 = value ? 1 : 0;
+              var v0 = data  ? trueVal : falseVal;
+              var v1 = value ? trueVal : falseVal;
               update(t, v0, v1, value);
             });
           }
         },
         toggle: function(t) {
+          t = _.finite(_.defaults(t, context.currentTime));
           context.sched(t, function() {
-            var v0 = data ? 1 : 0;
-            var v1 = data ? 0 : 1;
+            var v0 = data ? trueVal : falseVal;
+            var v1 = data ? falseVal : trueVal;
             update(t, v0, v1, !data);
           });
         }

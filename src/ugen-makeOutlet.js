@@ -22,6 +22,7 @@ function makeOutlet(context, unit, spec) {
       outlet.$maddOptimizable = false;
     } else {
       gain = context.createGain();
+      gain.gain.value = 0;
       _.connect({ from: outlet, to: gain });
       _.connect({ from: mul, to: gain.gain });
       outlet = gain;

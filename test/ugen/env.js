@@ -365,7 +365,7 @@ describe("ugen/env", function() {
     });
     it("works", function() {
       var synth = new Neume(function($) {
-        return $("cutoff", { releaseTime: 0.5, level: 0.8 });
+        return $("cutoff", { r: 0.5, level: 0.8 });
       })();
 
       var audioContext = neume._.findAudioContext(synth);
