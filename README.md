@@ -39,6 +39,40 @@ neume.js is dependent on `Web Audio API` and `Promise`.
 
   - [es6-promise](https://github.com/jakearchibald/es6-promise)
 
+## How do work?
+
+This code generates an audio graph like below.
+
+```javascript
+var Synth = new Neume(function($) {
+  return $("xline", { start: 0.25, end: 0.001, dur: 1},
+    $("tri", { freq: $("sin", { freq: 2, mul: 20, add: 880 } )})
+  ).on("end", function(e) {
+    this.stop(e.playbackTime);
+  });
+});
+```
+```
+                           +-------------------+
+                           | OscillatorNode    |
+                           | - type     : sine |
+                           | - frequency: 2    |
+                           | - detune   : 0    |
+                           +-------------------+
++-----------------------+    |
+| OscillatorNode        |  +------------+
+| - type     : triangle |  | GainNode   |
+| - frequency: 880      |--| - gain: 20 |
+| - detune   : 0        |  +------------+
++-----------------------+
+  |
++-----------------------+
+| GainNode              |
+| - gain: 0.25 -> 0.001 |
++-----------------------+
+  |
+```
+
 ## Documents
 
   - [Getting Started](https://github.com/mohayonao/neume.js/wiki/tutorial-Getting-Started) (:construction_worker: partially Japanese)
