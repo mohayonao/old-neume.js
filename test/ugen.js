@@ -4,7 +4,7 @@ var _ = require("../src/utils");
 var NeuContext = require("../src/context");
 var NeuUGen = require("../src/ugen");
 var NeuUnit = require("../src/unit");
-var Emitter = require("../src/emitter");
+var Emitter = require("../src/event/emitter");
 
 require("../src/ugen/osc");
 require("../src/ugen/add");

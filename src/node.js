@@ -2,7 +2,7 @@
 
 var _ = require("./utils");
 
-var Emitter = require("./emitter");
+var Emitter = require("./event/emitter");
 
 function NeuNode(synth) {
   Emitter.call(this);

@@ -3,7 +3,6 @@
 var _ = require("../src/utils");
 var NeuContext = require("../src/context");
 var NeuSynth = require("../src/synth");
-var Emitter = require("../src/emitter");
 var NeuUGen = require("../src/ugen");
 var NeuIn = require("../src/in");
 var NeuParam = require("../src/param");

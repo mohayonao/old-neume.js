@@ -1,6 +1,6 @@
 "use strict";
 
-var Emitter = require("../src/emitter");
+var Emitter = require("../../src/event/emitter");
 
 describe("Emitter", function() {
   var emitter = null;
