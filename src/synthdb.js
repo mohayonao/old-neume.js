@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require("./utils");
-var selectorParser = require("./selector-parser");
+var selectorParser = require("./parser/selector-parser");
 
 function NeuSynthDB() {
   this._all = [];

@@ -1,6 +1,6 @@
 "use strict";
 
-var selectorParser = require("../src/selector-parser");
+var selectorParser = require("../../src/parser/selector-parser");
 
 describe("key-parser", function() {
   describe(".isValidUGenName(name)", function() {

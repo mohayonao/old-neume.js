@@ -6,7 +6,7 @@ var NeuNode = require("./node");
 var NeuDC   = require("./dc");
 var NeuUnit = require("./unit");
 
-var SelectorParser = require("../selector-parser");
+var SelectorParser = require("../parser/selector-parser");
 var makeOutlet = require("./ugen-makeOutlet");
 
 function NeuUGen(synth, key, spec, inputs) {
