@@ -5,7 +5,7 @@ var _ = require("./utils");
 var NeuSynthDB = require("./synthdb");
 var NeuUGen = require("./ugen");
 var NeuParam = require("./param");
-var NeuIn = require("./in");
+var NeuIn = require("./node/in");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();

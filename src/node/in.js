@@ -1,8 +1,8 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
-var NeuNode = require("./node");
+var NeuNode = require("../node");
 
 function NeuIn(synth) {
   NeuNode.call(this, synth);
