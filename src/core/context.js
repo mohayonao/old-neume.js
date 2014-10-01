@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("./utils");
-var C = require("./const");
+var _ = require("../utils");
+var C = require("../const");
 
 var INIT  = 0;
 var START = 1;

@@ -2,7 +2,7 @@
 
 var _ = require("../../src/utils");
 
-var NeuContext = require("../../src/context");
+var NeuContext = require("../../src/core/context");
 var NeuUGen    = require("../../src/node/ugen");
 var makeOutlet = require("../../src/synth/synth-makeOutlet");
 

@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require("../../src/utils");
-var NeuContext = require("../../src/context");
+var NeuContext = require("../../src/core/context");
 var NeuSynth = require("../../src/synth/synth");
 var NeuUGen = require("../../src/node/ugen");
 var NeuIn = require("../../src/node/in");

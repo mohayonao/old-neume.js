@@ -67,7 +67,7 @@ var neume = function(context) {
 };
 
 neume._ = _;
-neume.Context  = require("./context");
+neume.Context  = require("./core/context");
 neume.SynthDef = require("./synth/synthdef");
 neume.Synth    = require("./synth/synth");
 neume.UGen     = require("./node/ugen");

@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require("../../src/utils");
-var NeuContext = require("../../src/context");
+var NeuContext = require("../../src/core/context");
 var NeuUGen = require("../../src/node/ugen");
 var NeuUnit = require("../../src/node/unit");
 var Emitter = require("../../src/event/emitter");
