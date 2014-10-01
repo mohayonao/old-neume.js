@@ -1,8 +1,8 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
-_.NeuSynth = require("./synth");
+_.NeuSynth = require("../synth");
 
 function NeuSynthDef(defaultContext, func) {
   if (!_.isFunction(func)) {
