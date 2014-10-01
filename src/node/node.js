@@ -1,8 +1,8 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
-var Emitter = require("./event/emitter");
+var Emitter = require("../event/emitter");
 
 function NeuNode(synth) {
   Emitter.call(this);

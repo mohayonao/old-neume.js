@@ -2,7 +2,7 @@
 
 var _ = require("../utils");
 
-var NeuNode = require("../node");
+var NeuNode = require("./node");
 var NeuDC   = require("./dc");
 var NeuUnit = require("./unit");
 

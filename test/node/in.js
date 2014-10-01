@@ -2,7 +2,7 @@
 
 var _ = require("../../src/utils");
 var NeuContext = require("../../src/context");
-var NeuNode = require("../../src/node");
+var NeuNode = require("../../src/node/node");
 var NeuIn = require("../../src/node/in");
 
 describe("NeuIn", function() {
