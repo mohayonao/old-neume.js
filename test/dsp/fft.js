@@ -1,6 +1,6 @@
 "use strict";
 
-var FFT = require("../src/fft");
+var FFT = require("../../src/dsp/fft");
 
 describe("FFT", function() {
 

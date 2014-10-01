@@ -2,7 +2,7 @@
 
 var NeuContext = require("../src/context");
 var NeuBuffer = require("../src/buffer");
-var FFT = require("../src/fft");
+var FFT = require("../src/dsp/fft");
 
 describe("NeuBuffer", function() {
   var audioContext = null;

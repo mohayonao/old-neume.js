@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
 function forward(_buffer) {
   var n = 1 << Math.ceil(Math.log(_.finite(_buffer.length)) * Math.LOG2E);

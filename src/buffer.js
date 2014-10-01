@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require("./utils");
-var FFT = require("./fft");
+var FFT = require("./dsp/fft");
 
 function NeuBuffer(context, buffer) {
   this.$context = context;

@@ -78,7 +78,7 @@ neume.Buffer   = require("./buffer");
 neume.DryWet   = require("./drywet");
 neume.Interval = require("./interval");
 neume.Timeout  = require("./timeout");
-neume.FFT      = require("./fft");
+neume.FFT      = require("./dsp/fft");
 
 _.each(require("./const"), function(val, key) {
   neume[key] = val;
