@@ -1,9 +1,9 @@
 "use strict";
 
-var neume = require("../src/neume");
-var NeuBuffer   = require("../src/control/buffer");
-var NeuInterval = require("../src/control/interval");
-var NeuTimeout  = require("../src/control/timeout");
+var neume = require("../../src/core/neume");
+var NeuBuffer   = require("../../src/control/buffer");
+var NeuInterval = require("../../src/control/interval");
+var NeuTimeout  = require("../../src/control/timeout");
 
 var NOP = function() {};
 

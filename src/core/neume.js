@@ -4,7 +4,7 @@
 window.AudioContext = window.AudioContext || /* istanbul ignore next */ window.webkitAudioContext;
 window.OfflineAudioContext = window.OfflineAudioContext || /* istanbul ignore next */ window.webkitOfflineAudioContext;
 
-var _ = require("./utils");
+var _ = require("../utils");
 
 var neume = function(context) {
   function Neume(spec) {
@@ -67,20 +67,20 @@ var neume = function(context) {
 };
 
 neume._ = _;
-neume.Context  = require("./core/context");
-neume.SynthDef = require("./synth/synthdef");
-neume.Synth    = require("./synth/synth");
-neume.UGen     = require("./node/ugen");
-neume.Param    = require("./node/param");
-neume.Unit     = require("./node/unit");
-neume.DC       = require("./node/dc");
-neume.Buffer   = require("./control/buffer");
-neume.DryWet   = require("./node/drywet");
-neume.Interval = require("./control/interval");
-neume.Timeout  = require("./control/timeout");
-neume.FFT      = require("./dsp/fft");
+neume.Context  = require("./context");
+neume.SynthDef = require("../synth/synthdef");
+neume.Synth    = require("../synth/synth");
+neume.UGen     = require("../node/ugen");
+neume.Param    = require("../node/param");
+neume.Unit     = require("../node/unit");
+neume.DC       = require("../node/dc");
+neume.Buffer   = require("../control/buffer");
+neume.DryWet   = require("../node/drywet");
+neume.Interval = require("../control/interval");
+neume.Timeout  = require("../control/timeout");
+neume.FFT      = require("../dsp/fft");
 
-_.each(require("./const"), function(val, key) {
+_.each(require("../const"), function(val, key) {
   neume[key] = val;
 });
 
