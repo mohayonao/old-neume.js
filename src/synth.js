@@ -2,7 +2,7 @@
 
 var _ = require("./utils");
 
-var NeuSynthDB     = require("./synthdb");
+var NeuSynthDB     = require("./synth/synthdb");
 var NeuSynthDollar = require("./synthdollar");
 var makeOutlet     = require("./synth-makeOutlet");
 

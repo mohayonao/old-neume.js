@@ -2,7 +2,7 @@
 
 var _ = require("./utils");
 
-var NeuSynthDB = require("./synthdb");
+var NeuSynthDB = require("./synth/synthdb");
 var NeuUGen = require("./node/ugen");
 var NeuParam = require("./node/param");
 var NeuIn = require("./node/in");
