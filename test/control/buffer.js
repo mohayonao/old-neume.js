@@ -1,8 +1,8 @@
 "use strict";
 
-var NeuContext = require("../src/context");
-var NeuBuffer = require("../src/buffer");
-var FFT = require("../src/dsp/fft");
+var NeuContext = require("../../src/context");
+var NeuBuffer = require("../../src/control/buffer");
+var FFT = require("../../src/dsp/fft");
 
 describe("NeuBuffer", function() {
   var audioContext = null;

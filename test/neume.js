@@ -1,7 +1,7 @@
 "use strict";
 
 var neume = require("../src/neume");
-var NeuBuffer   = require("../src/buffer");
+var NeuBuffer   = require("../src/control/buffer");
 var NeuInterval = require("../src/interval");
 var NeuTimeout  = require("../src/timeout");
 
