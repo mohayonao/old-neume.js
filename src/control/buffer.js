@@ -5,30 +5,30 @@ var FFT = require("../dsp/fft");
 
 function NeuBuffer(context, buffer) {
   this.$context = context;
-  this.$buffer = buffer;
+  this._buffer = buffer;
 
   Object.defineProperties(this, {
     sampleRate: {
-      value: this.$buffer.sampleRate,
+      value: this._buffer.sampleRate,
       enumerable: true
     },
     length: {
-      value: this.$buffer.length,
+      value: this._buffer.length,
       enumerable: true
     },
     duration: {
-      value: this.$buffer.duration,
+      value: this._buffer.duration,
       enumerable: true
     },
     numberOfChannels: {
-      value: this.$buffer.numberOfChannels,
+      value: this._buffer.numberOfChannels,
       enumerable: true
     },
   });
 
-  for (var i = 0; i < this.$buffer.numberOfChannels; i++) {
+  for (var i = 0; i < this._buffer.numberOfChannels; i++) {
     Object.defineProperty(this, i, {
-      value: this.$buffer.getChannelData(i)
+      value: this._buffer.getChannelData(i)
     });
   }
 }
@@ -97,7 +97,7 @@ function decodeAudioData(context, audioData) {
 NeuBuffer.prototype.getChannelData = function(ch) {
   ch = _.clip(_.int(ch), 0, this.numberOfChannels - 1);
 
-  return this.$buffer.getChannelData(ch);
+  return this._buffer.getChannelData(ch);
 };
 
 NeuBuffer.prototype.concat = function() {
@@ -216,10 +216,14 @@ NeuBuffer.prototype.resample = function(size, interpolation) {
   return new NeuBuffer(this.$context, buffer);
 };
 
+NeuBuffer.prototype.toAudioBuffer = function() {
+  return this._buffer;
+};
+
 NeuBuffer.prototype.toPeriodicWave = function(ch) {
   ch = Math.max(0, Math.min(_.int(ch), this.numberOfChannels - 1));
 
-  var buffer = this.$buffer.getChannelData(ch);
+  var buffer = this._buffer.getChannelData(ch);
 
   if (4096 < buffer.length) {
     buffer = buffer.subarray(0, 4096);

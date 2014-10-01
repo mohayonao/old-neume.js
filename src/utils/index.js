@@ -342,8 +342,11 @@ utils.findAudioNode = function(obj) {
 };
 
 utils.findAudioBuffer = function(obj) {
-  while (!(obj == null || obj instanceof window.AudioBuffer)) {
-    obj = obj.$buffer;
+  if (obj && typeof obj.toAudioBuffer === "function") {
+    obj = obj.toAudioBuffer();
+  }
+  if (!(obj instanceof window.AudioBuffer)) {
+    obj = null;
   }
   return obj || null;
 };

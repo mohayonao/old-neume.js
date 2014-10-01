@@ -535,18 +535,14 @@ describe("utils", function() {
       var audioContext = new window.AudioContext();
       var buf = audioContext.createBuffer(1, 18, 44100);
       var obj = {
-        $buffer: {
-          $buffer: buf
+        toAudioBuffer: function() {
+          return buf;
         }
       };
       assert(_.findAudioBuffer(obj) === buf);
     });
     it("returns null if not found", function() {
-      var obj = {
-        $buffer: {
-          $buffer: {}
-        }
-      };
+      var obj = {};
       assert(_.findAudioBuffer(obj) === null);
     });
   });
