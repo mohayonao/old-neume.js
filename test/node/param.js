@@ -1,7 +1,7 @@
 "use strict";
 
-var NeuContext = require("../src/context");
-var NeuParam = require("../src/param");
+var NeuContext = require("../../src/context");
+var NeuParam = require("../../src/node/param");
 
 describe("NeuParam", function() {
   var audioContext = null;

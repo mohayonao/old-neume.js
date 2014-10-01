@@ -5,7 +5,7 @@ var NeuContext = require("../src/context");
 var NeuSynth = require("../src/synth");
 var NeuUGen = require("../src/ugen");
 var NeuIn = require("../src/node/in");
-var NeuParam = require("../src/param");
+var NeuParam = require("../src/node/param");
 
 var NOP = function() {};
 
