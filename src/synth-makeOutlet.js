@@ -2,7 +2,7 @@
 
 var _ = require("./utils");
 
-var NeuDC   = require("./dc");
+var NeuDC   = require("./node/dc");
 var NeuUGen = require("./ugen");
 
 function makeOutlet(context, ugen) {

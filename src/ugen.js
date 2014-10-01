@@ -3,7 +3,7 @@
 var _ = require("./utils");
 
 var NeuNode = require("./node");
-var NeuDC   = require("./dc");
+var NeuDC   = require("./node/dc");
 var NeuUnit = require("./unit");
 
 var SelectorParser = require("./selector-parser");

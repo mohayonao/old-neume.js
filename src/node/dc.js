@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("./utils");
-var C = require("./const");
+var _ = require("../utils");
+var C = require("../const");
 
 var DC_BUF_SIZE = C.DC_BUF_SIZE;
 var filled0 = _.fill(new Float32Array(DC_BUF_SIZE), 0);

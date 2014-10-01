@@ -1,8 +1,8 @@
 "use strict";
 
-var _ = require("../src/utils");
-var NeuContext = require("../src/context");
-var NeuDC = require("../src/dc");
+var _ = require("../../src/utils");
+var NeuContext = require("../../src/context");
+var NeuDC = require("../../src/node/dc");
 
 describe("NeuDC", function() {
   var context = null;
