@@ -1,14 +1,14 @@
 "use strict";
 
-var _ = require("../src/utils");
-var NeuContext = require("../src/context");
-var NeuUGen = require("../src/ugen");
-var NeuUnit = require("../src/unit");
-var Emitter = require("../src/event/emitter");
+var _ = require("../../src/utils");
+var NeuContext = require("../../src/context");
+var NeuUGen = require("../../src/node/ugen");
+var NeuUnit = require("../../src/unit");
+var Emitter = require("../../src/event/emitter");
 
-require("../src/ugen/osc");
-require("../src/ugen/add");
-require("../src/ugen/mul");
+require("../../src/ugen/osc");
+require("../../src/ugen/add");
+require("../../src/ugen/mul");
 
 var NOP = function() {};
 

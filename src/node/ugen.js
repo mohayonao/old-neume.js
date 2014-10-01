@@ -1,13 +1,13 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
-var NeuNode = require("./node");
-var NeuDC   = require("./node/dc");
-var NeuUnit = require("./unit");
+var NeuNode = require("../node");
+var NeuDC   = require("./dc");
+var NeuUnit = require("../unit");
 
-var SelectorParser = require("./selector-parser");
-var makeOutlet = require("./node/ugen-makeOutlet");
+var SelectorParser = require("../selector-parser");
+var makeOutlet = require("./ugen-makeOutlet");
 
 function NeuUGen(synth, key, spec, inputs) {
   NeuNode.call(this, synth);

@@ -3,7 +3,7 @@
 var _ = require("../src/utils");
 var NeuContext = require("../src/context");
 var NeuSynth = require("../src/synth");
-var NeuUGen = require("../src/ugen");
+var NeuUGen = require("../src/node/ugen");
 var NeuIn = require("../src/node/in");
 var NeuParam = require("../src/node/param");
 
