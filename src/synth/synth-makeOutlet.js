@@ -1,9 +1,9 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
-var NeuDC   = require("./node/dc");
-var NeuUGen = require("./node/ugen");
+var NeuDC   = require("../node/dc");
+var NeuUGen = require("../node/ugen");
 
 function makeOutlet(context, ugen) {
   var outlet = null;
