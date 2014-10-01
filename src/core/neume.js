@@ -80,8 +80,8 @@ neume.Node     = require("../node/node");
 neume.Param    = require("../node/param");
 neume.UGen     = require("../node/ugen");
 neume.Unit     = require("../node/unit");
+neume.SynthDB  = require("../synth/db");
 neume.Synth    = require("../synth/synth");
-neume.SynthDB  = require("../synth/synthdb");
 neume.SynthDef = require("../synth/synthdef");
 
 _.each(require("../const"), function(val, key) {
