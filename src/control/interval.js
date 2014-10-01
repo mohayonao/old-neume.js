@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
 var INIT  = 0;
 var START = 1;

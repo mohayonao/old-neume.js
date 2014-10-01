@@ -76,7 +76,7 @@ neume.Unit     = require("./unit");
 neume.DC       = require("./dc");
 neume.Buffer   = require("./control/buffer");
 neume.DryWet   = require("./drywet");
-neume.Interval = require("./interval");
+neume.Interval = require("./control/interval");
 neume.Timeout  = require("./timeout");
 neume.FFT      = require("./dsp/fft");
 

@@ -2,7 +2,7 @@
 
 var neume = require("../src/neume");
 var NeuBuffer   = require("../src/control/buffer");
-var NeuInterval = require("../src/interval");
+var NeuInterval = require("../src/control/interval");
 var NeuTimeout  = require("../src/timeout");
 
 var NOP = function() {};
