@@ -1,8 +1,8 @@
 "use strict";
 
-var _ = require("./utils");
+var _ = require("../utils");
 
-_.NeuDC = require("./node/dc");
+_.NeuDC = require("./dc");
 
 function makeOutlet(context, unit, spec) {
   unit = unit || {};
