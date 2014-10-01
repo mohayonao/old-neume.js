@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("./utils");
-var C = require("./const");
+var _ = require("../utils");
+var C = require("../const");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
 var halfSize = WS_CURVE_SIZE >> 1;
