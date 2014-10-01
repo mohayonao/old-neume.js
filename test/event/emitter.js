@@ -1,6 +1,8 @@
 "use strict";
 
-var Emitter = require("../../src/event/emitter");
+var neume = require("../../src");
+
+var Emitter = neume.Emitter;
 
 describe("Emitter", function() {
   var emitter = null;

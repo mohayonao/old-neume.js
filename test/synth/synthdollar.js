@@ -1,12 +1,13 @@
 "use strict";
 
-var _ = require("../../src/utils");
-var NeuContext = require("../../src/core/context");
-var NeuSynth = require("../../src/synth/synth");
-var NeuUGen = require("../../src/node/ugen");
-var NeuIn = require("../../src/node/in");
-var NeuParam = require("../../src/node/param");
+var neume = require("../../src");
 
+var _          = neume._;
+var NeuContext = neume.Context;
+var NeuSynth   = neume.Synth;
+var NeuUGen    = neume.UGen;
+var NeuIn      = neume.In;
+var NeuParam   = neume.Param;
 var NOP = function() {};
 
 describe("NeuSynthDollar", function() {

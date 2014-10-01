@@ -1,7 +1,6 @@
 "use strict";
 
-var _ = require("../utils");
-
+var _       = require("../utils");
 var NeuNode = require("./node");
 var NeuDC   = require("./dc");
 

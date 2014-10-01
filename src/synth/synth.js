@@ -1,7 +1,6 @@
 "use strict";
 
-var _ = require("../utils");
-
+var _              = require("../utils");
 var NeuSynthDB     = require("./synthdb");
 var NeuSynthDollar = require("./synthdollar");
 var makeOutlet     = require("./synth-makeOutlet");

@@ -1,10 +1,12 @@
 "use strict";
 
-var _ = require("../../src/utils");
-var NeuContext = require("../../src/core/context");
-var NeuUGen = require("../../src/node/ugen");
-var NeuUnit = require("../../src/node/unit");
-var Emitter = require("../../src/event/emitter");
+var neume = require("../../src");
+
+var _          = neume._;
+var NeuContext = neume.Context;
+var NeuUGen    = neume.UGen;
+var NeuUnit    = neume.Unit;
+var Emitter    = neume.Emitter;
 
 require("../../src/ugen/osc");
 require("../../src/ugen/add");

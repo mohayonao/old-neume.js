@@ -1,6 +1,9 @@
 "use strict";
 
-var NeuContext = require("../../src/core/context");
+var neume = require("../../src");
+
+var NeuContext = neume.Context;
+
 var makeOutlet = require("../../src/node/ugen-makeOutlet");
 
 describe("makeOutlet", function() {

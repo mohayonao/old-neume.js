@@ -1,9 +1,11 @@
 "use strict";
 
-var _ = require("../../src/utils");
-var NeuContext = require("../../src/core/context");
-var NeuNode = require("../../src/node/node");
-var NeuIn = require("../../src/node/in");
+var neume = require("../../src");
+
+var _          = neume._;
+var NeuContext = neume.Context;
+var NeuNode    = neume.Node;
+var NeuIn      = neume.In;
 
 describe("NeuIn", function() {
   var audioContext = null;

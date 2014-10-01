@@ -1,6 +1,8 @@
 "use strict";
 
-var NeuSynthDB = require("../../src/synth/synthdb");
+var neume = require("../../src");
+
+var NeuSynthDB = neume.SynthDB;
 
 describe("NeuSynthDB", function() {
   var db = null;

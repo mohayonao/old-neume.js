@@ -1,7 +1,9 @@
 "use strict";
 
-var NeuContext = require("../../src/core/context");
-var NeuTimeout = require("../../src/control/timeout");
+var neume = require("../../src");
+
+var NeuContext = neume.Context;
+var NeuTimeout = neume.Timeout;
 var NOP = function() {};
 
 describe("NeuTimeout", function() {

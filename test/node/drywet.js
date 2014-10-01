@@ -1,6 +1,8 @@
 "use strict";
 
-var NeuDryWet = require("../../src/node/drywet");
+var neume = require("../../src");
+
+var NeuDryWet = neume.DryWet;
 
 describe("NeuDryWet", function() {
   var audioContext;

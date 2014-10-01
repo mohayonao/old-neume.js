@@ -1,10 +1,10 @@
 "use strict";
 
-var neume = require("../../src/core/neume");
-var NeuBuffer   = require("../../src/control/buffer");
-var NeuInterval = require("../../src/control/interval");
-var NeuTimeout  = require("../../src/control/timeout");
+var neume = require("../../src");
 
+var NeuBuffer   = neume.Buffer;
+var NeuInterval = neume.Interval;
+var NeuTimeout  = neume.Timeout;
 var NOP = function() {};
 
 describe("neume", function() {

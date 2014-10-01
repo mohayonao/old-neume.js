@@ -1,7 +1,9 @@
 "use strict";
 
-var NeuContext = require("../../src/core/context");
-var NeuInterval = require("../../src/control/interval");
+var neume = require("../../src");
+
+var NeuContext  = neume.Context;
+var NeuInterval = neume.Interval;
 var NOP = function() {};
 
 describe("NeuInterval", function() {

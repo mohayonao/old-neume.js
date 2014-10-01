@@ -1,8 +1,10 @@
 "use strict";
 
-var _ = require("../../src/utils");
-var NeuContext = require("../../src/core/context");
-var NeuSynthDef = require("../../src/synth/synthdef");
+var neume = require("../../src");
+
+var _           = neume._;
+var NeuContext  = neume.Context;
+var NeuSynthDef = neume.SynthDef;
 var NOP = function() {};
 
 describe("NeuSynthDef", function() {

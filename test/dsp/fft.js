@@ -1,6 +1,8 @@
 "use strict";
 
-var FFT = require("../../src/dsp/fft");
+var neume = require("../../src");
+
+var FFT = neume.FFT;
 
 describe("FFT", function() {
 

@@ -1,6 +1,8 @@
 "use strict";
 
-var NeuUnit = require("../../src/node/unit");
+var neume = require("../../src");
+
+var NeuUnit = neume.Unit;
 
 describe("NeuUnit", function() {
   var spec = null;

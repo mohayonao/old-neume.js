@@ -1,11 +1,10 @@
 "use strict";
 
-var _ = require("../utils");
-
+var _          = require("../utils");
+var NeuUGen    = require("../node/ugen");
+var NeuParam   = require("../node/param");
+var NeuIn      = require("../node/in");
 var NeuSynthDB = require("./synthdb");
-var NeuUGen = require("../node/ugen");
-var NeuParam = require("../node/param");
-var NeuIn = require("../node/in");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();

@@ -2,8 +2,6 @@
 
 var _ = require("../utils");
 
-_.NeuDC = require("./dc");
-
 function makeOutlet(context, unit, spec) {
   unit = unit || {};
 

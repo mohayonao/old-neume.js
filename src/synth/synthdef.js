@@ -2,6 +2,7 @@
 
 var _ = require("../utils");
 
+// TODO: FIX ME
 _.NeuSynth = require("./synth");
 
 function NeuSynthDef(defaultContext, func) {

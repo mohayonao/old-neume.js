@@ -66,19 +66,23 @@ var neume = function(context) {
   return Neume;
 };
 
-neume._ = _;
+neume._        = _;
 neume.Context  = require("./context");
-neume.SynthDef = require("../synth/synthdef");
-neume.Synth    = require("../synth/synth");
-neume.UGen     = require("../node/ugen");
-neume.Param    = require("../node/param");
-neume.Unit     = require("../node/unit");
-neume.DC       = require("../node/dc");
 neume.Buffer   = require("../control/buffer");
-neume.DryWet   = require("../node/drywet");
 neume.Interval = require("../control/interval");
 neume.Timeout  = require("../control/timeout");
 neume.FFT      = require("../dsp/fft");
+neume.Emitter  = require("../event/emitter");
+neume.DC       = require("../node/dc");
+neume.DryWet   = require("../node/drywet");
+neume.In       = require("../node/in");
+neume.Node     = require("../node/node");
+neume.Param    = require("../node/param");
+neume.UGen     = require("../node/ugen");
+neume.Unit     = require("../node/unit");
+neume.Synth    = require("../synth/synth");
+neume.SynthDB  = require("../synth/synthdb");
+neume.SynthDef = require("../synth/synthdef");
 
 _.each(require("../const"), function(val, key) {
   neume[key] = val;
