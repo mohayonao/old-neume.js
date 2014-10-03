@@ -218,7 +218,7 @@ NeuContext.prototype.connect = function(from, to) {
     return from._connect(to, output, input);
   }
 
-  if (_.isAudioParam(to)) {
+  if (to instanceof window.AudioParam) {
     if (_.isNumber(from)) {
       to.value = _.finite(from);
     }
@@ -229,7 +229,7 @@ NeuContext.prototype.connect = function(from, to) {
     if (from) {
       return from.connect(to, output, input);
     }
-  } else if (_.isAudioParam(to)) {
+  } else if (to instanceof window.AudioParam) {
     from = this.toAudioNode(from);
     if (from) {
       return from.connect(to, output);

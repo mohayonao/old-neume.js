@@ -319,10 +319,6 @@ utils.isAudioNode = function(value) {
   return value instanceof window.AudioNode;
 };
 
-utils.isAudioParam = function(value) {
-  return value instanceof window.AudioParam;
-};
-
 utils.findAudioContext = function(obj) {
   while (!(obj == null || obj instanceof window.AudioContext)) {
     obj = obj.$context;
