@@ -344,9 +344,4 @@ utils.findAudioBuffer = function(obj) {
   return obj || null;
 };
 
-utils.isValidInput = function(value) {
-  return utils.isFinite(value) || utils.isAudioNode(value) ||
-    !!(value && value.toAudioNode && utils.isAudioNode(value.toAudioNode()));
-};
-
 module.exports = utils;
