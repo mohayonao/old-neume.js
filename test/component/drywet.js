@@ -5,18 +5,18 @@ var neume = require("../../src");
 var NeuDryWet = neume.DryWet;
 
 describe("NeuDryWet", function() {
-  var audioContext;
+  var context;
 
   beforeEach(function() {
-    audioContext = new window.AudioContext();
+    context = new neume.Context(new window.AudioContext().destination);
   });
 
   describe("(context, inputs, wetNode, 1)", function() {
     it("returns wetNode", function() {
-      var inputs  =  [ audioContext.createOscillator(), audioContext.createOscillator() ];
-      var wetNode = audioContext.createConvolver();
+      var inputs  =  [ context.createOscillator(), context.createOscillator() ];
+      var wetNode = context.createConvolver();
 
-      var mixNode = new NeuDryWet(audioContext, inputs, wetNode, 1);
+      var mixNode = new NeuDryWet(context, inputs, wetNode, 1);
 
       assert.deepEqual(mixNode.toJSON(), {
         name: "ConvolverNode",
@@ -55,10 +55,10 @@ describe("NeuDryWet", function() {
 
   describe("(context, inputs, wetNode, 0)", function() {
     it("returns inputs[0]", function() {
-      var inputs  = [ audioContext.createOscillator() ];
-      var wetNode = audioContext.createConvolver();
+      var inputs  = [ context.createOscillator() ];
+      var wetNode = context.createConvolver();
 
-      var mixNode = new NeuDryWet(audioContext, inputs, wetNode, 0);
+      var mixNode = new NeuDryWet(context, inputs, wetNode, 0);
 
       assert.deepEqual(mixNode.toJSON(), {
         name: "OscillatorNode",
@@ -75,10 +75,10 @@ describe("NeuDryWet", function() {
       });
     });
     it("returns sum inputs", function() {
-      var inputs  = [ audioContext.createOscillator(), audioContext.createOscillator() ];
-      var wetNode = audioContext.createConvolver();
+      var inputs  = [ context.createOscillator(), context.createOscillator() ];
+      var wetNode = context.createConvolver();
 
-      var mixNode = new NeuDryWet(audioContext, inputs, wetNode, 0);
+      var mixNode = new NeuDryWet(context, inputs, wetNode, 0);
 
       assert.deepEqual(mixNode.toJSON(), {
         name: "GainNode",
@@ -120,10 +120,10 @@ describe("NeuDryWet", function() {
 
   describe("(context, inputs, wetNode, 0.25)", function() {
     it("returns mixNode", function() {
-      var inputs  = [ audioContext.createOscillator() ];
-      var wetNode = audioContext.createConvolver();
+      var inputs  = [ context.createOscillator() ];
+      var wetNode = context.createConvolver();
 
-      var mixNode = new NeuDryWet(audioContext, inputs, wetNode, 0.25);
+      var mixNode = new NeuDryWet(context, inputs, wetNode, 0.25);
 
       assert.deepEqual(mixNode.toJSON(), {
         name: "GainNode",
@@ -189,13 +189,13 @@ describe("NeuDryWet", function() {
 
   describe("(context, inputs, wetNode, node)", function() {
     it("2return mixNode", function() {
-      var node = audioContext.createGain();
-      var inputs  = [ audioContext.createOscillator() ];
-      var wetNode = audioContext.createConvolver();
+      var node = context.createGain();
+      var inputs  = [ context.createOscillator() ];
+      var wetNode = context.createConvolver();
 
       node.$id = "mix";
 
-      var mixNode = new NeuDryWet(audioContext, inputs, wetNode, node);
+      var mixNode = new NeuDryWet(context, inputs, wetNode, node);
 
       assert.deepEqual(mixNode.toJSON(), {
         name: "GainNode",

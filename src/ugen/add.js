@@ -34,7 +34,7 @@ module.exports = function(neume, _) {
       outlet = context.createGain();
 
       nodes.forEach(function(node) {
-        _.connect({ from: node, to: outlet });
+        context.connect(node, outlet);
       });
 
       outlet.$maddOptimizable = true;

@@ -50,7 +50,7 @@ module.exports = function(neume, _) {
     }
 
     inputs.forEach(function(input) {
-      _.connect({ from: input, to: line });
+      context.connect(input, line);
     });
 
     gain.setValueAtTime(startValue, 0);

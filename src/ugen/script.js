@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume) {
   "use strict";
 
   /**
@@ -25,7 +25,7 @@ module.exports = function(neume, _) {
     }
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: outlet });
+      context.connect(node, outlet);
     });
 
     return new neume.Unit({

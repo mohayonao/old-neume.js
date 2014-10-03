@@ -46,8 +46,8 @@ module.exports = function(neume, _) {
 
         gain.gain.value = 0;
 
-        _.connect({ from: node  , to: gain.gain });
-        _.connect({ from: outlet, to: gain });
+        context.connect(node  , gain.gain);
+        context.connect(outlet, gain);
 
         return gain;
       }, outlet);
@@ -58,7 +58,7 @@ module.exports = function(neume, _) {
         outlet = context.createGain();
 
         outlet.gain.value = multiple;
-        _.connect({ from: tmp, to: outlet });
+        context.connect(tmp, outlet);
       }
     }
 

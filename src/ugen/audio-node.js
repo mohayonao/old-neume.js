@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume) {
   "use strict";
 
   [
@@ -25,13 +25,13 @@ module.exports = function(neume, _) {
         inputs = [];
       }
 
-      return make(setup(node, inputs));
+      return make(setup(ugen.$context, node, inputs));
     });
   });
 
-  function setup(audioNode, inputs) {
+  function setup(context, audioNode, inputs) {
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: audioNode });
+      context.connect(node, audioNode);
     });
     return audioNode;
   }

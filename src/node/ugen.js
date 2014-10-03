@@ -63,22 +63,13 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
-NeuUGen.prototype._connect = function(to, output, input) {
-  _.connect({
-    from  : this.$outlet,
-    to    : to,
-    output: output,
-    input : input
-  });
+NeuUGen.prototype._connect = function(to) {
+  this.$context.connect(this.$outlet, to);
   if (this.$offset !== 0) {
     if (to instanceof window.AudioParam) {
       to.value = this.$offset;
     } else {
-      _.connect({
-        from : createGainDC(this.$context, this.$offset),
-        to   : to,
-        input: input
-      });
+      this.$context.connect(createGainDC(this.$context, this.$offset), to);
     }
   }
 };
@@ -88,7 +79,7 @@ function createGainDC(context, offset) {
 
   gain.gain.value = offset;
 
-  _.connect({ from: new NeuDC(context, 1), to: gain });
+  context.connect(new NeuDC(context, 1), gain);
 
   return gain;
 }

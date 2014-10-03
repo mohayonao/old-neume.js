@@ -94,11 +94,11 @@ NeuSynth.prototype.start = function(t) {
     }, this);
 
     if (this._routing.length === 0) {
-      _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
+      this.$context.connect(this.$outputs[0], this.$context.$outlet);
     } else {
       this._routing.forEach(function(destinations, output) {
         destinations.forEach(function(destination) {
-          _.connect({ from: this.$outputs[output], to: destination });
+          this.$context.connect(this.$outputs[output], destination);
         }, this);
       }, this);
     }
@@ -118,17 +118,18 @@ NeuSynth.prototype.start = function(t) {
 };
 
 NeuSynth.prototype.stop = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  var context = this.$context;
+  t = _.defaults(t, context.currentTime);
 
   if (this._state === START) {
     this._state = STOP;
 
-    this.$context.sched(t, function(t) {
+    context.sched(t, function(t) {
       this._stateString = "FINISHED";
 
-      this.$context.nextTick(function() {
+      context.nextTick(function() {
         this.$outputs.forEach(function(output) {
-          _.disconnect({ from: output });
+          context.disconnect(output);
         });
       }, this);
 

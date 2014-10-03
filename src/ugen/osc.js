@@ -134,8 +134,8 @@ module.exports = function(neume, _) {
     }
     osc.frequency.value = 0;
     osc.detune.value    = 0;
-    _.connect({ from: _.defaults(spec.freq, defaultFreq), to: osc.frequency });
-    _.connect({ from: _.defaults(spec.detune, 0), to: osc.detune });
+    context.connect(_.defaults(spec.freq, defaultFreq), osc.frequency);
+    context.connect(_.defaults(spec.detune, 0), osc.detune);
 
     return osc;
   }
@@ -152,10 +152,10 @@ module.exports = function(neume, _) {
     var gain = ugen.$context.createGain();
 
     gain.gain.value = 0;
-    _.connect({ from: osc, to: gain.gain });
+    context.connect(osc, gain.gain);
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: gain });
+      context.connect(node, gain);
     });
 
     return { outlet: gain, ctrl: osc };

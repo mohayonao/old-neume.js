@@ -48,7 +48,7 @@ module.exports = function(neume, _) {
     pan.coneOuterGain  = _.finite(_.defaults(spec.coneOuterGain , 0));
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: pan });
+      context.connect(node, pan);
     });
 
     function update(value) {

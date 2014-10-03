@@ -55,20 +55,21 @@ module.exports = function(neume, _) {
   });
 
   function setup(type, ugen, spec, inputs) {
-    var biquad = ugen.$context.createBiquadFilter();
+    var context = ugen.$context;
+    var biquad  = context.createBiquadFilter();
 
     biquad.type = type;
     biquad.frequency.value = 0;
     biquad.detune.value    = 0;
     biquad.Q.value         = 0;
     biquad.gain.value      = 0;
-    _.connect({ from: _.defaults(spec.freq  , 350), to: biquad.frequency });
-    _.connect({ from: _.defaults(spec.detune,   0), to: biquad.detune    });
-    _.connect({ from: _.defaults(spec.Q     ,   1), to: biquad.Q         });
-    _.connect({ from: _.defaults(spec.gain  ,   0), to: biquad.gain      });
+    context.connect(_.defaults(spec.freq  , 350), biquad.frequency);
+    context.connect(_.defaults(spec.detune,   0), biquad.detune);
+    context.connect(_.defaults(spec.Q     ,   1), biquad.Q);
+    context.connect(_.defaults(spec.gain  ,   0), biquad.gain);
 
     _.each(inputs, function(node) {
-      _.connect({ from: node, to: biquad });
+      context.connect(node, biquad);
     });
 
     return biquad;

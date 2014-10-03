@@ -86,8 +86,8 @@ NeuContext.prototype.reset = function() {
   this._masterGain = this.$context.createGain();
   this._analyser   = this.$context.createAnalyser();
 
-  _.connect({ from: this._masterGain, to: this._analyser });
-  _.connect({ from: this._analyser  , to: this.$destination });
+  this.connect(this._masterGain, this._analyser);
+  this.connect(this._analyser  , this.$destination);
 
   this.$outlet = this._masterGain;
 
@@ -131,9 +131,9 @@ function startAudioTimer() {
 
   // this is needed for iOS Safari
   bufferSource.start(0);
-  _.connect({ from: bufferSource, to: scriptProcessor });
+  this.connect(bufferSource, scriptProcessor);
 
-  _.connect({ from: scriptProcessor, to: context.destination });
+  this.connect(scriptProcessor, context.destination);
 }
 
 NeuContext.prototype.stop = function() {

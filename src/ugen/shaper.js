@@ -38,7 +38,8 @@ module.exports = function(neume, _) {
   });
 
   function setup(curve, ugen, spec, inputs) {
-    var shaper = ugen.$context.createWaveShaper();
+    var context = ugen.$context;
+    var shaper = context.createWaveShaper();
 
     if (curve instanceof Float32Array) {
       shaper.curve = curve;
@@ -46,7 +47,7 @@ module.exports = function(neume, _) {
     shaper.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: shaper });
+      context.connect(node, shaper);
     });
 
     return shaper;

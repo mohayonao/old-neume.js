@@ -38,7 +38,7 @@ describe("NeuUGen", function() {
     var audioContext = new window.AudioContext();
     context = new NeuContext(audioContext.destination);
     synth = {
-      $context: audioContext
+      $context: context
     };
     ugen0 = NeuUGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
     _.findAudioNode(ugen0).$id = "ugen0";

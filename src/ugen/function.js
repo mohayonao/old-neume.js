@@ -38,7 +38,7 @@ module.exports = function(neume, _) {
     }
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: gain });
+      context.connect(node, gain);
     });
 
     var prevValue = _.finite(data(0, count++));

@@ -145,7 +145,7 @@ module.exports = function(neume, _) {
     }
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: env });
+      context.connect(node, env);
     });
 
     gain.value = init;

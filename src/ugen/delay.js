@@ -36,10 +36,10 @@ module.exports = function(neume, _) {
     var delay = context.createDelay(maxDelayTime);
 
     delay.delayTime.value = 0;
-    _.connect({ from: delayTime, to: delay.delayTime });
+    context.connect(delayTime, delay.delayTime);
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: delay });
+      context.connect(node, delay);
     });
 
     return new neume.Unit({

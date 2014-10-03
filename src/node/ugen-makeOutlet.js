@@ -21,8 +21,8 @@ function makeOutlet(context, unit, spec) {
     } else {
       gain = context.createGain();
       gain.gain.value = 0;
-      _.connect({ from: outlet, to: gain });
-      _.connect({ from: mul, to: gain.gain });
+      context.connect(outlet, gain);
+      context.connect(mul, gain.gain);
       outlet = gain;
     }
   }
@@ -31,8 +31,8 @@ function makeOutlet(context, unit, spec) {
     offset += add;
   } else if (outlet) {
     gain = context.createGain();
-    _.connect({ from: outlet, to: gain });
-    _.connect({ from: add   , to: gain });
+    context.connect(outlet, gain);
+    context.connect(add   , gain);
     outlet = gain;
   } else {
     outlet = add;

@@ -33,23 +33,23 @@ function DryWetNode(context, inputs, wetNode, mix) {
   wsWet.curve = curveWet;
   wsDry.curve = curveDry;
 
-  _.connect({ from: mix, to: wsWet });
-  _.connect({ from: mix, to: wsDry });
+  context.connect(mix, wsWet);
+  context.connect(mix, wsDry);
 
   gainWet.gain.value = 0;
   gainDry.gain.value = 0;
 
-  wsWet.connect(gainWet.gain);
-  wsDry.connect(gainDry.gain);
+  context.connect(wsWet, gainWet.gain);
+  context.connect(wsDry, gainDry.gain);
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
-    _.connect({ from: inputs[i], to: wetNode });
-    _.connect({ from: inputs[i], to: gainDry });
+    context.connect(inputs[i], wetNode);
+    context.connect(inputs[i], gainDry);
   }
 
-  _.connect({ from: wetNode, to: gainWet });
-  _.connect({ from: gainWet, to: gainMix });
-  _.connect({ from: gainDry, to: gainMix });
+  context.connect(wetNode, gainWet);
+  context.connect(gainWet, gainMix);
+  context.connect(gainDry, gainMix);
 
   gainMix.$maddOptimizable = true;
 
@@ -65,7 +65,7 @@ function DryWetNumber(context, inputs, wetNode, mix) {
 
   if (wet === 1) {
     for (i = 0, imax = inputs.length; i < imax; i++) {
-      _.connect({ from: inputs[i], to: wetNode });
+      context.connect(inputs[i], wetNode);
     }
     return wetNode;
   }
@@ -85,12 +85,12 @@ function DryWetNumber(context, inputs, wetNode, mix) {
   gainDry.gain.value = dry;
 
   for (i = 0, imax = inputs.length; i < imax; i++) {
-    _.connect({ from: inputs[i], to: wetNode });
-    _.connect({ from: inputs[i], to: gainDry });
+    context.connect(inputs[i], wetNode);
+    context.connect(inputs[i], gainDry);
   }
-  _.connect({ from: wetNode, to: gainWet });
-  _.connect({ from: gainWet, to: gainMix });
-  _.connect({ from: gainDry, to: gainMix });
+  context.connect(wetNode, gainWet);
+  context.connect(gainWet, gainMix);
+  context.connect(gainDry, gainMix);
 
   gainMix.$maddOptimizable = true;
 
@@ -101,7 +101,7 @@ function sum(context, inputs) {
   var result = context.createGain();
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
-    _.connect({ from: inputs[i], to: result });
+    context.connect(inputs[i], result);
   }
   result.$maddOptimizable = true;
 

@@ -30,7 +30,7 @@ function createGainDC(context, offset) {
 
   gain.gain.value = offset;
 
-  _.connect({ from: new NeuDC(context, 1), to: gain });
+  context.connect(new NeuDC(context, 1), gain);
 
   return gain;
 }
@@ -38,8 +38,8 @@ function createGainDC(context, offset) {
 function sum(context, outlet, dc) {
   var gain = context.createGain();
 
-  _.connect({ from: outlet, to: gain });
-  _.connect({ from: dc    , to: gain });
+  context.connect(outlet, gain);
+  context.connect(dc    , gain);
 
   return gain;
 }

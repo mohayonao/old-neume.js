@@ -33,7 +33,7 @@ module.exports = function(neume, _) {
     }
 
     inputs.forEach(function(node) {
-      _.connect({ from: node, to: gain });
+      context.connect(node, gain);
     });
 
     gain.gain.setValueAtTime(data, 0);
