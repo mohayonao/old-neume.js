@@ -388,6 +388,26 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#toAudioNode()", function() {
+    it("calls toAudioNode() if exists", function() {
+      var gain = context.createGain();
+      var node = {
+        toAudioNode: function() {
+          return gain;
+        }
+      };
+      assert(context.toAudioNode(node) === gain);
+    });
+    it("returns a given AudioNode when given an AudioNode", function() {
+      var gain = context.createGain();
+      assert(context.toAudioNode(gain) === gain);
+    });
+    it("null", function() {
+      var node = {};
+      assert(context.toAudioNode(node) === null);
+    });
+  });
+
   describe("#connect(from, to)", function() {
     it("assign value if finite number -> AudioParam", function() {
       var osc = context.createOscillator();

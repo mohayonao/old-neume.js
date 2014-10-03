@@ -190,6 +190,16 @@ NeuContext.prototype.nextTick = function(callback, ctx) {
   return this;
 };
 
+NeuContext.prototype.toAudioNode = function(obj) {
+  if (obj && obj.toAudioNode) {
+    return obj.toAudioNode();
+  }
+  if (!(obj instanceof window.AudioNode)) {
+    obj = null;
+  }
+  return obj;
+};
+
 NeuContext.prototype.connect = function(from, to) {
   var output = 0;
   var input  = 0;
