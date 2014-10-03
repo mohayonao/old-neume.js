@@ -58,6 +58,7 @@ _.each([
   "createChannelMerger",
   "createDynamicsCompressor",
   "createOscillator",
+  "decodeAudioData",
 ], function(methodName) {
   NeuContext.prototype[methodName] = function() {
     return this.$context[methodName].apply(this.$context, arguments);
