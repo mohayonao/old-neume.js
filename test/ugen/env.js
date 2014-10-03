@@ -45,7 +45,7 @@ describe("ugen/env", function() {
         });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -109,7 +109,7 @@ describe("ugen/env", function() {
         });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -200,7 +200,7 @@ describe("ugen/env", function() {
         return $("adsr", { a: 0.1, d: 0.2, s: 0.3, r: 0.5 });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -256,7 +256,7 @@ describe("ugen/env", function() {
         return $("dadsr", { delay: 0.1, a: 0.1, d: 0.2, s: 0.3, r: 0.5 });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -312,7 +312,7 @@ describe("ugen/env", function() {
         return $("asr", { a: 0.1, s: 0.3, r: 0.5 });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -368,7 +368,7 @@ describe("ugen/env", function() {
         return $("cutoff", { r: 0.5, level: 0.8 });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 

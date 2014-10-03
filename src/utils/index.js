@@ -315,13 +315,6 @@ utils.inherits = function(ctor, superCtor) {
   });
 };
 
-utils.findAudioContext = function(obj) {
-  while (!(obj == null || obj instanceof window.AudioContext)) {
-    obj = obj.$context;
-  }
-  return obj || null;
-};
-
 utils.findAudioBuffer = function(obj) {
   if (obj && typeof obj.toAudioBuffer === "function") {
     obj = obj.toAudioBuffer();

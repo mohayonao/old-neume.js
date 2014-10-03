@@ -57,7 +57,8 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter", { iter: iter });
       })();
-      var audioContext = neume._.findAudioContext(synth);
+
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -95,7 +96,8 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter", { iter: iter });
       })();
-      var audioContext = neume._.findAudioContext(synth);
+
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -135,7 +137,8 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter", { iter: iter });
       })();
-      var audioContext = neume._.findAudioContext(synth);
+
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
 
       audioContext.$reset();
@@ -190,7 +193,8 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter", { iter: iter, lag: 0.1, curve: 0.1 });
       })();
-      var audioContext = neume._.findAudioContext(synth);
+
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
 
       audioContext.$reset();

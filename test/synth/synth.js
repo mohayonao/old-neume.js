@@ -184,7 +184,7 @@ describe("NeuSynth", function() {
     it("is an instance of AudioContext", function() {
       var synth = new NeuSynth(context, NOP, []);
 
-      assert(synth.context instanceof window.AudioContext);
+      assert(synth.context instanceof neume.Context);
     });
   });
 

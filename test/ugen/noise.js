@@ -41,7 +41,7 @@ describe("ugen/noise", function() {
         return $("white");
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
 
       audioContext.$reset();
@@ -89,7 +89,7 @@ describe("ugen/noise", function() {
         return $("pink");
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
 
       audioContext.$reset();

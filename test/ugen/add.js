@@ -41,7 +41,7 @@ describe("ugen/add", function() {
         return $("+", 1, 2, 3);
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
 
       audioContext.$reset();
       synth.$context.reset();

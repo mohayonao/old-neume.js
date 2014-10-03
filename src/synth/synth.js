@@ -31,7 +31,7 @@ function NeuSynth(context, func, args) {
 
   Object.defineProperties(this, {
     context: {
-      value: _.findAudioContext(this.$context),
+      value: this.$context,
       enumerable: true
     },
     currentTime: {

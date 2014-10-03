@@ -24,7 +24,7 @@ function NeuSynthDef(defaultContext, func) {
 
   Object.defineProperties(SynthDef, {
     context: {
-      value: _.findAudioContext(defaultContext),
+      value: defaultContext,
       enumerable: true
     }
   });

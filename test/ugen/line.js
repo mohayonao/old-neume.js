@@ -29,7 +29,8 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       })();
-      var audioContext = neume._.findAudioContext(synth);
+
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -59,7 +60,7 @@ describe("ugen/line", function() {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 
@@ -105,7 +106,8 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("xline", { start: 880, end: 440, dur: 0.200 });
       })();
-      var audioContext = neume._.findAudioContext(synth);
+
+      var audioContext = Neume.context;
       var outlet = synth.outlet;
       var ended = 0;
 

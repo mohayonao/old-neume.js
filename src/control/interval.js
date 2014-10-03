@@ -22,7 +22,7 @@ function NeuInterval(context, interval, callback) {
 
   Object.defineProperties(this, {
     context: {
-      value: _.findAudioContext(this.$context),
+      value: this.$context,
       enumerable: true
     },
     outlet: {
