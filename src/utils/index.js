@@ -315,10 +315,6 @@ utils.inherits = function(ctor, superCtor) {
   });
 };
 
-utils.isAudioNode = function(value) {
-  return value instanceof window.AudioNode;
-};
-
 utils.findAudioContext = function(obj) {
   while (!(obj == null || obj instanceof window.AudioContext)) {
     obj = obj.$context;

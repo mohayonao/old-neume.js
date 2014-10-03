@@ -219,12 +219,12 @@ NeuContext.prototype.connect = function(from, to) {
   }
 
   if (to instanceof window.AudioParam) {
-    if (_.isNumber(from)) {
+    if (typeof from === "number") {
       to.value = _.finite(from);
     }
   }
 
-  if (_.isAudioNode(to)) {
+  if (to instanceof window.AudioNode) {
     from = this.toAudioNode(from);
     if (from) {
       return from.connect(to, output, input);

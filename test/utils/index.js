@@ -445,16 +445,6 @@ describe("utils", function() {
     });
   });
 
-  describe(".isAudioNode(value)", function() {
-    it("checks if value is an instance of AudioNode", function() {
-      var audioContext = new window.AudioContext();
-      var osc = audioContext.createOscillator();
-      assert(_.isAudioNode(audioContext) === false);
-      assert(_.isAudioNode(osc) === true);
-      assert(_.isAudioNode(osc.detune) === false);
-    });
-  });
-
   describe(".findAudioContext(obj)", function() {
     it("returns obj if it is an instance of AudioContext", function() {
       var audioContext = new window.AudioContext();
