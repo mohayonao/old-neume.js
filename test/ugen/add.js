@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/add"));
@@ -47,7 +47,8 @@ describe("ugen/add", function() {
       synth.$context.reset();
 
       synth.start(0);
-      audioContext.$process(0.100);
+
+      audioContext.$processTo("00:00.100");
 
       assert.deepEqual(synth.outlet.toJSON(), {
         name: "GainNode",

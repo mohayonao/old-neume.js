@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/script"));
 

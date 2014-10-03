@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/buf"));
 
@@ -67,7 +67,7 @@ describe("ugen/buf", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      audioContext.$process(0.250);
+      audioContext.$processTo("00:00.250");
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -90,7 +90,7 @@ describe("ugen/buf", function() {
 
       synth.start(0.100);
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.100");
 
       assert(spy.calledOnce === true);
       assert.deepEqual(spy.firstCall.args, [ 0.100, 5 ]);
@@ -110,7 +110,7 @@ describe("ugen/buf", function() {
 
       synth.start(0.100);
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.100");
 
       assert(spy.calledOnce === true);
       assert.deepEqual(spy.firstCall.args, [ 0.100, 5, 10 ]);

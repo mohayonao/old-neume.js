@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/array"));
 
@@ -57,7 +57,7 @@ describe("ugen/array", function() {
       synth.at(0.250, 4);
       synth.prev(0.400);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
       assert(outlet.gain.$valueAtTime(0.150) === 1);
@@ -87,7 +87,7 @@ describe("ugen/array", function() {
       synth.at(0.250, 4);
       synth.prev(0.400);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
       assert(outlet.gain.$valueAtTime(0.150) === 1);
@@ -118,7 +118,7 @@ describe("ugen/array", function() {
       synth.at(0.250, 4);
       synth.prev(0.400);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
       assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.683772233983162 , 1e-6));

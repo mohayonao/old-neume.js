@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/iter"));
 
@@ -75,7 +75,7 @@ describe("ugen/iter", function() {
       synth.next(0.500);
       synth.next(0.600);
 
-      audioContext.$process(0.600);
+      audioContext.$processTo("00:00.600");
       assert(outlet.gain.$valueAtTime(0.000) === 3);
       assert(outlet.gain.$valueAtTime(0.050) === 3);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
@@ -114,7 +114,7 @@ describe("ugen/iter", function() {
       synth.next(0.600);
       synth.reset(0.425);
 
-      audioContext.$process(0.600);
+      audioContext.$processTo("00:00.600");
       assert(outlet.gain.$valueAtTime(0.000) === 3);
       assert(outlet.gain.$valueAtTime(0.050) === 3);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
@@ -159,7 +159,7 @@ describe("ugen/iter", function() {
       synth.reset(0.200);
       synth.reset(0.500);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 3);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
       assert(outlet.gain.$valueAtTime(0.150) === 0);
@@ -204,7 +204,7 @@ describe("ugen/iter", function() {
       synth.next(0.400);
       synth.next(0.500);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 3);
       assert(outlet.gain.$valueAtTime(0.100) === 3);
       assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.632455532033676 , 1e-6));

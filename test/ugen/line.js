@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/line"));
 
@@ -40,7 +40,7 @@ describe("ugen/line", function() {
         ended = e.playbackTime;
       });
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
 
       assert(outlet.gain.$valueAtTime(0.000) === 880);
       assert(outlet.gain.$valueAtTime(0.050) === 880);
@@ -71,7 +71,7 @@ describe("ugen/line", function() {
       });
       synth.stop(0.200);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
 
       assert(outlet.gain.$valueAtTime(0.000) === 880);
       assert(outlet.gain.$valueAtTime(0.050) === 880);
@@ -116,7 +116,7 @@ describe("ugen/line", function() {
         ended = e.playbackTime;
       });
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
 
       assert(outlet.gain.$valueAtTime(0.000) === 880);
       assert(outlet.gain.$valueAtTime(0.050) === 880);

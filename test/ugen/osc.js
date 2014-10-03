@@ -1,6 +1,6 @@
 "use strict";
 
-var neume = require("../../src/neume");
+var neume = require("../../src");
 
 neume.use(require("../../src/ugen/osc"));
 
@@ -52,7 +52,7 @@ describe("ugen/osc", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      audioContext.$process(0.300);
+      audioContext.$processTo("00:00.300");
 
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
@@ -153,7 +153,7 @@ describe("ugen/osc", function() {
       var synth = new Neume(function($) {
         return $("osc", { type: "pulse", width: 0.25 });
       })();
-      // assert(synth.outlet.type === "custom");
+      assert(synth.outlet.type === "custom");
     });
     it("PeriodicWave -> custom", function() {
       var wave = Neume.context.createPeriodicWave(
@@ -162,7 +162,7 @@ describe("ugen/osc", function() {
       var synth = new Neume(function($) {
         return $("osc", { type: wave });
       })();
-      // assert(synth.outlet.type === "custom");
+      assert(synth.outlet.type === "custom");
     });
   });
 
@@ -195,7 +195,7 @@ describe("ugen/osc", function() {
       var synth = new Neume(function($) {
         return $("pulse", { width: 0.25 });
       })();
-      // assert(synth.outlet.type === "custom");
+      assert(synth.outlet.type === "custom");
     });
     it("PeriodicWave -> custom", function() {
       var wave = Neume.context.createPeriodicWave(
@@ -204,7 +204,7 @@ describe("ugen/osc", function() {
       var synth = new Neume(function($) {
         return $(wave);
       })();
-      // assert(synth.outlet.type === "custom");
+      assert(synth.outlet.type === "custom");
     });
     it("invalid periodicwave -> sine", function() {
       var synth = new Neume(function($) {
