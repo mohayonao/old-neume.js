@@ -190,6 +190,42 @@ NeuContext.prototype.nextTick = function(callback, ctx) {
   return this;
 };
 
+NeuContext.prototype.connect = function(from, to) {
+  var output = 0;
+  var input  = 0;
+
+  if (from && from._connect) {
+    return from._connect(to, output, input);
+  }
+
+  if (_.isAudioParam(to)) {
+    if (_.isNumber(from)) {
+      to.value = _.finite(from);
+    }
+  }
+
+  if (_.isAudioNode(to)) {
+    from = _.findAudioNode(from);
+    if (from) {
+      return from.connect(to, output, input);
+    }
+  } else if (_.isAudioParam(to)) {
+    from = _.findAudioNode(from);
+    if (from) {
+      return from.connect(to, output);
+    }
+  }
+
+  return this;
+};
+
+NeuContext.prototype.disconnect = function(from) {
+  /* istanbul ignore else */
+  if (from && from.disconnect) {
+    from.disconnect();
+  }
+};
+
 function onaudioprocess(e) {
   // Safari 7.0.6 does not support e.playbackTime
   var currentTime     = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;

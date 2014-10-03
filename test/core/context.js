@@ -388,6 +388,146 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#connect(from, to)", function() {
+    it("assign value if finite number -> AudioParam", function() {
+      var osc = context.createOscillator();
+
+      context.connect(10, osc.frequency);
+
+      assert.deepEqual(osc.toJSON(), {
+        name: "OscillatorNode",
+        type: "sine",
+        frequency: {
+          value: 10,
+          inputs: []
+        },
+        detune: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("connect nodes if AudioNode -> AudioNode", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+    it("connect nodes if AudioNode -> AudioParam", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp.gain);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        },
+        inputs: []
+      });
+    });
+    it("call defined connect function", function() {
+      var osc = {
+        _connect: sinon.spy()
+      };
+      var amp = context.createGain();
+
+      context.connect(osc, amp);
+
+      assert(osc._connect.calledOnce);
+      assert.deepEqual(osc._connect.firstCall.args, [ amp, 0, 0 ]);
+    });
+    it("do nothing if else", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(amp.gain, osc);
+      context.connect(osc, null);
+
+      assert.deepEqual(osc.toJSON(), {
+        name: "OscillatorNode",
+        type: "sine",
+        frequency: {
+          value: 440,
+          inputs: []
+        },
+        detune: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
+  describe("#disconnect(from)", function() {
+    it("disconnect nodes", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp.gain);
+
+      context.disconnect(osc);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
   describe("offline-rendering", function() {
     it("works", function() {
       var audioContext = new window.OfflineAudioContext(2, 44100 * 0.5, 44100);
