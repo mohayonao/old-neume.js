@@ -285,6 +285,12 @@ describe("NeuUGen", function() {
     });
   });
 
+  describe("#toAudioNode()", function() {
+    it("returns an AudioNode", function() {
+      assert(ugen0.toAudioNode() instanceof window.AudioNode);
+    });
+  });
+
   describe("#_connect(to)", function() {
     it("connect to an AudioNode without offset", function() {
       var ugen0 = NeuUGen.build(synth, "sin#ugen0", {}, []);

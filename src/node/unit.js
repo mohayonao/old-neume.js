@@ -35,4 +35,8 @@ NeuUnit.prototype.apply = function(method, args) {
   }
 };
 
+NeuUnit.prototype.toAudioNode = function() {
+  return this.$outlet;
+};
+
 module.exports = NeuUnit;

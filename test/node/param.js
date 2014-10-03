@@ -177,6 +177,12 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#toAudioNode()", function() {
+    it("returns an AudioNode", function() {
+      assert(param.toAudioNode() instanceof window.AudioNode);
+    });
+  });
+
   describe("#_connect(to)", function() {
     it("works", function() {
       param = new NeuParam({ $context: context }, "freq", 440);

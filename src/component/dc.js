@@ -35,6 +35,10 @@ function NeuDC(context, value) {
 }
 NeuDC.$name = "NeuDC";
 
+NeuDC.prototype.toAudioNode = function() {
+  return this.$outlet;
+};
+
 /**
  * @return {number} value
  */

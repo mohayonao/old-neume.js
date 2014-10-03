@@ -118,6 +118,16 @@ NeuParam.prototype.cancel = function(startTime) {
   return this;
 };
 
+NeuParam.prototype.toAudioNode = function() {
+  if (this.$outlet == null) {
+    this.$outlet = this.$context.createGain();
+    this.$outlet.gain.setValueAtTime(this._value, 0);
+    this._params.push(this.$outlet.gain);
+    this.$context.connect(new NeuDC(this.$context, 1), this.$outlet);
+  }
+  return this.$outlet;
+};
+
 NeuParam.prototype._connect = function(to) {
   if (this._connected.indexOf(to) !== -1) {
     return; // if already connected
@@ -129,13 +139,7 @@ NeuParam.prototype._connect = function(to) {
     to.setValueAtTime(this._value, 0);
     this._params.push(to);
   } else {
-    if (this.$outlet == null) {
-      this.$outlet = this.$context.createGain();
-      this.$outlet.gain.setValueAtTime(this._value, 0);
-      this._params.push(this.$outlet.gain);
-      this.$context.connect(new NeuDC(this.$context, 1), this.$outlet);
-    }
-    this.$context.connect(this.$outlet, to);
+    this.$context.connect(this.toAudioNode(), to);
   }
 };
 

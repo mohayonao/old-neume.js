@@ -2,7 +2,6 @@
 
 var neume = require("../../src");
 
-var _          = neume._;
 var NeuContext = neume.Context;
 var NeuNode    = neume.Node;
 var NeuIn      = neume.In;
@@ -23,8 +22,11 @@ describe("NeuIn", function() {
       assert(_in instanceof NeuIn);
       assert(_in instanceof NeuNode);
     });
-    it("has outlet-link", function() {
-      assert(_.findAudioNode(_in) instanceof window.GainNode);
+  });
+
+  describe("#toAudioNode()", function() {
+    it("returns an AudioNode", function() {
+      assert(_in.toAudioNode() instanceof window.AudioNode);
     });
   });
 

@@ -25,6 +25,12 @@ describe("NeuDC", function() {
     });
   });
 
+  describe("#toAudioNode()", function() {
+    it("returns an AudioNode", function() {
+      assert(new NeuDC(context, 0).toAudioNode() instanceof window.AudioNode);
+    });
+  });
+
   describe("#valueOf()", function() {
     it("returns the value", function() {
       assert(new NeuDC(context, 0).valueOf() === 0);

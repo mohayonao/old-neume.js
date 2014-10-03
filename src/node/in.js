@@ -13,4 +13,8 @@ _.inherits(NeuIn, NeuNode);
 
 NeuIn.$name = "NeuIn";
 
+NeuIn.prototype.toAudioNode = function() {
+  return this.$outlet;
+};
+
 module.exports = _.NeuIn = NeuIn;

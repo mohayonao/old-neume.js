@@ -63,6 +63,10 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.toAudioNode = function() {
+  return this.$outlet;
+};
+
 NeuUGen.prototype._connect = function(to) {
   this.$context.connect(this.$outlet, to);
   if (this.$offset !== 0) {
