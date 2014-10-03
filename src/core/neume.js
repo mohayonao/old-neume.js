@@ -68,13 +68,13 @@ var neume = function(context) {
 
 neume._        = _;
 neume.Context  = require("./context");
+neume.DryWet   = require("../component/drywet");
 neume.Buffer   = require("../control/buffer");
 neume.Interval = require("../control/interval");
 neume.Timeout  = require("../control/timeout");
 neume.FFT      = require("../dsp/fft");
 neume.Emitter  = require("../event/emitter");
 neume.DC       = require("../node/dc");
-neume.DryWet   = require("../node/drywet");
 neume.In       = require("../node/in");
 neume.Node     = require("../node/node");
 neume.Param    = require("../node/param");
