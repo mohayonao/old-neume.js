@@ -42,7 +42,7 @@ describe("ugen/boolean", function() {
       synth.setValue(0.400, 0);
       synth.setValue(0.400, true);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
       assert(outlet.gain.$valueAtTime(0.150) === 1);
@@ -76,7 +76,7 @@ describe("ugen/boolean", function() {
       synth.setValue(0.400, 0);
       synth.setValue(0.400, false);
 
-      audioContext.$process(0.500);
+      audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 1);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
       assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.31622776601683783 , 1e-6));

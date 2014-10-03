@@ -47,7 +47,8 @@ describe("ugen/add", function() {
       synth.$context.reset();
 
       synth.start(0);
-      audioContext.$process(0.100);
+
+      audioContext.$processTo("00:00.100");
 
       assert.deepEqual(synth.outlet.toJSON(), {
         name: "GainNode",

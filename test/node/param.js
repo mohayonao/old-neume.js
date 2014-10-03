@@ -47,16 +47,16 @@ describe("NeuParam", function() {
       param.setAt(880, 0.250);
       assert(param.valueOf() === 440, "00:00.000");
 
-      audioContext.$process(0.255);
+      audioContext.$processTo("00:00.250");
       assert(param.valueOf() === 880, "00:00.250");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.500");
       assert(param.valueOf() === 880, "00:00.500");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.750");
       assert(param.valueOf() === 880, "00:00.750");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:01.000");
       assert(param.valueOf() === 880, "00:01.000");
     });
   });
@@ -69,16 +69,16 @@ describe("NeuParam", function() {
       param.linTo(880, 1.000);
       assert(param.valueOf() === 440, "00:00.000");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.250");
       assert(param.valueOf() === 550, "00:00.250");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.500");
       assert(param.valueOf() === 660, "00:00.500");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.750");
       assert(param.valueOf() === 770, "00:00.750");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:01.000");
       assert(param.valueOf() === 880, "00:01.000");
     });
   });
@@ -90,19 +90,19 @@ describe("NeuParam", function() {
     it("works", function() {
       param.expTo(880, 1.000);
 
-      assert(param.valueOf() === 440, "00:00.000");
+      assert(closeTo(param.valueOf(), 440, 1e-6), "00:00.000");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 523.2511306011972, "00:00.250");
+      audioContext.$processTo("00:00.250");
+      assert(closeTo(param.valueOf(), 523.2511306011972, 1e-6), "00:00.250");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 622.2539674441618, "00:00.500");
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 622.2539674441618, 1e-6), "00:00.500");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 739.9888454232688, "00:00.750");
+      audioContext.$processTo("00:00.750");
+      assert(closeTo(param.valueOf(), 739.9888454232688, 1e-6), "00:00.750");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 880, "00:01.000");
+      audioContext.$processTo("00:01.000");
+      assert(closeTo(param.valueOf(), 880, 1e-6), "00:01.000");
     });
   });
 
@@ -115,17 +115,17 @@ describe("NeuParam", function() {
 
       assert(param.valueOf() === 440, "00:00.000");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.250");
       assert(param.valueOf() === 440, "00:00.250");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 718.1330458845654, "00:00.500");
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 718.1330458845654, 1e-6), "00:00.500");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 820.4524753758905, "00:00.750");
+      audioContext.$processTo("00:00.750");
+      assert(closeTo(param.valueOf(), 820.4524753758905, 1e-6), "00:00.750");
 
-      audioContext.$process(0.25);
-      assert(param.valueOf() === 858.0936899181398, "00:01.000");
+      audioContext.$processTo("00:01.000");
+      assert(closeTo(param.valueOf(), 858.0936899181398, 1e-6), "00:01.000");
     });
   });
 
@@ -138,16 +138,16 @@ describe("NeuParam", function() {
 
       assert(param.valueOf() === 440, "00:00.000");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.250");
       assert(param.valueOf() === 660, "00:00.250");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.500");
       assert(param.valueOf() === 330, "00:00.500");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.750");
       assert(param.valueOf() === 330, "00:00.750");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:01.000");
       assert(param.valueOf() === 330, "00:01.000");
     });
   });
@@ -161,18 +161,18 @@ describe("NeuParam", function() {
 
       assert(param.valueOf() === 440, "00:00.000");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.250");
       assert(param.valueOf() === 550, "00:00.250");
 
       param.cancel();
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.500");
       assert(param.valueOf() === 550, "00:00.500");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:00.750");
       assert(param.valueOf() === 550, "00:00.750");
 
-      audioContext.$process(0.25);
+      audioContext.$processTo("00:01.000");
       assert(param.valueOf() === 550, "00:01.000");
     });
   });

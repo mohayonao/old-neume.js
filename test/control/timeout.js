@@ -38,39 +38,39 @@ describe("NeuTimeout", function() {
       timeout.start(0.100);
       timeout.stop(0.400);
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.050");
       assert(timeout.state === "SCHEDULED", "00:00.050");
       assert(passed === null, "00:00.050");
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.100");
       assert(timeout.state === "SCHEDULED", "00:00.100");
       assert(passed === null, "00:00.100");
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.150");
       assert(timeout.state === "SCHEDULED", "00:00.150");
       assert(passed === null, "00:00.150");
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.200");
       assert(timeout.state === "SCHEDULED", "00:00.200");
       assert(passed === null, "00:00.200");
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.250");
       assert(timeout.state === "SCHEDULED", "00:00.250");
       assert(passed === null, "00:02.500");
 
-      audioContext.$process(0.055);
+      audioContext.$processTo("00:00.305");
       assert(timeout.state === "FINISHED", "00:00.305");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 0 }, "00:00.305");
 
-      audioContext.$process(0.045);
+      audioContext.$processTo("00:00.350");
       assert(timeout.state === "FINISHED", "00:00.350");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 0 }, "00:00.350");
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.400");
       assert(timeout.state === "FINISHED", "00:00.400");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 0 }, "00:00.400");
 
-      audioContext.$process(0.050);
+      audioContext.$processTo("00:00.450");
       assert(timeout.state === "FINISHED", "00:00.450");
       assert.deepEqual(passed, { playbackTime: 0.30000000000000004, count: 0 }, "00:00.450");
     });
@@ -85,10 +85,10 @@ describe("NeuTimeout", function() {
 
         timeout.start(0.000);
 
-        audioContext.$process(0.010);
+        audioContext.$processTo("00:00.010");
         assert(timeout.state === "SCHEDULED", "00:00.010");
 
-        audioContext.$process(0.020);
+        audioContext.$processTo("00:00.020");
         assert(timeout.state === "SCHEDULED", "00:00.020");
       });
     });

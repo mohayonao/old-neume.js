@@ -50,7 +50,7 @@ describe("ugen/noise", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      audioContext.$process(0.300);
+      audioContext.$processTo("00:00.300");
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -98,7 +98,7 @@ describe("ugen/noise", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      audioContext.$process(0.300);
+      audioContext.$processTo("00:00.300");
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");

@@ -68,7 +68,7 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600);
 
-      audioContext.$process(1.000);
+      audioContext.$processTo("00:01.000");
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
@@ -133,7 +133,7 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600).stop(0.150);
 
-      audioContext.$process(1.000);
+      audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0, 1e-6));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0, 1e-6));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0, 1e-6));
@@ -211,7 +211,7 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600);
 
-      audioContext.$process(1.000);
+      audioContext.$processTo("00:01.000");
 
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
@@ -267,7 +267,7 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600);
 
-      audioContext.$process(1.000);
+      audioContext.$processTo("00:01.000");
 
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
@@ -323,7 +323,7 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600);
 
-      audioContext.$process(1.000);
+      audioContext.$processTo("00:01.000");
 
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
@@ -379,7 +379,7 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600);
 
-      audioContext.$process(1.000);
+      audioContext.$processTo("00:01.000");
 
       assert(outlet.gain.$valueAtTime(0.000) === 0.8);
       assert(outlet.gain.$valueAtTime(0.050) === 0.8);

@@ -294,19 +294,19 @@ describe("NeuContext", function() {
 
       assert(passed === 0, "00:00.000");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.100");
       assert(passed === 1, "00:00.100");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.200");
       assert(passed === 2, "00:00.200");
 
-      audioContext.$process(0.110);
+      audioContext.$processTo("00:00.310");
       assert(passed === 3, "00:00.310");
 
-      audioContext.$process(0.090);
+      audioContext.$processTo("00:00.400");
       assert(passed === 4, "00:00.400");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.500");
       assert(passed === 5, "00:00.500");
     });
     it("same time order", function() {
@@ -321,7 +321,7 @@ describe("NeuContext", function() {
 
       assert.deepEqual(passed, [], "00:00.000");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.100");
       assert.deepEqual(passed, [ 1, 2, 3, 4, 5 ], "00:00.100");
     });
   });
@@ -345,19 +345,19 @@ describe("NeuContext", function() {
 
       assert(passed === 0, "00:00.000");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.100");
       assert(passed === 1, "00:00.100");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.200");
       assert(passed === 1, "00:00.200"); // removed callback
 
-      audioContext.$process(0.110);
+      audioContext.$processTo("00:00.310");
       assert(passed === 3, "00:00.310");
 
-      audioContext.$process(0.090);
+      audioContext.$processTo("00:00.400");
       assert(passed === 4, "00:00.400");
 
-      audioContext.$process(0.100);
+      audioContext.$processTo("00:00.500");
       assert(passed === 5, "00:00.500");
     });
   });

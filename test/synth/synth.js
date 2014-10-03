@@ -143,7 +143,8 @@ describe("NeuSynth", function() {
 
           synth.start(0.010);
           synth.stop(0.100);
-          audioContext.$process(0.200);
+
+          audioContext.$processTo("00:00.200");
 
           assert.deepEqual(passed, [
             [ "fizz", 0.040, 1 ],
@@ -165,7 +166,8 @@ describe("NeuSynth", function() {
 
           synth.start(0.010);
           synth.stop(0.100);
-          audioContext.$process(0.200);
+
+          audioContext.$processTo("00:00.200");
 
           assert.deepEqual(passed, [
             [ "fizz", 0.04, 1 ],
