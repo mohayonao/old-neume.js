@@ -41,7 +41,7 @@ function NeuSynth(context, func, args) {
       enumerable: true
     },
     outlet: {
-      value: _.findAudioNode(this.$outputs[0]),
+      value: context.toAudioNode(this.$outputs[0]),
       enumerable: true
     },
     state: {
@@ -168,7 +168,7 @@ NeuSynth.prototype.connect = function(destination, output, input) {
     if (!this._routing[output]) {
       this._routing[output] = [];
     }
-    this._routing[output].push(_.findAudioNode(destination.$inputs[input]));
+    this._routing[output].push(this.$context.toAudioNode(destination.$inputs[input]));
   }
 
   return this;

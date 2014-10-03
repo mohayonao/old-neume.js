@@ -17,12 +17,6 @@ describe("NeuDC", function() {
     it("returns an instance of NeuDC", function() {
       assert(new NeuDC(context, 220) instanceof NeuDC);
     });
-    it("has link to AudioNode", function() {
-      var outlet = _.findAudioNode(new NeuDC(context, 0));
-
-      assert(outlet instanceof window.AudioNode);
-      assert.deepEqual(outlet.toJSON(), DC(0));
-    });
   });
 
   describe("#toAudioNode()", function() {

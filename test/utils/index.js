@@ -499,32 +499,6 @@ describe("utils", function() {
     });
   });
 
-  describe(".findAudioNode(obj)", function() {
-    it("returns obj if it is an instance of AudioNode", function() {
-      var audioContext = new window.AudioContext();
-      var osc = audioContext.createOscillator();
-      assert(_.findAudioNode(osc) === osc);
-    });
-    it("returns an instance of AudioNode that found from link", function() {
-      var audioContext = new window.AudioContext();
-      var osc = audioContext.createOscillator();
-      var obj = {
-        $outlet: {
-          $outlet: osc
-        }
-      };
-      assert(_.findAudioNode(obj) === osc);
-    });
-    it("returns null if not found", function() {
-      var obj = {
-        $outlet: {
-          $outlet: {}
-        }
-      };
-      assert(_.findAudioNode(obj) === null);
-    });
-  });
-
   describe(".findAudioBuffer(obj)", function() {
     it("returns obj if it is an instance of AudioBuffer", function() {
       var audioContext = new window.AudioContext();
@@ -552,8 +526,8 @@ describe("utils", function() {
       var audioContext = new window.AudioContext();
       var osc = audioContext.createOscillator();
       var obj = {
-        $outlet: {
-          $outlet: osc
+        toAudioNode: function() {
+          return osc;
         }
       };
       assert(_.isValidInput(obj)      === true);

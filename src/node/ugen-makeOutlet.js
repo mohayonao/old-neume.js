@@ -12,7 +12,7 @@ function makeOutlet(context, unit, spec) {
   var mul = _.defaults(spec.mul, 1);
   var add = _.defaults(spec.add, 0);
 
-  outlet = (mul === 0) ? null : _.findAudioNode(unit.$outlet);
+  outlet = (mul === 0) ? null : context.toAudioNode(unit);
 
   if (outlet && mul !== 1) {
     if (outlet.$maddOptimizable) {

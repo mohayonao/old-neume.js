@@ -334,13 +334,6 @@ utils.findAudioContext = function(obj) {
   return obj || null;
 };
 
-utils.findAudioNode = function(obj) {
-  while (!(obj == null || utils.isAudioNode(obj))) {
-    obj = obj.$outlet;
-  }
-  return obj || null;
-};
-
 utils.findAudioBuffer = function(obj) {
   if (obj && typeof obj.toAudioBuffer === "function") {
     obj = obj.toAudioBuffer();
@@ -352,7 +345,8 @@ utils.findAudioBuffer = function(obj) {
 };
 
 utils.isValidInput = function(value) {
-  return utils.isFinite(value) || utils.isAudioNode(utils.findAudioNode(value));
+  return utils.isFinite(value) || utils.isAudioNode(value) ||
+    !!(value && value.toAudioNode && utils.isAudioNode(value.toAudioNode()));
 };
 
 module.exports = utils;

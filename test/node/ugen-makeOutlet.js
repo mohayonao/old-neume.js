@@ -6,7 +6,7 @@ var NeuContext = neume.Context;
 
 var makeOutlet = require("../../src/node/ugen-makeOutlet");
 
-describe("makeOutlet", function() {
+describe("UGen::makeOutlet", function() {
   var context = null;
   var node = null;
   var unit = null;
@@ -14,7 +14,7 @@ describe("makeOutlet", function() {
   beforeEach(function() {
     context = new NeuContext(new window.AudioContext().destination);
     node = context.createOscillator();
-    unit = { $outlet: node, $offset: 0 };
+    unit = new neume.Unit({ outlet: node });
   });
 
   describe("(context, null, {})", function() {

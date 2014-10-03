@@ -41,7 +41,7 @@ describe("NeuUGen", function() {
       $context: context
     };
     ugen0 = NeuUGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
-    _.findAudioNode(ugen0).$id = "ugen0";
+    ugen0.toAudioNode().$id = "ugen0";
   });
 
   describe("(synth, key, spec, inputs)", function() {
@@ -118,8 +118,8 @@ describe("NeuUGen", function() {
       var ugen2 = NeuUGen.build(synth, "sin#ugen2", {}, []);
       var ugen3 = ugen0.add(ugen2);
 
-      _.findAudioNode(ugen2).$id = "ugen2";
-      _.findAudioNode(ugen3).$id = "ugen3";
+      ugen2.toAudioNode().$id = "ugen2";
+      ugen3.toAudioNode().$id = "ugen3";
 
       assert(ugen3 instanceof NeuUGen);
       assert(ugen3 !== ugen0);
@@ -166,8 +166,8 @@ describe("NeuUGen", function() {
       var ugen2 = NeuUGen.build(synth, "sin#ugen2", {}, []);
       var ugen3 = ugen0.mul(ugen2);
 
-      _.findAudioNode(ugen2).$id = "ugen2";
-      _.findAudioNode(ugen3).$id = "ugen3";
+      ugen2.toAudioNode().$id = "ugen2";
+      ugen3.toAudioNode().$id = "ugen3";
 
       assert(ugen3 instanceof NeuUGen);
       assert(ugen3 !== ugen0);
@@ -217,9 +217,9 @@ describe("NeuUGen", function() {
       var ugen3 = NeuUGen.build(synth, "sin#ugen3", {}, []);
       var ugen4 = ugen0.madd(ugen2, ugen3);
 
-      _.findAudioNode(ugen2).$id = "ugen2";
-      _.findAudioNode(ugen3).$id = "ugen3";
-      _.findAudioNode(ugen4).$id = "ugen4";
+      ugen2.toAudioNode().$id = "ugen2";
+      ugen3.toAudioNode().$id = "ugen3";
+      ugen4.toAudioNode().$id = "ugen4";
 
       assert(ugen4 instanceof NeuUGen);
       assert(ugen4 !== ugen0);
@@ -296,7 +296,7 @@ describe("NeuUGen", function() {
       var ugen0 = NeuUGen.build(synth, "sin#ugen0", {}, []);
       var gain  = context.createGain();
 
-      _.findAudioNode(ugen0).$id = "ugen0";
+      ugen0.toAudioNode().$id = "ugen0";
 
       ugen0._connect(gain);
 
@@ -327,7 +327,7 @@ describe("NeuUGen", function() {
       var ugen0 = NeuUGen.build(synth, "sin#ugen0", { add: 880 }, []);
       var gain  = context.createGain();
 
-      _.findAudioNode(ugen0).$id = "ugen0";
+      ugen0.toAudioNode().$id = "ugen0";
 
       ugen0._connect(gain);
 
@@ -369,7 +369,7 @@ describe("NeuUGen", function() {
 
       gain.gain.value = 0;
 
-      _.findAudioNode(ugen0).$id = "ugen0";
+      ugen0.toAudioNode().$id = "ugen0";
 
       ugen0._connect(gain.gain);
 
@@ -402,7 +402,7 @@ describe("NeuUGen", function() {
 
       gain.gain.value = 0;
 
-      _.findAudioNode(ugen0).$id = "ugen0";
+      ugen0.toAudioNode().$id = "ugen0";
 
       ugen0._connect(gain.gain);
 

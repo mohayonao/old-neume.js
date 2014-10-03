@@ -225,12 +225,12 @@ NeuContext.prototype.connect = function(from, to) {
   }
 
   if (_.isAudioNode(to)) {
-    from = _.findAudioNode(from);
+    from = this.toAudioNode(from);
     if (from) {
       return from.connect(to, output, input);
     }
   } else if (_.isAudioParam(to)) {
-    from = _.findAudioNode(from);
+    from = this.toAudioNode(from);
     if (from) {
       return from.connect(to, output);
     }
