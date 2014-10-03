@@ -1,7 +1,7 @@
 "use strict";
 
 var _       = require("../utils");
-var NeuDC   = require("../node/dc");
+var NeuDC   = require("../component/dc");
 var NeuUGen = require("../node/ugen");
 
 function makeOutlet(context, ugen) {

@@ -2,7 +2,7 @@
 
 var _       = require("../utils");
 var NeuNode = require("./node");
-var NeuDC   = require("./dc");
+var NeuDC   = require("../component/dc");
 
 function NeuParam(synth, name, value) {
   NeuNode.call(this, synth);

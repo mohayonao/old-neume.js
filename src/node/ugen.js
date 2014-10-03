@@ -2,8 +2,8 @@
 
 var _       = require("../utils");
 var NeuNode = require("./node");
-var NeuDC   = require("./dc");
 var NeuUnit = require("./unit");
+var NeuDC   = require("../component/dc");
 var SelectorParser = require("../parser/selector");
 var makeOutlet     = require("./ugen-makeOutlet");
 
