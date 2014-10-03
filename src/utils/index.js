@@ -355,42 +355,4 @@ utils.isValidInput = function(value) {
   return utils.isFinite(value) || utils.isAudioNode(utils.findAudioNode(value));
 };
 
-utils.connect = function(spec) {
-  var from = spec.from;
-  var to   = spec.to;
-  var output = utils.int(spec.output);
-  var input  = utils.int(spec.input);
-
-  if (from && from._connect) {
-    return from._connect(to, output, input);
-  }
-
-  if (utils.isAudioParam(to)) {
-    if (utils.isNumber(from)) {
-      to.value = utils.finite(from);
-    }
-  }
-
-  if (utils.isAudioNode(to)) {
-    from = utils.findAudioNode(from);
-    if (from) {
-      return from.connect(to, output, input);
-    }
-  } else if (utils.isAudioParam(to)) {
-    from = utils.findAudioNode(from);
-    if (from) {
-      return from.connect(to, output);
-    }
-  }
-};
-
-utils.disconnect = function(spec) {
-  var from = utils.findAudioNode(spec.from);
-
-  /* istanbul ignore else */
-  if (from) {
-    from.disconnect();
-  }
-};
-
 module.exports = utils;
