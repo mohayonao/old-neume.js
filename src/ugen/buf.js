@@ -42,10 +42,10 @@ module.exports = function(neume, _) {
   });
 
   function make(buffer, ugen, spec) {
-    buffer = _.findAudioBuffer(buffer);
-
     var context = ugen.$context;
     var bufSrc  = context.createBufferSource();
+
+    buffer = context.toAudioBuffer(buffer);
 
     /* istanbul ignore else */
     if (buffer != null) {

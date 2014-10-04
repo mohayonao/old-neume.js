@@ -26,7 +26,7 @@ module.exports = function(neume, _) {
   neume.register("conv", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var buffer = _.findAudioBuffer(spec.buf);
+    var buffer = context.toAudioBuffer(spec.buf);
     var conv = context.createConvolver();
 
     var mix = _.defaults(spec.mix, 1);
