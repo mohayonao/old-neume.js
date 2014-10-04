@@ -408,6 +408,26 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#toAudioBuffer()", function() {
+    it("calls toAudioBuffer() if exists", function() {
+      var buf = context.createBuffer(1, 128, 44100);
+      var node = {
+        toAudioBuffer: function() {
+          return buf;
+        }
+      };
+      assert(context.toAudioBuffer(node) === buf);
+    });
+    it("returns a given AudioBuffer when given an AudioBuffer", function() {
+      var buf = context.createBuffer(1, 128, 44100);
+      assert(context.toAudioBuffer(buf) === buf);
+    });
+    it("null", function() {
+      var node = {};
+      assert(context.toAudioBuffer(node) === null);
+    });
+  });
+
   describe("#connect(from, to)", function() {
     it("assign value if finite number -> AudioParam", function() {
       var osc = context.createOscillator();

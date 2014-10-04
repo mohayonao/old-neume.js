@@ -200,6 +200,16 @@ NeuContext.prototype.toAudioNode = function(obj) {
   return obj;
 };
 
+NeuContext.prototype.toAudioBuffer = function(obj) {
+  if (obj && obj.toAudioBuffer) {
+    return obj.toAudioBuffer();
+  }
+  if (!(obj instanceof window.AudioBuffer)) {
+    obj = null;
+  }
+  return obj;
+};
+
 NeuContext.prototype.connect = function(from, to) {
   var output = 0;
   var input  = 0;
