@@ -5,7 +5,7 @@
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp --no-power-assert test"
   },
   "dependencies": {
     "promise": "^6.0.0"
