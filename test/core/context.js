@@ -230,6 +230,17 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#createPeriodicWave()", function() {
+    it("call AudioContext#createPeriodicWave()", function() {
+      var spy = sinon.stub(context, "createPeriodicWave");
+
+      context.createPeriodicWave(1, 2, 3);
+
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
+    });
+  });
+
   describe("#decodeAudioData()", function() {
     it("call AudioContext#decodeAudioData()", function() {
       var spy = sinon.stub(context, "decodeAudioData");

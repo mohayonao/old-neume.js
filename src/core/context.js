@@ -66,17 +66,13 @@ _.each([
   "createChannelMerger",
   "createDynamicsCompressor",
   "createOscillator",
+  "createPeriodicWave",
   "decodeAudioData",
 ], function(methodName) {
   NeuContext.prototype[methodName] = function() {
     return this.$context[methodName].apply(this.$context, arguments);
   };
 });
-
-NeuContext.prototype.createPeriodicWave = function() {
-  var context = this.$context;
-  return (context.createPeriodicWave || context.createWaveTable).apply(context, arguments);
-};
 
 NeuContext.prototype.createComponent = function(node) {
   return new NeuComponent(this, node);

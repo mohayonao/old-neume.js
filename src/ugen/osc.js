@@ -62,7 +62,7 @@ module.exports = function(neume, _) {
     return make(setup(type, ugen, spec, inputs));
   });
 
-  function periodicwave(ugen, spec, inputs) {
+  neume.register("periodicwave", function(ugen, spec, inputs) {
     var type = spec.value;
 
     if (!isWave(type)) {
@@ -70,10 +70,7 @@ module.exports = function(neume, _) {
     }
 
     return make(setup(type, ugen, spec, inputs));
-  }
-
-  neume.register("periodicwave", periodicwave);
-  neume.register("wavetable"   , periodicwave);
+  });
 
   _.each(WAVE_TYPES, function(type, name) {
     neume.register(name, function(ugen, spec, inputs) {
@@ -90,19 +87,7 @@ module.exports = function(neume, _) {
     if (window.PeriodicWave && wave instanceof window.PeriodicWave) {
       return true;
     }
-    if (window.WaveTable && wave instanceof window.WaveTable) {
-      return true;
-    }
     return false;
-  }
-
-  function setWave(osc, wave) {
-    if (osc.setPeriodicWave) {
-      return osc.setPeriodicWave(wave);
-    }
-    if (osc.setWaveTable) {
-      return osc.setWaveTable(wave);
-    }
   }
 
   function setup(type, ugen, spec, inputs) {
@@ -128,7 +113,7 @@ module.exports = function(neume, _) {
     var osc = context.createOscillator();
 
     if (isWave(type)) {
-      setWave(osc, type);
+      osc.setPeriodicWave(type);
     } else {
       osc.type = type;
     }

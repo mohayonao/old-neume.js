@@ -1,8 +1,6 @@
 "use strict";
 
-// Safari 7.0.6  needs webkit prefix
-window.AudioContext = window.AudioContext || /* istanbul ignore next */ window.webkitAudioContext;
-window.OfflineAudioContext = window.OfflineAudioContext || /* istanbul ignore next */ window.webkitOfflineAudioContext;
+require("./shim");
 
 var _ = require("../utils");
 
