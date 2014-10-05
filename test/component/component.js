@@ -200,4 +200,23 @@ describe("NeuComponent", function() {
     });
   });
 
+  describe("#disconnect(to)", function() {
+    it("disconnect from node", function() {
+      var to = context.createGain();
+
+      new NeuComponent(
+        context, context.createOscillator()
+      ).connect(to).disconnect();
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });

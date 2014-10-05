@@ -420,4 +420,21 @@ describe("NeuUGen", function() {
     });
   });
 
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var node = context.createGain();
+
+      NeuUGen.build(synth, "sin#ugen0", {}, []).connect(node).disconnect();
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });

@@ -55,4 +55,9 @@ NeuMul.prototype.connect = function(to) {
   return this;
 };
 
+NeuMul.prototype.disconnect = function() {
+  this.$context.disconnect(this.$outlet);
+  return this;
+};
+
 module.exports = _.NeuMul = NeuMul;

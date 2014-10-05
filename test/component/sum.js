@@ -149,7 +149,7 @@ describe("NeuSum", function() {
     });
   });
 
-  describe("1#toAudioNode()", function() {
+  describe("#toAudioNode()", function() {
     it("return an AudioNode []", function() {
       var sum = new NeuSum(context, []);
       assert(sum.toAudioNode() instanceof window.AudioNode);
@@ -486,6 +486,25 @@ describe("NeuSum", function() {
               inputs: []
             }
           ]
+        },
+        inputs: []
+      });
+    });
+  });
+
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var to = context.createGain();
+
+      new NeuSum(context, [
+        context.createOscillator(), context.createDelay(), 10, new NeuDC(context, -10)
+      ]).connect(to).disconnect();
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
         },
         inputs: []
       });

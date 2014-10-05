@@ -20,4 +20,9 @@ NeuIn.prototype.connect = function(to) {
   return this;
 };
 
+NeuIn.prototype.disconnect = function() {
+  this.$context.disconnect(this.$outlet);
+  return this;
+};
+
 module.exports = _.NeuIn = NeuIn;

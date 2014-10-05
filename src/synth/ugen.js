@@ -2,8 +2,6 @@
 
 var _ = require("../utils");
 var NeuComponent = require("../component/component");
-var NeuMul = require("../component/mul");
-var NeuAdd = require("../component/add");
 var NeuUnit = require("./unit");
 var SelectorParser = require("../parser/selector");
 
@@ -27,9 +25,12 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("Invalid UGen: " + key);
   }
 
+  this._node = unit.$outlet;
+  this._node = this.$context.createMul(this._node, _.defaults(spec.mul, 1));
+  this._node = this.$context.createAdd(this._node, _.defaults(spec.add, 0));
+
   this.$synth = synth;
   this.$unit  = unit;
-  this.$spec  = spec;
 
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
@@ -64,20 +65,19 @@ NeuUGen.build = function(synth, key, spec, inputs) {
 
 NeuUGen.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
-    this.$outlet = madd(this.$context, this.$spec, this.$unit.$outlet).toAudioNode();
+    this.$outlet = this._node.toAudioNode();
   }
   return this.$outlet;
 };
 
 NeuUGen.prototype.connect = function(to) {
-  madd(this.$context, this.$spec, this.$unit.$outlet).connect(to);
+  this._node.connect(to);
   return this;
 };
 
-function madd(context, spec, outlet) {
-  outlet = new NeuMul(context, outlet, _.defaults(spec.mul, 1));
-  outlet = new NeuAdd(context, outlet, _.defaults(spec.add, 0));
-  return outlet;
-}
+NeuUGen.prototype.disconnect = function() {
+  this._node.disconnect();
+  return this;
+};
 
 module.exports = NeuUGen;

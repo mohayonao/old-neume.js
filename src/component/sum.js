@@ -84,4 +84,15 @@ function createSumNode(context, inputs) {
   return node;
 }
 
+NeuSum.prototype.disconnect = function() {
+  var context = this.$context;
+  var inputs = this._inputs;
+
+  for (var i = 0, imax = inputs.length; i < imax; i++) {
+    context.disconnect(inputs[i]);
+  }
+
+  return this;
+};
+
 module.exports = _.NeuSum = NeuSum;

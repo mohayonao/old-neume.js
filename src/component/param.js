@@ -132,4 +132,9 @@ NeuParam.prototype.connect = function(to) {
   return this;
 };
 
+NeuParam.prototype.disconnect = function() {
+  this.$context.disconnect(this.$outlet);
+  return this;
+};
+
 module.exports = _.NeuParam = NeuParam;

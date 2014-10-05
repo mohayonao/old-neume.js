@@ -58,4 +58,10 @@ NeuAdd.prototype.connect = function(to) {
   return this;
 };
 
+NeuAdd.prototype.disconnect = function() {
+  this.$context.disconnect(this._a);
+  this.$context.disconnect(this._b);
+  return this;
+};
+
 module.exports = _.NeuAdd = NeuAdd;

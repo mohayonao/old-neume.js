@@ -31,7 +31,7 @@ describe("NeuDC", function() {
     it("0 -> AudioNode", function() {
       var gain = context.createGain();
 
-      context.connect(new NeuDC(context, 0), gain);
+      new NeuDC(context, 0).connect(gain);
 
       assert.deepEqual(gain.toJSON(), {
         name: "GainNode",
@@ -47,7 +47,7 @@ describe("NeuDC", function() {
     it("1 -> AudioNode", function() {
       var gain = context.createGain();
 
-      context.connect(new NeuDC(context, 1), gain);
+      new NeuDC(context, 1).connect(gain);
 
       assert.deepEqual(gain.toJSON(), {
         name: "GainNode",
@@ -63,7 +63,7 @@ describe("NeuDC", function() {
     it("2 -> AudioNode", function() {
       var gain = context.createGain();
 
-      context.connect(new NeuDC(context, 2), gain);
+      new NeuDC(context, 2).connect(gain);
 
       assert.deepEqual(gain.toJSON(), {
         name: "GainNode",
@@ -88,12 +88,29 @@ describe("NeuDC", function() {
     it("3 -> AudioParam", function() {
       var gain = context.createGain();
 
-      context.connect(new NeuDC(context, 3), gain.gain);
+      new NeuDC(context, 3).connect(gain.gain);
 
       assert.deepEqual(gain.toJSON(), {
         name: "GainNode",
         gain: {
           value: 3,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var gain = context.createGain();
+
+      new NeuDC(context, 0).connect(gain).disconnect();
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
           inputs: []
         },
         inputs: []

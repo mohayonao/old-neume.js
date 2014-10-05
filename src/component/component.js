@@ -33,7 +33,13 @@ NeuComponent.prototype.toAudioNode = function() {
 };
 
 NeuComponent.prototype.connect = function(to) {
-  return this.$context.connect(_.defaults(this._node, this), to);
+  this.$context.connect(_.defaults(this._node, this), to);
+  return this;
+};
+
+NeuComponent.prototype.disconnect = function() {
+  this.$context.disconnect(_.defaults(this._node, this));
+  return this;
 };
 
 module.exports = _.NeuComponent = NeuComponent;

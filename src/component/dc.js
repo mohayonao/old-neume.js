@@ -32,6 +32,11 @@ NeuDC.prototype.connect = function(to) {
   return this;
 };
 
+NeuDC.prototype.disconnect = function() {
+  this.$context.disconnect(this.$outlet);
+  return this;
+};
+
 NeuDC.prototype.valueOf = function() {
   return this._value;
 };

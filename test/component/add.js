@@ -384,4 +384,23 @@ describe("NeuAdd", function() {
     });
   });
 
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var to = context.createGain();
+
+      new NeuAdd(
+        context, context.createOscillator(), context.createDelay()
+      ).connect(to).disconnect();
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });

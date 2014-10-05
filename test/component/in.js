@@ -27,5 +27,47 @@ describe("NeuIn", function() {
       assert(_in.toAudioNode() instanceof window.AudioNode);
     });
   });
+  describe("#connect(to)", function() {
+    it("works", function() {
+      var node = context.createDelay();
+
+      new NeuIn(context).connect(node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+  });
+
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var node = context.createDelay();
+
+      new NeuIn(context).connect(node).disconnect();
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
 
 });

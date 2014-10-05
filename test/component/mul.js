@@ -262,4 +262,23 @@ describe("NeuMul", function() {
     });
   });
 
+  describe("#disconnect(to)", function() {
+    it("works", function() {
+      var to = context.createDelay();
+
+      new NeuMul(
+        context, context.createOscillator(), context.createGain()
+      ).connect(to).disconnect();
+
+      assert.deepEqual(to.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });

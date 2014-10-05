@@ -281,4 +281,21 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var node = context.createDelay();
+
+      new NeuParam(context, 0).connect(node).disconnect();
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
 });
