@@ -39,9 +39,7 @@ module.exports = function(neume, _) {
     context.connect(_.defaults(spec.a, 0.003), comp.attack);
     context.connect(_.defaults(spec.r, 0.250), comp.release);
 
-    inputs.forEach(function(node) {
-      context.connect(node, comp);
-    });
+    context.createSum(inputs).connect(comp);
 
     return new neume.Unit({
       outlet: comp

@@ -68,9 +68,7 @@ module.exports = function(neume, _) {
     context.connect(_.defaults(spec.Q     ,   1), biquad.Q);
     context.connect(_.defaults(spec.gain  ,   0), biquad.gain);
 
-    _.each(inputs, function(node) {
-      context.connect(node, biquad);
-    });
+    context.createSum(inputs).connect(biquad);
 
     return biquad;
   }

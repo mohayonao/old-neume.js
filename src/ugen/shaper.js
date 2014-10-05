@@ -46,9 +46,7 @@ module.exports = function(neume, _) {
     }
     shaper.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
 
-    inputs.forEach(function(node) {
-      context.connect(node, shaper);
-    });
+    context.createSum(inputs).connect(shaper);
 
     return shaper;
   }

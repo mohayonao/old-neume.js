@@ -30,9 +30,7 @@ module.exports = function(neume) {
   });
 
   function setup(context, audioNode, inputs) {
-    inputs.forEach(function(node) {
-      context.connect(node, audioNode);
-    });
+    context.createSum(inputs).connect(audioNode);
     return audioNode;
   }
 

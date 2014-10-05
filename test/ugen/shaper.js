@@ -16,7 +16,7 @@ describe("ugen/shaper", function() {
       var synth = new Neume(function($) {
         return $("shaper");
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "WaveShaperNode",
         oversample: "none",
         inputs: []
@@ -29,12 +29,12 @@ describe("ugen/shaper", function() {
       var synth = new Neume(function($) {
         return $("shaper", { curve: new Float32Array([ -1, +1 ]) });
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "WaveShaperNode",
         oversample: "none",
         inputs: []
       });
-      assert.deepEqual(synth.outlet.curve, new Float32Array([ -1, +1 ]));
+      assert.deepEqual(synth.toAudioNode().curve, new Float32Array([ -1, +1 ]));
     });
     it("return a WaveShaperNode with curve number", function() {
       var synth1 = new Neume(function($) {
@@ -46,13 +46,13 @@ describe("ugen/shaper", function() {
       var synth3 = new Neume(function($) {
         return $("shaper", { curve: 0.5 });
       })();
-      assert.deepEqual(synth1.outlet.toJSON(), {
+      assert.deepEqual(synth1.toAudioNode().toJSON(), {
         name: "WaveShaperNode",
         oversample: "none",
         inputs: []
       });
-      assert(synth1.outlet.curve === synth2.outlet.curve);
-      assert(synth2.outlet.curve !== synth3.outlet.curve);
+      assert(synth1.toAudioNode().curve === synth2.toAudioNode().curve);
+      assert(synth2.toAudioNode().curve !== synth3.toAudioNode().curve);
     });
   });
 
@@ -61,7 +61,7 @@ describe("ugen/shaper", function() {
       var synth = new Neume(function($) {
         return $("shaper", $("shaper"), $("shaper"));
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "WaveShaperNode",
         oversample: "none",
         inputs: [
@@ -88,12 +88,12 @@ describe("ugen/shaper", function() {
       var synth2 = new Neume(function($) {
         return $("clip");
       })();
-      assert.deepEqual(synth1.outlet.toJSON(), {
+      assert.deepEqual(synth1.toAudioNode().toJSON(), {
         name: "WaveShaperNode",
         oversample: "none",
         inputs: []
       });
-      assert(synth1.outlet.curve === synth2.outlet.curve);
+      assert(synth1.toAudioNode().curve === synth2.toAudioNode().curve);
     });
 
   });

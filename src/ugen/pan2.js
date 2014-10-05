@@ -69,10 +69,7 @@ module.exports = function(neume, _) {
     gainL.connect(merger, 0, 0);
     gainR.connect(merger, 0, 1);
 
-    inputs.forEach(function(node) {
-      context.connect(node, gainL);
-      context.connect(node, gainR);
-    });
+    context.createSum(inputs).connect(gainL).connect(gainR);
 
     return new neume.Unit({
       outlet: merger

@@ -29,7 +29,7 @@ describe("ugen/script", function() {
         return $("script", { audioprocess: NOP }, $("script"));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "ScriptProcessorNode",
         inputs: [
           {

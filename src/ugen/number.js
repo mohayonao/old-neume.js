@@ -22,33 +22,32 @@ module.exports = function(neume, _) {
    */
   neume.register("number", function(ugen, spec, inputs) {
     var context = ugen.$context;
+    var outlet  = null;
 
-    var gain  = context.createGain();
     var data  = _.finite(spec.value);
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
+    var param = context.createParam(data);
 
-    if (inputs.length === 0) {
-      inputs = [ new neume.DC(context, 1) ];
+    if (inputs.length) {
+      outlet = context.createGain();
+      context.createSum(inputs).connect(outlet);
+      context.connect(param, outlet.gain);
+    } else {
+      outlet = param;
     }
-
-    inputs.forEach(function(node) {
-      context.connect(node, gain);
-    });
-
-    gain.gain.setValueAtTime(data, 0);
 
     function update(t0, v0, v1, nextData) {
       if (lag <= 0 || curve < 0 || 1 <= curve) {
-        gain.gain.setValueAtTime(v1, t0);
+        param.setAt(v1, t0);
       } else {
-        gain.gain.setTargetAtTime(v1, t0, timeConstant(lag, v0, v1, curve));
+        param.targetAt(v1, t0, timeConstant(lag, v0, v1, curve));
       }
       data = nextData;
     }
 
     return new neume.Unit({
-      outlet: gain,
+      outlet: outlet,
       methods: {
         setValue: function(t, value) {
           if (_.isFinite(value)) {

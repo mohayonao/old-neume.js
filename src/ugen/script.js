@@ -24,9 +24,7 @@ module.exports = function(neume) {
       outlet.onaudioprocess = spec.audioprocess;
     }
 
-    inputs.forEach(function(node) {
-      context.connect(node, outlet);
-    });
+    context.createSum(inputs).connect(outlet);
 
     return new neume.Unit({
       outlet: outlet

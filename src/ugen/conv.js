@@ -37,7 +37,7 @@ module.exports = function(neume, _) {
     }
     conv.normalize = !!_.defaults(spec.normalize, true);
 
-    var outlet = new neume.DryWet(context, inputs, conv, mix);
+    var outlet = context.createDryWet(inputs, conv, mix);
 
     return new neume.Unit({
       outlet: outlet

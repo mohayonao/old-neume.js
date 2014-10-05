@@ -25,7 +25,8 @@ describe("ugen/add", function() {
         return $("+", 0);
       })();
 
-      assert(synth.outlet === null);
+      assert.deepEqual(synth.toAudioNode().toJSON(), DC(0));
+      assert(synth.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
   });
 
@@ -41,16 +42,7 @@ describe("ugen/add", function() {
         return $("+", 1, 2, 3);
       })();
 
-      var audioContext = Neume.context;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0);
-
-      audioContext.$processTo("00:00.100");
-
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 6,
@@ -59,7 +51,7 @@ describe("ugen/add", function() {
         inputs: [ DC(1) ]
       });
 
-      assert(synth.outlet.$inputs[0].buffer.getChannelData(0)[0] === 1);
+      assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
   });
 
@@ -80,7 +72,7 @@ describe("ugen/add", function() {
         return $("+", $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -148,7 +140,7 @@ describe("ugen/add", function() {
         return $("+", { mul: 0.5 }, $("sin"));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 0.5,
@@ -169,6 +161,25 @@ describe("ugen/add", function() {
             inputs: []
           }
         ]
+      });
+    });
+  });
+
+  describe("connect", function() {
+    it("$(+ 1 2 3) connect to AudioParam", function() {
+      var node = Neume.context.createGain();
+
+      new Neume(function($) {
+        return $("+", 1, 2, 3);
+      })().connect(node.gain);
+
+      assert.deepEqual(node.toJSON(), {
+        "name": "GainNode",
+        "gain": {
+          "value": 6,
+          "inputs": []
+        },
+        "inputs": []
       });
     });
   });

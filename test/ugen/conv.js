@@ -33,7 +33,7 @@ describe("ugen/conv", function() {
         return $("conv", { buf: buffer, normalize: false }, $("sin"));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "ConvolverNode",
         normalize: false,
         inputs: [
@@ -53,7 +53,7 @@ describe("ugen/conv", function() {
         ]
       });
 
-      assert.deepEqual(synth.outlet.buffer.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().buffer.toJSON(), {
         name: "AudioBuffer",
         sampleRate: 44100,
         length: 4,

@@ -28,7 +28,7 @@ describe("ugen/delay", function() {
         return $("delay", { delay: 0.5 }, $("delay"));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "DelayNode",
         delayTime: {
           value: 0.5,
@@ -46,7 +46,7 @@ describe("ugen/delay", function() {
         ]
       });
 
-      // assert(synth.outlet.$maxDelayTime === 0.5);
+      assert(synth.toAudioNode().$maxDelayTime === 0.5);
     });
   });
   describe("$(delay delay:$(delay) $(delay))", function() {
@@ -55,7 +55,7 @@ describe("ugen/delay", function() {
         return $("delay", { delay: $("delay") }, $("delay"));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "DelayNode",
         delayTime: {
           value: 0,

@@ -148,15 +148,13 @@ module.exports = function(neume, _) {
   function hasInputs(type, ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var osc  = createOscillator(context, type, spec , 2);
+    var osc  = createOscillator(context, type, spec, 2);
     var gain = ugen.$context.createGain();
 
     gain.gain.value = 0;
     context.connect(osc, gain.gain);
 
-    inputs.forEach(function(node) {
-      context.connect(node, gain);
-    });
+    context.createSum(inputs).connect(gain);
 
     return { outlet: gain, ctrl: osc };
   }

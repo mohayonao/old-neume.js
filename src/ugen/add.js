@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume) {
   "use strict";
 
   /**
@@ -15,34 +15,8 @@ module.exports = function(neume, _) {
    *   |
    */
   neume.register("+", function(ugen, spec, inputs) {
-    var context = ugen.$context;
-    var outlet  = null;
-
-    var nodes  = [];
-    var offset = 0;
-
-    inputs.forEach(function(node) {
-      if (typeof node === "number") {
-        offset += node;
-      } else {
-        nodes.push(node);
-      }
-    });
-    offset = _.finite(offset);
-
-    if (nodes.length) {
-      outlet = context.createGain();
-
-      nodes.forEach(function(node) {
-        context.connect(node, outlet);
-      });
-
-      outlet.$maddOptimizable = true;
-    }
-
     return new neume.Unit({
-      outlet: outlet,
-      offset: offset
+      outlet: ugen.$context.createSum(inputs)
     });
   });
 

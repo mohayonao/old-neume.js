@@ -27,24 +27,22 @@ module.exports = function(neume, _) {
    */
   neume.register("iter", function(ugen, spec, inputs) {
     var context = ugen.$context;
+    var outlet  = null;
 
-    var gain  = context.createGain();
     var iter  = _.defaults(spec.iter, {});
     var lag   = _.finite(spec.lag);
     var curve = _.finite(spec.curve);
     var state = ITERATE;
-
-    if (inputs.length === 0) {
-      inputs = [ new neume.DC(context, 1) ];
-    }
-
-    inputs.forEach(function(node) {
-      context.connect(node, gain);
-    });
-
     var prevValue = 0;
+    var param = context.createParam(prevValue);
 
-    gain.gain.setValueAtTime(prevValue, 0);
+    if (inputs.length) {
+      outlet = context.createGain();
+      context.createSum(inputs).connect(outlet);
+      context.connect(param, outlet.gain);
+    } else {
+      outlet = param;
+    }
 
     function iterNext() {
       return typeof iter.next === "function" ? iter.next() : 0;
@@ -54,9 +52,9 @@ module.exports = function(neume, _) {
       v1 = _.finite(v1);
 
       if (lag <= 0 || curve < 0 || 1 <= curve) {
-        gain.gain.setValueAtTime(v1, t);
+        param.setAt(v1, t);
       } else {
-        gain.gain.setTargetAtTime(v1, t, timeConstant(lag, prevValue, v1, curve));
+        param.targetAt(v1, t, timeConstant(lag, prevValue, v1, curve));
       }
 
       prevValue = v1;
@@ -85,10 +83,10 @@ module.exports = function(neume, _) {
     }
 
     return new neume.Unit({
-      outlet: gain,
+      outlet: outlet,
       start: function(t) {
         prevValue = _.finite(iterNext());
-        gain.gain.setValueAtTime(prevValue, t);
+        param.setAt(prevValue, t);
       },
       methods: {
         setValue: function(t, value) {

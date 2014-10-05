@@ -42,13 +42,7 @@ module.exports = function(neume, _) {
       data = [ 0 ];
     }
 
-    if (inputs.length === 0) {
-      inputs = [ new neume.DC(context, 1) ];
-    }
-
-    inputs.forEach(function(node) {
-      context.connect(node, gain);
-    });
+    context.createSum(inputs.length ? inputs : [ 1 ]).connect(gain);
 
     var prevValue = _.finite(data[0]);
 

@@ -17,7 +17,7 @@ describe("ugen/noise", function() {
         return $("white");
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "AudioBufferSourceNode",
         buffer: {
           name: "AudioBuffer",
@@ -42,7 +42,7 @@ describe("ugen/noise", function() {
       })();
 
       var audioContext = Neume.context;
-      var outlet = synth.outlet;
+      var outlet = synth.toAudioNode();
 
       audioContext.$reset();
       synth.$context.reset();
@@ -65,7 +65,7 @@ describe("ugen/noise", function() {
         return $("pink");
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "AudioBufferSourceNode",
         buffer: {
           name: "AudioBuffer",
@@ -90,7 +90,7 @@ describe("ugen/noise", function() {
       })();
 
       var audioContext = Neume.context;
-      var outlet = synth.outlet;
+      var outlet = synth.toAudioNode();
 
       audioContext.$reset();
       synth.$context.reset();

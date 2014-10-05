@@ -47,9 +47,7 @@ module.exports = function(neume, _) {
     pan.coneOuterAngle = _.finite(_.defaults(spec.coneOuterAngle, 360));
     pan.coneOuterGain  = _.finite(_.defaults(spec.coneOuterGain , 0));
 
-    inputs.forEach(function(node) {
-      context.connect(node, pan);
-    });
+    new neume.Sum(context, inputs).connect(pan);
 
     function update(value) {
       _.each(value, function(value, key) {
