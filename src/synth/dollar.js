@@ -48,7 +48,7 @@ function $param(synth, params) {
 
     validateParam(name, defaultValue);
 
-    var param = new NeuParam(synth, defaultValue);
+    var param = new NeuParam(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
       set: function(value) {
