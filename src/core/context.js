@@ -94,8 +94,8 @@ NeuContext.prototype.createSum = function(inputs) {
   return new NeuSum(this, inputs);
 };
 
-NeuContext.prototype.createParam = function(value) {
-  return new NeuParam(this, _.finite(value));
+NeuContext.prototype.createParam = function(value, spec) {
+  return new NeuParam(this, _.finite(value), spec);
 };
 
 NeuContext.prototype.createDryWet = function(inputs, node, mix) {

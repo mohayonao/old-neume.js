@@ -3,10 +3,13 @@
 var _ = require("../utils");
 var NeuComponent = require("./component");
 
-function NeuParam(context, value) {
+function NeuParam(context, value, spec) {
+  spec = spec || {};
   NeuComponent.call(this, context);
   this._value  = _.finite(value);
   this._params = [];
+  this._lag   = _.finite(spec.lag);
+  this._curve = _.finite(spec.curve);
 }
 _.inherits(NeuParam, NeuComponent);
 
@@ -110,6 +113,23 @@ NeuParam.prototype.cancel = function(startTime) {
   return this;
 };
 
+NeuParam.prototype.update = function(t0, v1, v0) {
+  t0 = _.finite(t0);
+  v1 = _.finite(v1);
+  v0 = _.finite(_.defaults(v0, v1));
+
+  var lag   = this._lag;
+  var curve = this._curve;
+
+  if (lag <= 0 || curve < 0 || 1 <= curve || v0 === v1) {
+    this.setAt(v1, t0);
+  } else {
+    this.targetAt(v1, t0, timeConstant(lag, v0, v1, curve));
+  }
+
+  return this;
+};
+
 NeuParam.prototype.toAudioNode = function() {
   if (this.$outlet == null) {
     this.$outlet = this.$context.createGain();
@@ -136,5 +156,11 @@ NeuParam.prototype.disconnect = function() {
   this.$context.disconnect(this.$outlet);
   return this;
 };
+
+function timeConstant(duration, startValue, endValue, curve) {
+  var targetValue = startValue + (endValue - startValue) * (1 - curve);
+
+  return -duration / Math.log((targetValue - endValue) / (startValue - endValue));
+}
 
 module.exports = _.NeuParam = NeuParam;

@@ -30,9 +30,7 @@ module.exports = function(neume, _) {
     var data = !!spec.value;
     var trueVal  = _.finite(_.defaults(spec.true , 1));
     var falseVal = _.finite(_.defaults(spec.false, 0));
-    var lag   = _.finite(spec.lag);
-    var curve = _.finite(spec.curve);
-    var param = context.createParam(data ? trueVal : falseVal);
+    var param = context.createParam(data ? trueVal : falseVal, spec);
 
     if (inputs.length) {
       outlet = context.createGain();
@@ -43,11 +41,7 @@ module.exports = function(neume, _) {
     }
 
     function update(t0, v0, v1, nextData) {
-      if (lag <= 0 || curve < 0 || 1 <= curve) {
-        param.setAt(v1, t0);
-      } else {
-        param.targetAt(v1, t0, timeConstant(lag, v0, v1, curve));
-      }
+      param.update(t0, v1, v0);
       data = nextData;
     }
 
@@ -75,11 +69,5 @@ module.exports = function(neume, _) {
       }
     });
   });
-
-  function timeConstant(duration, startValue, endValue, curve) {
-    var targetValue = startValue + (endValue - startValue) * (1 - curve);
-
-    return -duration / Math.log((targetValue - endValue) / (startValue - endValue));
-  }
 
 };

@@ -30,11 +30,9 @@ module.exports = function(neume, _) {
     var outlet  = null;
 
     var iter  = _.defaults(spec.iter, {});
-    var lag   = _.finite(spec.lag);
-    var curve = _.finite(spec.curve);
     var state = ITERATE;
     var prevValue = 0;
-    var param = context.createParam(prevValue);
+    var param = context.createParam(prevValue, spec);
 
     if (inputs.length) {
       outlet = context.createGain();
@@ -48,14 +46,10 @@ module.exports = function(neume, _) {
       return typeof iter.next === "function" ? iter.next() : 0;
     }
 
-    function update(t, v1) {
-      v1 = _.finite(v1);
+    function update(t0, v1) {
+      var v0 = prevValue;
 
-      if (lag <= 0 || curve < 0 || 1 <= curve) {
-        param.setAt(v1, t);
-      } else {
-        param.targetAt(v1, t, timeConstant(lag, prevValue, v1, curve));
-      }
+      param.update(t0, v1, v0);
 
       prevValue = v1;
     }
@@ -110,11 +104,5 @@ module.exports = function(neume, _) {
       }
     });
   });
-
-  function timeConstant(duration, startValue, endValue, curve) {
-    var targetValue = startValue + (endValue - startValue) * (1 - curve);
-
-    return -duration / Math.log((targetValue - endValue) / (startValue - endValue));
-  }
 
 };
