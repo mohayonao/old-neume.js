@@ -22,8 +22,9 @@ function NeuUGen(synth, key, spec, inputs) {
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
+  /* istanbul ignore if */
   if (!(unit instanceof NeuUnit)) {
-    throw new Error("invalid key: " + key);
+    throw new Error("Invalid UGen: " + key);
   }
 
   this.$synth = synth;

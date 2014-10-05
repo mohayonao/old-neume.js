@@ -22,7 +22,7 @@ function NeuSynth(context, func, args) {
   this.$inputs  = $.inputs;
   this.$outputs = $.outputs;
   this._connected = false;
-  this._db = $.outputs.length ? $.db : EMPTY_DB;
+  this._db = $.outputs.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
@@ -159,6 +159,7 @@ NeuSynth.prototype.connect = function(to, output, input) {
 
   if (to instanceof NeuSynth) {
     // TODO: FIX ME!!!
+    /* istanbul ignore else */
     if (to.$inputs[input] instanceof _.NeuIn) {
       this.$context.connect(this.$outputs[output], to.$inputs[input].toAudioNode());
     }

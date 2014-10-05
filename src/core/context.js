@@ -127,9 +127,8 @@ NeuContext.prototype.reset = function() {
 
   this.$outlet = this._masterGain;
 
-  if (this._scriptProcessor) {
-    this._scriptProcessor.disconnect();
-  }
+  this.disconnect(this._scriptProcessor);
+
   this._events = [];
   this._nextTicks = [];
   this._state = INIT;
@@ -228,10 +227,9 @@ NeuContext.prototype.nextTick = function(callback, ctx) {
 
 NeuContext.prototype.toAudioNode = function(obj) {
   if (obj && obj.toAudioNode) {
-    return obj.toAudioNode();
-  }
-  if (typeof obj === "number") {
-    obj = new _.NeuDC(this, _.finite(obj)).toAudioNode();
+    obj = obj.toAudioNode();
+  } else if (typeof obj === "number") {
+    obj = this.createDC(obj).toAudioNode();
   }
   if (!(obj instanceof window.AudioNode)) {
     obj = null;
@@ -251,18 +249,18 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
 
 NeuContext.prototype.connect = function(from, to) {
   if (to) {
-    if (from && from.connect) {
+    if (from instanceof NeuComponent) {
       from.connect(to);
     } else if (to instanceof window.AudioParam) {
       if (typeof from === "number") {
         to.value = _.finite(from);
+      } else {
+        from = this.toAudioNode(from);
+        if (from) {
+          return from.connect(to);
+        }
       }
     } else if (to instanceof window.AudioNode) {
-      from = this.toAudioNode(from);
-      if (from) {
-        return from.connect(to);
-      }
-    } else if (to instanceof window.AudioParam) {
       from = this.toAudioNode(from);
       if (from) {
         return from.connect(to);
@@ -273,7 +271,6 @@ NeuContext.prototype.connect = function(from, to) {
 };
 
 NeuContext.prototype.disconnect = function(from) {
-  /* istanbul ignore else */
   if (from && from.disconnect) {
     from.disconnect();
   }
