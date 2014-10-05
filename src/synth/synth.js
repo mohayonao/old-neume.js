@@ -3,7 +3,6 @@
 var _              = require("../utils");
 var NeuSynthDB     = require("./db");
 var NeuSynthDollar = require("./dollar");
-var makeOutlet     = require("./synth-makeOutlet");
 
 var EMPTY_DB = new NeuSynthDB();
 var INIT  = 0;
@@ -14,7 +13,7 @@ function NeuSynth(context, func, args) {
   this.$context = context;
 
   var $ = new NeuSynthDollar(this);
-  var result = makeOutlet(context, func.apply(null, [ $.builder ].concat(args)));
+  var result = func.apply(null, [ $.builder ].concat(args));
 
   if ($.outputs[0] == null) {
     $.outputs[0] = result;
@@ -22,7 +21,7 @@ function NeuSynth(context, func, args) {
 
   this.$inputs  = $.inputs;
   this.$outputs = $.outputs;
-  this._routing = [];
+  this._connected = false;
   this._db = $.outputs.length ? $.db : EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
@@ -38,10 +37,6 @@ function NeuSynth(context, func, args) {
       get: function() {
         return this.$context.currentTime;
       },
-      enumerable: true
-    },
-    outlet: {
-      value: context.toAudioNode(this.$outputs[0]),
       enumerable: true
     },
     state: {
@@ -93,14 +88,8 @@ NeuSynth.prototype.start = function(t) {
       this._stateString = "PLAYING";
     }, this);
 
-    if (this._routing.length === 0) {
-      this.$context.connect(this.$outputs[0], this.$context.$outlet);
-    } else {
-      this._routing.forEach(function(destinations, output) {
-        destinations.forEach(function(destination) {
-          this.$context.connect(this.$outputs[output], destination);
-        }, this);
-      }, this);
+    if (!this._connected) {
+      this.connect(this.$context.$outlet);
     }
 
     this._db.all().forEach(function(ugen) {
@@ -160,16 +149,23 @@ NeuSynth.prototype.call = function() {
   return this.apply(method, args);
 };
 
-NeuSynth.prototype.connect = function(destination, output, input) {
+NeuSynth.prototype.toAudioNode = function() {
+  return this.$context.toAudioNode(this.$outputs[0]);
+};
+
+NeuSynth.prototype.connect = function(to, output, input) {
   output = Math.max(0, _.int(output));
   input  = Math.max(0, _.int(input));
 
-  if (destination instanceof NeuSynth && this.$outputs[output] && destination.$inputs[input]) {
-    if (!this._routing[output]) {
-      this._routing[output] = [];
+  if (to instanceof NeuSynth) {
+    // TODO: FIX ME!!!
+    if (to.$inputs[input] instanceof _.NeuIn) {
+      this.$context.connect(this.$outputs[output], to.$inputs[input].toAudioNode());
     }
-    this._routing[output].push(this.$context.toAudioNode(destination.$inputs[input]));
+  } else {
+    this.$context.connect(this.$outputs[output], to);
   }
+  this._connected = true;
 
   return this;
 };

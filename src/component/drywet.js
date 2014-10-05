@@ -2,6 +2,7 @@
 
 var _ = require("../utils");
 var C = require("../const");
+var NeuComponent = require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
 var halfSize = WS_CURVE_SIZE >> 1;
@@ -53,7 +54,7 @@ function DryWetNode(context, inputs, wetNode, mix) {
 
   gainMix.$maddOptimizable = true;
 
-  return gainMix;
+  return new NeuComponent(context, gainMix);
 }
 
 function DryWetNumber(context, inputs, wetNode, mix) {
@@ -71,10 +72,7 @@ function DryWetNumber(context, inputs, wetNode, mix) {
   }
 
   if (dry === 1) {
-    if (inputs.length === 1) {
-      return inputs[0];
-    }
-    return sum(context, inputs);
+    return context.createSum(inputs);
   }
 
   var gainWet = context.createGain();
@@ -94,18 +92,7 @@ function DryWetNumber(context, inputs, wetNode, mix) {
 
   gainMix.$maddOptimizable = true;
 
-  return gainMix;
+  return new NeuComponent(context, gainMix);
 }
 
-function sum(context, inputs) {
-  var result = context.createGain();
-
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    context.connect(inputs[i], result);
-  }
-  result.$maddOptimizable = true;
-
-  return result;
-}
-
-module.exports = NeuDryWet;
+module.exports = _.NeuDryWet = NeuDryWet;

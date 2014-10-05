@@ -10,7 +10,6 @@ function NeuUnit(spec) {
   this._spec   = spec;
   this._state  = INIT;
   this.$outlet  = _.defaults(spec.outlet, null);
-  this.$offset  = _.finite(spec.offset);
   this.$methods = _.defaults(spec.methods, {});
 }
 NeuUnit.$name = "NeuUnit";

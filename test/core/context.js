@@ -508,14 +508,14 @@ describe("NeuContext", function() {
     });
     it("call defined connect function", function() {
       var osc = {
-        _connect: sinon.spy()
+        connect: sinon.spy()
       };
       var amp = context.createGain();
 
       context.connect(osc, amp);
 
-      assert(osc._connect.calledOnce);
-      assert.deepEqual(osc._connect.firstCall.args, [ amp, 0, 0 ]);
+      assert(osc.connect.calledOnce);
+      assert.deepEqual(osc.connect.firstCall.args, [ amp ]);
     });
     it("do nothing if else", function() {
       var osc = context.createOscillator();

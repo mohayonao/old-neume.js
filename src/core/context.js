@@ -3,6 +3,14 @@
 var _ = require("../utils");
 var C = require("../const");
 
+var NeuComponent = require("../component/component");
+var NeuDC = require("../component/dc");
+var NeuMul = require("../component/mul");
+var NeuAdd = require("../component/add");
+var NeuSum = require("../component/sum");
+var NeuParam = require("../component/param");
+var NeuDryWet = require("../component/drywet");
+
 var INIT  = 0;
 var START = 1;
 var PROCESS_BUF_SIZE   = C.PROCESS_BUF_SIZE;
@@ -68,6 +76,34 @@ _.each([
 NeuContext.prototype.createPeriodicWave = function() {
   var context = this.$context;
   return (context.createPeriodicWave || context.createWaveTable).apply(context, arguments);
+};
+
+NeuContext.prototype.createComponent = function(node) {
+  return new NeuComponent(this, node);
+};
+
+NeuContext.prototype.createDC = function(value) {
+  return new NeuDC(this, _.finite(value));
+};
+
+NeuContext.prototype.createMul = function(a, b) {
+  return new NeuMul(this, a, b);
+};
+
+NeuContext.prototype.createAdd = function(a, b) {
+  return new NeuAdd(this, a, b);
+};
+
+NeuContext.prototype.createSum = function(inputs) {
+  return new NeuSum(this, inputs);
+};
+
+NeuContext.prototype.createParam = function(value) {
+  return new NeuParam(this, _.finite(value));
+};
+
+NeuContext.prototype.createDryWet = function(inputs, node, mix) {
+  return new NeuDryWet(this, inputs, node, mix);
 };
 
 NeuContext.prototype.getMasterGain = function() {
@@ -194,6 +230,9 @@ NeuContext.prototype.toAudioNode = function(obj) {
   if (obj && obj.toAudioNode) {
     return obj.toAudioNode();
   }
+  if (typeof obj === "number") {
+    obj = new _.NeuDC(this, _.finite(obj)).toAudioNode();
+  }
   if (!(obj instanceof window.AudioNode)) {
     obj = null;
   }
@@ -211,31 +250,25 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
 };
 
 NeuContext.prototype.connect = function(from, to) {
-  var output = 0;
-  var input  = 0;
-
-  if (from && from._connect) {
-    return from._connect(to, output, input);
-  }
-
-  if (to instanceof window.AudioParam) {
-    if (typeof from === "number") {
-      to.value = _.finite(from);
+  if (to) {
+    if (from && from.connect) {
+      from.connect(to);
+    } else if (to instanceof window.AudioParam) {
+      if (typeof from === "number") {
+        to.value = _.finite(from);
+      }
+    } else if (to instanceof window.AudioNode) {
+      from = this.toAudioNode(from);
+      if (from) {
+        return from.connect(to);
+      }
+    } else if (to instanceof window.AudioParam) {
+      from = this.toAudioNode(from);
+      if (from) {
+        return from.connect(to);
+      }
     }
   }
-
-  if (to instanceof window.AudioNode) {
-    from = this.toAudioNode(from);
-    if (from) {
-      return from.connect(to, output, input);
-    }
-  } else if (to instanceof window.AudioParam) {
-    from = this.toAudioNode(from);
-    if (from) {
-      return from.connect(to, output);
-    }
-  }
-
   return this;
 };
 

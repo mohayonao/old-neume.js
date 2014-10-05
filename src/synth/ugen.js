@@ -1,14 +1,14 @@
 "use strict";
 
-var _       = require("../utils");
-var NeuNode = require("./node");
+var _ = require("../utils");
+var NeuComponent = require("../component/component");
+var NeuMul = require("../component/mul");
+var NeuAdd = require("../component/add");
 var NeuUnit = require("./unit");
-var NeuDC   = require("../component/dc");
 var SelectorParser = require("../parser/selector");
-var makeOutlet     = require("./ugen-makeOutlet");
 
 function NeuUGen(synth, key, spec, inputs) {
-  NeuNode.call(this, synth);
+  NeuComponent.call(this, synth.$context);
 
   var parsed = SelectorParser.parse(key);
 
@@ -26,11 +26,9 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("invalid key: " + key);
   }
 
-  var outlet = makeOutlet(this.$context, unit, spec);
-
-  this.$unit   = unit;
-  this.$outlet = outlet.outlet;
-  this.$offset = outlet.offset;
+  this.$synth = synth;
+  this.$unit  = unit;
+  this.$spec  = spec;
 
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
@@ -38,7 +36,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 }
-_.inherits(NeuUGen, NeuNode);
+_.inherits(NeuUGen, NeuComponent);
 
 NeuUGen.$name = "NeuUGen";
 
@@ -64,28 +62,21 @@ NeuUGen.build = function(synth, key, spec, inputs) {
 };
 
 NeuUGen.prototype.toAudioNode = function() {
+  if (this.$outlet === null) {
+    this.$outlet = madd(this.$context, this.$spec, this.$unit.$outlet).toAudioNode();
+  }
   return this.$outlet;
 };
 
-NeuUGen.prototype._connect = function(to) {
-  this.$context.connect(this.$outlet, to);
-  if (this.$offset !== 0) {
-    if (to instanceof window.AudioParam) {
-      to.value = this.$offset;
-    } else {
-      this.$context.connect(createGainDC(this.$context, this.$offset), to);
-    }
-  }
+NeuUGen.prototype.connect = function(to) {
+  madd(this.$context, this.$spec, this.$unit.$outlet).connect(to);
+  return this;
 };
 
-function createGainDC(context, offset) {
-  var gain = context.createGain();
-
-  gain.gain.value = offset;
-
-  context.connect(new NeuDC(context, 1), gain);
-
-  return gain;
+function madd(context, spec, outlet) {
+  outlet = new NeuMul(context, outlet, _.defaults(spec.mul, 1));
+  outlet = new NeuAdd(context, outlet, _.defaults(spec.add, 0));
+  return outlet;
 }
 
-module.exports = _.NeuUGen = NeuUGen;
+module.exports = NeuUGen;

@@ -196,16 +196,6 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("#outlet", function() {
-    it("is an instance of AudioNode", sinon.test(function() {
-      var synth = new NeuSynth(context, function($) {
-        return $("sin");
-      }, []);
-
-      assert(synth.outlet instanceof window.AudioNode);
-    }));
-  });
-
   describe("#getMethods()", function() {
     it("returns method names", sinon.test(function() {
       var synth = new NeuSynth(context, function($) {
@@ -359,9 +349,7 @@ describe("NeuSynth", function() {
       synth1.start();
       synth2.start();
 
-      audioContext.$process(0.1);
-
-      assert.deepEqual(synth2.outlet.toJSON(), {
+      assert.deepEqual(synth2.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -452,7 +440,7 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("1works", function() {
+  describe("works", function() {
     var synth = null;
     var ugen1 = null;
     var ugen2 = null;

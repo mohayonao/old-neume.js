@@ -1,22 +1,14 @@
 "use strict";
 
-var _       = require("../utils");
-var NeuNode = require("./node");
-var NeuDC   = require("../component/dc");
+var _ = require("../utils");
+var NeuComponent = require("./component");
 
-function NeuParam(synth, name, value) {
-  NeuNode.call(this, synth);
-
-  this.name = name;
-
-  this.$outlet = null;
-  this.$offset = 0;
-
+function NeuParam(context, value) {
+  NeuComponent.call(this, context);
+  this._value  = _.finite(value);
   this._params = [];
-  this._connected = [];
-  this._value = _.finite(value);
 }
-_.inherits(NeuParam, NeuNode);
+_.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
@@ -121,19 +113,15 @@ NeuParam.prototype.cancel = function(startTime) {
 NeuParam.prototype.toAudioNode = function() {
   if (this.$outlet == null) {
     this.$outlet = this.$context.createGain();
+    this.$outlet.gain.value = this._value;
     this.$outlet.gain.setValueAtTime(this._value, 0);
     this._params.push(this.$outlet.gain);
-    this.$context.connect(new NeuDC(this.$context, 1), this.$outlet);
+    this.$context.connect(this.$context.createDC(1), this.$outlet);
   }
   return this.$outlet;
 };
 
-NeuParam.prototype._connect = function(to) {
-  if (this._connected.indexOf(to) !== -1) {
-    return; // if already connected
-  }
-  this._connected.push(to);
-
+NeuParam.prototype.connect = function(to) {
   if (to instanceof window.AudioParam) {
     to.value = this._value;
     to.setValueAtTime(this._value, 0);
@@ -141,6 +129,7 @@ NeuParam.prototype._connect = function(to) {
   } else {
     this.$context.connect(this.toAudioNode(), to);
   }
+  return this;
 };
 
 module.exports = _.NeuParam = NeuParam;

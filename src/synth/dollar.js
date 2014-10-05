@@ -1,10 +1,10 @@
 "use strict";
 
 var _          = require("../utils");
-var NeuUGen    = require("../node/ugen");
-var NeuParam   = require("../node/param");
-var NeuIn      = require("../node/in");
+var NeuParam   = require("../component/param");
+var NeuIn      = require("../component/in");
 var NeuSynthDB = require("./db");
+var NeuUGen    = require("./ugen");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();
@@ -48,7 +48,7 @@ function $param(synth, params) {
 
     validateParam(name, defaultValue);
 
-    var param = new NeuParam(synth, name, defaultValue);
+    var param = new NeuParam(synth, defaultValue);
 
     Object.defineProperty(synth, name, {
       set: function(value) {
@@ -70,7 +70,7 @@ function $input(synth, inputs) {
     index = Math.max(0, index|0);
 
     if (!inputs[index]) {
-      inputs[index] = new NeuIn(synth);
+      inputs[index] = new NeuIn(synth.$context);
     }
 
     return inputs[index];
