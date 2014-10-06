@@ -45,7 +45,7 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (_.isFinite(value)) {
-            context.sched(t, function() {
+            context.sched(_.finite(context.toSeconds(t)), function() {
               update(t, data, value, value);
             });
           }

@@ -59,7 +59,7 @@ module.exports = function(neume, _) {
     context.connect(_.defaults(spec.rate, 1), bufSrc.playbackRate);
 
     var offset = _.finite(_.defaults(spec.offset, 0));
-    var duration = _.defaults(spec.dur, null);
+    var duration = _.defaults(context.toSeconds(spec.dur), null);
     if (duration != null) {
       duration = _.finite(duration);
     }

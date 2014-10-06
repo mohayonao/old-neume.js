@@ -7,11 +7,17 @@ var START = 1;
 var STOP  = 2;
 
 function NeuInterval(context, interval, callback) {
-  interval = _.finite(interval);
-
   this.$context = context;
 
-  this._interval = Math.max(1 / context.sampleRate, interval);
+  this._minInterval = 1 / context.sampleRate;
+
+  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
+    this._relative = true;
+    this._interval = interval;
+  } else {
+    this._relative = false;
+    this._interval = Math.max(this._minInterval, _.finite(context.toSeconds(interval)));
+  }
   this._callback = callback;
   this._oninterval = oninterval.bind(this);
   this._state = INIT;
@@ -40,7 +46,7 @@ function NeuInterval(context, interval, callback) {
 NeuInterval.$name = "NeuInterval";
 
 NeuInterval.prototype.start = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
@@ -61,7 +67,7 @@ NeuInterval.prototype.start = function(t) {
 };
 
 NeuInterval.prototype.stop = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === START) {
     this._state = STOP;
@@ -78,7 +84,10 @@ function oninterval(t) {
   if (t < this._stopTime) {
     this._callback({ playbackTime: t, count: this._count++ });
 
-    var nextTime = this._startTime + this._interval * this._count;
+    var nextTime = this._relative ?
+      t + Math.max(this._minInterval, _.finite(this.$context.toSeconds(this._interval))) :
+      this._startTime + this._interval * this._count;
+
     this.$context.sched(nextTime, this._oninterval);
   }
 }

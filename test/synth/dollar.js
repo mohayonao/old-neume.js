@@ -178,6 +178,25 @@ describe("NeuSynthDollar", function() {
             [ "fizz", 0.09999999999999999, 3 ]
           ]);
         });
+        it("works relative", function() {
+          var passed = [];
+          var synth = new NeuSynth(context, function($) {
+            $.interval("32n", function(t, i) {
+              passed.push([ "fizz", t, i ]);
+            });
+          }, []);
+
+          synth.start(0.010);
+          synth.stop(0.200);
+
+          audioContext.$processTo("00:00.500");
+
+          assert.deepEqual(passed, [
+            [ "fizz", 0.0725, 1 ],
+            [ "fizz", 0.1350, 2 ],
+            [ "fizz", 0.1975, 3 ]
+          ]);
+        });
       });
     });
   });

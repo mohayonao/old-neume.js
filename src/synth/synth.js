@@ -78,7 +78,7 @@ NeuSynth.prototype.getMethods = function() {
 };
 
 NeuSynth.prototype.start = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
@@ -107,8 +107,9 @@ NeuSynth.prototype.start = function(t) {
 };
 
 NeuSynth.prototype.stop = function(t) {
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+
   var context = this.$context;
-  t = _.defaults(t, context.currentTime);
 
   if (this._state === START) {
     this._state = STOP;

@@ -36,8 +36,8 @@ module.exports = function(neume, _) {
     context.connect(_.defaults(spec.thresh,   -24), comp.threshold);
     context.connect(_.defaults(spec.knee  ,    30), comp.knee);
     context.connect(_.defaults(spec.ratio ,    12), comp.ratio);
-    context.connect(_.defaults(spec.a, 0.003), comp.attack);
-    context.connect(_.defaults(spec.r, 0.250), comp.release);
+    context.connect(_.defaults(context.toSeconds(spec.a), 0.003), comp.attack);
+    context.connect(_.defaults(context.toSeconds(spec.r), 0.250), comp.release);
 
     context.createSum(inputs).connect(comp);
 

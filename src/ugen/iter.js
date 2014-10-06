@@ -84,20 +84,17 @@ module.exports = function(neume, _) {
       },
       methods: {
         setValue: function(t, value) {
-          t = _.finite(_.defaults(t, context.currentTime));
-          context.sched(t, function() {
+          context.sched(_.finite(context.toSeconds(t)), function() {
             iter = _.defaults(value, {});
           });
         },
         next: function(t) {
-          t = _.finite(_.defaults(t, context.currentTime));
-          context.sched(t, function() {
+          context.sched(_.finite(context.toSeconds(t)), function(t) {
             next(t);
           });
         },
         reset: function(t) {
-          t = _.finite(_.defaults(t, context.currentTime));
-          context.sched(t, function() {
+          context.sched(_.finite(context.toSeconds(t)), function(t) {
             reset(t);
           });
         },

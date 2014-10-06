@@ -7,7 +7,7 @@ var START = 1;
 var STOP  = 2;
 
 function NeuTimeout(context, interval, callback) {
-  interval = _.finite(interval);
+  interval = _.finite(context.toSeconds(interval));
 
   this.$context = context;
 
@@ -39,7 +39,7 @@ function NeuTimeout(context, interval, callback) {
 NeuTimeout.$name = "NeuTimeout";
 
 NeuTimeout.prototype.start = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
@@ -65,7 +65,7 @@ NeuTimeout.prototype.start = function(t) {
 };
 
 NeuTimeout.prototype.stop = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === START) {
     this._state = STOP;

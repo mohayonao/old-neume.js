@@ -154,7 +154,7 @@ module.exports = function(neume, _) {
       var t0 = t;
 
       param.setAt(v0, t0);
-      schedule(param, startTable, v0, t0);
+      schedule(context, param, startTable, v0, t0);
     }
 
     function stop() {
@@ -164,8 +164,8 @@ module.exports = function(neume, _) {
 
     function release(t) {
       var v0 = releaseValue;
-      var t0 = _.finite(_.defaults(t, context.currentTime));
-      var t1 = schedule(param, stopTable, v0, t0);
+      var t0 = _.finite(_.defaults(context.toSeconds(t), context.currentTime));
+      var t1 = schedule(context, param, stopTable, v0, t0);
 
       schedId = context.sched(t1, function(t) {
         schedId = 0;
@@ -183,9 +183,9 @@ module.exports = function(neume, _) {
     });
   }
 
-  function schedule(param, table, v0, t0) {
+  function schedule(context, param, table, v0, t0) {
     table.forEach(function(params) {
-      var dur = _.finite(params[0]);
+      var dur = _.finite(context.toSeconds(params[0]));
       var t1  = t0 + dur;
       var v1  = _.finite(params[1]);
       var cur = _.finite(params[2]);

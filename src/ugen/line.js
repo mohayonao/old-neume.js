@@ -27,14 +27,14 @@ module.exports = function(neume, _) {
   neume.register("line", function(ugen, spec, inputs) {
     var startValue = _.finite(_.defaults(spec.start, 1));
     var endValue   = _.finite(_.defaults(spec.end  , 0));
-    var duration   = _.finite(_.defaults(spec.dur  , 1));
+    var duration   = _.finite(_.defaults(ugen.$context.toSeconds(spec.dur), 1));
     return make("linTo", ugen, startValue, endValue, duration, inputs);
   });
 
   neume.register("xline", function(ugen, spec, inputs) {
     var startValue = Math.max(1e-6, _.finite(_.defaults(spec.start, 1)));
     var endValue   = Math.max(1e-6, _.finite(_.defaults(spec.end  , 0)));
-    var duration   = _.finite(_.defaults(spec.dur  , 1));
+    var duration   = _.finite(_.defaults(ugen.$context.toSeconds(spec.dur), 1));
     return make("expTo", ugen, startValue, endValue, duration, inputs);
   });
 

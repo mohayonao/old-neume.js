@@ -119,7 +119,7 @@ module.exports = function(neume, _) {
     }
     osc.frequency.value = 0;
     osc.detune.value    = 0;
-    context.connect(_.defaults(spec.freq, defaultFreq), osc.frequency);
+    context.connect(_.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
     context.connect(_.defaults(spec.detune, 0), osc.detune);
 
     return osc;

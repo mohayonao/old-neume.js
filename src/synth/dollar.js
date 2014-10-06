@@ -101,7 +101,7 @@ function $timeout(synth, timers) {
   var context = synth.$context;
 
   return function(timeout) {
-    timeout = Math.max(0, _.finite(timeout));
+    timeout = Math.max(0, _.finite(context.toSeconds(timeout)));
 
     var schedId   = 0;
     var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
@@ -129,9 +129,17 @@ function $timeout(synth, timers) {
 
 function $interval(synth, timers) {
   var context = synth.$context;
+  var minInterval = 1 / context.sampleRate;
 
   return function(interval) {
-    interval = Math.max(1 / context.sampleRate, _.finite(interval));
+    var relative;
+
+    if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
+      relative = true;
+    } else {
+      relative = false;
+      interval = Math.max(minInterval, _.finite(context.toSeconds(interval)));
+    }
 
     var schedId   = 0;
     var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
@@ -145,14 +153,24 @@ function $interval(synth, timers) {
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
           callbacks[i].call(synth, t, count);
         }
-        sched(startTime + interval * (count + 1));
+
+        var nextTime = relative ?
+          t + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+          startTime + interval * (count + 1);
+
+        sched(nextTime);
       });
     }
 
     timers.push({
       start: function(t) {
         startTime = t;
-        sched(t + interval);
+
+        var nextTime = relative ?
+          startTime + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+          startTime + interval;
+
+        sched(nextTime);
       },
       stop: function() {
         context.unsched(schedId);
