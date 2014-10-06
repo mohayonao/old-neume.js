@@ -19,6 +19,18 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#context", function() {
+    it("points to this", function() {
+      assert(context.context === context);
+    });
+  });
+
+  describe("#audioContext", function() {
+    it("points to AudioContext", function() {
+      assert(context.audioContext === audioContext);
+    });
+  });
+
   describe("#sampleRate", function() {
     it("points to AudioContext#sampleRate", function() {
       assert(context.sampleRate === audioContext.sampleRate);

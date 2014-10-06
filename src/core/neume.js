@@ -10,8 +10,12 @@ var neume = function(context) {
   }
 
   Object.defineProperties(Neume, {
+    audioContext: {
+      value: context.audioContext,
+      enumerable: true
+    },
     context: {
-      value: context.$context,
+      value: context,
       enumerable: true
     },
     destination: {

@@ -58,7 +58,7 @@ describe("ugen/buf", function() {
         return $("buf", { buf: buffer });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();
@@ -81,7 +81,7 @@ describe("ugen/buf", function() {
         return $("buf", { buf: buffer, offset: 5 });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
       var spy = sinon.spy(outlet, "start");
 
@@ -101,7 +101,7 @@ describe("ugen/buf", function() {
         return $("buf", { buf: buffer, offset: 5, dur: 10 });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
       var spy = sinon.spy(outlet, "start");
 

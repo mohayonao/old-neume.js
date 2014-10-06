@@ -30,7 +30,7 @@ describe("ugen/boolean", function() {
         return $(false);
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();
@@ -63,7 +63,7 @@ describe("ugen/boolean", function() {
         return $(true, { lag: 0.1, curve: 0.1 });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();

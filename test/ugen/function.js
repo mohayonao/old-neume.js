@@ -32,7 +32,7 @@ describe("ugen/function", function() {
         return $(function(t, count) { return count; });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();
@@ -69,7 +69,7 @@ describe("ugen/function", function() {
         return $(function(t, count) { return count; }, { lag: 0.1, curve: 0.1 });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();

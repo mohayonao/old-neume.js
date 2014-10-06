@@ -46,7 +46,7 @@ describe("ugen/array", function() {
         return $([ 0, 1, 2, 3, 4 ]);
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();
@@ -75,7 +75,7 @@ describe("ugen/array", function() {
         return $([ 0, 1, 2, 3, 4 ]);
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();
@@ -109,7 +109,7 @@ describe("ugen/array", function() {
         return $([ 0, 1, 2, 3, 4 ], { lag: 0.1, curve: 0.1 });
       })();
 
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();

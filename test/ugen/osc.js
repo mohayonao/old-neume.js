@@ -43,7 +43,7 @@ describe("ugen/osc", function() {
       });
     });
     it("works", function() {
-      var audioContext = Neume.context;
+      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode();
 
       audioContext.$reset();

@@ -26,6 +26,14 @@ function NeuContext(destination, duration) {
   this._transport = new NeuTransport(this);
 
   Object.defineProperties(this, {
+    context: {
+      value: this,
+      enumerable: true
+    },
+    audioContext: {
+      value: this.$context,
+      enumerable: true
+    },
     sampleRate: {
       value: this.$context.sampleRate,
       enumerable: true

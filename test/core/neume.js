@@ -2,6 +2,7 @@
 
 var neume = require("../../src");
 
+var NeuContext  = neume.Context;
 var NeuBuffer   = neume.Buffer;
 var NeuInterval = neume.Interval;
 var NeuTimeout  = neume.Timeout;
@@ -19,14 +20,14 @@ describe("neume", function() {
     it("return Neume", function() {
       var Neume = neume.exports(audioContext);
       assert(typeof Neume === "function");
-      assert(Neume.context === audioContext);
+      assert(Neume.audioContext === audioContext);
       assert(Neume.destination === audioContext.destination);
     });
     it("custom destination", function() {
       var lpf = audioContext.createBiquadFilter();
       var Neume = neume.exports(lpf);
       assert(typeof Neume === "function");
-      assert(Neume.context === audioContext);
+      assert(Neume.audioContext === audioContext);
       assert(Neume.destination === lpf);
     });
     it("failed", function() {
@@ -67,9 +68,14 @@ describe("neume", function() {
         assert(Neume.analyser instanceof window.AnalyserNode);
       });
     });
-    describe(".context", function() {
+    describe(".audioContext", function() {
       it("points to AudioContext", function() {
-        assert(Neume.context instanceof window.AudioContext);
+        assert(Neume.audioContext instanceof window.AudioContext);
+      });
+    });
+    describe(".context", function() {
+      it("points to NeuContext", function() {
+        assert(Neume.context instanceof NeuContext);
       });
     });
     describe(".destination", function() {
