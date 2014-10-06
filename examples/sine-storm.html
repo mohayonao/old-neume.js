@@ -57,22 +57,22 @@
     var freq = $.param("freq", exprand(55.00, 880.0));
     var amp  = $.param("amp" , exprand( 0.05,   0.2));
 
-    return $("sin", { freq: mod, mul: amp }, $("sin", { freq: freq, mul: amp }));
+    return $("out", { bus: 1 }, $("sin", { freq: mod, mul: amp }, $("sin", { freq: freq, mul: amp })));
   });
 
   var Out = new Neume(function($) {
-    // `$.in` is used to input from other synth signal.
-
-    return $("comp", { mul: 0.8 }, $.in(0));
+    return $("out", { bus: 0 }, $("comp", { mul: 0.8 }, $("in", 1)));
   });
 
   var players = [];
 
   function start() {
+    Neume.context.reset();
+
     var out = new Out();
 
     var sines = _.range(25).map(function() {
-      return new Sine().connect(out).start();
+      return new Sine().start();
     });
 
     var timer = new Neume.Interval(4.000, function(e) {

@@ -70,7 +70,7 @@
   }
 
   var Piano = new Neume(function($, freq, dur) {
-    return $("xline", { start: 0.75, end: 0.01, dur: dur * 5 },
+    return $("out", { bus: 1 }, $("xline", { start: 0.75, end: 0.01, dur: dur * 5 },
       $("clip", $("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 10 },
         $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
           return $("saw", { freq: freq * x });
@@ -78,16 +78,18 @@
       ))
     ).on("end", function(e) {
       this.stop(e.playbackTime);
-    });
+    }));
   });
 
   var Reverb = new Neume(function($, buffer) {
-    return $("conv", { buf: buffer, mix: 0.75 }, $.in(0));
+    return $("out", $("conv", { buf: buffer, mix: 0.75 }, $("in", 1)));
   });
 
   var players = [];
 
   function start() {
+    Neume.context.reset();
+
     var reverb = new Reverb(
       createReverbBuffer({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 })
     );
@@ -97,7 +99,7 @@
     mmlEmitter.tracks.forEach(function(track) {
       track.on("note", function(e) {
         // routing: Piano[output:0] -> Reverb[input:0] -> destination
-        new Piano(e.frequency, e.duration).connect(reverb).start(e.playbackTime);
+        new Piano(e.frequency, e.duration).start(e.playbackTime);
         visualizer.push(e);
       });
     });
