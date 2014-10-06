@@ -31,6 +31,15 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#bpm", function() {
+    it("points to NeuTransport#bpm", function() {
+      assert(typeof context.bpm === "number");
+
+      context.bpm = 200;
+      assert(context.bpm === 200);
+    });
+  });
+
   describe("#destination", function() {
     it("points to AudioContext#destination", function() {
       assert(context.destination === audioContext.destination);
@@ -660,6 +669,31 @@ describe("NeuContext", function() {
         context.disconnect({});
         context.disconnect(null);
       });
+    });
+  });
+
+  describe("#getBpm()", function() {
+    it("works", function() {
+      assert(context.getBpm() === 120);
+    });
+  });
+
+  describe("#setBpm(value, rampTime)", function() {
+    it("works", function() {
+      assert(context.setBpm(200, 0) === context);
+      assert(context.getBpm() === 200);
+    });
+  });
+
+  describe("#toSeconds()", function() {
+    it("works", function() {
+      assert(context.toSeconds("2hz") === 0.5);
+    });
+  });
+
+  describe("#toFrequency()", function() {
+    it("works", function() {
+      assert(context.toFrequency("500ms") === 2);
     });
   });
 

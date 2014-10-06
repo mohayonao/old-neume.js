@@ -66,6 +66,7 @@ var neume = function(context) {
 
 neume._        = _;
 neume.Context  = require("./context");
+neume.Transport = require("./transport");
 neume.Component = require("../component/component");
 neume.Add      = require("../component/add");
 neume.DC       = require("../component/dc");

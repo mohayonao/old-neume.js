@@ -3,6 +3,7 @@
 var _ = require("../utils");
 var C = require("../const");
 
+var NeuTransport = require("./transport");
 var NeuComponent = require("../component/component");
 var NeuDC = require("../component/dc");
 var NeuMul = require("../component/mul");
@@ -22,6 +23,8 @@ function NeuContext(destination, duration) {
   this.$context = destination.context;
   this.$destination = destination;
 
+  this._transport = new NeuTransport(this);
+
   Object.defineProperties(this, {
     sampleRate: {
       value: this.$context.sampleRate,
@@ -31,7 +34,16 @@ function NeuContext(destination, duration) {
       get: function() {
         return this._currentTime || this.$context.currentTime;
       },
-      enumarable: true
+      enumerable: true
+    },
+    bpm: {
+      get: function() {
+        return this._transport.getBpm();
+      },
+      set: function(value) {
+        this._transport.setBpm(value);
+      },
+      enumerable: true
     },
     destination: {
       value: destination,
@@ -270,6 +282,23 @@ NeuContext.prototype.disconnect = function(from) {
   if (from && from.disconnect) {
     from.disconnect();
   }
+};
+
+NeuContext.prototype.getBpm = function() {
+  return this._transport.getBpm();
+};
+
+NeuContext.prototype.setBpm = function(value, rampTime) {
+  this._transport.setBpm(value, rampTime);
+  return this;
+};
+
+NeuContext.prototype.toSeconds = function(value) {
+  return this._transport.toSeconds(value);
+};
+
+NeuContext.prototype.toFrequency = function(value) {
+  return this._transport.toFrequency(value);
 };
 
 function onaudioprocess(e) {
