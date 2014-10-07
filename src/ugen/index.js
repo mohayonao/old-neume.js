@@ -7,6 +7,7 @@ module.exports = function(neume) {
   neume.use(require("./biquad"));
   neume.use(require("./boolean"));
   neume.use(require("./buf"));
+  neume.use(require("./comb"));
   neume.use(require("./comp"));
   neume.use(require("./conv"));
   neume.use(require("./delay"));
