@@ -199,6 +199,24 @@ describe("NeuSynthDollar", function() {
         });
       });
     });
+    describe(".sec(value)", function() {
+      it("works", function() {
+        var passed = 0;
+        var synth = new NeuSynth(context, function($) {
+          passed = $.sec("4n");
+        }, []);
+        assert(passed === 0.5);
+      });
+    });
+    describe(".freq(value)", function() {
+      it("works", function() {
+        var passed = 0;
+        var synth = new NeuSynth(context, function($) {
+          passed = $.freq("4n");
+        }, []);
+        assert(passed === 2);
+      });
+    });
   });
 
 });

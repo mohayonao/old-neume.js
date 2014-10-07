@@ -131,5 +131,15 @@ describe("neume", function() {
         assert(Neume.Timeout(0, NOP) instanceof NeuTimeout);
       });
     });
+    describe(".toSeconds(value)", function() {
+      it("works", function() {
+        assert(Neume.toSeconds("4n") === 0.5);
+      });
+    });
+    describe(".toFrequency(value)", function() {
+      it("works", function() {
+        assert(Neume.toFrequency("4n") === 2);
+      });
+    });
   });
 });

@@ -34,6 +34,8 @@ function NeuSynthDollar(synth) {
   builder.method   = $method(synth, this.methods);
   builder.timeout  = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
+  builder.sec      = $sec(synth);
+  builder.freq     = $freq(synth);
 
   this.builder = builder;
 }
@@ -177,6 +179,18 @@ function $interval(synth, timers) {
         schedId = 0;
       }
     });
+  };
+}
+
+function $sec(synth) {
+  return function(value) {
+    return synth.$context.toSeconds(value);
+  };
+}
+
+function $freq(synth) {
+  return function(value) {
+    return synth.$context.toFrequency(value);
   };
 }
 

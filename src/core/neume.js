@@ -63,6 +63,16 @@ var neume = function(context) {
       },
       enumerable: true
     },
+    toSeconds: {
+      value: function(value) {
+        return context.toSeconds(value);
+      }
+    },
+    toFrequency: {
+      value: function(value) {
+        return context.toFrequency(value);
+      }
+    },
   });
 
   return Neume;
