@@ -52,8 +52,6 @@ function DryWetNode(context, inputs, wetNode, mix) {
   context.connect(gainWet, gainMix);
   context.connect(gainDry, gainMix);
 
-  gainMix.$maddOptimizable = true;
-
   return new NeuComponent(context, gainMix);
 }
 
@@ -89,8 +87,6 @@ function DryWetNumber(context, inputs, wetNode, mix) {
   context.connect(wetNode, gainWet);
   context.connect(gainWet, gainMix);
   context.connect(gainDry, gainMix);
-
-  gainMix.$maddOptimizable = true;
 
   return new NeuComponent(context, gainMix);
 }
