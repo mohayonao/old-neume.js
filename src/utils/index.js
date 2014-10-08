@@ -315,14 +315,4 @@ utils.inherits = function(ctor, superCtor) {
   });
 };
 
-utils.findAudioBuffer = function(obj) {
-  if (obj && typeof obj.toAudioBuffer === "function") {
-    obj = obj.toAudioBuffer();
-  }
-  if (!(obj instanceof window.AudioBuffer)) {
-    obj = null;
-  }
-  return obj || null;
-};
-
 module.exports = utils;
