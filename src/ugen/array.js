@@ -3,9 +3,8 @@ module.exports = function(neume, _) {
 
   /**
    * $([], {
-   *   mode : enum[ clip, wrap, fold ] = clip
-   *   lag  : [number] = 0
-   *   curve: [number] = 0
+   *   mode: enum[ clip, wrap, fold ] = clip
+   *   timeConstant: [number] = 0
    * } ... inputs)
    *
    * methods:

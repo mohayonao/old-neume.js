@@ -8,8 +8,14 @@ function NeuParam(context, value, spec) {
   NeuComponent.call(this, context);
   this._value  = _.finite(value);
   this._params = [];
-  this._lag   = _.finite(spec.lag);
-  this._curve = _.finite(spec.curve);
+
+  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(spec.timeConstant)) {
+    this._relative = true;
+    this._timeConstant = spec.timeConstant;
+  } else {
+    this._relative = false;
+    this._timeConstant = Math.max(0, _.finite(spec.timeConstant));
+  }
 }
 _.inherits(NeuParam, NeuComponent);
 
@@ -37,7 +43,7 @@ NeuParam.prototype.set = function(value) {
 
 NeuParam.prototype.setAt = function(value, startTime) {
   value     = _.finite(value);
-  startTime = _.finite(startTime);
+  startTime = _.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -50,7 +56,7 @@ NeuParam.prototype.setAt = function(value, startTime) {
 
 NeuParam.prototype.linTo = function(value, endTime) {
   value   = _.finite(value);
-  endTime = _.finite(endTime);
+  endTime = _.finite(this.$context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -63,7 +69,7 @@ NeuParam.prototype.linTo = function(value, endTime) {
 
 NeuParam.prototype.expTo = function(value, endTime) {
   value   = _.finite(value);
-  endTime = _.finite(endTime);
+  endTime = _.finite(this.$context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -76,8 +82,8 @@ NeuParam.prototype.expTo = function(value, endTime) {
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   target       = _.finite(target);
-  startTime    = _.finite(startTime);
-  timeConstant = _.finite(timeConstant);
+  startTime    = _.finite(this.$context.toSeconds(startTime));
+  timeConstant = _.finite(this.$context.toSeconds(timeConstant));
 
   var params = this._params;
 
@@ -89,8 +95,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
 };
 
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
-  startTime = _.finite(startTime);
-  duration  = _.finite(duration);
+  startTime = _.finite(this.$context.toSeconds(startTime));
+  duration  = _.finite(this.$context.toSeconds(duration));
 
   var params = this._params;
 
@@ -102,7 +108,7 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 };
 
 NeuParam.prototype.cancel = function(startTime) {
-  startTime = _.finite(startTime);
+  startTime = _.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -114,17 +120,20 @@ NeuParam.prototype.cancel = function(startTime) {
 };
 
 NeuParam.prototype.update = function(t0, v1, v0) {
-  t0 = _.finite(t0);
+  t0 = _.finite(this.$context.toSeconds(t0));
   v1 = _.finite(v1);
   v0 = _.finite(_.defaults(v0, v1));
 
-  var lag   = this._lag;
-  var curve = this._curve;
-
-  if (lag <= 0 || curve < 0 || 1 <= curve || v0 === v1) {
+  if (this._timeConstant === 0 || v0 === v1) {
     this.setAt(v1, t0);
   } else {
-    this.targetAt(v1, t0, timeConstant(lag, v0, v1, curve));
+    var timeConstant;
+    if (this._relative) {
+      timeConstant = this.$context.toSeconds(this._timeConstant);
+    } else {
+      timeConstant = this._timeConstant;
+    }
+    this.targetAt(v1, t0, timeConstant);
   }
 
   return this;
@@ -156,11 +165,5 @@ NeuParam.prototype.disconnect = function() {
   this.$context.disconnect(this.$outlet);
   return this;
 };
-
-function timeConstant(duration, startValue, endValue, curve) {
-  var targetValue = startValue + (endValue - startValue) * (1 - curve);
-
-  return -duration / Math.log((targetValue - endValue) / (startValue - endValue));
-}
 
 module.exports = _.NeuParam = NeuParam;

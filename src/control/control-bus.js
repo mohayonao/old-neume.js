@@ -17,7 +17,7 @@ NeuControlBus.prototype.valueOf = function() {
 
 NeuControlBus.prototype.setValue = function(value, timeConstant) {
   value = _.finite(value);
-  timeConstant = _.finite(timeConstant);
+  timeConstant = _.finite(this.$context.toSeconds(timeConstant));
 
   var startTime = this.$context.currentTime;
   var params = this._params;

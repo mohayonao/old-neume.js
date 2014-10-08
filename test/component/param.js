@@ -183,6 +183,82 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#update(t0, v1, v0)", function() {
+    it("works1", function() {
+      param = new NeuParam(context, 440);
+      param.connect(context.destination);
+
+      param.update(0.2, 660, 440);
+      param.update(0.4, 220, 660);
+
+      assert(param.valueOf() === 440, "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(param.valueOf() === 440, "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(param.valueOf() === 660, "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(param.valueOf() === 660, "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(param.valueOf() === 220, "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(param.valueOf() === 220, "00:00.500");
+    });
+    it("works with timeConstant", function() {
+      param = new NeuParam(context, 440, { timeConstant: 0.1 });
+      param.connect(context.destination);
+
+      param.update(0.2, 660, 440);
+      param.update(0.4, 220, 660);
+
+      assert(param.valueOf() === 440, "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(param.valueOf() === 440, "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(closeTo(param.valueOf(), 440, 1e-6), "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(closeTo(param.valueOf(), 579.0665229422826, 1e-6), "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(closeTo(param.valueOf(), 630.2262376879452, 1e-6), "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 370.9137990745046, 1e-6), "00:00.500");
+    });
+    it("works with relative timeConstant", function() {
+      param = new NeuParam(context, 440, { timeConstant: "32n" });
+      param.connect(context.destination);
+
+      param.update(0.2, 660, 440);
+      context.bpm = 240;
+      param.update(0.4, 220, 660);
+
+      assert(param.valueOf() === 440, "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(param.valueOf() === 440, "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(closeTo(param.valueOf(), 440, 1e-6), "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(closeTo(param.valueOf(), 615.5827660411758, 1e-6), "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(closeTo(param.valueOf(), 651.0323151247594, 1e-6), "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 237.56982715038288, 1e-6), "00:00.500");
+    });
+  });
+
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
       assert(param.toAudioNode() instanceof window.AudioNode);

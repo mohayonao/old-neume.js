@@ -6,8 +6,7 @@ module.exports = function(neume, _) {
 
   /**
    * $(function, {
-   *   lag  : [number] = 0
-   *   curve: [number] = 0
+   *   timeConstant: [number] = 0
    * } ... inputs)
    *
    * methods:
