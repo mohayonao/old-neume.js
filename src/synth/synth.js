@@ -89,7 +89,7 @@ NeuSynth.prototype.start = function(t) {
     }, this);
 
     if (!this._connected) {
-      this.connect(this.$context.$outlet);
+      this.connect(this.$context.$inlet);
     }
 
     this._db.all().forEach(function(ugen) {

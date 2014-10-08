@@ -23,7 +23,15 @@ function NeuContext(destination, duration) {
   this.$context = destination.context;
   this.$destination = destination;
 
-  this._transport = new NeuTransport(this);
+  this._transport  = new NeuTransport(this);
+  this.$masterGain = this.$context.createGain();
+  this.$analyser   = this.$context.createAnalyser();
+  this.connect(this.$masterGain, this.$analyser);
+  this.connect(this.$analyser  , this.$destination);
+  this._scriptProcessor = null;
+
+  this.$inlet  = null;
+  this.$outlet = this.$analyser;
 
   Object.defineProperties(this, {
     context: {
@@ -122,26 +130,13 @@ NeuContext.prototype.createDryWet = function(inputs, node, mix) {
   return new NeuDryWet(this, inputs, node, mix);
 };
 
-NeuContext.prototype.getMasterGain = function() {
-  return this._masterGain;
-};
-
-NeuContext.prototype.getAnalyser = function() {
-  return this._analyser;
-};
-
 NeuContext.prototype.reset = function() {
-  if (this.$outlet) {
-    this.$outlet.disconnect();
+  if (this.$inlet) {
+    this.$inlet.disconnect();
   }
 
-  this._masterGain = this.$context.createGain();
-  this._analyser   = this.$context.createAnalyser();
-
-  this.connect(this._masterGain, this._analyser);
-  this.connect(this._analyser  , this.$destination);
-
-  this.$outlet = this._masterGain;
+  this.$inlet  = this.$context.createGain();
+  this.connect(this.$inlet, this.$masterGain);
 
   this.disconnect(this._scriptProcessor);
 

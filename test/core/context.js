@@ -328,20 +328,6 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#getMasterGain()", function() {
-    it("returns a GainNode", function() {
-      assert(context.getMasterGain() instanceof window.GainNode);
-      assert(context.getMasterGain() === context.getMasterGain());
-    });
-  });
-
-  describe("#getAnalyser()", function() {
-    it("returns an AnalyserNode", function() {
-      assert(context.getAnalyser() instanceof window.AnalyserNode);
-      assert(context.getAnalyser() === context.getAnalyser());
-    });
-  });
-
   describe("#reset()", function() {
     it("returns self", function() {
       assert(context.reset() === context);

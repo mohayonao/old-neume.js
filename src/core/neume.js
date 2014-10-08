@@ -148,19 +148,14 @@ neume.exports = function(destination) {
       render: {
         value: function(duration, func) {
           return neume.render(context, duration, func);
-        },
-        enumerable: true
+        }
       },
       master: {
-        get: function() {
-          return context.getMasterGain();
-        },
+        value: context.$masterGain,
         enumerable: true
       },
       analyser: {
-        get: function() {
-          return context.getAnalyser();
-        },
+        value: context.$analyser,
         enumerable: true
       }
     }
