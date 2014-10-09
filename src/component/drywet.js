@@ -2,6 +2,7 @@
 
 var _ = require("../utils");
 var C = require("../const");
+var NeuComponent = require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
 var halfSize = WS_CURVE_SIZE >> 1;
@@ -33,27 +34,25 @@ function DryWetNode(context, inputs, wetNode, mix) {
   wsWet.curve = curveWet;
   wsDry.curve = curveDry;
 
-  _.connect({ from: mix, to: wsWet });
-  _.connect({ from: mix, to: wsDry });
+  context.connect(mix, wsWet);
+  context.connect(mix, wsDry);
 
   gainWet.gain.value = 0;
   gainDry.gain.value = 0;
 
-  wsWet.connect(gainWet.gain);
-  wsDry.connect(gainDry.gain);
+  context.connect(wsWet, gainWet.gain);
+  context.connect(wsDry, gainDry.gain);
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
-    _.connect({ from: inputs[i], to: wetNode });
-    _.connect({ from: inputs[i], to: gainDry });
+    context.connect(inputs[i], wetNode);
+    context.connect(inputs[i], gainDry);
   }
 
-  _.connect({ from: wetNode, to: gainWet });
-  _.connect({ from: gainWet, to: gainMix });
-  _.connect({ from: gainDry, to: gainMix });
+  context.connect(wetNode, gainWet);
+  context.connect(gainWet, gainMix);
+  context.connect(gainDry, gainMix);
 
-  gainMix.$maddOptimizable = true;
-
-  return gainMix;
+  return new NeuComponent(context, gainMix);
 }
 
 function DryWetNumber(context, inputs, wetNode, mix) {
@@ -65,16 +64,13 @@ function DryWetNumber(context, inputs, wetNode, mix) {
 
   if (wet === 1) {
     for (i = 0, imax = inputs.length; i < imax; i++) {
-      _.connect({ from: inputs[i], to: wetNode });
+      context.connect(inputs[i], wetNode);
     }
     return wetNode;
   }
 
   if (dry === 1) {
-    if (inputs.length === 1) {
-      return inputs[0];
-    }
-    return sum(context, inputs);
+    return context.createSum(inputs);
   }
 
   var gainWet = context.createGain();
@@ -85,27 +81,14 @@ function DryWetNumber(context, inputs, wetNode, mix) {
   gainDry.gain.value = dry;
 
   for (i = 0, imax = inputs.length; i < imax; i++) {
-    _.connect({ from: inputs[i], to: wetNode });
-    _.connect({ from: inputs[i], to: gainDry });
+    context.connect(inputs[i], wetNode);
+    context.connect(inputs[i], gainDry);
   }
-  _.connect({ from: wetNode, to: gainWet });
-  _.connect({ from: gainWet, to: gainMix });
-  _.connect({ from: gainDry, to: gainMix });
+  context.connect(wetNode, gainWet);
+  context.connect(gainWet, gainMix);
+  context.connect(gainDry, gainMix);
 
-  gainMix.$maddOptimizable = true;
-
-  return gainMix;
+  return new NeuComponent(context, gainMix);
 }
 
-function sum(context, inputs) {
-  var result = context.createGain();
-
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    _.connect({ from: inputs[i], to: result });
-  }
-  result.$maddOptimizable = true;
-
-  return result;
-}
-
-module.exports = NeuDryWet;
+module.exports = _.NeuDryWet = NeuDryWet;

@@ -27,40 +27,38 @@ module.exports = function(neume, _) {
   neume.register("line", function(ugen, spec, inputs) {
     var startValue = _.finite(_.defaults(spec.start, 1));
     var endValue   = _.finite(_.defaults(spec.end  , 0));
-    var duration   = _.finite(_.defaults(spec.dur  , 1));
-    return make("linearRampToValueAtTime", ugen, startValue, endValue, duration, inputs);
+    var duration   = _.finite(_.defaults(ugen.$context.toSeconds(spec.dur), 1));
+    return make("linTo", ugen, startValue, endValue, duration, inputs);
   });
 
   neume.register("xline", function(ugen, spec, inputs) {
     var startValue = Math.max(1e-6, _.finite(_.defaults(spec.start, 1)));
     var endValue   = Math.max(1e-6, _.finite(_.defaults(spec.end  , 0)));
-    var duration   = _.finite(_.defaults(spec.dur  , 1));
-    return make("exponentialRampToValueAtTime", ugen, startValue, endValue, duration, inputs);
+    var duration   = _.finite(_.defaults(ugen.$context.toSeconds(spec.dur), 1));
+    return make("expTo", ugen, startValue, endValue, duration, inputs);
   });
 
   function make(curve, ugen, startValue, endValue, duration, inputs) {
     var context = ugen.$context;
+    var outlet  = null;
 
-    var line  = context.createGain();
-    var gain  = line.gain;
     var schedId = 0;
+    var param = context.createParam(startValue);
 
-    if (inputs.length === 0) {
-      inputs = [ new neume.DC(context, 1) ];
+    if (inputs.length) {
+      outlet = context.createGain();
+      context.createSum(inputs).connect(outlet);
+      context.connect(param, outlet.gain);
+    } else {
+      outlet = param;
     }
-
-    inputs.forEach(function(input) {
-      _.connect({ from: input, to: line });
-    });
-
-    gain.setValueAtTime(startValue, 0);
 
     function start(t) {
       var t0 = t;
       var t1 = t0 + duration;
 
-      gain.setValueAtTime(startValue, t0);
-      gain[curve](endValue, t1);
+      param.setAt(startValue, t0);
+      param[curve](endValue, t1);
 
       schedId = context.sched(t1, function(t) {
         schedId = 0;
@@ -73,7 +71,7 @@ module.exports = function(neume, _) {
     }
 
     return new neume.Unit({
-      outlet: line,
+      outlet: outlet,
       start : start,
       stop  : stop
     });

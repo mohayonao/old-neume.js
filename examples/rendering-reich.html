@@ -85,23 +85,25 @@
   }
 
   var Tape = new Neume(function($, buffer, rate) {
-    return $(buffer, { rate: rate, loop: true });
+    return $("out", { bus: 1 }, $(buffer, { rate: rate, loop: true }));
   });
 
   var Comp = new Neume(function($) {
-    return $("comp", $.in(0));
+    return $("out", { bus: 0 }, $("comp", $("in", 1)));
   });
 
   var players = [];
 
   function start() {
+    Neume.context.reset();
+
     score = _.shuffle(score);
 
     var comp = new Comp();
 
     Neume.render(2.000, minimal).then(function(buffer) {
       rates.forEach(function(rate) {
-        new Tape(buffer, rate).connect(comp).start();
+        new Tape(buffer, rate).start();
       });
     }).catch(function(e) {
       console.error(e);

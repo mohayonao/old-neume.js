@@ -54,8 +54,8 @@ module.exports = function(neume, _) {
       wsL.curve = curveL;
       wsR.curve = curveR;
 
-      _.connect({ from: pos, to: wsL });
-      _.connect({ from: pos, to: wsR });
+      context.connect(pos, wsL);
+      context.connect(pos, wsR);
 
       gainL.gain.value = 0;
       gainR.gain.value = 0;
@@ -69,10 +69,7 @@ module.exports = function(neume, _) {
     gainL.connect(merger, 0, 0);
     gainR.connect(merger, 0, 1);
 
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: gainL });
-      _.connect({ from: node, to: gainR });
-    });
+    context.createSum(inputs).connect(gainL).connect(gainR);
 
     return new neume.Unit({
       outlet: merger

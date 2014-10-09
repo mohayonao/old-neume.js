@@ -1,22 +1,23 @@
 "use strict";
 
-var _       = require("../utils");
-var NeuNode = require("./node");
-var NeuDC   = require("../component/dc");
+var _ = require("../utils");
+var NeuComponent = require("./component");
 
-function NeuParam(synth, name, value) {
-  NeuNode.call(this, synth);
-
-  this.name = name;
-
-  this.$outlet = null;
-  this.$offset = 0;
-
+function NeuParam(context, value, spec) {
+  spec = spec || {};
+  NeuComponent.call(this, context);
+  this._value  = _.finite(value);
   this._params = [];
-  this._connected = [];
-  this._value = _.finite(value);
+
+  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(spec.timeConstant)) {
+    this._relative = true;
+    this._timeConstant = spec.timeConstant;
+  } else {
+    this._relative = false;
+    this._timeConstant = Math.max(0, _.finite(spec.timeConstant));
+  }
 }
-_.inherits(NeuParam, NeuNode);
+_.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
@@ -42,7 +43,7 @@ NeuParam.prototype.set = function(value) {
 
 NeuParam.prototype.setAt = function(value, startTime) {
   value     = _.finite(value);
-  startTime = _.finite(startTime);
+  startTime = _.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -55,7 +56,7 @@ NeuParam.prototype.setAt = function(value, startTime) {
 
 NeuParam.prototype.linTo = function(value, endTime) {
   value   = _.finite(value);
-  endTime = _.finite(endTime);
+  endTime = _.finite(this.$context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -68,7 +69,7 @@ NeuParam.prototype.linTo = function(value, endTime) {
 
 NeuParam.prototype.expTo = function(value, endTime) {
   value   = _.finite(value);
-  endTime = _.finite(endTime);
+  endTime = _.finite(this.$context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -81,8 +82,8 @@ NeuParam.prototype.expTo = function(value, endTime) {
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   target       = _.finite(target);
-  startTime    = _.finite(startTime);
-  timeConstant = _.finite(timeConstant);
+  startTime    = _.finite(this.$context.toSeconds(startTime));
+  timeConstant = _.finite(this.$context.toSeconds(timeConstant));
 
   var params = this._params;
 
@@ -94,8 +95,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
 };
 
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
-  startTime = _.finite(startTime);
-  duration  = _.finite(duration);
+  startTime = _.finite(this.$context.toSeconds(startTime));
+  duration  = _.finite(this.$context.toSeconds(duration));
 
   var params = this._params;
 
@@ -107,7 +108,7 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 };
 
 NeuParam.prototype.cancel = function(startTime) {
-  startTime = _.finite(startTime);
+  startTime = _.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -118,25 +119,51 @@ NeuParam.prototype.cancel = function(startTime) {
   return this;
 };
 
-NeuParam.prototype._connect = function(to, output, input) {
-  if (this._connected.indexOf(to) !== -1) {
-    return; // if already connected
-  }
-  this._connected.push(to);
+NeuParam.prototype.update = function(t0, v1, v0) {
+  t0 = _.finite(this.$context.toSeconds(t0));
+  v1 = _.finite(v1);
+  v0 = _.finite(_.defaults(v0, v1));
 
+  if (this._timeConstant === 0 || v0 === v1) {
+    this.setAt(v1, t0);
+  } else {
+    var timeConstant;
+    if (this._relative) {
+      timeConstant = this.$context.toSeconds(this._timeConstant);
+    } else {
+      timeConstant = this._timeConstant;
+    }
+    this.targetAt(v1, t0, timeConstant);
+  }
+
+  return this;
+};
+
+NeuParam.prototype.toAudioNode = function() {
+  if (this.$outlet == null) {
+    this.$outlet = this.$context.createGain();
+    this.$outlet.gain.value = this._value;
+    this.$outlet.gain.setValueAtTime(this._value, 0);
+    this._params.push(this.$outlet.gain);
+    this.$context.connect(this.$context.createDC(1), this.$outlet);
+  }
+  return this.$outlet;
+};
+
+NeuParam.prototype.connect = function(to) {
   if (to instanceof window.AudioParam) {
     to.value = this._value;
     to.setValueAtTime(this._value, 0);
     this._params.push(to);
   } else {
-    if (this.$outlet == null) {
-      this.$outlet = this.$context.createGain();
-      this.$outlet.gain.setValueAtTime(this._value, 0);
-      this._params.push(this.$outlet.gain);
-      _.connect({ from: new NeuDC(this.$context, 1), to: this.$outlet });
-    }
-    _.connect({ from: this.$outlet, to: to, input: input });
+    this.$context.connect(this.toAudioNode(), to);
   }
+  return this;
+};
+
+NeuParam.prototype.disconnect = function() {
+  this.$context.disconnect(this.$outlet);
+  return this;
 };
 
 module.exports = _.NeuParam = NeuParam;

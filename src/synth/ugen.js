@@ -1,14 +1,12 @@
 "use strict";
 
-var _       = require("../utils");
-var NeuNode = require("./node");
+var _ = require("../utils");
+var NeuComponent = require("../component/component");
 var NeuUnit = require("./unit");
-var NeuDC   = require("../component/dc");
 var SelectorParser = require("../parser/selector");
-var makeOutlet     = require("./ugen-makeOutlet");
 
 function NeuUGen(synth, key, spec, inputs) {
-  NeuNode.call(this, synth);
+  NeuComponent.call(this, synth.$context);
 
   var parsed = SelectorParser.parse(key);
 
@@ -16,21 +14,24 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
+  this.$synth = synth;
   this.$key   = parsed.key;
   this.$class = parsed.class;
   this.$id    = parsed.id;
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
+  /* istanbul ignore if */
   if (!(unit instanceof NeuUnit)) {
-    throw new Error("invalid key: " + key);
+    throw new Error("Invalid UGen: " + key);
   }
 
-  var outlet = makeOutlet(this.$context, unit, spec);
+  this._node = unit.$outlet;
+  this._node = this.$context.createMul(this._node, _.defaults(spec.mul, 1));
+  this._node = this.$context.createAdd(this._node, _.defaults(spec.add, 0));
+  this.$isOutput = unit.$isOutput;
 
-  this.$unit   = unit;
-  this.$outlet = outlet.outlet;
-  this.$offset = outlet.offset;
+  this.$unit = unit;
 
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
@@ -38,7 +39,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 }
-_.inherits(NeuUGen, NeuNode);
+_.inherits(NeuUGen, NeuComponent);
 
 NeuUGen.$name = "NeuUGen";
 
@@ -63,34 +64,21 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
-NeuUGen.prototype._connect = function(to, output, input) {
-  _.connect({
-    from  : this.$outlet,
-    to    : to,
-    output: output,
-    input : input
-  });
-  if (this.$offset !== 0) {
-    if (to instanceof window.AudioParam) {
-      to.value = this.$offset;
-    } else {
-      _.connect({
-        from : createGainDC(this.$context, this.$offset),
-        to   : to,
-        input: input
-      });
-    }
+NeuUGen.prototype.toAudioNode = function() {
+  if (this.$outlet === null && this._node !== null) {
+    this.$outlet = this._node.toAudioNode();
   }
+  return this.$outlet;
 };
 
-function createGainDC(context, offset) {
-  var gain = context.createGain();
+NeuUGen.prototype.connect = function(to) {
+  this._node.connect(to);
+  return this;
+};
 
-  gain.gain.value = offset;
+NeuUGen.prototype.disconnect = function() {
+  this._node.disconnect();
+  return this;
+};
 
-  _.connect({ from: new NeuDC(context, 1), to: gain });
-
-  return gain;
-}
-
-module.exports = _.NeuUGen = NeuUGen;
+module.exports = NeuUGen;

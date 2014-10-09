@@ -35,7 +35,7 @@ describe("ugen/comp", function() {
         }, $("sin"));
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "DynamicsCompressorNode",
         threshold: {
           value: -20,

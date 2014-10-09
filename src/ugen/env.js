@@ -131,31 +131,30 @@ module.exports = function(neume, _) {
 
   function make(init, table, releaseNode, ugen, spec, inputs) {
     var context = ugen.$context;
+    var outlet  = null;
 
-    var env  = context.createGain();
-    var gain = env.gain;
     var startTable = table.slice(0, releaseNode);
     var stopTable  = table.slice(releaseNode);
 
     var releaseValue = startTable.length ? _.finite(_.last(startTable)[1]) : init;
     var schedId = 0;
 
-    if (inputs.length === 0) {
-      inputs = [ new neume.DC(context, 1) ];
+    var param = context.createParam(init);
+
+    if (inputs.length) {
+      outlet = context.createGain();
+      context.createSum(inputs).connect(outlet);
+      context.connect(param, outlet.gain);
+    } else {
+      outlet = param;
     }
-
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: env });
-    });
-
-    gain.value = init;
 
     function start(t) {
       var v0 = init;
       var t0 = t;
 
-      gain.setValueAtTime(v0, t0);
-      schedule(gain, startTable, v0, t0);
+      param.setAt(v0, t0);
+      schedule(context, param, startTable, v0, t0);
     }
 
     function stop() {
@@ -165,8 +164,8 @@ module.exports = function(neume, _) {
 
     function release(t) {
       var v0 = releaseValue;
-      var t0 = _.finite(_.defaults(t, context.currentTime));
-      var t1 = schedule(gain, stopTable, v0, t0);
+      var t0 = _.finite(_.defaults(context.toSeconds(t), context.currentTime));
+      var t1 = schedule(context, param, stopTable, v0, t0);
 
       schedId = context.sched(t1, function(t) {
         schedId = 0;
@@ -175,7 +174,7 @@ module.exports = function(neume, _) {
     }
 
     return new neume.Unit({
-      outlet: env,
+      outlet: outlet,
       start : start,
       stop  : stop,
       methods: {
@@ -184,17 +183,17 @@ module.exports = function(neume, _) {
     });
   }
 
-  function schedule(gain, table, v0, t0) {
+  function schedule(context, param, table, v0, t0) {
     table.forEach(function(params) {
-      var dur = _.finite(params[0]);
+      var dur = _.finite(context.toSeconds(params[0]));
       var t1  = t0 + dur;
       var v1  = _.finite(params[1]);
       var cur = _.finite(params[2]);
 
       if (v0 === v1 || dur <= 0) {
-        gain.setValueAtTime(v1, t0);
+        param.setAt(v1, t0);
       } else if (0 < cur && cur < 1) {
-        gain.setTargetAtTime(v1, t0, timeConstant(dur, v0, v1, cur));
+        param.targetAt(v1, t0, timeConstant(dur, v0, v1, cur));
       }
 
       t0 = t1;

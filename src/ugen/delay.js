@@ -22,25 +22,23 @@ module.exports = function(neume, _) {
   neume.register("delay", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var delayTime = _.defaults(spec.delay, 0);
+    var delayTime = _.defaults(context.toSeconds(spec.delay), 0);
     var maxDelayTime;
 
     if (typeof delayTime === "number") {
-      delayTime    = _.clip(_.finite(delayTime), 0, WEB_AUDIO_MAX_DELAY_TIME);
+      delayTime    = _.clip(_.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
       maxDelayTime = delayTime;
     } else {
-      maxDelayTime = _.finite(_.defaults(spec.maxDelayTime, 1));
+      maxDelayTime = _.finite(_.defaults(context.toSeconds(spec.maxDelayTime), 1));
     }
     maxDelayTime = _.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
 
     var delay = context.createDelay(maxDelayTime);
 
     delay.delayTime.value = 0;
-    _.connect({ from: delayTime, to: delay.delayTime });
+    context.connect(delayTime, delay.delayTime);
 
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: delay });
-    });
+    context.createSum(inputs).connect(delay);
 
     return new neume.Unit({
       outlet: delay

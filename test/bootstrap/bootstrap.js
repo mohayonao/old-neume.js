@@ -32,10 +32,12 @@ require("web-audio-test-api");
 global.assert = require("power-assert");
 global.sinon  = require("sinon");
 
-require("espower-loader")({
-  cwd: process.cwd(),
-  pattern: "test/**/*.js"
-});
+if (process.argv.indexOf("--no-power-assert") === -1) {
+  require("espower-loader")({
+    cwd: process.cwd(),
+    pattern: "test/**/*.js"
+  });
+}
 
 global.closeTo = function(actual, expected, delta) {
   return Math.abs(actual - expected) <= delta;

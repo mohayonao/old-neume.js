@@ -13,9 +13,7 @@ describe("NeuParam", function() {
   beforeEach(function() {
     audioContext = new window.AudioContext();
     context = new NeuContext(audioContext.destination);
-    param = new NeuParam({ $context: context }, "freq", 440);
-    param._connect(context.destination);
-    param.$outlet.connect(context.destination);
+    param = new NeuParam(context, 440);
   });
 
   describe("(synth, name, value)", function() {
@@ -26,7 +24,7 @@ describe("NeuParam", function() {
 
   describe("#valueOf()", function() {
     it("returns the value", function() {
-      assert(typeof param.valueOf() === "number");
+      assert(param.valueOf() === 440);
     });
   });
 
@@ -44,6 +42,8 @@ describe("NeuParam", function() {
       assert(param.setAt(880, 0.500) === param);
     });
     it("works", function() {
+      param.connect(context.destination);
+
       param.setAt(880, 0.250);
       assert(param.valueOf() === 440, "00:00.000");
 
@@ -66,6 +66,8 @@ describe("NeuParam", function() {
       assert(param.linTo(880, 1) === param);
     });
     it("works", function() {
+      param.connect(context.destination);
+
       param.linTo(880, 1.000);
       assert(param.valueOf() === 440, "00:00.000");
 
@@ -88,8 +90,9 @@ describe("NeuParam", function() {
       assert(param.expTo(880, 1.000) === param);
     });
     it("works", function() {
-      param.expTo(880, 1.000);
+      param.connect(context.destination);
 
+      param.expTo(880, 1.000);
       assert(closeTo(param.valueOf(), 440, 1e-6), "00:00.000");
 
       audioContext.$processTo("00:00.250");
@@ -111,8 +114,9 @@ describe("NeuParam", function() {
       assert(param.targetAt(880, 0.500, 0.25) === param);
     });
     it("works", function() {
-      param.targetAt(880, 0.250, 0.25);
+      param.connect(context.destination);
 
+      param.targetAt(880, 0.250, 0.25);
       assert(param.valueOf() === 440, "00:00.000");
 
       audioContext.$processTo("00:00.250");
@@ -133,9 +137,10 @@ describe("NeuParam", function() {
     it("returns self", function() {
       assert(param.curveAt(new Float32Array([]), 0.500, 0.25) === param);
     });
-    it("schedules the value change exponentially without third argument", function() {
-      param.curveAt(new Float32Array([ 660, 330 ]), 0.250, 0.25);
+    it("works", function() {
+      param.connect(context.destination);
 
+      param.curveAt(new Float32Array([ 660, 330 ]), 0.250, 0.25);
       assert(param.valueOf() === 440, "00:00.000");
 
       audioContext.$processTo("00:00.250");
@@ -157,8 +162,9 @@ describe("NeuParam", function() {
       assert(param.cancel() === param);
     });
     it("cancels all schedules", function() {
-      param.linTo(880, 1);
+      param.connect(context.destination);
 
+      param.linTo(880, 1);
       assert(param.valueOf() === 440, "00:00.000");
 
       audioContext.$processTo("00:00.250");
@@ -177,9 +183,91 @@ describe("NeuParam", function() {
     });
   });
 
-  describe("#_connect(to)", function() {
+  describe("#update(t0, v1, v0)", function() {
+    it("works1", function() {
+      param = new NeuParam(context, 440);
+      param.connect(context.destination);
+
+      param.update(0.2, 660, 440);
+      param.update(0.4, 220, 660);
+
+      assert(param.valueOf() === 440, "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(param.valueOf() === 440, "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(param.valueOf() === 660, "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(param.valueOf() === 660, "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(param.valueOf() === 220, "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(param.valueOf() === 220, "00:00.500");
+    });
+    it("works with timeConstant", function() {
+      param = new NeuParam(context, 440, { timeConstant: 0.1 });
+      param.connect(context.destination);
+
+      param.update(0.2, 660, 440);
+      param.update(0.4, 220, 660);
+
+      assert(param.valueOf() === 440, "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(param.valueOf() === 440, "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(closeTo(param.valueOf(), 440, 1e-6), "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(closeTo(param.valueOf(), 579.0665229422826, 1e-6), "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(closeTo(param.valueOf(), 630.2262376879452, 1e-6), "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 370.9137990745046, 1e-6), "00:00.500");
+    });
+    it("works with relative timeConstant", function() {
+      param = new NeuParam(context, 440, { timeConstant: "32n" });
+      param.connect(context.destination);
+
+      param.update(0.2, 660, 440);
+      context.bpm = 240;
+      param.update(0.4, 220, 660);
+
+      assert(param.valueOf() === 440, "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(param.valueOf() === 440, "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(closeTo(param.valueOf(), 440, 1e-6), "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(closeTo(param.valueOf(), 615.5827660411758, 1e-6), "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(closeTo(param.valueOf(), 651.0323151247594, 1e-6), "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 237.56982715038288, 1e-6), "00:00.500");
+    });
+  });
+
+  describe("#toAudioNode()", function() {
+    it("returns an AudioNode", function() {
+      assert(param.toAudioNode() instanceof window.AudioNode);
+    });
+  });
+
+  describe("#connect(to)", function() {
     it("works", function() {
-      param = new NeuParam({ $context: context }, "freq", 440);
+      param = new NeuParam(context, 440);
 
       var to1 = context.createGain();
       var to2 = context.createGain();
@@ -191,14 +279,14 @@ describe("NeuParam", function() {
       to3.$id = "to3";
       to4.$id = "to4";
 
-      param._connect(to1);
-      param._connect(to1);
-      param._connect(to2);
-      param._connect(to2);
-      param._connect(to3.gain);
-      param._connect(to3.gain);
-      param._connect(to4.gain);
-      param._connect(to4.gain);
+      param.connect(to1);
+      param.connect(to1);
+      param.connect(to2);
+      param.connect(to2);
+      param.connect(to3.gain);
+      param.connect(to3.gain);
+      param.connect(to4.gain);
+      param.connect(to4.gain);
 
       assert.deepEqual(to1.toJSON(), {
         name: "GainNode#to1",
@@ -266,6 +354,23 @@ describe("NeuParam", function() {
       assert(to2.$inputs[0].gain.value === 220);
       assert(to3.gain.value === 220);
       assert(to4.gain.value === 220);
+    });
+  });
+
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var node = context.createDelay();
+
+      new NeuParam(context, 0).connect(node).disconnect();
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
     });
   });
 

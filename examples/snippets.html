@@ -27,6 +27,9 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.5.0/mode/javascript/javascript.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="../build/neume.js"></script>
+  <script src="../plugins/freeverb.js"></script>
+  <script src="../plugins/ring.js"></script>
+  <script src="../plugins/debug.js"></script>
   <script>var Neume = neume(new AudioContext());</script>
 </head>
 <body>
@@ -99,6 +102,8 @@
     }
 
     function play() {
+      Neume.context.reset();
+
       if (synth) {
         if (typeof synth === "function" && synth.name === "SynthDef") {
           synth = new synth().start();

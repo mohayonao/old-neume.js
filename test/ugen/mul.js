@@ -24,7 +24,8 @@ describe("ugen/mul", function() {
         return $("*");
       })();
 
-      assert(synth.outlet === null);
+      assert.deepEqual(synth.toAudioNode().toJSON(), DC(1));
+      assert(synth.toAudioNode().buffer.getChannelData(0)[0] === 1);
     });
   });
 
@@ -40,7 +41,8 @@ describe("ugen/mul", function() {
         return $("*", $("sin"), 0);
       })();
 
-      assert(synth.outlet === null);
+      assert.deepEqual(synth.toAudioNode().toJSON(), DC(0));
+      assert(synth.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
   });
 
@@ -56,7 +58,7 @@ describe("ugen/mul", function() {
         return $("*", $("sin"), 1);
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "OscillatorNode",
         type: "sine",
         frequency: {
@@ -89,7 +91,7 @@ describe("ugen/mul", function() {
         return $("*", $("sin"), 0.5);
       })();
 
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 0.5,
@@ -140,7 +142,8 @@ describe("ugen/mul", function() {
       var synth = new Neume(function($) {
         return $("*", 1, $("sin", { freq: 1 }), 2, $("sin", { freq: 2 }), 3, $("sin", { freq: 3 }));
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 6,

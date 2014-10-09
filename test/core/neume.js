@@ -2,6 +2,7 @@
 
 var neume = require("../../src");
 
+var NeuContext  = neume.Context;
 var NeuBuffer   = neume.Buffer;
 var NeuInterval = neume.Interval;
 var NeuTimeout  = neume.Timeout;
@@ -19,14 +20,14 @@ describe("neume", function() {
     it("return Neume", function() {
       var Neume = neume.exports(audioContext);
       assert(typeof Neume === "function");
-      assert(Neume.context === audioContext);
+      assert(Neume.audioContext === audioContext);
       assert(Neume.destination === audioContext.destination);
     });
     it("custom destination", function() {
       var lpf = audioContext.createBiquadFilter();
       var Neume = neume.exports(lpf);
       assert(typeof Neume === "function");
-      assert(Neume.context === audioContext);
+      assert(Neume.audioContext === audioContext);
       assert(Neume.destination === lpf);
     });
     it("failed", function() {
@@ -67,9 +68,14 @@ describe("neume", function() {
         assert(Neume.analyser instanceof window.AnalyserNode);
       });
     });
-    describe(".context", function() {
+    describe(".audioContext", function() {
       it("points to AudioContext", function() {
-        assert(Neume.context instanceof window.AudioContext);
+        assert(Neume.audioContext instanceof window.AudioContext);
+      });
+    });
+    describe(".context", function() {
+      it("points to NeuContext", function() {
+        assert(Neume.context instanceof NeuContext);
       });
     });
     describe(".destination", function() {
@@ -80,6 +86,11 @@ describe("neume", function() {
     describe(".currentTime", function() {
       it("points to audioContext.currentTime", function() {
         assert(Neume.currentTime === Neume.context.currentTime);
+      });
+    });
+    describe(".bus(index)", function() {
+      it("returns NeuControlBus", function() {
+        assert(Neume.bus(0) instanceof neume.ControlBus);
       });
     });
     describe(".Buffer(channels, length, sampleRate)", function() {
@@ -123,6 +134,16 @@ describe("neume", function() {
     describe(".Timeout(interval, callback)", function() {
       it("return NeuTimeout", function() {
         assert(Neume.Timeout(0, NOP) instanceof NeuTimeout);
+      });
+    });
+    describe(".toSeconds(value)", function() {
+      it("works", function() {
+        assert(Neume.toSeconds("4n") === 0.5);
+      });
+    });
+    describe(".toFrequency(value)", function() {
+      it("works", function() {
+        assert(Neume.toFrequency("4n") === 2);
       });
     });
   });

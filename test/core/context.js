@@ -19,6 +19,18 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#context", function() {
+    it("points to this", function() {
+      assert(context.context === context);
+    });
+  });
+
+  describe("#audioContext", function() {
+    it("points to AudioContext", function() {
+      assert(context.audioContext === audioContext);
+    });
+  });
+
   describe("#sampleRate", function() {
     it("points to AudioContext#sampleRate", function() {
       assert(context.sampleRate === audioContext.sampleRate);
@@ -28,6 +40,15 @@ describe("NeuContext", function() {
   describe("#currentTime", function() {
     it("points to AudioContext#currentTime", function() {
       assert(typeof context.currentTime === "number");
+    });
+  });
+
+  describe("#bpm", function() {
+    it("points to NeuTransport#bpm", function() {
+      assert(typeof context.bpm === "number");
+
+      context.bpm = 200;
+      assert(context.bpm === 200);
     });
   });
 
@@ -232,6 +253,28 @@ describe("NeuContext", function() {
 
   describe("#createPeriodicWave()", function() {
     it("call AudioContext#createPeriodicWave()", function() {
+      var spy = sinon.stub(context, "createPeriodicWave");
+
+      context.createPeriodicWave(1, 2, 3);
+
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
+    });
+  });
+
+  describe("#decodeAudioData()", function() {
+    it("call AudioContext#decodeAudioData()", function() {
+      var spy = sinon.stub(context, "decodeAudioData");
+
+      context.decodeAudioData(1, 2, 3);
+
+      assert(spy.calledOnce === true);
+      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
+    });
+  });
+
+  describe("#createPeriodicWave()", function() {
+    it("call AudioContext#createPeriodicWave()", function() {
       var spy = sinon.spy(context, "createPeriodicWave");
       var imag = new Float32Array([ 1, 2, 3, 4 ]);
       var real = new Float32Array([ 5, 6, 7, 8 ]);
@@ -243,17 +286,61 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#getMasterGain()", function() {
-    it("returns a GainNode", function() {
-      assert(context.getMasterGain() instanceof window.GainNode);
-      assert(context.getMasterGain() === context.getMasterGain());
+  describe("#createComponent(node)", function() {
+    it("returns a NeuComponent", function() {
+      assert(context.createComponent({}) instanceof neume.Component);
     });
   });
 
-  describe("#getAnalyser()", function() {
-    it("returns an AnalyserNode", function() {
-      assert(context.getAnalyser() instanceof window.AnalyserNode);
-      assert(context.getAnalyser() === context.getAnalyser());
+  describe("#createDC(value)", function() {
+    it("returns a NeuDC", function() {
+      assert(context.createDC(0) instanceof neume.DC);
+    });
+  });
+
+  describe("#createMul(a, b)", function() {
+    it("returns a NeuMul", function() {
+      assert(context.createMul({}, {}) instanceof neume.Mul);
+    });
+  });
+
+  describe("#createAdd(a, b)", function() {
+    it("returns a NeuAdd", function() {
+      assert(context.createAdd({}, {}) instanceof neume.Add);
+    });
+  });
+
+  describe("#createSum(inputs)", function() {
+    it("returns a NeuSum", function() {
+      assert(context.createSum({}) instanceof neume.Sum);
+      assert(context.createSum([]) instanceof neume.Sum);
+    });
+  });
+
+  describe("#createParam(inputs)", function() {
+    it("returns a NeuParam", function() {
+      assert(context.createParam(0) instanceof neume.Param);
+    });
+  });
+
+  describe.skip("#createDeyWet(inputs, node, mix)", function() {
+    it("returns a NeuDryWet", function() {
+    });
+  });
+
+  describe("#getAudioBus(index)", function() {
+    it("returns a NeuAudioBus", function() {
+      assert(context.getAudioBus(0) instanceof neume.AudioBus);
+      assert(context.getAudioBus(0) !== context.getAudioBus(1));
+      assert(context.getAudioBus(1) === context.getAudioBus(1));
+    });
+  });
+
+  describe("#getControlBus(index)", function() {
+    it("returns a NeuControlBus", function() {
+      assert(context.getControlBus(0) instanceof neume.ControlBus);
+      assert(context.getControlBus(0) !== context.getControlBus(1));
+      assert(context.getControlBus(1) === context.getControlBus(1));
     });
   });
 
@@ -374,6 +461,253 @@ describe("NeuContext", function() {
 
       audioContext.$process(1024 / audioContext.sampleRate);
       assert(passed === 1);
+    });
+  });
+
+  describe("#toAudioNode()", function() {
+    it("calls toAudioNode() if exists", function() {
+      var gain = context.createGain();
+      var node = {
+        toAudioNode: function() {
+          return gain;
+        }
+      };
+      assert(context.toAudioNode(node) === gain);
+    });
+    it("returns a given AudioNode when given an AudioNode", function() {
+      var gain = context.createGain();
+      assert(context.toAudioNode(gain) === gain);
+    });
+    it("returns a DC when given a number", function() {
+      var node = context.toAudioNode(100);
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 100,
+          inputs: []
+        },
+        inputs: [ DC(1) ]
+      });
+      assert(node.$inputs[0].buffer.getChannelData(0)[0] === 1);
+    });
+    it("null", function() {
+      var node = {};
+      assert(context.toAudioNode(node) === null);
+    });
+  });
+
+  describe("#toAudioBuffer()", function() {
+    it("calls toAudioBuffer() if exists", function() {
+      var buf = context.createBuffer(1, 128, 44100);
+      var node = {
+        toAudioBuffer: function() {
+          return buf;
+        }
+      };
+      assert(context.toAudioBuffer(node) === buf);
+    });
+    it("returns a given AudioBuffer when given an AudioBuffer", function() {
+      var buf = context.createBuffer(1, 128, 44100);
+      assert(context.toAudioBuffer(buf) === buf);
+    });
+    it("null", function() {
+      var node = {};
+      assert(context.toAudioBuffer(node) === null);
+    });
+  });
+
+  describe("#connect(from, to)", function() {
+    it("apply from.connect(to)", function() {
+      var osc = new neume.Component(context);
+      var amp = context.createGain();
+
+      sinon.stub(osc, "connect");
+
+      context.connect(osc, amp);
+
+      assert(osc.connect.calledOnce);
+      assert.deepEqual(osc.connect.firstCall.args, [ amp ]);
+    });
+    it("number -> AudioParam", function() {
+      var node = context.createGain();
+
+      context.connect(100, node.gain);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 100,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("AudioNode -> AudioParam", function() {
+      var node = context.createGain();
+
+      context.connect(context.createOscillator(), node.gain);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        },
+        inputs: []
+      });
+    });
+    it("invalid -> AudioParam", function() {
+      var node = context.createGain();
+
+      context.connect({}, node.gain);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("number -> AudioNode", function() {
+      var node = context.createDelay();
+
+      context.connect(100, node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 100,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
+      });
+      assert(node.$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
+    });
+    it("AudioNode -> AudioNode", function() {
+      var node = context.createDelay();
+
+      context.connect(context.createOscillator(), node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+    it("invalid -> AudioNode", function() {
+      var node = context.createDelay();
+
+      context.connect({}, node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("invalid -> invalid", function() {
+      assert.doesNotThrow(function() {
+        context.connect({}, {});
+        context.connect(null, {});
+        context.connect({}, null);
+        context.connect(null, null);
+      });
+    });
+  });
+
+  describe("#disconnect(from)", function() {
+    it("disconnect nodes", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp.gain);
+
+      context.disconnect(osc);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("invalid", function() {
+      assert.doesNotThrow(function() {
+        context.disconnect({});
+        context.disconnect(null);
+      });
+    });
+  });
+
+  describe("#getBpm()", function() {
+    it("works", function() {
+      assert(context.getBpm() === 120);
+    });
+  });
+
+  describe("#setBpm(value, rampTime)", function() {
+    it("works", function() {
+      assert(context.setBpm(200, 0) === context);
+      assert(context.getBpm() === 200);
+    });
+  });
+
+  describe("#toSeconds()", function() {
+    it("works", function() {
+      assert(context.toSeconds("2hz") === 0.5);
+    });
+  });
+
+  describe("#toFrequency()", function() {
+    it("works", function() {
+      assert(context.toFrequency("500ms") === 2);
     });
   });
 

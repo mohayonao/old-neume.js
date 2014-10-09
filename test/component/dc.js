@@ -17,11 +17,104 @@ describe("NeuDC", function() {
     it("returns an instance of NeuDC", function() {
       assert(new NeuDC(context, 220) instanceof NeuDC);
     });
-    it("has link to AudioNode", function() {
-      var outlet = _.findAudioNode(new NeuDC(context, 0));
+  });
 
-      assert(outlet instanceof window.AudioNode);
-      assert.deepEqual(outlet.toJSON(), DC(0));
+  describe("#toAudioNode()", function() {
+    it("returns an AudioNode", function() {
+      var dc = new NeuDC(context, 0);
+      assert(dc.toAudioNode() instanceof window.AudioNode);
+      assert(dc.toAudioNode() === dc.toAudioNode());
+    });
+  });
+
+  describe("#connect(to)", function() {
+    it("0 -> AudioNode", function() {
+      var gain = context.createGain();
+
+      new NeuDC(context, 0).connect(gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(0) ]
+      });
+
+      assert(gain.$inputs[0].buffer.getChannelData(0)[0] === 0);
+    });
+    it("1 -> AudioNode", function() {
+      var gain = context.createGain();
+
+      new NeuDC(context, 1).connect(gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(1) ]
+      });
+
+      assert(gain.$inputs[0].buffer.getChannelData(0)[0] === 1);
+    });
+    it("2 -> AudioNode", function() {
+      var gain = context.createGain();
+
+      new NeuDC(context, 2).connect(gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 2,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
+      });
+
+      assert(gain.$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
+    });
+    it("3 -> AudioParam", function() {
+      var gain = context.createGain();
+
+      new NeuDC(context, 3).connect(gain.gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 3,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
+  describe("#disconnect()", function() {
+    it("works", function() {
+      var gain = context.createGain();
+
+      new NeuDC(context, 0).connect(gain).disconnect();
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
     });
   });
 

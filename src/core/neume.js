@@ -1,8 +1,6 @@
 "use strict";
 
-// Safari 7.0.6  needs webkit prefix
-window.AudioContext = window.AudioContext || /* istanbul ignore next */ window.webkitAudioContext;
-window.OfflineAudioContext = window.OfflineAudioContext || /* istanbul ignore next */ window.webkitOfflineAudioContext;
+require("./shim");
 
 var _ = require("../utils");
 
@@ -12,8 +10,12 @@ var neume = function(context) {
   }
 
   Object.defineProperties(Neume, {
+    audioContext: {
+      value: context.audioContext,
+      enumerable: true
+    },
     context: {
-      value: context.$context,
+      value: context,
       enumerable: true
     },
     destination: {
@@ -29,6 +31,11 @@ var neume = function(context) {
         return context.currentTime;
       },
       enumerable: true
+    },
+    bus: {
+      value: function(index) {
+        return context.getControlBus(index);
+      }
     },
     Buffer: {
       value: Object.defineProperties(function(channels, length, sampleRate) {
@@ -61,6 +68,16 @@ var neume = function(context) {
       },
       enumerable: true
     },
+    toSeconds: {
+      value: function(value) {
+        return context.toSeconds(value);
+      }
+    },
+    toFrequency: {
+      value: function(value) {
+        return context.toFrequency(value);
+      }
+    },
   });
 
   return Neume;
@@ -68,21 +85,26 @@ var neume = function(context) {
 
 neume._        = _;
 neume.Context  = require("./context");
+neume.Transport = require("./transport");
+neume.Component = require("../component/component");
+neume.Add      = require("../component/add");
 neume.DC       = require("../component/dc");
 neume.DryWet   = require("../component/drywet");
+neume.Mul      = require("../component/mul");
+neume.Sum      = require("../component/sum");
+neume.Param    = require("../component/param");
+neume.AudioBus = require("../control/audio-bus");
+neume.ControlBus = require("../control/control-bus");
 neume.Buffer   = require("../control/buffer");
 neume.Interval = require("../control/interval");
 neume.Timeout  = require("../control/timeout");
 neume.FFT      = require("../dsp/fft");
 neume.Emitter  = require("../event/emitter");
-neume.In       = require("../node/in");
-neume.Node     = require("../node/node");
-neume.Param    = require("../node/param");
-neume.UGen     = require("../node/ugen");
-neume.Unit     = require("../node/unit");
 neume.SynthDB  = require("../synth/db");
 neume.Synth    = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
+neume.UGen     = require("../synth/ugen");
+neume.Unit     = require("../synth/unit");
 
 _.each(require("../const"), function(val, key) {
   neume[key] = val;
@@ -132,19 +154,14 @@ neume.exports = function(destination) {
       render: {
         value: function(duration, func) {
           return neume.render(context, duration, func);
-        },
-        enumerable: true
+        }
       },
       master: {
-        get: function() {
-          return context.getMasterGain();
-        },
+        value: context.$masterGain,
         enumerable: true
       },
       analyser: {
-        get: function() {
-          return context.getAnalyser();
-        },
+        value: context.$analyser,
         enumerable: true
       }
     }

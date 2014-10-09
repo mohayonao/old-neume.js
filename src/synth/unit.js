@@ -10,8 +10,8 @@ function NeuUnit(spec) {
   this._spec   = spec;
   this._state  = INIT;
   this.$outlet  = _.defaults(spec.outlet, null);
-  this.$offset  = _.finite(spec.offset);
   this.$methods = _.defaults(spec.methods, {});
+  this.$isOutput = !!spec.isOutput;
 }
 NeuUnit.$name = "NeuUnit";
 
@@ -33,6 +33,10 @@ NeuUnit.prototype.apply = function(method, args) {
   if (this.$methods[method]) {
     this.$methods[method].apply(null, args);
   }
+};
+
+NeuUnit.prototype.toAudioNode = function() {
+  return this.$outlet;
 };
 
 module.exports = NeuUnit;

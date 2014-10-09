@@ -26,7 +26,7 @@ module.exports = function(neume, _) {
   neume.register("conv", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var buffer = _.findAudioBuffer(spec.buf);
+    var buffer = context.toAudioBuffer(spec.buf);
     var conv = context.createConvolver();
 
     var mix = _.defaults(spec.mix, 1);
@@ -37,7 +37,7 @@ module.exports = function(neume, _) {
     }
     conv.normalize = !!_.defaults(spec.normalize, true);
 
-    var outlet = new neume.DryWet(context, inputs, conv, mix);
+    var outlet = context.createDryWet(inputs, conv, mix);
 
     return new neume.Unit({
       outlet: outlet

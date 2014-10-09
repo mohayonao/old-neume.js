@@ -7,8 +7,7 @@ module.exports = function(neume, _) {
   /**
    * $("iter", {
    *   iter : [iterator] = null
-   *   lag  : [number] = 0
-   *   curve: [number] = 0
+   *   timeConstant: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -27,37 +26,29 @@ module.exports = function(neume, _) {
    */
   neume.register("iter", function(ugen, spec, inputs) {
     var context = ugen.$context;
+    var outlet  = null;
 
-    var gain  = context.createGain();
     var iter  = _.defaults(spec.iter, {});
-    var lag   = _.finite(spec.lag);
-    var curve = _.finite(spec.curve);
     var state = ITERATE;
-
-    if (inputs.length === 0) {
-      inputs = [ new neume.DC(context, 1) ];
-    }
-
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: gain });
-    });
-
     var prevValue = 0;
+    var param = context.createParam(prevValue, spec);
 
-    gain.gain.setValueAtTime(prevValue, 0);
+    if (inputs.length) {
+      outlet = context.createGain();
+      context.createSum(inputs).connect(outlet);
+      context.connect(param, outlet.gain);
+    } else {
+      outlet = param;
+    }
 
     function iterNext() {
       return typeof iter.next === "function" ? iter.next() : 0;
     }
 
-    function update(t, v1) {
-      v1 = _.finite(v1);
+    function update(t0, v1) {
+      var v0 = prevValue;
 
-      if (lag <= 0 || curve < 0 || 1 <= curve) {
-        gain.gain.setValueAtTime(v1, t);
-      } else {
-        gain.gain.setTargetAtTime(v1, t, timeConstant(lag, prevValue, v1, curve));
-      }
+      param.update(t0, v1, v0);
 
       prevValue = v1;
     }
@@ -85,38 +76,29 @@ module.exports = function(neume, _) {
     }
 
     return new neume.Unit({
-      outlet: gain,
+      outlet: outlet,
       start: function(t) {
         prevValue = _.finite(iterNext());
-        gain.gain.setValueAtTime(prevValue, t);
+        param.setAt(prevValue, t);
       },
       methods: {
         setValue: function(t, value) {
-          t = _.finite(_.defaults(t, context.currentTime));
-          context.sched(t, function() {
+          context.sched(_.finite(context.toSeconds(t)), function() {
             iter = _.defaults(value, {});
           });
         },
         next: function(t) {
-          t = _.finite(_.defaults(t, context.currentTime));
-          context.sched(t, function() {
+          context.sched(_.finite(context.toSeconds(t)), function(t) {
             next(t);
           });
         },
         reset: function(t) {
-          t = _.finite(_.defaults(t, context.currentTime));
-          context.sched(t, function() {
+          context.sched(_.finite(context.toSeconds(t)), function(t) {
             reset(t);
           });
         },
       }
     });
   });
-
-  function timeConstant(duration, startValue, endValue, curve) {
-    var targetValue = startValue + (endValue - startValue) * (1 - curve);
-
-    return -duration / Math.log((targetValue - endValue) / (startValue - endValue));
-  }
 
 };

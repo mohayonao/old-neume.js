@@ -16,7 +16,7 @@ describe("ugen/number", function() {
       var synth = new Neume(function($) {
         return $(0);
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 0,
@@ -29,8 +29,9 @@ describe("ugen/number", function() {
       var synth = new Neume(function($) {
         return $(0);
       })();
-      var audioContext = neume._.findAudioContext(synth);
-      var outlet = synth.outlet;
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode();
 
       audioContext.$reset();
       synth.$context.reset();
@@ -56,44 +57,12 @@ describe("ugen/number", function() {
     });
   });
 
-  describe("$(0 lag:0.1, curve:0.1)", function() {
-    it("works", function() {
-      var synth = new Neume(function($) {
-        return $(0, { lag: 0.1, curve: 0.1 });
-      })();
-      var audioContext = neume._.findAudioContext(synth);
-      var outlet = synth.outlet;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0);
-
-      assert(outlet.gain.value === 0, "00:00.000");
-
-      synth.setValue(0.100, "1");
-      synth.setValue(0.200, 2);
-
-      audioContext.$processTo("00:00.500");
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(outlet.gain.$valueAtTime(0.150) === 0);
-      assert(outlet.gain.$valueAtTime(0.200) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 1.367544467966324 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 1.7999999999999998, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 1.9367544467966324, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 1.98              , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 1.9936754446796632, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 1.998             , 1e-6));
-    });
-  });
-
   describe("$(1, $(2), $(3))", function() {
     it("returns a GainNode that is connected with inputs", function() {
       var synth = new Neume(function($) {
         return $(1, $(2), $(3));
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,

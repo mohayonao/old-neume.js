@@ -79,7 +79,7 @@
 
   // define synth
   var Seq1 = new Neume(function($, freq) {
-    return $("xline", { start: 0.05, dur: 0.250 },
+    return $("xline", { start: 0.05, dur: "8n" },
       $(famiconTriangle, { freq: freq * 0.99 }), $(famiconTriangle, { freq: freq * 1.01 })
     ).on("end", function(e) {
       this.stop(e.playbackTime);
@@ -87,7 +87,7 @@
   });
 
   var Seq2 = new Neume(function($, freq) {
-    return $("xline", { start: 0.1, dur: 1.500 },
+    return $("xline", { start: 0.1, dur: "2nd" },
       $("sin", { freq: freq * 7 },
         $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: 1.000 }) })
       )
@@ -134,7 +134,9 @@
   var players = [];
 
   function start(score) {
-    var timer = new Neume.Interval(0.125, function(e) {
+    Neume.context.reset();
+
+    var timer = new Neume.Interval("16n", function(e) {
       var index = e.count % 32;
 
       instruments.forEach(function(instrument, i) {

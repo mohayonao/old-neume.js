@@ -1,18 +1,15 @@
 "use strict";
 
-var _          = require("../utils");
-var NeuUGen    = require("../node/ugen");
-var NeuParam   = require("../node/param");
-var NeuIn      = require("../node/in");
+var _ = require("../utils");
+var NeuParam   = require("../component/param");
 var NeuSynthDB = require("./db");
+var NeuUGen    = require("./ugen");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();
 
   this.db      = db;
   this.params  = {};
-  this.inputs  = [];
-  this.outputs = [];
   this.methods = {};
   this.timers  = [];
 
@@ -29,11 +26,11 @@ function NeuSynthDollar(synth) {
   }
 
   builder.param    = $param(synth, this.params);
-  builder.in       = $input(synth, this.inputs);
-  builder.out      = $output(synth, this.outputs);
   builder.method   = $method(synth, this.methods);
   builder.timeout  = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
+  builder.sec      = $sec(synth);
+  builder.freq     = $freq(synth);
 
   this.builder = builder;
 }
@@ -48,7 +45,7 @@ function $param(synth, params) {
 
     validateParam(name, defaultValue);
 
-    var param = new NeuParam(synth, name, defaultValue);
+    var param = new NeuParam(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
       set: function(value) {
@@ -65,30 +62,6 @@ function $param(synth, params) {
   };
 }
 
-function $input(synth, inputs) {
-  return function(index) {
-    index = Math.max(0, index|0);
-
-    if (!inputs[index]) {
-      inputs[index] = new NeuIn(synth);
-    }
-
-    return inputs[index];
-  };
-}
-
-function $output(synth, outputs) {
-  return function(index, ugen) {
-    index = Math.max(0, index|0);
-
-    if (ugen instanceof NeuUGen) {
-      outputs[index] = ugen;
-    }
-
-    return null;
-  };
-}
-
 function $method(synth, methods) {
   return function(methodName, func) {
     if (/^[a-z]\w*$/.test(methodName) && typeof func === "function") {
@@ -101,7 +74,7 @@ function $timeout(synth, timers) {
   var context = synth.$context;
 
   return function(timeout) {
-    timeout = Math.max(0, _.finite(timeout));
+    timeout = Math.max(0, _.finite(context.toSeconds(timeout)));
 
     var schedId   = 0;
     var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
@@ -129,9 +102,17 @@ function $timeout(synth, timers) {
 
 function $interval(synth, timers) {
   var context = synth.$context;
+  var minInterval = 1 / context.sampleRate;
 
   return function(interval) {
-    interval = Math.max(1 / context.sampleRate, _.finite(interval));
+    var relative;
+
+    if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
+      relative = true;
+    } else {
+      relative = false;
+      interval = Math.max(minInterval, _.finite(context.toSeconds(interval)));
+    }
 
     var schedId   = 0;
     var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
@@ -145,20 +126,42 @@ function $interval(synth, timers) {
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
           callbacks[i].call(synth, t, count);
         }
-        sched(startTime + interval * (count + 1));
+
+        var nextTime = relative ?
+          t + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+          startTime + interval * (count + 1);
+
+        sched(nextTime);
       });
     }
 
     timers.push({
       start: function(t) {
         startTime = t;
-        sched(t + interval);
+
+        var nextTime = relative ?
+          startTime + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+          startTime + interval;
+
+        sched(nextTime);
       },
       stop: function() {
         context.unsched(schedId);
         schedId = 0;
       }
     });
+  };
+}
+
+function $sec(synth) {
+  return function(value) {
+    return synth.$context.toSeconds(value);
+  };
+}
+
+function $freq(synth) {
+  return function(value) {
+    return synth.$context.toFrequency(value);
   };
 }
 

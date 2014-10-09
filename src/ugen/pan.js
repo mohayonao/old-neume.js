@@ -47,9 +47,7 @@ module.exports = function(neume, _) {
     pan.coneOuterAngle = _.finite(_.defaults(spec.coneOuterAngle, 360));
     pan.coneOuterGain  = _.finite(_.defaults(spec.coneOuterGain , 0));
 
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: pan });
-    });
+    new neume.Sum(context, inputs).connect(pan);
 
     function update(value) {
       _.each(value, function(value, key) {
@@ -64,23 +62,23 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (_.isDictionary(value)) {
-            context.sched(t, function() {
+            context.sched(context.toSeconds(t), function() {
               update(value);
             });
           }
         },
         setPosition: function(t, x, y, z) {
-          context.sched(t, function() {
+          context.sched(context.toSeconds(t), function() {
             pan.setPosition(x, y, z);
           });
         },
         setOrientation: function(t, x, y, z) {
-          context.sched(t, function() {
+          context.sched(context.toSeconds(t), function() {
             pan.setOrientation(x, y, z);
           });
         },
         setVelocity: function(t, x, y, z) {
-          context.sched(t, function() {
+          context.sched(context.toSeconds(t), function() {
             pan.setVelocity(x, y, z);
           });
         },

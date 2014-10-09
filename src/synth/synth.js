@@ -3,7 +3,6 @@
 var _              = require("../utils");
 var NeuSynthDB     = require("./db");
 var NeuSynthDollar = require("./dollar");
-var makeOutlet     = require("./synth-makeOutlet");
 
 var EMPTY_DB = new NeuSynthDB();
 var INIT  = 0;
@@ -12,18 +11,22 @@ var STOP  = 2;
 
 function NeuSynth(context, func, args) {
   this.$context = context;
+  this.$outputs = [];
+  this.$localBuses = [];
 
   var $ = new NeuSynthDollar(this);
-  var result = makeOutlet(context, func.apply(null, [ $.builder ].concat(args)));
+  var result = func.apply(null, [ $.builder ].concat(args));
 
-  if ($.outputs[0] == null) {
-    $.outputs[0] = result;
+  if (result && result.toAudioNode && !result.$isOutput) {
+    this.$outputs[0] = result;
   }
 
-  this.$inputs  = $.inputs;
-  this.$outputs = $.outputs;
-  this._routing = [];
-  this._db = $.outputs.length ? $.db : EMPTY_DB;
+  this.$outputs = this.$outputs.map(function(node) {
+    return node.toAudioNode();
+  });
+
+  this._connected = false;
+  this._db = this.$outputs.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
@@ -31,17 +34,13 @@ function NeuSynth(context, func, args) {
 
   Object.defineProperties(this, {
     context: {
-      value: _.findAudioContext(this.$context),
+      value: this.$context,
       enumerable: true
     },
     currentTime: {
       get: function() {
         return this.$context.currentTime;
       },
-      enumerable: true
-    },
-    outlet: {
-      value: _.findAudioNode(this.$outputs[0]),
       enumerable: true
     },
     state: {
@@ -83,7 +82,7 @@ NeuSynth.prototype.getMethods = function() {
 };
 
 NeuSynth.prototype.start = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
@@ -93,15 +92,9 @@ NeuSynth.prototype.start = function(t) {
       this._stateString = "PLAYING";
     }, this);
 
-    if (this._routing.length === 0) {
-      _.connect({ from: this.$outputs[0], to: this.$context.$outlet });
-    } else {
-      this._routing.forEach(function(destinations, output) {
-        destinations.forEach(function(destination) {
-          _.connect({ from: this.$outputs[output], to: destination });
-        }, this);
-      }, this);
-    }
+    this.$outputs.forEach(function(node, index) {
+      this.connect(node, this.getAudioBus(index));
+    }, this.$context);
 
     this._db.all().forEach(function(ugen) {
       ugen.$unit.start(t);
@@ -118,17 +111,19 @@ NeuSynth.prototype.start = function(t) {
 };
 
 NeuSynth.prototype.stop = function(t) {
-  t = _.defaults(t, this.$context.currentTime);
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+
+  var context = this.$context;
 
   if (this._state === START) {
     this._state = STOP;
 
-    this.$context.sched(t, function(t) {
+    context.sched(t, function(t) {
       this._stateString = "FINISHED";
 
-      this.$context.nextTick(function() {
-        this.$outputs.forEach(function(output) {
-          _.disconnect({ from: output });
+      context.nextTick(function() {
+        this.$outputs.forEach(function(node) {
+          context.disconnect(node);
         });
       }, this);
 
@@ -159,18 +154,8 @@ NeuSynth.prototype.call = function() {
   return this.apply(method, args);
 };
 
-NeuSynth.prototype.connect = function(destination, output, input) {
-  output = Math.max(0, _.int(output));
-  input  = Math.max(0, _.int(input));
-
-  if (destination instanceof NeuSynth && this.$outputs[output] && destination.$inputs[input]) {
-    if (!this._routing[output]) {
-      this._routing[output] = [];
-    }
-    this._routing[output].push(_.findAudioNode(destination.$inputs[input]));
-  }
-
-  return this;
+NeuSynth.prototype.toAudioNode = function() {
+  return this.$context.toAudioNode(this.$outputs[0]);
 };
 
 NeuSynth.prototype.hasListeners = function(event) {

@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume) {
   "use strict";
 
   /**
@@ -24,9 +24,7 @@ module.exports = function(neume, _) {
       outlet.onaudioprocess = spec.audioprocess;
     }
 
-    inputs.forEach(function(node) {
-      _.connect({ from: node, to: outlet });
-    });
+    context.createSum(inputs).connect(outlet);
 
     return new neume.Unit({
       outlet: outlet

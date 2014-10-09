@@ -86,7 +86,7 @@ function loadWithXHR(url) {
 
 function decodeAudioData(context, audioData) {
   return new window.Promise(function(resolve, reject) {
-    _.findAudioContext(context).decodeAudioData(audioData, function(decodedData) {
+    context.decodeAudioData(audioData, function(decodedData) {
       resolve(decodedData);
     }, function() {
       reject({/* TODO: error object */});

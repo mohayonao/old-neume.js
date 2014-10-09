@@ -22,7 +22,7 @@ describe("ugen/audio-node", function() {
       return $(gain, $("sin"));
     })();
 
-    assert.deepEqual(synth.outlet.toJSON(), {
+    assert.deepEqual(synth.toAudioNode().toJSON(), {
       name: "GainNode#gain",
       gain: {
         value: 1,
@@ -55,7 +55,7 @@ describe("ugen/audio-node", function() {
       return $(osc, $("sin"));
     })();
 
-    assert.deepEqual(synth.outlet.toJSON(), {
+    assert.deepEqual(synth.toAudioNode().toJSON(), {
       name: "OscillatorNode#osc",
       type: "sine",
       frequency: {

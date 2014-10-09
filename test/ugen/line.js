@@ -16,7 +16,7 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("line");
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -29,8 +29,9 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       })();
-      var audioContext = neume._.findAudioContext(synth);
-      var outlet = synth.outlet;
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode();
       var ended = 0;
 
       audioContext.$reset();
@@ -59,8 +60,8 @@ describe("ugen/line", function() {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       })();
 
-      var audioContext = neume._.findAudioContext(synth);
-      var outlet = synth.outlet;
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode();
       var ended = 0;
 
       audioContext.$reset();
@@ -92,7 +93,7 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("xline");
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -105,8 +106,9 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("xline", { start: 880, end: 440, dur: 0.200 });
       })();
-      var audioContext = neume._.findAudioContext(synth);
-      var outlet = synth.outlet;
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode();
       var ended = 0;
 
       audioContext.$reset();
@@ -137,7 +139,7 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("line", $("line"), $("line"));
       })();
-      assert.deepEqual(synth.outlet.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,

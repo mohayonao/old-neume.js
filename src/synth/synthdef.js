@@ -14,7 +14,7 @@ function NeuSynthDef(defaultContext, func) {
     var context = defaultContext;
     var args = _.toArray(arguments);
 
-    if (_.isAudioContext(_.first(args))) {
+    if (_.first(args) instanceof window.AudioContext) {
       context = _.first(args);
       args = _.rest(args);
     }
@@ -24,7 +24,7 @@ function NeuSynthDef(defaultContext, func) {
 
   Object.defineProperties(SynthDef, {
     context: {
-      value: _.findAudioContext(defaultContext),
+      value: defaultContext,
       enumerable: true
     }
   });

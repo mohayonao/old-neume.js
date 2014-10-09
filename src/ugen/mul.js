@@ -38,35 +38,19 @@ module.exports = function(neume, _) {
     });
     multiple = _.finite(multiple);
 
-    if (nodes.length && multiple !== 0) {
-      outlet = nodes.shift();
-
-      outlet = nodes.reduce(function(outlet, node) {
-        var gain = context.createGain();
-
-        gain.gain.value = 0;
-
-        _.connect({ from: node  , to: gain.gain });
-        _.connect({ from: outlet, to: gain });
-
-        return gain;
-      }, outlet);
-
-      if (multiple !== 1) {
-        var tmp = outlet;
-
-        outlet = context.createGain();
-
-        outlet.gain.value = multiple;
-        _.connect({ from: tmp, to: outlet });
-      }
+    if (nodes.length === 0) {
+      nodes.push(1);
     }
 
-    return new neume.Unit({
-      outlet: outlet,
-      offset: 0
-    });
+    outlet = nodes[0];
+    for (var i = 1, imax = nodes.length; i < imax; i++) {
+      outlet = context.createMul(outlet, nodes[i]);
+    }
+    outlet = context.createMul(outlet, multiple);
 
+    return new neume.Unit({
+      outlet: outlet
+    });
   });
 
 };
