@@ -6,7 +6,8 @@ var _          = neume._;
 var NeuContext = neume.Context;
 var NeuSynth   = neume.Synth;
 var NeuUGen    = neume.UGen;
-var NeuIn      = neume.In;
+var NeuControlBus = neume.ControlBus;
+var NeuAudioBus = neume.AudioBus;
 var NeuParam   = neume.Param;
 var NOP = function() {};
 
@@ -64,50 +65,6 @@ describe("NeuSynthDollar", function() {
           assert.throws(function() {
             new NeuSynth(context, func, []);
           }, TypeError);
-        });
-      });
-      describe(".in(index)", function() {
-        it("works", function() {
-          var in0 = null;
-          var in1 = null;
-          var in2 = null;
-
-          var synth = new NeuSynth(context, function($) {
-            in0 = $.in(0);
-            in1 = $.in(1);
-            in2 = $.in(0);
-          }, []);
-
-          assert(in0 instanceof NeuIn);
-          assert(in1 instanceof NeuIn);
-          assert(in0 !== in1);
-          assert(in0 === in2);
-          assert(synth.$inputs[0] === in0);
-          assert(synth.$inputs[1] === in1);
-        });
-      });
-      describe(".out(index, ugen)", function() {
-        it("works", function() {
-          var ugen0 = null;
-          var ugen1 = null;
-          var ugen2 = null;
-          var ugen3 = null;
-
-          var synth = new NeuSynth(context, function($) {
-            ugen0 = $("sin");
-            ugen1 = $("sin");
-            // ugen2 is null
-            ugen3 = $("sin");
-            assert($.out( 0, ugen0) === null);
-            assert($.out( 1, ugen1) === null);
-            assert($.out( 2, ugen2) === null);
-            assert($.out( 3, ugen3) === null);
-          }, []);
-
-          assert(synth.$outputs[0] === ugen0);
-          assert(synth.$outputs[1] === ugen1);
-          assert(synth.$outputs[2] === undefined);
-          assert(synth.$outputs[3] === ugen3);
         });
       });
       describe(".method(methodName, func)", function() {

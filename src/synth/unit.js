@@ -11,6 +11,7 @@ function NeuUnit(spec) {
   this._state  = INIT;
   this.$outlet  = _.defaults(spec.outlet, null);
   this.$methods = _.defaults(spec.methods, {});
+  this.$isOutput = !!spec.isOutput;
 }
 NeuUnit.$name = "NeuUnit";
 

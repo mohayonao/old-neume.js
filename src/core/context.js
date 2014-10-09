@@ -11,6 +11,8 @@ var NeuAdd = require("../component/add");
 var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
+var NeuAudioBus = require("../control/audio-bus");
+var NeuControlBus = require("../control/control-bus");
 
 var INIT  = 0;
 var START = 1;
@@ -29,6 +31,8 @@ function NeuContext(destination, duration) {
   this.connect(this.$masterGain, this.$analyser);
   this.connect(this.$analyser  , this.$destination);
   this._scriptProcessor = null;
+  this._audioBuses   = [];
+  this._controlBuses = [];
 
   this.$inlet  = null;
   this.$outlet = this.$analyser;
@@ -130,12 +134,31 @@ NeuContext.prototype.createDryWet = function(inputs, node, mix) {
   return new NeuDryWet(this, inputs, node, mix);
 };
 
+NeuContext.prototype.getAudioBus = function(index) {
+  index = Math.max(0, Math.min(_.finite(_.defaults(index, 0)|0), C.MAX_AUDIO_BUS_SIZE));
+  if (!this._audioBuses[index]) {
+    this._audioBuses[index] = new NeuAudioBus(this);
+  }
+  return this._audioBuses[index];
+};
+
+NeuContext.prototype.getControlBus = function(index) {
+  index = Math.max(0, Math.min(_.finite(_.defaults(index, 0)|0), C.MAX_CONTROL_BUS_SIZE));
+  if (!this._controlBuses[index]) {
+    this._controlBuses[index] = new NeuControlBus(this);
+  }
+  return this._controlBuses[index];
+};
+
 NeuContext.prototype.reset = function() {
   if (this.$inlet) {
     this.$inlet.disconnect();
   }
 
-  this.$inlet  = this.$context.createGain();
+  this._audioBuses   = [];
+  this._controlBuses = [];
+
+  this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
   this.connect(this.$inlet, this.$masterGain);
 
   this.disconnect(this._scriptProcessor);
@@ -276,6 +299,8 @@ NeuContext.prototype.connect = function(from, to) {
       if (from) {
         return from.connect(to);
       }
+    } else if (to instanceof NeuAudioBus) {
+      this.connect(from, to.toAudioNode());
     }
   }
   return this;

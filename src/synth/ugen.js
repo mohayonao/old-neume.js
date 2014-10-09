@@ -14,6 +14,7 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
+  this.$synth = synth;
   this.$key   = parsed.key;
   this.$class = parsed.class;
   this.$id    = parsed.id;
@@ -28,9 +29,9 @@ function NeuUGen(synth, key, spec, inputs) {
   this._node = unit.$outlet;
   this._node = this.$context.createMul(this._node, _.defaults(spec.mul, 1));
   this._node = this.$context.createAdd(this._node, _.defaults(spec.add, 0));
+  this.$isOutput = unit.$isOutput;
 
-  this.$synth = synth;
-  this.$unit  = unit;
+  this.$unit = unit;
 
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
@@ -64,7 +65,7 @@ NeuUGen.build = function(synth, key, spec, inputs) {
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
+  if (this.$outlet === null && this._node !== null) {
     this.$outlet = this._node.toAudioNode();
   }
   return this.$outlet;

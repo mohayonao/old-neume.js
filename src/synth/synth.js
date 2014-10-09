@@ -11,18 +11,21 @@ var STOP  = 2;
 
 function NeuSynth(context, func, args) {
   this.$context = context;
+  this.$outputs = [];
 
   var $ = new NeuSynthDollar(this);
   var result = func.apply(null, [ $.builder ].concat(args));
 
-  if ($.outputs[0] == null) {
-    $.outputs[0] = result;
+  if (result && result.toAudioNode && !result.$isOutput) {
+    this.$outputs[0] = result;
   }
 
-  this.$inputs  = $.inputs;
-  this.$outputs = $.outputs;
+  this.$outputs = this.$outputs.map(function(node) {
+    return node.toAudioNode();
+  });
+
   this._connected = false;
-  this._db = $.outputs.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
+  this._db = this.$outputs.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
@@ -88,9 +91,9 @@ NeuSynth.prototype.start = function(t) {
       this._stateString = "PLAYING";
     }, this);
 
-    if (!this._connected) {
-      this.connect(this.$context.$inlet);
-    }
+    this.$outputs.forEach(function(node, index) {
+      this.connect(node, this.getAudioBus(index));
+    }, this.$context);
 
     this._db.all().forEach(function(ugen) {
       ugen.$unit.start(t);
@@ -118,8 +121,8 @@ NeuSynth.prototype.stop = function(t) {
       this._stateString = "FINISHED";
 
       context.nextTick(function() {
-        this.$outputs.forEach(function(output) {
-          context.disconnect(output);
+        this.$outputs.forEach(function(node) {
+          context.disconnect(node);
         });
       }, this);
 
@@ -152,24 +155,6 @@ NeuSynth.prototype.call = function() {
 
 NeuSynth.prototype.toAudioNode = function() {
   return this.$context.toAudioNode(this.$outputs[0]);
-};
-
-NeuSynth.prototype.connect = function(to, output, input) {
-  output = Math.max(0, _.int(output));
-  input  = Math.max(0, _.int(input));
-
-  if (to instanceof NeuSynth) {
-    // TODO: FIX ME!!!
-    /* istanbul ignore else */
-    if (to.$inputs[input] instanceof _.NeuIn) {
-      this.$context.connect(this.$outputs[output], to.$inputs[input].toAudioNode());
-    }
-  } else {
-    this.$context.connect(this.$outputs[output], to);
-  }
-  this._connected = true;
-
-  return this;
 };
 
 NeuSynth.prototype.hasListeners = function(event) {

@@ -328,6 +328,22 @@ describe("NeuContext", function() {
     });
   });
 
+  describe("#getAudioBus(index)", function() {
+    it("returns a NeuAudioBus", function() {
+      assert(context.getAudioBus(0) instanceof neume.AudioBus);
+      assert(context.getAudioBus(0) !== context.getAudioBus(1));
+      assert(context.getAudioBus(1) === context.getAudioBus(1));
+    });
+  });
+
+  describe("#getControlBus(index)", function() {
+    it("returns a NeuControlBus", function() {
+      assert(context.getControlBus(0) instanceof neume.ControlBus);
+      assert(context.getControlBus(0) !== context.getControlBus(1));
+      assert(context.getControlBus(1) === context.getControlBus(1));
+    });
+  });
+
   describe("#reset()", function() {
     it("returns self", function() {
       assert(context.reset() === context);

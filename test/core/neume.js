@@ -88,6 +88,11 @@ describe("neume", function() {
         assert(Neume.currentTime === Neume.context.currentTime);
       });
     });
+    describe(".bus(index)", function() {
+      it("returns NeuControlBus", function() {
+        assert(Neume.bus(0) instanceof neume.ControlBus);
+      });
+    });
     describe(".Buffer(channels, length, sampleRate)", function() {
       it("return NeuBuffer", sinon.test(function() {
         this.spy(neume.Buffer, "create");

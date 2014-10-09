@@ -1,8 +1,7 @@
 "use strict";
 
-var _          = require("../utils");
+var _ = require("../utils");
 var NeuParam   = require("../component/param");
-var NeuIn      = require("../component/in");
 var NeuSynthDB = require("./db");
 var NeuUGen    = require("./ugen");
 
@@ -11,8 +10,6 @@ function NeuSynthDollar(synth) {
 
   this.db      = db;
   this.params  = {};
-  this.inputs  = [];
-  this.outputs = [];
   this.methods = {};
   this.timers  = [];
 
@@ -29,8 +26,6 @@ function NeuSynthDollar(synth) {
   }
 
   builder.param    = $param(synth, this.params);
-  builder.in       = $input(synth, this.inputs);
-  builder.out      = $output(synth, this.outputs);
   builder.method   = $method(synth, this.methods);
   builder.timeout  = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
@@ -64,30 +59,6 @@ function $param(synth, params) {
     params[name] = param;
 
     return param;
-  };
-}
-
-function $input(synth, inputs) {
-  return function(index) {
-    index = Math.max(0, index|0);
-
-    if (!inputs[index]) {
-      inputs[index] = new NeuIn(synth.$context);
-    }
-
-    return inputs[index];
-  };
-}
-
-function $output(synth, outputs) {
-  return function(index, ugen) {
-    index = Math.max(0, index|0);
-
-    if (ugen instanceof NeuUGen) {
-      outputs[index] = ugen;
-    }
-
-    return null;
   };
 }
 

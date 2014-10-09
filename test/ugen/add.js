@@ -165,23 +165,4 @@ describe("ugen/add", function() {
     });
   });
 
-  describe("connect", function() {
-    it("$(+ 1 2 3) connect to AudioParam", function() {
-      var node = Neume.context.createGain();
-
-      new Neume(function($) {
-        return $("+", 1, 2, 3);
-      })().connect(node.gain);
-
-      assert.deepEqual(node.toJSON(), {
-        "name": "GainNode",
-        "gain": {
-          "value": 6,
-          "inputs": []
-        },
-        "inputs": []
-      });
-    });
-  });
-
 });

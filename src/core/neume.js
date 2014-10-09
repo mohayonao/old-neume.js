@@ -32,6 +32,11 @@ var neume = function(context) {
       },
       enumerable: true
     },
+    bus: {
+      value: function(index) {
+        return context.getControlBus(index);
+      }
+    },
     Buffer: {
       value: Object.defineProperties(function(channels, length, sampleRate) {
         return neume.Buffer.create(context, channels, length, sampleRate);
@@ -85,10 +90,11 @@ neume.Component = require("../component/component");
 neume.Add      = require("../component/add");
 neume.DC       = require("../component/dc");
 neume.DryWet   = require("../component/drywet");
-neume.In       = require("../component/in");
 neume.Mul      = require("../component/mul");
 neume.Sum      = require("../component/sum");
 neume.Param    = require("../component/param");
+neume.AudioBus = require("../control/audio-bus");
+neume.ControlBus = require("../control/control-bus");
 neume.Buffer   = require("../control/buffer");
 neume.Interval = require("../control/interval");
 neume.Timeout  = require("../control/timeout");
