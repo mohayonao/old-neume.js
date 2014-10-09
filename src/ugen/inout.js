@@ -62,6 +62,37 @@ module.exports = function(neume, _) {
     });
   });
 
+  neume.register("local-in", function(ugen, spec, inputs) {
+    var context = ugen.$context;
+    var synth   = ugen.$synth;
+    var outlet  = null;
+
+    inputs = inputs.filter(_.isFinite).map(function(index) {
+      return getLocalBus(context, synth, index);
+    });
+
+    outlet = context.createSum(inputs);
+
+    return new neume.Unit({
+      outlet: outlet
+    });
+  });
+
+  neume.register("local-out", function(ugen, spec, inputs) {
+    var context = ugen.$context;
+    var synth   = ugen.$synth;
+    var outlet  = null;
+
+    var index = Math.max(0, Math.min(_.finite(_.defaults(spec.bus, 0))|0, MAX_AUDIO_BUS_SIZE));
+    var bus = getLocalBus(context, synth, index);
+
+    outlet = context.createSum(inputs).connect(bus);
+
+    return new neume.Unit({
+      outlet: outlet
+    });
+  });
+
   function createAudioIn(context, index) {
     index = Math.max(0, Math.min(_.finite(_.defaults(index, 0))|0, MAX_AUDIO_BUS_SIZE));
 
@@ -72,5 +103,15 @@ module.exports = function(neume, _) {
     index = Math.max(0, Math.min(_.finite(_.defaults(index, 0))|0, MAX_CONTROL_BUS_SIZE));
 
     return context.getControlBus(index);
+  }
+
+  function getLocalBus(context, synth, index) {
+    index = Math.max(0, Math.min(_.finite(_.defaults(index, 0))|0, MAX_AUDIO_BUS_SIZE));
+
+    if (!synth.$localBuses[index]) {
+      synth.$localBuses[index] = context.createGain();
+    }
+
+    return synth.$localBuses[index];
   }
 };

@@ -12,6 +12,7 @@ var STOP  = 2;
 function NeuSynth(context, func, args) {
   this.$context = context;
   this.$outputs = [];
+  this.$localBuses = [];
 
   var $ = new NeuSynthDollar(this);
   var result = func.apply(null, [ $.builder ].concat(args));
