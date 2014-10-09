@@ -13,6 +13,7 @@ module.exports = function(neume) {
   neume.use(require("./delay"));
   neume.use(require("./env"));
   neume.use(require("./function"));
+  neume.use(require("./inout"));
   neume.use(require("./iter"));
   neume.use(require("./line"));
   neume.use(require("./media-stream"));
