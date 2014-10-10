@@ -2,7 +2,6 @@
 
 var _ = require("../utils");
 var NeuComponent = require("../component/component");
-var NeuUnit = require("./unit");
 var SelectorParser = require("../parser/selector");
 
 function NeuUGen(synth, key, spec, inputs) {
@@ -20,11 +19,6 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$id    = parsed.id;
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
-
-  /* istanbul ignore if */
-  if (!(unit instanceof NeuUnit)) {
-    throw new Error("Invalid UGen: " + key);
-  }
 
   this._node = unit.$outlet;
   this._node = this.$context.createMul(this._node, _.defaults(spec.mul, 1));
