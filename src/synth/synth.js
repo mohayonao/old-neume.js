@@ -30,7 +30,30 @@ function NeuSynth(context, func, args) {
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
-  this._methodNames = [];
+
+  var methodNames = [];
+
+  _.each($.methods, function(method, methodName) {
+    methodNames.push(methodName);
+    Object.defineProperty(this, methodName, {
+      value: function() {
+        method.apply(this, _.toArray(arguments));
+      }
+    });
+  }, this);
+
+  this._db.all().forEach(function(ugen) {
+    _.keys(ugen.$unit.$methods).forEach(function(methodName) {
+      if (!this.hasOwnProperty(methodName)) {
+        methodNames.push(methodName);
+        Object.defineProperty(this, methodName, {
+          value: function() {
+            return this.apply(methodName, _.toArray(arguments));
+          }
+        });
+      }
+    }, this);
+  }, this);
 
   Object.defineProperties(this, {
     context: {
@@ -49,37 +72,13 @@ function NeuSynth(context, func, args) {
       },
       enumerable: true
     },
+    methods: {
+      value: methodNames.sort(),
+      enumerable: true
+    }
   });
-
-  _.each($.methods, function(method, methodName) {
-    this._methodNames.push(methodName);
-    Object.defineProperty(this, methodName, {
-      value: function() {
-        method.apply(this, _.toArray(arguments));
-      }
-    });
-  }, this);
-
-  this._db.all().forEach(function(ugen) {
-    _.keys(ugen.$unit.$methods).forEach(function(methodName) {
-      if (!this.hasOwnProperty(methodName)) {
-        this._methodNames.push(methodName);
-        Object.defineProperty(this, methodName, {
-          value: function() {
-            return this.apply(methodName, _.toArray(arguments));
-          }
-        });
-      }
-    }, this);
-  }, this);
-
-  this._methodNames = this._methodNames.sort();
 }
 NeuSynth.$name = "NeuSynth";
-
-NeuSynth.prototype.getMethods = function() {
-  return this._methodNames.slice();
-};
 
 NeuSynth.prototype.start = function(t) {
   t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;

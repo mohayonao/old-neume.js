@@ -57,13 +57,13 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("#getMethods()", function() {
+  describe("#methods", function() {
     it("returns method names", sinon.test(function() {
       var synth = new NeuSynth(context, function($) {
         return $("boolean", $("array"));
       }, []);
 
-      assert.deepEqual(synth.getMethods(), [ "at", "next", "prev", "setValue", "toggle" ]);
+      assert.deepEqual(synth.methods, [ "at", "next", "prev", "setValue", "toggle" ]);
     }));
   });
 
