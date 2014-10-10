@@ -12,6 +12,7 @@ var Emitter      = neume.Emitter;
 require("../../src/ugen/osc");
 require("../../src/ugen/add");
 require("../../src/ugen/mul");
+require("../../src/ugen/env");
 
 var NOP = function() {};
 
@@ -434,6 +435,14 @@ describe("NeuUGen", function() {
         },
         inputs: []
       });
+    });
+  });
+
+  describe("method bindings", function() {
+    it("works", function() {
+      var ugen1 = NeuUGen.build(synth, "adsr", {}, []);
+
+      assert(ugen1.release() === ugen1);
     });
   });
 

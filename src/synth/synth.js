@@ -38,6 +38,7 @@ function NeuSynth(context, func, args) {
     Object.defineProperty(this, methodName, {
       value: function() {
         method.apply(this, _.toArray(arguments));
+        return this;
       }
     });
   }, this);
@@ -48,7 +49,8 @@ function NeuSynth(context, func, args) {
         methodNames.push(methodName);
         Object.defineProperty(this, methodName, {
           value: function() {
-            return this.apply(methodName, _.toArray(arguments));
+            this.apply(methodName, _.toArray(arguments));
+            return this;
           }
         });
       }

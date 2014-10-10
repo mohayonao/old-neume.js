@@ -194,14 +194,21 @@ describe("NeuSynth", function() {
     var ugen3 = null;
     var ugen4 = null;
     var passed = null;
+    var bang = null;
 
     beforeEach(function() {
       passed = [];
+      bang = false;
       synth = new NeuSynth(context, function($) {
         ugen1 = $("line#ugen1.amp");
         ugen2 = $("adsr#ugen2.amp");
         ugen3 = $("line#ugen3.fo");
         ugen4 = $("adsr#ugen4.lfo");
+
+        $.method("bang", function() {
+          bang = true;
+        });
+
         return $("+", ugen1, ugen2, ugen3, ugen4);
       }, []);
     });
@@ -327,6 +334,14 @@ describe("NeuSynth", function() {
         ugen4.emit("end", 4); // #ugen4
 
         assert.deepEqual(passed, [ 1, 2, 3, 1, 2, 3 ]);
+      });
+    });
+
+    describe("method bindings", function() {
+      it("works", function() {
+        assert(synth.release() === synth);
+        assert(synth.bang() === synth);
+        assert(bang === true);
       });
     });
 

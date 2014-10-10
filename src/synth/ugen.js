@@ -35,7 +35,10 @@ function NeuUGen(synth, key, spec, inputs) {
 
   _.each(unit.$methods, function(method, name) {
     _.definePropertyIfNotExists(this, name, {
-      value: method
+      value: function() {
+        method.apply(this, arguments);
+        return this;
+      }
     });
   }, this);
 }
