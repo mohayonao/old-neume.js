@@ -1,6 +1,7 @@
 "use strict";
 
 var neume = require("../../src");
+var pkg = require("../../package.json");
 
 var NeuContext  = neume.Context;
 var NeuBuffer   = neume.Buffer;
@@ -38,6 +39,11 @@ describe("neume", function() {
     describe(".use(fn)", function() {
       it("points to neume.use(fn)", function() {
         assert(neume.exports.use === neume.use);
+      });
+    });
+    describe(".version", function() {
+      it("points to version that defined in package.json", function() {
+        assert(neume.exports.version === pkg.version);
       });
     });
   });

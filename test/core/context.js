@@ -323,7 +323,7 @@ describe("NeuContext", function() {
     });
   });
 
-  describe.skip("#createDeyWet(inputs, node, mix)", function() {
+  describe.skip("#createDryWet(dryNode, wetNode, mix)", function() {
     it("returns a NeuDryWet", function() {
     });
   });

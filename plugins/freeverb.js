@@ -31,7 +31,10 @@
     var mix  = _.defaults(spec.mix , 0.33);
     var inlet = context.createGain();
 
-    context.createSum(inputs).connect(inlet);
+    var dryNode = context.createSum(inputs);
+    var wetNode;
+
+    dryNode.connect(inlet);
 
     var lbfc = [
       createLBCF(context, 1557/44100, room, damp),
@@ -60,7 +63,9 @@
     context.connect(ap[1].outlet, ap[2].inlet);
     context.connect(ap[2].outlet, ap[3].inlet);
 
-    outlet = context.createDryWet(inputs, ap[3].outlet, mix);
+    wetNode = ap[3].outlet;
+
+    outlet = context.createDryWet(dryNode, wetNode, mix);
 
     return new neume.Unit({
       outlet: outlet
@@ -90,11 +95,23 @@
   }
 
   function createAP(context, delayTime) {
-    var node = context.createBiquadFilter();
+    var inlet = context.createGain();
+    var outlet = context.createGain();
+    var delay = context.createDelay(delayTime);
+    var fNode = context.createGain();
+    var dNode = context.createGain();
 
-    node.type = "allpass";
-    node.frequency.value = delayTime * 44100;
+    delay.delayTime.value = delayTime;
+    dNode.gain.value = -0.5;
+    fNode.gain.value = +0.5;
 
-    return { inlet: node, outlet: node };
+    context.connect(inlet, delay);
+    context.connect(delay, outlet);
+    context.connect(delay, fNode);
+    context.connect(fNode, inlet);
+    context.connect(inlet, dNode);
+    context.connect(dNode, outlet);
+
+    return { inlet: inlet, outlet: outlet };
   }
 });
