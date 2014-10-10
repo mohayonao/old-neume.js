@@ -130,8 +130,8 @@ NeuContext.prototype.createParam = function(value, spec) {
   return new NeuParam(this, _.finite(value), spec);
 };
 
-NeuContext.prototype.createDryWet = function(inputs, node, mix) {
-  return new NeuDryWet(this, inputs, node, mix);
+NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
+  return new NeuDryWet(this, dryNode, wetNode, mix);
 };
 
 NeuContext.prototype.getAudioBus = function(index) {

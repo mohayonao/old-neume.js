@@ -2,7 +2,6 @@
 
 var _ = require("../utils");
 var C = require("../const");
-var NeuComponent = require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
 var halfSize = WS_CURVE_SIZE >> 1;
@@ -17,14 +16,14 @@ for (var i = 0; i < halfSize; i++) {
   curveDry[i + halfSize] = Math.cos(i / halfSize * Math.PI * 0.5);
 }
 
-function NeuDryWet(context, inputs, wetNode, mix) {
+function NeuDryWet(context, dryNode, wetNode, mix) {
   if (typeof mix === "number") {
-    return new DryWetNumber(context, inputs, wetNode, mix);
+    return new DryWetNumber(context, dryNode, wetNode, mix);
   }
-  return new DryWetNode(context, inputs, wetNode, mix);
+  return new DryWetNode(context, dryNode, wetNode, mix);
 }
 
-function DryWetNode(context, inputs, wetNode, mix) {
+function DryWetNode(context, dryNode, wetNode, mix) {
   var gainWet = context.createGain();
   var gainDry = context.createGain();
   var gainMix = context.createGain();
@@ -43,34 +42,26 @@ function DryWetNode(context, inputs, wetNode, mix) {
   context.connect(wsWet, gainWet.gain);
   context.connect(wsDry, gainDry.gain);
 
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    context.connect(inputs[i], wetNode);
-    context.connect(inputs[i], gainDry);
-  }
-
+  context.connect(dryNode, gainDry);
   context.connect(wetNode, gainWet);
   context.connect(gainWet, gainMix);
   context.connect(gainDry, gainMix);
 
-  return new NeuComponent(context, gainMix);
+  return context.createComponent(gainMix);
 }
 
-function DryWetNumber(context, inputs, wetNode, mix) {
-  mix = _.clip(mix, 0, 1);
+function DryWetNumber(context, dryNode, wetNode, mix) {
+  mix = _.clip(_.finite(mix), 0, 1);
 
   var wet = mix;
   var dry = 1 - mix;
-  var i, imax;
 
   if (wet === 1) {
-    for (i = 0, imax = inputs.length; i < imax; i++) {
-      context.connect(inputs[i], wetNode);
-    }
-    return wetNode;
+    return context.createComponent(wetNode);
   }
 
   if (dry === 1) {
-    return context.createSum(inputs);
+    return context.createComponent(dryNode);
   }
 
   var gainWet = context.createGain();
@@ -80,15 +71,12 @@ function DryWetNumber(context, inputs, wetNode, mix) {
   gainWet.gain.value = wet;
   gainDry.gain.value = dry;
 
-  for (i = 0, imax = inputs.length; i < imax; i++) {
-    context.connect(inputs[i], wetNode);
-    context.connect(inputs[i], gainDry);
-  }
+  context.connect(dryNode, gainDry);
   context.connect(wetNode, gainWet);
   context.connect(gainWet, gainMix);
   context.connect(gainDry, gainMix);
 
-  return new NeuComponent(context, gainMix);
+  return context.createComponent(gainMix);
 }
 
 module.exports = _.NeuDryWet = NeuDryWet;
