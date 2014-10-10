@@ -3,6 +3,7 @@
 require("./shim");
 
 var _ = require("../utils");
+var VERSION = "0.0.14";
 
 var neume = function(context) {
   function Neume(spec) {
@@ -169,5 +170,6 @@ neume.exports = function(destination) {
 };
 
 neume.exports.use = neume.use;
+neume.exports.version = VERSION;
 
 module.exports = neume;
