@@ -18,6 +18,7 @@ module.exports = function(neume) {
   neume.use(require("./line"));
   neume.use(require("./media-stream"));
   neume.use(require("./media"));
+  neume.use(require("./mono"));
   neume.use(require("./mul"));
   neume.use(require("./noise"));
   neume.use(require("./number"));
