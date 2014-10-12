@@ -145,6 +145,40 @@ NeuSynth.prototype.stop = function(t) {
   return this;
 };
 
+NeuSynth.prototype.fadeIn = function(t, dur) {
+  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  dur = _.finite(this.$context.toSeconds(dur));
+
+  if (this._state === INIT) {
+    var tC = -Math.max(1e-6, dur) / -4.605170185988091;
+    this.$outputs.forEach(function(node) {
+      node.gain.value = 0;
+      node.gain.setTargetAtTime(1, t, tC);
+      node.gain.setValueAtTime(1, t + dur);
+    });
+    this.start(t);
+  }
+
+  return this;
+};
+
+NeuSynth.prototype.fadeOut = function(t, dur) {
+  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  dur = _.finite(this.$context.toSeconds(dur));
+
+  if (this._state === START) {
+    var v0 = this.$outputs[0].gain.value;
+    var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
+    this.$outputs.forEach(function(node) {
+      node.gain.setTargetAtTime(0, t, tC);
+      node.gain.setValueAtTime(0, t + dur);
+    });
+    this.stop(t + dur);
+  }
+
+  return this;
+};
+
 NeuSynth.prototype.apply = function(method, args) {
   iterateOverTargetss(this._db, method, function(ugen, method) {
     ugen.$unit.apply(method, args);
