@@ -29,7 +29,7 @@ describe("NeuControlBus", function() {
       assert(bus.valueOf() === 0, "00:00.000");
 
       audioContext.$processTo("00:00.100");
-      assert(closeTo(bus.valueOf(), 879.9999981861848, 1e-6), "00:00.100");
+      assert(closeTo(bus.valueOf(), 879.999, 1e-2), "00:00.100");
     });
   });
 

@@ -43,17 +43,17 @@ describe("ugen/line", function() {
 
       audioContext.$processTo("00:00.500");
 
-      assert(outlet.gain.$valueAtTime(0.000) === 880);
-      assert(outlet.gain.$valueAtTime(0.050) === 880);
-      assert(outlet.gain.$valueAtTime(0.100) === 880);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 770, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 660, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 550, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 440, 1e-6));
-      assert(outlet.gain.$valueAtTime(0.350) === 440);
-      assert(outlet.gain.$valueAtTime(0.400) === 440);
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 880, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 880, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 880, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 770, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 660, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 550, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 440, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 440, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 440, 1e-2));
 
-      assert(ended === 0.30000000000000004);
+      assert(closeTo(ended, 0.300, 1e-2));
     });
     it("works with stop", function() {
       var synth = new Neume(function($) {
@@ -74,15 +74,15 @@ describe("ugen/line", function() {
 
       audioContext.$processTo("00:00.500");
 
-      assert(outlet.gain.$valueAtTime(0.000) === 880);
-      assert(outlet.gain.$valueAtTime(0.050) === 880);
-      assert(outlet.gain.$valueAtTime(0.100) === 880);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 770, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 660, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 550, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 440, 1e-6));
-      assert(outlet.gain.$valueAtTime(0.350) === 440);
-      assert(outlet.gain.$valueAtTime(0.400) === 440);
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 880, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 880, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 880, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 770, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 660, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 550, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 440, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 440, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 440, 1e-2));
 
       assert(ended === 0);
     });
@@ -120,17 +120,17 @@ describe("ugen/line", function() {
 
       audioContext.$processTo("00:00.500");
 
-      assert(outlet.gain.$valueAtTime(0.000) === 880);
-      assert(outlet.gain.$valueAtTime(0.050) === 880);
-      assert(outlet.gain.$valueAtTime(0.100) === 880);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 739.9888454232688, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 622.2539674441618, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 523.2511306011974, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 440              , 1e-6));
-      assert(outlet.gain.$valueAtTime(0.350) === 440);
-      assert(outlet.gain.$valueAtTime(0.400) === 440);
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 880.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 880.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 880.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 739.988, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 622.253, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 523.251, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 440.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 440.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 440.000, 1e-2));
 
-      assert(ended === 0.30000000000000004);
+      assert(closeTo(ended, 0.300, 12-2));
     });
   });
 

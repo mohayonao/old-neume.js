@@ -38,19 +38,19 @@ describe("NeuTransport", function() {
       assert(transport.getBpm() === 120, "00:00.000");
 
       context.$context.$processTo("00:00.100");
-      assert(closeTo(transport.getBpm(), 126.37598467698214, 1e-6), "00:00.100");
+      assert(closeTo(transport.getBpm(), 126.375, 1e-2), "00:00.100");
 
       context.$context.$processTo("00:00.200");
-      assert(closeTo(transport.getBpm(), 133.31319191899797, 1e-6), "00:00.200");
+      assert(closeTo(transport.getBpm(), 133.313, 1e-2), "00:00.200");
 
       context.$context.$processTo("00:00.300");
-      assert(closeTo(transport.getBpm(), 140.63120604011894, 1e-6), "00:00.300");
+      assert(closeTo(transport.getBpm(), 140.631, 1e-2), "00:00.300");
 
       context.$context.$processTo("00:00.400");
-      assert(closeTo(transport.getBpm(), 150.34618734471195, 1e-6), "00:00.400");
+      assert(closeTo(transport.getBpm(), 150.346, 1e-2), "00:00.400");
 
       context.$context.$processTo("00:00.500");
-      assert(closeTo(transport.getBpm(), 158.5992004652275, 1e-6), "00:00.500");
+      assert(closeTo(transport.getBpm(), 158.599, 1e-2), "00:00.500");
 
       context.$context.$processTo("00:00.600");
       assert(transport.getBpm() === 160, "00:00.600");
