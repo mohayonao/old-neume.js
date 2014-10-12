@@ -46,6 +46,11 @@ describe("neume", function() {
         assert(neume.exports.version === pkg.version);
       });
     });
+    describe(".PROCESS_BUF_SIZE", function() {
+      it("has", function() {
+        assert(typeof neume.PROCESS_BUF_SIZE === "number");
+      });
+    });
   });
 
   describe("Neume", function() {

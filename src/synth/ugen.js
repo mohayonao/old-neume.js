@@ -27,7 +27,8 @@ function NeuUGen(synth, key, spec, inputs) {
 
   this.$unit = unit;
 
-  _.each(unit.$methods, function(method, name) {
+  Object.keys(unit.$methods).forEach(function(name) {
+    var method = unit.$methods[name];
     _.definePropertyIfNotExists(this, name, {
       value: function() {
         method.apply(this, arguments);

@@ -48,7 +48,8 @@ module.exports = function(neume, _) {
     return make(setup(type, ugen, spec, inputs));
   });
 
-  _.each(FILTER_TYPES, function(type, name) {
+  Object.keys(FILTER_TYPES).forEach(function(name) {
+    var type = FILTER_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
       return make(setup(type, ugen, spec, inputs));
     });

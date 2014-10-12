@@ -107,9 +107,11 @@ neume.SynthDef = require("../synth/synthdef");
 neume.UGen     = require("../synth/ugen");
 neume.Unit     = require("../synth/unit");
 
-_.each(require("../const"), function(val, key) {
-  neume[key] = val;
-});
+(function(C) {
+  Object.keys(C).forEach(function(key) {
+    neume[key] = C[key];
+  });
+})(require("../const"));
 
 neume.register = function(name, func) {
   neume.UGen.register(name, func);

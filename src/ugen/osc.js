@@ -72,7 +72,8 @@ module.exports = function(neume, _) {
     return make(setup(type, ugen, spec, inputs));
   });
 
-  _.each(WAVE_TYPES, function(type, name) {
+  Object.keys(WAVE_TYPES).forEach(function(name) {
+    var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
       return make(setup(type, ugen, spec, inputs));
     });

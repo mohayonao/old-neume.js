@@ -80,7 +80,7 @@ function NeuContext(destination, duration) {
 }
 NeuContext.$name = "NeuContext";
 
-_.each([
+[
   "createBuffer",
   "createBufferSource",
   "createMediaElementSource",
@@ -100,7 +100,7 @@ _.each([
   "createOscillator",
   "createPeriodicWave",
   "decodeAudioData",
-], function(methodName) {
+].forEach(function(methodName) {
   NeuContext.prototype[methodName] = function() {
     return this.$context[methodName].apply(this.$context, arguments);
   };
@@ -224,7 +224,7 @@ NeuContext.prototype.sched = function(time, callback, ctx) {
     context : ctx || this
   };
 
-  if (events.length === 0 || _.last(events).time <= time) {
+  if (events.length === 0 || events[events.length - 1].time <= time) {
     events.push(event);
   } else {
     for (var i = 0, imax = events.length; i < imax; i++) {

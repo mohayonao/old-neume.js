@@ -4,9 +4,8 @@ var _ = require("../utils");
 var C = require("../const");
 var NeuComponent = require("./component");
 
-var DC_BUF_SIZE = C.DC_BUF_SIZE;
-var filled0 = _.fill(new Float32Array(DC_BUF_SIZE), 0);
-var filled1 = _.fill(new Float32Array(DC_BUF_SIZE), 1);
+var filled0 = new FilledFloat32Array(C.DC_BUF_SIZE, 0);
+var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
 
 function NeuDC(context, value) {
   NeuComponent.call(this, context);
@@ -41,9 +40,19 @@ NeuDC.prototype.valueOf = function() {
   return this._value;
 };
 
+function FilledFloat32Array(size, value) {
+  var result = new Float32Array(size);
+
+  for (var i = 0; i < size; i++) {
+    result[i] = value;
+  }
+
+  return result;
+}
+
 function createDCNode(context, value) {
   var node   = null;
-  var buf    = context.createBuffer(1, DC_BUF_SIZE, context.sampleRate);
+  var buf    = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
   var bufSrc = (node = context.createBufferSource());
 
   buf.getChannelData(0).set(value === 0 ? filled0 : filled1);

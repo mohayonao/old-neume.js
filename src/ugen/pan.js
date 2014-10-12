@@ -50,9 +50,9 @@ module.exports = function(neume, _) {
     new neume.Sum(context, inputs).connect(pan);
 
     function update(value) {
-      _.each(value, function(value, key) {
+      Object.keys(value).forEach(function(key) {
         if (PannerNodeParams.hasOwnProperty(key)) {
-          pan[key] = _.finite(value);
+          pan[key] = _.finite(value[key]);
         }
       });
     }
