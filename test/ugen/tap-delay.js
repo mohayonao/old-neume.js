@@ -18,7 +18,7 @@ describe("ugen/tap-delay", function() {
         return $("tap-delay", $("osc"));
       })();
 
-      assert.deepEqual(synth.toAudioNode().toJSON(),{
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -28,10 +28,19 @@ describe("ugen/tap-delay", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.5,
+              value: 1,
               inputs: []
             },
-            inputs: []
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.5,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });
@@ -61,62 +70,22 @@ describe("ugen/tap-delay", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.5,
-              inputs: []
-            },
-            inputs: []
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.85,
+              value: 1,
               inputs: []
             },
             inputs: [
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0,
+                name: "GainNode",
+                gain: {
+                  value: 0.5,
                   inputs: []
                 },
-                inputs: [
-                  {
-                    name: "GainNode",
-                    gain: {
-                      value: 1,
-                      inputs: []
-                    },
-                    inputs: [
-                      {
-                        name: "OscillatorNode",
-                        type: "sine",
-                        frequency: {
-                          value: 440,
-                          inputs: []
-                        },
-                        detune: {
-                          value: 0,
-                          inputs: []
-                        },
-                        inputs: []
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.45,
-              inputs: []
-            },
-            inputs: [
+                inputs: []
+              },
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.005,
+                name: "GainNode",
+                gain: {
+                  value: 0.85,
                   inputs: []
                 },
                 inputs: [
@@ -152,20 +121,11 @@ describe("ugen/tap-delay", function() {
                     ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.2,
-              inputs: []
-            },
-            inputs: [
+              },
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.01,
+                name: "GainNode",
+                gain: {
+                  value: 0.45,
                   inputs: []
                 },
                 inputs: [
@@ -210,20 +170,11 @@ describe("ugen/tap-delay", function() {
                     ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0,
-              inputs: []
-            },
-            inputs: [
+              },
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.02,
+                name: "GainNode",
+                gain: {
+                  value: 0.2,
                   inputs: []
                 },
                 inputs: [
@@ -277,6 +228,73 @@ describe("ugen/tap-delay", function() {
                     ]
                   }
                 ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [
+                  {
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0.02,
+                      inputs: []
+                    },
+                    inputs: [
+                      {
+                        name: "DelayNode",
+                        delayTime: {
+                          value: 0.01,
+                          inputs: []
+                        },
+                        inputs: [
+                          {
+                            name: "DelayNode",
+                            delayTime: {
+                              value: 0.005,
+                              inputs: []
+                            },
+                            inputs: [
+                              {
+                                name: "DelayNode",
+                                delayTime: {
+                                  value: 0,
+                                  inputs: []
+                                },
+                                inputs: [
+                                  {
+                                    name: "GainNode",
+                                    gain: {
+                                      value: 1,
+                                      inputs: []
+                                    },
+                                    inputs: [
+                                      {
+                                        name: "OscillatorNode",
+                                        type: "sine",
+                                        frequency: {
+                                          value: 440,
+                                          inputs: []
+                                        },
+                                        detune: {
+                                          value: 0,
+                                          inputs: []
+                                        },
+                                        inputs: []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -303,67 +321,76 @@ describe("ugen/tap-delay", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.5,
-              inputs: []
-            },
-            inputs: []
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.85,
+              value: 1,
               inputs: []
             },
             inputs: [
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0,
-                  inputs: [
-                    {
-                      name: "OscillatorNode",
-                      type: "triangle",
-                      frequency: {
-                        value: 0.001,
-                        inputs: []
-                      },
-                      detune: {
-                        value: 0,
-                        inputs: []
-                      },
-                      inputs: []
-                    }
-                  ]
+                name: "GainNode",
+                gain: {
+                  value: 0.5,
+                  inputs: []
+                },
+                inputs: []
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.85,
+                  inputs: []
                 },
                 inputs: [
                   {
-                    name: "GainNode",
-                    gain: {
-                      value: 1,
-                      inputs: []
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0,
+                      inputs: [
+                        {
+                          name: "OscillatorNode",
+                          type: "triangle",
+                          frequency: {
+                            value: 0.001,
+                            inputs: []
+                          },
+                          detune: {
+                            value: 0,
+                            inputs: []
+                          },
+                          inputs: []
+                        }
+                      ]
                     },
                     inputs: [
                       {
-                        name: "OscillatorNode",
-                        type: "sine",
-                        frequency: {
-                          value: 440,
-                          inputs: []
-                        },
-                        detune: {
-                          value: 0,
-                          inputs: []
-                        },
-                        inputs: []
-                      },
-                      {
                         name: "GainNode",
                         gain: {
-                          value: 0.1,
+                          value: 1,
                           inputs: []
                         },
                         inputs: [
-                          "<circular:GainNode>"
+                          {
+                            name: "OscillatorNode",
+                            type: "sine",
+                            frequency: {
+                              value: 440,
+                              inputs: []
+                            },
+                            detune: {
+                              value: 0,
+                              inputs: []
+                            },
+                            inputs: []
+                          },
+                          {
+                            name: "GainNode",
+                            gain: {
+                              value: 0.1,
+                              inputs: []
+                            },
+                            inputs: [
+                              "<circular:GainNode>"
+                            ]
+                          }
                         ]
                       }
                     ]

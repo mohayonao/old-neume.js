@@ -36,44 +36,53 @@ describe("ugen/comp", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "DynamicsCompressorNode",
-        threshold: {
-          value: -20,
-          inputs: []
-        },
-        knee: {
-          value: 25,
-          inputs: []
-        },
-        ratio: {
-          value: 10,
-          inputs: []
-        },
-        reduction: {
-          value: 0,
-          inputs: []
-        },
-        attack: {
-          value: 0.05,
-          inputs: []
-        },
-        release: {
-          value: 0.1,
+        name: "GainNode",
+        gain: {
+          value: 1,
           inputs: []
         },
         inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
+            name: "DynamicsCompressorNode",
+            threshold: {
+              value: -20,
               inputs: []
             },
-            detune: {
+            knee: {
+              value: 25,
+              inputs: []
+            },
+            ratio: {
+              value: 10,
+              inputs: []
+            },
+            reduction: {
               value: 0,
               inputs: []
             },
-            inputs: []
+            attack: {
+              value: 0.05,
+              inputs: []
+            },
+            release: {
+              value: 0.1,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });

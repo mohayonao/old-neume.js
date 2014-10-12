@@ -25,8 +25,14 @@ describe("ugen/add", function() {
         return $("+", 0);
       })();
 
-      assert.deepEqual(synth.toAudioNode().toJSON(), DC(0));
-      assert(synth.toAudioNode().buffer.getChannelData(0)[0] === 0);
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [],
+        },
+        inputs: []
+      });
     });
   });
 
@@ -45,13 +51,22 @@ describe("ugen/add", function() {
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 6,
+          value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 6,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
 
-      assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
+      assert(synth.toAudioNode().$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
   });
 
@@ -143,22 +158,31 @@ describe("ugen/add", function() {
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0.5,
+          value: 1,
           inputs: []
         },
         inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
+            name: "GainNode",
+            gain: {
+              value: 0.5,
               inputs: []
             },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });

@@ -22,7 +22,11 @@ function NeuSynth(context, func, args) {
   }
 
   this.$outputs = this.$outputs.map(function(node) {
-    return context.toAudioNode(node);
+    var gain = context.createGain();
+
+    context.connect(node, gain);
+
+    return gain;
   });
 
   this._connected = false;

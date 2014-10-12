@@ -23,24 +23,33 @@ describe("ugen/audio-node", function() {
     })();
 
     assert.deepEqual(synth.toAudioNode().toJSON(), {
-      name: "GainNode#gain",
+      name: "GainNode",
       gain: {
         value: 1,
         inputs: []
       },
       inputs: [
         {
-          name: "OscillatorNode",
-          type: "sine",
-          frequency: {
-            value: 440,
+          name: "GainNode#gain",
+          gain: {
+            value: 1,
             inputs: []
           },
-          detune: {
-            value: 0,
-            inputs: []
-          },
-          inputs: []
+          inputs: [
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
         }
       ]
     });
@@ -56,17 +65,26 @@ describe("ugen/audio-node", function() {
     })();
 
     assert.deepEqual(synth.toAudioNode().toJSON(), {
-      name: "OscillatorNode#osc",
-      type: "sine",
-      frequency: {
-        value: 440,
+      name: "GainNode",
+      gain: {
+        value: 1,
         inputs: []
       },
-      detune: {
-        value: 0,
-        inputs: []
-      },
-      inputs: []
+      inputs: [
+        {
+          name: "OscillatorNode#osc",
+          type: "sine",
+          frequency: {
+            value: 440,
+            inputs: []
+          },
+          detune: {
+            value: 0,
+            inputs: []
+          },
+          inputs: []
+        }
+      ]
     });
   });
 });

@@ -34,26 +34,35 @@ describe("ugen/conv", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "ConvolverNode",
-        normalize: false,
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
         inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
+            name: "ConvolverNode",
+            normalize: false,
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });
 
-      assert.deepEqual(synth.toAudioNode().buffer.toJSON(), {
+      assert.deepEqual(synth.toAudioNode().$inputs[0].buffer.toJSON(), {
         name: "AudioBuffer",
         sampleRate: 44100,
         length: 4,

@@ -24,9 +24,18 @@ describe("ugen/inout", function() {
           value: 1,
           inputs: []
         },
-        inputs: []
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
       });
-      assert(synth.toAudioNode() === synth.context.getAudioBus(1).toAudioNode());
+      assert(synth.toAudioNode().$inputs[0] === synth.context.getAudioBus(1).toAudioNode());
     });
     it("graph control", function() {
       var synth = new Neume(function($) {
@@ -36,12 +45,21 @@ describe("ugen/inout", function() {
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0,
+          value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
-      assert(synth.toAudioNode() === synth.context.getControlBus(1).toAudioNode());
+      assert(synth.toAudioNode().$inputs[0] === synth.context.getControlBus(1).toAudioNode());
     });
   });
 
@@ -54,6 +72,72 @@ describe("ugen/inout", function() {
       synth.start(0);
 
       assert.deepEqual(synth.context.getAudioBus(1).toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
+  describe("$(local-in)", function() {
+    it("graph", function() {
+      var synth = new Neume(function($) {
+        return $("local-in", 1);
+      })();
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+  });
+
+  describe("$(local-out)", function() {
+    it("graph", function() {
+      var synth = new Neume(function($) {
+        return $("local-out", { bus: 1 }, $("osc"));
+      })();
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -78,45 +162,6 @@ describe("ugen/inout", function() {
     });
   });
 
-  describe("$(local-in)", function() {
-    it("graph", function() {
-      var synth = new Neume(function($) {
-        return $("local-in", 1);
-      })();
-
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        "name": "GainNode",
-        "gain": {
-          "value": 1,
-          "inputs": []
-        },
-        "inputs": []
-      });
-    });
-  });
-
-  describe("$(local-out)", function() {
-    it("graph", function() {
-      var synth = new Neume(function($) {
-        return $("local-out", { bus: 1 }, $("osc"));
-      })();
-
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        "name": "OscillatorNode",
-        "type": "sine",
-        "frequency": {
-          "value": 440,
-          "inputs": []
-        },
-        "detune": {
-          "value": 0,
-          "inputs": []
-        },
-        "inputs": []
-      });
-    });
-  });
-
   describe("$(local-out { bus: 0 } $(osc mul:$(local-in 0)))", function() {
     it("graph", function() {
       var synth = new Neume(function($) {
@@ -124,35 +169,44 @@ describe("ugen/inout", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        "name": "GainNode",
-        "gain": {
-          "value": 0,
-          "inputs": [
-            {
-              "name": "GainNode",
-              "gain": {
-                "value": 1,
-                "inputs": []
-              },
-              "inputs": [
-                "<circular:GainNode>"
-              ]
-            }
-          ]
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
         },
-        "inputs": [
+        inputs: [
           {
-            "name": "OscillatorNode",
-            "type": "sine",
-            "frequency": {
-              "value": 440,
-              "inputs": []
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "GainNode",
+                  gain: {
+                    value: 1,
+                    inputs: []
+                  },
+                  inputs: [
+                    "<circular:GainNode>"
+                  ]
+                }
+              ]
             },
-            "detune": {
-              "value": 0,
-              "inputs": []
-            },
-            "inputs": []
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });

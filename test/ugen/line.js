@@ -16,13 +16,23 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("line");
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
     it("works", function() {
@@ -31,7 +41,7 @@ describe("ugen/line", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
 
       audioContext.$reset();
@@ -61,7 +71,7 @@ describe("ugen/line", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
 
       audioContext.$reset();
@@ -99,7 +109,16 @@ describe("ugen/line", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
     it("works", function() {
@@ -108,7 +127,7 @@ describe("ugen/line", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
 
       audioContext.$reset();
@@ -139,6 +158,7 @@ describe("ugen/line", function() {
       var synth = new Neume(function($) {
         return $("line", $("line"), $("line"));
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -152,18 +172,28 @@ describe("ugen/line", function() {
               value: 1,
               inputs: []
             },
-            inputs: [ DC(1) ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 1,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 1,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 1,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
           }
         ]
       });
     });
   });
+
 });

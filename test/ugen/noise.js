@@ -18,22 +18,31 @@ describe("ugen/noise", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "AudioBufferSourceNode",
-        buffer: {
-          name: "AudioBuffer",
-          length: 44100,
-          duration: 1,
-          sampleRate: 44100,
-          numberOfChannels: 1
-        },
-        playbackRate: {
+        name: "GainNode",
+        gain: {
           value: 1,
           inputs: []
         },
-        loop: true,
-        loopStart: 0,
-        loopEnd: 0,
-        inputs: []
+        inputs: [
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 44100,
+              duration: 1,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: true,
+            loopStart: 0,
+            loopEnd: 0,
+            inputs: []
+          }
+        ]
       });
     });
     it("works", function() {
@@ -42,7 +51,7 @@ describe("ugen/noise", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
 
       audioContext.$reset();
       synth.$context.reset();
@@ -66,22 +75,31 @@ describe("ugen/noise", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "AudioBufferSourceNode",
-        buffer: {
-          name: "AudioBuffer",
-          length: 44100,
-          duration: 1,
-          sampleRate: 44100,
-          numberOfChannels: 1
-        },
-        playbackRate: {
+        name: "GainNode",
+        gain: {
           value: 1,
           inputs: []
         },
-        loop: true,
-        loopStart: 0,
-        loopEnd: 0,
-        inputs: []
+        inputs: [
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 44100,
+              duration: 1,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: true,
+            loopStart: 0,
+            loopEnd: 0,
+            inputs: []
+          }
+        ]
       });
     });
     it("works", function() {
@@ -90,7 +108,7 @@ describe("ugen/noise", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
 
       audioContext.$reset();
       synth.$context.reset();

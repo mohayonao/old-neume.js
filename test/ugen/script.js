@@ -30,11 +30,20 @@ describe("ugen/script", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "ScriptProcessorNode",
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
         inputs: [
           {
             name: "ScriptProcessorNode",
-            inputs: []
+            inputs: [
+              {
+                name: "ScriptProcessorNode",
+                inputs: []
+              }
+            ]
           }
         ]
       });
