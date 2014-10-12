@@ -36,8 +36,9 @@ describe("ugen/env", function() {
             [ 0.100, 90, 1e-3 ],
             [ 0.100, 80, 1e-3 ],
             [ 0.000, 60, 1e-3 ],
-            [ 0.100, 50, 1e+3 ],
-            [ 0.100, 50, 1e+3 ],
+            [ 0.100, 50, 1e-3 ],
+            [ 0.100, 50, 1e-3 ],
+            ///// release /////
             [ 0.100, 20, 1e-3 ],
             [ 0.200,  0, 1e-3 ],
           ],
@@ -54,7 +55,7 @@ describe("ugen/env", function() {
 
       // 0.000
       // 0.100 :  0 <- start
-      // 0.200 : 10
+      // 0.200 : 90
       // 0.300 : 80
       // 0.300 : 60
       // 0.400 : 50
@@ -68,31 +69,33 @@ describe("ugen/env", function() {
         ended = e.playbackTime;
       }).release(0.600);
 
-      audioContext.$processTo("00:01.000");
+      audioContext.$processTo("00:01.500");
+
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.15395010584841, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.91            , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.31338171612276, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.00991         , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 50, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 50, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.94868329805053   , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.029999999999923  , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 3.561893658307925   , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.6334042153317155  , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.11263696743562424 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.020029999999999385, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.003561893658307831, 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.301), 59.332, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 50.316, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 50.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 50.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.948, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.029, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750),  3.561, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800),  0.633, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850),  0.112, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900),  0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950),  0.003, 1e-2));
 
-      assert(ended === 0.8999999999999999);
+      assert(closeTo(ended, 1.186, 1e-2));
     });
-    it("works", function() {
+    it("works with stop", function() {
       var synth = new Neume(function($) {
         return $("env", {
           init: 0,
@@ -102,6 +105,7 @@ describe("ugen/env", function() {
             [ 0.000, 60, 1e-3 ],
             [ 0.100, 50, 1e+3 ],
             [ 0.100, 50, 1e+3 ],
+            ///// release /////
             [ 0.100, 20, 1e-3 ],
             [ 0.200,  0, 1e-3 ],
           ],
@@ -118,8 +122,8 @@ describe("ugen/env", function() {
 
       // 0.000
       // 0.100 :  0 <- start
+      // 0.200 : 90
       //            <- stop
-      // 0.200 : 10
       // 0.300 : 80
       // 0.300 : 60
       // 0.400 : 50
@@ -131,20 +135,149 @@ describe("ugen/env", function() {
 
       synth.start(0.100).on("end", function(e) {
         ended = e.playbackTime;
-      }).release(0.600).stop(0.150);
+      }).release(0.600).stop(0.225);
 
-      audioContext.$processTo("00:01.000");
-      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.15395010584841, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.91, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.31338171612276, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.00991, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50, 1e-6));
+      audioContext.$processTo("00:01.500");
+
+      assert(closeTo(outlet.gain.$valueAtTime(0.000),  0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050),  0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100),  0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.225), 86.512, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 86.512, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 86.512, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 86.512, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 86.512, 1e-2));
 
       assert(ended === 0);
+    });
+
+    it("works with loop", function() {
+      var synth = new Neume(function($) {
+        return $("env", {
+          init: 0,
+          table: [
+            [ 0.100, 90, 1e-3 ],
+            [ 0.100, 80, 1e-3 ],
+            ////// loop ///////
+            [ 0.050, 60, 1e-3 ],
+            [ 0.050, 50, 1e-3 ],
+            ///// release /////
+            [ 0.100, 20, 1e-3 ],
+            [ 0.200,  0, 1e-3 ],
+          ],
+          release: 4, loop: 2
+        });
+      })();
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode();
+      var ended = 0;
+
+      audioContext.$reset();
+      synth.$context.reset();
+
+      // 0.000
+      // 0.100 :  0 <- start
+      // 0.200 : 90
+      // 0.300 : 80
+      // 0.350 : 60 ..
+      // 0.400 : 50 ..
+      // 0.450 : 60 -- loop
+      // 0.500 : 50
+      // 0.550 : 60 -- loop
+      // -----------
+      // 0.600 : 50 <- release
+      // 0.700 : 20
+      // 0.900 :  0 -> end
+
+      synth.start(0.100).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.600);
+
+      audioContext.$processTo("00:01.500");
+
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 0);
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 59.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 59.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.948, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750),  3.561, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800),  0.633, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850),  0.112, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900),  0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950),  0.003, 1e-2));
+
+      assert(closeTo(ended, 1.186, 1e-2));
+    });
+
+    it("works without releaseNode", function() {
+      var synth = new Neume(function($) {
+        return $("env", {
+          init: 0,
+          table: [
+            [ 0.100, 90, 1e-3 ],
+            [ 0.100, 80, 1e-3 ],
+            [ 0.100, 60, 1e-3 ],
+            [ 0.100, 50, 1e-3 ],
+            [ 0.100, 20, 1e-3 ],
+            [ 0.200,  0, 1e-3 ],
+          ],
+        });
+      })();
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode();
+      var ended = 0;
+
+      audioContext.$reset();
+      synth.$context.reset();
+
+      // 0.000
+      // 0.100 :  0 <- start
+      // 0.200 : 90
+      // 0.300 : 80
+      // 0.400 : 60
+      // 0.500 : 50
+      // 0.600 : 20
+      // 0.700 :  0 <- end
+
+      synth.start(0.100).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.600);
+
+      audioContext.$processTo("00:01.500");
+
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 0);
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60.632, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 60.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 50.316, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 20.949, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 20.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 3.5618, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.6334, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.1126, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.0200, 1e-2));
+
+      assert(closeTo(ended, 1.086, 1e-2));
     });
   });
 
@@ -216,24 +349,24 @@ describe("ugen/env", function() {
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.8999999999999999 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.99               , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.5181971585516186 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.3690000000000003 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.32181971585516195, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.30690000000000006, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.3021819715855162 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.30069            , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.30021819715855164, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.300069           , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.18933073940082704, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.1194596205608174 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.07537392496166481, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.04755773153686137, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.03000690000000000, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.01893307394008270, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.01194596205608174, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.00753739249616648, 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.899, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.518, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.369, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.321, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.306, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.302, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.189, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.119, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.075, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.047, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.018, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.011, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.007, 1e-2));
     });
   });
 
@@ -274,22 +407,22 @@ describe("ugen/env", function() {
       assert(outlet.gain.$valueAtTime(0.100) === 0);
       assert(outlet.gain.$valueAtTime(0.150) === 0);
       assert(outlet.gain.$valueAtTime(0.200) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.8999999999999999 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.99               , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.5181971585516186 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.3690000000000003 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.32181971585516195, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.30690000000000006, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.3021819715855162 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.30069            , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.18972256391174924, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.11970684511373113, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.07552991310906157, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.04765615340411321, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.03006900000000000, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.01897225639117493, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.01197068451137311, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.00755299131090615, 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.899, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.518, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.369, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.321, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.306, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.302, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.189, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.119, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.075, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.047, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.018, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.011, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.007, 1e-2));
     });
   });
 
@@ -328,24 +461,24 @@ describe("ugen/env", function() {
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.26999999999999996, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.297              , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.29969999999999997, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.29997            , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.299997           , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.2999997          , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.29999997         , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.29999999699999996, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.29999999969999996, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.29999999997      , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.1892872033251292 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.11943215115410599, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.07535659293775174, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.04754679576907870, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.02999999999700000, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.01892872033251292, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.01194321511541060, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.00753565929377517, 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.269, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.297, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.299, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.189, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.119, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.075, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.047, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.029, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.018, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.011, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.007, 1e-2));
     });
   });
 
@@ -394,14 +527,14 @@ describe("ugen/env", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 0.8);
       assert(outlet.gain.$valueAtTime(0.550) === 0.8);
       assert(outlet.gain.$valueAtTime(0.600) === 0.8);
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.5047658755841544 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.31848573644279793, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.2009509145207664 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.12679145539688905, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.08000000000000002, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.05047658755841545, 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.0318485736442798 , 1e-6));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.02009509145207664, 1e-6));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.504, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.318, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.126, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.080, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.031, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.020, 1e-2));
     });
   });
 
