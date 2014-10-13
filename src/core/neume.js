@@ -3,7 +3,7 @@
 require("./shim");
 
 var _ = require("../utils");
-var VERSION = "0.0.14";
+var VERSION = "0.0.15";
 
 var neume = function(context) {
   function Neume(spec) {
