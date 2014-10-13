@@ -37,30 +37,6 @@ describe("ugen/inout", function() {
       });
       assert(synth.toAudioNode().$inputs[0] === synth.context.getAudioBus(1).toAudioNode());
     });
-    it("graph control", function() {
-      var synth = new Neume(function($) {
-        return $("in", { rate: "control" }, 1);
-      })();
-
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 0,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
-          }
-        ]
-      });
-      assert(synth.toAudioNode().$inputs[0] === synth.context.getControlBus(1).toAudioNode());
-    });
   });
 
   describe("$(out)", function() {

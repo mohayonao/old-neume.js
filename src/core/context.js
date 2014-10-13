@@ -12,7 +12,6 @@ var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
 var NeuAudioBus = require("../control/audio-bus");
-var NeuControlBus = require("../control/control-bus");
 
 var INIT  = 0;
 var START = 1;
@@ -140,14 +139,6 @@ NeuContext.prototype.getAudioBus = function(index) {
     this._audioBuses[index] = new NeuAudioBus(this);
   }
   return this._audioBuses[index];
-};
-
-NeuContext.prototype.getControlBus = function(index) {
-  index = _.clip(_.int(_.defaults(index, 0)), 0, C.MAX_CONTROL_BUS_SIZE);
-  if (!this._controlBuses[index]) {
-    this._controlBuses[index] = new NeuControlBus(this);
-  }
-  return this._controlBuses[index];
 };
 
 NeuContext.prototype.reset = function() {

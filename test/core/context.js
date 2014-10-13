@@ -336,14 +336,6 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#getControlBus(index)", function() {
-    it("returns a NeuControlBus", function() {
-      assert(context.getControlBus(0) instanceof neume.ControlBus);
-      assert(context.getControlBus(0) !== context.getControlBus(1));
-      assert(context.getControlBus(1) === context.getControlBus(1));
-    });
-  });
-
   describe("#reset()", function() {
     it("returns self", function() {
       assert(context.reset() === context);
