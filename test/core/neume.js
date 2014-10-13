@@ -46,6 +46,11 @@ describe("neume", function() {
         assert(neume.exports.version === pkg.version);
       });
     });
+    describe(".PROCESS_BUF_SIZE", function() {
+      it("has", function() {
+        assert(typeof neume.PROCESS_BUF_SIZE === "number");
+      });
+    });
   });
 
   describe("Neume", function() {
@@ -92,11 +97,6 @@ describe("neume", function() {
     describe(".currentTime", function() {
       it("points to audioContext.currentTime", function() {
         assert(Neume.currentTime === Neume.context.currentTime);
-      });
-    });
-    describe(".bus(index)", function() {
-      it("returns NeuControlBus", function() {
-        assert(Neume.bus(0) instanceof neume.ControlBus);
       });
     });
     describe(".Buffer(channels, length, sampleRate)", function() {

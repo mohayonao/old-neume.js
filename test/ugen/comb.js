@@ -18,7 +18,14 @@ describe("ugen/comb", function() {
         return $("comb", $("osc"));
       })();
 
-      assert.deepEqual(synth.toAudioNode().toJSON(), DC(0));
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(0) ]
+      });
     });
   });
 
@@ -40,36 +47,14 @@ describe("ugen/comb", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.3,
+              value: 1,
               inputs: []
             },
             inputs: [
               {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.4,
-              inputs: []
-            },
-            inputs: [
-              {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.001,
+                name: "GainNode",
+                gain: {
+                  value: 0.3,
                   inputs: []
                 },
                 inputs: [
@@ -87,24 +72,55 @@ describe("ugen/comb", function() {
                     inputs: []
                   }
                 ]
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.5,
-              inputs: []
-            },
-            inputs: [
+              },
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.001,
+                name: "GainNode",
+                gain: {
+                  value: 0.4,
                   inputs: []
                 },
                 inputs: [
-                  "<circular:GainNode>"
+                  {
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0.001,
+                      inputs: []
+                    },
+                    inputs: [
+                      {
+                        name: "OscillatorNode",
+                        type: "sine",
+                        frequency: {
+                          value: 440,
+                          inputs: []
+                        },
+                        detune: {
+                          value: 0,
+                          inputs: []
+                        },
+                        inputs: []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.5,
+                  inputs: []
+                },
+                inputs: [
+                  {
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0.001,
+                      inputs: []
+                    },
+                    inputs: [
+                      "<circular:GainNode>"
+                    ]
+                  }
                 ]
               }
             ]
@@ -132,55 +148,64 @@ describe("ugen/comb", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.3,
+              value: 1,
               inputs: []
             },
             inputs: [
               {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
+                name: "GainNode",
+                gain: {
+                  value: 0.3,
                   inputs: []
                 },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.4,
-              inputs: []
-            },
-            inputs: [
+                inputs: [
+                  {
+                    name: "OscillatorNode",
+                    type: "sine",
+                    frequency: {
+                      value: 440,
+                      inputs: []
+                    },
+                    detune: {
+                      value: 0,
+                      inputs: []
+                    },
+                    inputs: []
+                  }
+                ]
+              },
               {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
+                name: "GainNode",
+                gain: {
+                  value: 0.4,
                   inputs: []
                 },
-                detune: {
-                  value: 0,
+                inputs: [
+                  {
+                    name: "OscillatorNode",
+                    type: "sine",
+                    frequency: {
+                      value: 440,
+                      inputs: []
+                    },
+                    detune: {
+                      value: 0,
+                      inputs: []
+                    },
+                    inputs: []
+                  }
+                ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.5,
                   inputs: []
                 },
-                inputs: []
+                inputs: [
+                  "<circular:GainNode>"
+                ]
               }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.5,
-              inputs: []
-            },
-            inputs: [
-              "<circular:GainNode>"
             ]
           }
         ]
@@ -202,47 +227,33 @@ describe("ugen/comb", function() {
         },
         inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
-          {
             name: "GainNode",
             gain: {
-              value: 0,
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sawtooth",
-                  frequency: {
-                    value: 440,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
+              value: 1,
+              inputs: []
             },
             inputs: [
               {
-                name: "DelayNode",
-                delayTime: {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              },
+              {
+                name: "GainNode",
+                gain: {
                   value: 0,
                   inputs: [
                     {
                       name: "OscillatorNode",
-                      type: "custom",
+                      type: "sawtooth",
                       frequency: {
                         value: 440,
                         inputs: []
@@ -256,7 +267,30 @@ describe("ugen/comb", function() {
                   ]
                 },
                 inputs: [
-                  "<circular:GainNode>"
+                  {
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0,
+                      inputs: [
+                        {
+                          name: "OscillatorNode",
+                          type: "custom",
+                          frequency: {
+                            value: 440,
+                            inputs: []
+                          },
+                          detune: {
+                            value: 0,
+                            inputs: []
+                          },
+                          inputs: []
+                        }
+                      ]
+                    },
+                    inputs: [
+                      "<circular:GainNode>"
+                    ]
+                  }
                 ]
               }
             ]
@@ -284,36 +318,14 @@ describe("ugen/comb", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.2,
+              value: 1,
               inputs: []
             },
             inputs: [
               {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.3,
-              inputs: []
-            },
-            inputs: [
-              {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.5,
+                name: "GainNode",
+                gain: {
+                  value: 0.2,
                   inputs: []
                 },
                 inputs: [
@@ -331,24 +343,55 @@ describe("ugen/comb", function() {
                     inputs: []
                   }
                 ]
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0.4,
-              inputs: []
-            },
-            inputs: [
+              },
               {
-                name: "DelayNode",
-                delayTime: {
-                  value: 0.6,
+                name: "GainNode",
+                gain: {
+                  value: 0.3,
                   inputs: []
                 },
                 inputs: [
-                  "<circular:GainNode>"
+                  {
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0.5,
+                      inputs: []
+                    },
+                    inputs: [
+                      {
+                        name: "OscillatorNode",
+                        type: "sine",
+                        frequency: {
+                          value: 440,
+                          inputs: []
+                        },
+                        detune: {
+                          value: 0,
+                          inputs: []
+                        },
+                        inputs: []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.4,
+                  inputs: []
+                },
+                inputs: [
+                  {
+                    name: "DelayNode",
+                    delayTime: {
+                      value: 0.6,
+                      inputs: []
+                    },
+                    inputs: [
+                      "<circular:GainNode>"
+                    ]
+                  }
                 ]
               }
             ]

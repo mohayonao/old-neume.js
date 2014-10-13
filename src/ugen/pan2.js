@@ -41,10 +41,18 @@ module.exports = function(neume, _) {
     var gainL = context.createGain();
     var gainR = context.createGain();
 
+    gainL.channelCount = 1;
+    gainL.channelCountMode = "explicit";
+    gainL.channelInterpretation = "speakers";
+
+    gainR.channelCount = 1;
+    gainR.channelCountMode = "explicit";
+    gainR.channelInterpretation = "speakers";
+
     var pos = _.defaults(spec.pos, 0);
 
     if (typeof pos === "number") {
-      pos = Math.max(-1, Math.min(pos, +1)) * 0.5 + 0.5;
+      pos = _.clip(pos, -1, +1) * 0.5 + 0.5;
       gainL.gain.value = Math.cos(pos * Math.PI * 0.5);
       gainR.gain.value = Math.sin(pos * Math.PI * 0.5);
     } else {

@@ -11,7 +11,7 @@ function NeuSynthDB() {
 NeuSynthDB.prototype.append = function(obj) {
   if (_.isObject(obj)) {
     this._all.push(obj);
-    if (_.has(obj, "$id")) {
+    if (obj.hasOwnProperty("$id")) {
       this._ids[obj.$id] = obj;
     }
   }

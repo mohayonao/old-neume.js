@@ -2,7 +2,6 @@
 
 var _ = require("../utils");
 var NeuComponent = require("../component/component");
-var NeuUnit = require("./unit");
 var SelectorParser = require("../parser/selector");
 
 function NeuUGen(synth, key, spec, inputs) {
@@ -21,11 +20,6 @@ function NeuUGen(synth, key, spec, inputs) {
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
-  /* istanbul ignore if */
-  if (!(unit instanceof NeuUnit)) {
-    throw new Error("Invalid UGen: " + key);
-  }
-
   this._node = unit.$outlet;
   this._node = this.$context.createMul(this._node, _.defaults(spec.mul, 1));
   this._node = this.$context.createAdd(this._node, _.defaults(spec.add, 0));
@@ -33,9 +27,13 @@ function NeuUGen(synth, key, spec, inputs) {
 
   this.$unit = unit;
 
-  _.each(unit.$methods, function(method, name) {
+  Object.keys(unit.$methods).forEach(function(name) {
+    var method = unit.$methods[name];
     _.definePropertyIfNotExists(this, name, {
-      value: method
+      value: function() {
+        method.apply(this, arguments);
+        return this;
+      }
     });
   }, this);
 }
@@ -57,8 +55,14 @@ NeuUGen.register = function(name, func) {
 
 NeuUGen.build = function(synth, key, spec, inputs) {
   if (typeof key !== "string") {
+    var type = _.typeOf(key);
+
+    if (typeof key === "object" && !NeuUGen.registered.hasOwnProperty(type)) {
+      type = "object";
+    }
+
     spec.value = key;
-    key = _.typeOf(key);
+    key = type;
   }
 
   return new NeuUGen(synth, key, spec, inputs);

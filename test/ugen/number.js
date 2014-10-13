@@ -16,13 +16,23 @@ describe("ugen/number", function() {
       var synth = new Neume(function($) {
         return $(0);
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0,
+          value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
     it("works", function() {
@@ -31,7 +41,7 @@ describe("ugen/number", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
 
       audioContext.$reset();
       synth.$context.reset();
@@ -62,6 +72,7 @@ describe("ugen/number", function() {
       var synth = new Neume(function($) {
         return $(1, $(2), $(3));
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -72,18 +83,27 @@ describe("ugen/number", function() {
           {
             name: "GainNode",
             gain: {
-              value: 2,
+              value: 1,
               inputs: []
             },
-            inputs: [ DC(1) ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 3,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 2,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 3,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
           }
         ]
       });

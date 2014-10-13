@@ -12,7 +12,6 @@ var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
 var NeuAudioBus = require("../control/audio-bus");
-var NeuControlBus = require("../control/control-bus");
 
 var INIT  = 0;
 var START = 1;
@@ -80,7 +79,7 @@ function NeuContext(destination, duration) {
 }
 NeuContext.$name = "NeuContext";
 
-_.each([
+[
   "createBuffer",
   "createBufferSource",
   "createMediaElementSource",
@@ -100,7 +99,7 @@ _.each([
   "createOscillator",
   "createPeriodicWave",
   "decodeAudioData",
-], function(methodName) {
+].forEach(function(methodName) {
   NeuContext.prototype[methodName] = function() {
     return this.$context[methodName].apply(this.$context, arguments);
   };
@@ -135,19 +134,11 @@ NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
 };
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = Math.max(0, Math.min(_.finite(_.defaults(index, 0)|0), C.MAX_AUDIO_BUS_SIZE));
+  index = _.clip(_.int(_.defaults(index, 0)), 0, C.MAX_AUDIO_BUS_SIZE);
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new NeuAudioBus(this);
   }
   return this._audioBuses[index];
-};
-
-NeuContext.prototype.getControlBus = function(index) {
-  index = Math.max(0, Math.min(_.finite(_.defaults(index, 0)|0), C.MAX_CONTROL_BUS_SIZE));
-  if (!this._controlBuses[index]) {
-    this._controlBuses[index] = new NeuControlBus(this);
-  }
-  return this._controlBuses[index];
 };
 
 NeuContext.prototype.reset = function() {
@@ -224,7 +215,7 @@ NeuContext.prototype.sched = function(time, callback, ctx) {
     context : ctx || this
   };
 
-  if (events.length === 0 || _.last(events).time <= time) {
+  if (events.length === 0 || events[events.length - 1].time <= time) {
     events.push(event);
   } else {
     for (var i = 0, imax = events.length; i < imax; i++) {

@@ -29,24 +29,33 @@ describe("ugen/delay", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "DelayNode",
-        delayTime: {
-          value: 0.5,
+        name: "GainNode",
+        gain: {
+          value: 1,
           inputs: []
         },
         inputs: [
           {
             name: "DelayNode",
             delayTime: {
-              value: 0,
+              value: 0.5,
               inputs: []
             },
-            inputs: []
+            inputs: [
+              {
+                name: "DelayNode",
+                delayTime: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });
 
-      assert(synth.toAudioNode().$maxDelayTime === 0.5);
+      assert(synth.toAudioNode().$inputs[0].$maxDelayTime === 0.5);
     });
   });
   describe("$(delay delay:$(delay) $(delay))", function() {
@@ -56,28 +65,37 @@ describe("ugen/delay", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "DelayNode",
-        delayTime: {
-          value: 0,
-          inputs: [
-            {
-              name: "DelayNode",
-              delayTime: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
         },
         inputs: [
           {
             name: "DelayNode",
             delayTime: {
               value: 0,
-              inputs: []
+              inputs: [
+                {
+                  name: "DelayNode",
+                  delayTime: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
             },
-            inputs: []
+            inputs: [
+              {
+                name: "DelayNode",
+                delayTime: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });

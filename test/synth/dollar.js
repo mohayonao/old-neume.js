@@ -79,7 +79,7 @@ describe("NeuSynthDollar", function() {
             });
           });
 
-          assert.deepEqual(synth.getMethods(), [ "func" ]);
+          assert.deepEqual(synth.methods, [ "func" ]);
 
           synth.func(1, 2);
           assert.deepEqual(passed, [ "func", 1, 2 ]);

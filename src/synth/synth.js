@@ -22,7 +22,11 @@ function NeuSynth(context, func, args) {
   }
 
   this.$outputs = this.$outputs.map(function(node) {
-    return node.toAudioNode();
+    var gain = context.createGain();
+
+    context.connect(node, gain);
+
+    return gain;
   });
 
   this._connected = false;
@@ -30,7 +34,35 @@ function NeuSynth(context, func, args) {
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
-  this._methodNames = [];
+
+  var methodNames = [];
+
+  Object.keys($.methods).forEach(function(methodName) {
+    var method = $.methods[methodName];
+
+    methodNames.push(methodName);
+
+    Object.defineProperty(this, methodName, {
+      value: function() {
+        method.apply(this, _.toArray(arguments));
+        return this;
+      }
+    });
+  }, this);
+
+  this._db.all().forEach(function(ugen) {
+    Object.keys(ugen.$unit.$methods).forEach(function(methodName) {
+      if (!this.hasOwnProperty(methodName)) {
+        methodNames.push(methodName);
+        Object.defineProperty(this, methodName, {
+          value: function() {
+            this.apply(methodName, _.toArray(arguments));
+            return this;
+          }
+        });
+      }
+    }, this);
+  }, this);
 
   Object.defineProperties(this, {
     context: {
@@ -49,37 +81,13 @@ function NeuSynth(context, func, args) {
       },
       enumerable: true
     },
+    methods: {
+      value: methodNames.sort(),
+      enumerable: true
+    }
   });
-
-  _.each($.methods, function(method, methodName) {
-    this._methodNames.push(methodName);
-    Object.defineProperty(this, methodName, {
-      value: function() {
-        method.apply(this, _.toArray(arguments));
-      }
-    });
-  }, this);
-
-  this._db.all().forEach(function(ugen) {
-    _.keys(ugen.$unit.$methods).forEach(function(methodName) {
-      if (!this.hasOwnProperty(methodName)) {
-        this._methodNames.push(methodName);
-        Object.defineProperty(this, methodName, {
-          value: function() {
-            return this.apply(methodName, _.toArray(arguments));
-          }
-        });
-      }
-    }, this);
-  }, this);
-
-  this._methodNames = this._methodNames.sort();
 }
 NeuSynth.$name = "NeuSynth";
-
-NeuSynth.prototype.getMethods = function() {
-  return this._methodNames.slice();
-};
 
 NeuSynth.prototype.start = function(t) {
   t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
@@ -135,6 +143,40 @@ NeuSynth.prototype.stop = function(t) {
         timer.stop(t);
       });
     }, this);
+  }
+
+  return this;
+};
+
+NeuSynth.prototype.fadeIn = function(t, dur) {
+  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  dur = _.finite(this.$context.toSeconds(dur));
+
+  if (this._state === INIT) {
+    var tC = -Math.max(1e-6, dur) / -4.605170185988091;
+    this.$outputs.forEach(function(node) {
+      node.gain.value = 0;
+      node.gain.setTargetAtTime(1, t, tC);
+      node.gain.setValueAtTime(1, t + dur);
+    });
+    this.start(t);
+  }
+
+  return this;
+};
+
+NeuSynth.prototype.fadeOut = function(t, dur) {
+  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  dur = _.finite(this.$context.toSeconds(dur));
+
+  if (this._state === START) {
+    var v0 = this.$outputs[0].gain.value;
+    var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
+    this.$outputs.forEach(function(node) {
+      node.gain.setTargetAtTime(0, t, tC);
+      node.gain.setValueAtTime(0, t + dur);
+    });
+    this.stop(t + dur);
   }
 
   return this;

@@ -29,7 +29,7 @@ NeuTransport.prototype.getBpm = function() {
 NeuTransport.prototype.setBpm = function(value, rampTime) {
   rampTime = this.toSeconds(_.defaults(rampTime, 0));
 
-  var bpm = Math.max(1, Math.min(_.finite(value), 1000));
+  var bpm = _.clip(_.finite(value), 1, 1000);
 
   if (rampTime <= 0) {
     this._bpm  = bpm;

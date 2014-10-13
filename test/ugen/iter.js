@@ -16,13 +16,23 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter");
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0,
+          value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
   });
@@ -44,13 +54,23 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter", { init: 3, iter: iter });
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0,
+          value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
     it("works", function() {
@@ -59,7 +79,7 @@ describe("ugen/iter", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
 
       audioContext.$reset();
@@ -98,7 +118,7 @@ describe("ugen/iter", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
 
       audioContext.$reset();
@@ -139,7 +159,7 @@ describe("ugen/iter", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
 
       audioContext.$reset();
       synth.$context.reset();
@@ -181,10 +201,11 @@ describe("ugen/iter", function() {
       var synth = new Neume(function($) {
         return $("iter", $("iter"), $("iter"));
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0,
+          value: 1,
           inputs: []
         },
         inputs: [
@@ -194,15 +215,24 @@ describe("ugen/iter", function() {
               value: 0,
               inputs: []
             },
-            inputs: [ DC(1) ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 0,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
           }
         ]
       });

@@ -3,7 +3,7 @@
 require("./shim");
 
 var _ = require("../utils");
-var VERSION = "0.0.14";
+var VERSION = "0.0.15";
 
 var neume = function(context) {
   function Neume(spec) {
@@ -32,11 +32,6 @@ var neume = function(context) {
         return context.currentTime;
       },
       enumerable: true
-    },
-    bus: {
-      value: function(index) {
-        return context.getControlBus(index);
-      }
     },
     Buffer: {
       value: Object.defineProperties(function(channels, length, sampleRate) {
@@ -95,7 +90,6 @@ neume.Mul      = require("../component/mul");
 neume.Sum      = require("../component/sum");
 neume.Param    = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
-neume.ControlBus = require("../control/control-bus");
 neume.Buffer   = require("../control/buffer");
 neume.Interval = require("../control/interval");
 neume.Timeout  = require("../control/timeout");
@@ -107,9 +101,11 @@ neume.SynthDef = require("../synth/synthdef");
 neume.UGen     = require("../synth/ugen");
 neume.Unit     = require("../synth/unit");
 
-_.each(require("../const"), function(val, key) {
-  neume[key] = val;
-});
+(function(C) {
+  Object.keys(C).forEach(function(key) {
+    neume[key] = C[key];
+  });
+})(require("../const"));
 
 neume.register = function(name, func) {
   neume.UGen.register(name, func);

@@ -34,22 +34,31 @@ describe("ugen/buf", function() {
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "AudioBufferSourceNode",
-        buffer: {
-          name: "AudioBuffer",
-          length: 4,
-          duration: 4 / 44100,
-          sampleRate: 44100,
-          numberOfChannels: 1
-        },
-        playbackRate: {
+        name: "GainNode",
+        gain: {
           value: 1,
           inputs: []
         },
-        loop: false,
-        loopStart: 0,
-        loopEnd: 0,
-        inputs: []
+        inputs: [
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 4,
+              duration: 4 / 44100,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: false,
+            loopStart: 0,
+            loopEnd: 0,
+            inputs: []
+          }
+        ]
       });
     });
 
@@ -59,7 +68,7 @@ describe("ugen/buf", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
 
       audioContext.$reset();
       synth.$context.reset();
@@ -82,7 +91,7 @@ describe("ugen/buf", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var spy = sinon.spy(outlet, "start");
 
       audioContext.$reset();
@@ -102,7 +111,7 @@ describe("ugen/buf", function() {
       })();
 
       var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode();
+      var outlet = synth.toAudioNode().$inputs[0];
       var spy = sinon.spy(outlet, "start");
 
       audioContext.$reset();
@@ -124,23 +133,33 @@ describe("ugen/buf", function() {
       var synth = new Neume(function($) {
         return $(audioBuffer);
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "AudioBufferSourceNode",
-        buffer: {
-          name: "AudioBuffer",
-          length: 128,
-          duration: 128 / 44100,
-          sampleRate: 44100,
-          numberOfChannels: 1
-        },
-        playbackRate: {
+        name: "GainNode",
+        gain: {
           value: 1,
           inputs: []
         },
-        loop: false,
-        loopStart: 0,
-        loopEnd: 0,
-        inputs: []
+        inputs: [
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 128,
+              duration: 128 / 44100,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: false,
+            loopStart: 0,
+            loopEnd: 0,
+            inputs: []
+          }
+        ]
       });
     });
   });
@@ -151,23 +170,33 @@ describe("ugen/buf", function() {
       var synth = new Neume(function($) {
         return $(buffer);
       })();
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "AudioBufferSourceNode",
-        buffer: {
-          name: "AudioBuffer",
-          length: 4,
-          duration: 4 / 44100,
-          sampleRate: 44100,
-          numberOfChannels: 1
-        },
-        playbackRate: {
+        name: "GainNode",
+        gain: {
           value: 1,
           inputs: []
         },
-        loop: false,
-        loopStart: 0,
-        loopEnd: 0,
-        inputs: []
+        inputs: [
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 4,
+              duration: 4 / 44100,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: false,
+            loopStart: 0,
+            loopEnd: 0,
+            inputs: []
+          }
+        ]
       });
     });
   });
