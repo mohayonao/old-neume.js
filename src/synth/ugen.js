@@ -55,8 +55,14 @@ NeuUGen.register = function(name, func) {
 
 NeuUGen.build = function(synth, key, spec, inputs) {
   if (typeof key !== "string") {
+    var type = _.typeOf(key);
+
+    if (typeof key === "object" && !NeuUGen.registered.hasOwnProperty(type)) {
+      type = "object";
+    }
+
     spec.value = key;
-    key = _.typeOf(key);
+    key = type;
   }
 
   return new NeuUGen(synth, key, spec, inputs);

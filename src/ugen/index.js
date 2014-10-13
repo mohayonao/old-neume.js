@@ -22,6 +22,7 @@ module.exports = function(neume) {
   neume.use(require("./mul"));
   neume.use(require("./noise"));
   neume.use(require("./number"));
+  neume.use(require("./object"));
   neume.use(require("./osc"));
   neume.use(require("./pan"));
   neume.use(require("./pan2"));
