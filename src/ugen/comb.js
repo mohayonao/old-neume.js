@@ -143,12 +143,12 @@ module.exports = function(neume, _) {
 
   function createDelay(context, delayTime, maxDelayTime) {
     if (typeof delayTime === "number") {
-      delayTime = Math.max(0, Math.min(delayTime, MAX_DELAY_SEC));
+      delayTime = _.clip(delayTime, 0, MAX_DELAY_SEC);
       maxDelayTime = delayTime;
     } else {
       maxDelayTime = _.finite(_.defaults(context.toSeconds(maxDelayTime), 1));
     }
-    maxDelayTime = Math.max(1 / context.sampleRate, Math.min(maxDelayTime, MAX_DELAY_SEC));
+    maxDelayTime = _.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
 
     var delayNode = context.createDelay(maxDelayTime);
 

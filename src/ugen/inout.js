@@ -52,7 +52,7 @@ module.exports = function(neume, _) {
     var synth   = ugen.$synth;
     var outlet  = context.createSum(inputs);
 
-    var index = Math.max(0, Math.min(_.finite(_.defaults(spec.bus, 0))|0, MAX_AUDIO_BUS_SIZE));
+    var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, MAX_AUDIO_BUS_SIZE);
 
     synth.$outputs[index] = outlet;
 
@@ -83,7 +83,7 @@ module.exports = function(neume, _) {
     var synth   = ugen.$synth;
     var outlet  = null;
 
-    var index = Math.max(0, Math.min(_.finite(_.defaults(spec.bus, 0))|0, MAX_AUDIO_BUS_SIZE));
+    var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, MAX_AUDIO_BUS_SIZE);
     var bus = getLocalBus(context, synth, index);
 
     outlet = context.createSum(inputs).connect(bus);
@@ -94,19 +94,19 @@ module.exports = function(neume, _) {
   });
 
   function createAudioIn(context, index) {
-    index = Math.max(0, Math.min(_.finite(_.defaults(index, 0))|0, MAX_AUDIO_BUS_SIZE));
+    index = _.clip(_.int(_.defaults(index, 0)), 0, MAX_AUDIO_BUS_SIZE);
 
     return context.getAudioBus(index);
   }
 
   function createControlIn(context, index) {
-    index = Math.max(0, Math.min(_.finite(_.defaults(index, 0))|0, MAX_CONTROL_BUS_SIZE));
+    index = _.clip(_.int(_.defaults(index, 0)), 0, MAX_CONTROL_BUS_SIZE);
 
     return context.getControlBus(index);
   }
 
   function getLocalBus(context, synth, index) {
-    index = Math.max(0, Math.min(_.finite(_.defaults(index, 0))|0, MAX_AUDIO_BUS_SIZE));
+    index = _.clip(_.int(_.defaults(index, 0)), 0, MAX_AUDIO_BUS_SIZE);
 
     if (!synth.$localBuses[index]) {
       synth.$localBuses[index] = context.createGain();

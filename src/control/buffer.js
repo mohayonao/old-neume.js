@@ -221,7 +221,7 @@ NeuBuffer.prototype.toAudioBuffer = function() {
 };
 
 NeuBuffer.prototype.toPeriodicWave = function(ch) {
-  ch = Math.max(0, Math.min(_.int(ch), this.numberOfChannels - 1));
+  ch = _.clip(_.int(ch), 0, this.numberOfChannels - 1);
 
   var buffer = this._buffer.getChannelData(ch);
 

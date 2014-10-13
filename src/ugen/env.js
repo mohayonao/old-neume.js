@@ -170,7 +170,7 @@ module.exports = function(neume, _) {
       var t1  = t0 + dur;
       var v0  = param.valueOf();
       var v1  = _.finite(params[1]);
-      var cur = Math.max(1e-6, Math.min(_.finite(params[2]), 1-1e-6));
+      var cur = _.clip(_.finite(params[2]), 1e-6, 1 - 1e-6);
 
       if (v0 === v1 || dur <= 0) {
         param.setAt(v1, t1);

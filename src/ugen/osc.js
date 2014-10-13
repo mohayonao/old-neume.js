@@ -148,7 +148,7 @@ module.exports = function(neume, _) {
   var _wave = new Array(256);
 
   function makePulseWave(context, width) {
-    width = (Math.max(0, Math.min(width, 1)) * 256)|0;
+    width = _.int(_.clip(width, 0, 1) * 256);
 
     if (_wave[width]) {
       return _wave[width];
