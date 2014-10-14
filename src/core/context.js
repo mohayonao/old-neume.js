@@ -282,16 +282,19 @@ NeuContext.prototype.connect = function(from, to) {
       } else {
         from = this.toAudioNode(from);
         if (from) {
-          return from.connect(to);
+          from.connect(to);
         }
       }
     } else if (to instanceof window.AudioNode) {
       from = this.toAudioNode(from);
       if (from) {
-        return from.connect(to);
+        from.connect(to);
       }
     } else if (to instanceof NeuAudioBus) {
       this.connect(from, to.toAudioNode());
+    }
+    if (to.onconnected) {
+      to.onconnected(from);
     }
   }
   return this;
@@ -300,7 +303,13 @@ NeuContext.prototype.connect = function(from, to) {
 NeuContext.prototype.disconnect = function(from) {
   if (from && from.disconnect) {
     from.disconnect();
+    if (from.$outputs) {
+      from.$outputs.forEach(function(to) {
+        return to.ondisconnected && to.ondisconnected(from);
+      });
+    }
   }
+  return this;
 };
 
 NeuContext.prototype.getBpm = function() {
