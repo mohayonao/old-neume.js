@@ -28,7 +28,7 @@ module.exports = function(neume, _) {
     var context = ugen.$context;
     var outlet  = null;
 
-    var iter  = _.defaults(spec.iter, {});
+    var iter  = _.defaults(spec.iter, null);
     var state = ITERATE;
     var prevValue = 0;
     var param = context.createParam(prevValue, spec);
@@ -42,44 +42,33 @@ module.exports = function(neume, _) {
     }
 
     function iterNext() {
-      return typeof iter.next === "function" ? iter.next() : 0;
-    }
-
-    function update(t0, v1) {
-      var v0 = prevValue;
-
-      param.update(t0, v1, v0);
-
-      prevValue = v1;
-    }
-
-    function next(t) {
-      if (state !== ITERATE) {
-        return;
+      if (iter == null) {
+        return { value: undefined, done: true };
       }
-
-      var v1 = iterNext();
-
-      if (v1 == null) {
-        state = FINISHED;
-        ugen.emit("end", { playbackTime: t }, ugen.$synth);
+      var items;
+      if (typeof iter.next === "function") {
+        items = iter.next();
+        if (!_.isObject(items)) {
+          items = { value: items, done: false };
+        }
       } else {
-        update(t, v1);
+        items = { value: iter.valueOf(), done: false };
       }
-    }
-
-    function reset(t) {
-      if (typeof iter.reset === "function") {
-        iter.reset();
-      }
-      update(t, iterNext());
+      return items;
     }
 
     return new neume.Unit({
       outlet: outlet,
       start: function(t) {
-        prevValue = _.finite(iterNext());
-        param.setAt(prevValue, t);
+        var items = iterNext();
+
+        if (items.done) {
+          state = FINISHED;
+          ugen.emit("end", { playbackTime: t }, ugen.$synth);
+        } else {
+          prevValue = _.finite(items.value);
+          param.setAt(prevValue, t);
+        }
       },
       methods: {
         setValue: function(t, value) {
@@ -89,14 +78,21 @@ module.exports = function(neume, _) {
         },
         next: function(t) {
           context.sched(_.finite(context.toSeconds(t)), function(t) {
-            next(t);
+            if (state === ITERATE) {
+              var items = iterNext();
+              var value;
+
+              if (items.done) {
+                state = FINISHED;
+                ugen.emit("end", { playbackTime: t }, ugen.$synth);
+              } else {
+                value = _.finite(items.value);
+                param.update(t, value, prevValue);
+                prevValue = value;
+              }
+            }
           });
-        },
-        reset: function(t) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
-            reset(t);
-          });
-        },
+        }
       }
     });
   });

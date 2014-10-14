@@ -40,13 +40,17 @@ describe("ugen/iter", function() {
   describe("$(iter iter:iter)", function() {
     var iter = null;
     beforeEach(function() {
-      var i = 0;
       iter = {
+        index: 0,
+        values: [ 3, 1, 4, 1, 5 ],
         next: function() {
-          return [ 3, 1, 4, 1, 5 ][i++] || null;
+          if (iter.index < iter.values.length) {
+            return { value: iter.values[iter.index++], done: false };
+          }
+          return { value: undefined, done: true };
         },
         reset: function() {
-          i = 0;
+          iter.index = 0;
         }
       };
     });
@@ -112,9 +116,10 @@ describe("ugen/iter", function() {
 
       assert(ended === 0.500);
     });
-    it("works with reset", function() {
+
+    it("works with null", function() {
       var synth = new Neume(function($) {
-        return $("iter", { iter: iter });
+        return $("iter");
       })();
 
       var audioContext = Neume.audioContext;
@@ -130,25 +135,14 @@ describe("ugen/iter", function() {
 
       synth.next(0.100);
       synth.next(0.200);
-      synth.next(0.300);
-      synth.next(0.400);
-      synth.next(0.500);
-      synth.next(0.600);
-      synth.reset(0.425);
 
       audioContext.$processTo("00:00.600");
-      assert(outlet.gain.$valueAtTime(0.000) === 3);
-      assert(outlet.gain.$valueAtTime(0.050) === 3);
-      assert(outlet.gain.$valueAtTime(0.100) === 1);
-      assert(outlet.gain.$valueAtTime(0.150) === 1);
-      assert(outlet.gain.$valueAtTime(0.200) === 4);
-      assert(outlet.gain.$valueAtTime(0.250) === 4);
-      assert(outlet.gain.$valueAtTime(0.300) === 1);
-      assert(outlet.gain.$valueAtTime(0.350) === 1);
-      assert(outlet.gain.$valueAtTime(0.400) === 5);
-      assert(outlet.gain.$valueAtTime(0.450) === 3);
-      assert(outlet.gain.$valueAtTime(0.500) === 1);
-      assert(outlet.gain.$valueAtTime(0.600) === 4);
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 0);
+      assert(outlet.gain.$valueAtTime(0.150) === 0);
+      assert(outlet.gain.$valueAtTime(0.200) === 0);
+      assert(outlet.gain.$valueAtTime(0.250) === 0);
 
       assert(ended === 0.000);
     });
@@ -178,9 +172,6 @@ describe("ugen/iter", function() {
       synth.next(0.400);
       synth.next(0.500);
       synth.next(0.600);
-
-      synth.reset(0.200);
-      synth.reset(0.500);
 
       audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 3);
