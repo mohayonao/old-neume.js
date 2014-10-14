@@ -25,7 +25,7 @@ module.exports = function(neume, _) {
 
     var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, MAX_AUDIO_BUS_SIZE);
 
-    synth.$outputs[index] = outlet;
+    synth.$routes[index] = outlet;
 
     return new neume.Unit({
       outlet: outlet,

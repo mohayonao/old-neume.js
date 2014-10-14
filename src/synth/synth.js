@@ -11,17 +11,17 @@ var STOP  = 2;
 
 function NeuSynth(context, func, args) {
   this.$context = context;
-  this.$outputs = [];
+  this.$routes = [];
   this.$localBuses = [];
 
   var $ = new NeuSynthDollar(this);
   var result = func.apply(null, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.$isOutput) {
-    this.$outputs[0] = result;
+    this.$routes[0] = result;
   }
 
-  this.$outputs = this.$outputs.map(function(node) {
+  this.$routes = this.$routes.map(function(node) {
     var gain = context.createGain();
 
     context.connect(node, gain);
@@ -30,7 +30,7 @@ function NeuSynth(context, func, args) {
   });
 
   this._connected = false;
-  this._db = this.$outputs.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
+  this._db = this.$routes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
@@ -100,7 +100,7 @@ NeuSynth.prototype.start = function(t) {
       this._stateString = "PLAYING";
     }, this);
 
-    this.$outputs.forEach(function(node, index) {
+    this.$routes.forEach(function(node, index) {
       this.connect(node, this.getAudioBus(index));
     }, this.$context);
 
@@ -130,7 +130,7 @@ NeuSynth.prototype.stop = function(t) {
       this._stateString = "FINISHED";
 
       context.nextTick(function() {
-        this.$outputs.forEach(function(node) {
+        this.$routes.forEach(function(node) {
           context.disconnect(node);
         });
       }, this);
@@ -154,7 +154,7 @@ NeuSynth.prototype.fadeIn = function(t, dur) {
 
   if (this._state === INIT) {
     var tC = -Math.max(1e-6, dur) / -4.605170185988091;
-    this.$outputs.forEach(function(node) {
+    this.$routes.forEach(function(node) {
       node.gain.value = 0;
       node.gain.setTargetAtTime(1, t, tC);
       node.gain.setValueAtTime(1, t + dur);
@@ -170,9 +170,9 @@ NeuSynth.prototype.fadeOut = function(t, dur) {
   dur = _.finite(this.$context.toSeconds(dur));
 
   if (this._state === START) {
-    var v0 = this.$outputs[0].gain.value;
+    var v0 = this.$routes[0].gain.value;
     var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
-    this.$outputs.forEach(function(node) {
+    this.$routes.forEach(function(node) {
       node.gain.setTargetAtTime(0, t, tC);
       node.gain.setValueAtTime(0, t + dur);
     });
@@ -197,7 +197,7 @@ NeuSynth.prototype.call = function() {
 };
 
 NeuSynth.prototype.toAudioNode = function() {
-  return this.$context.toAudioNode(this.$outputs[0]);
+  return this.$context.toAudioNode(this.$routes[0]);
 };
 
 NeuSynth.prototype.hasListeners = function(event) {
