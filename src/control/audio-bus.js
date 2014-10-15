@@ -28,6 +28,22 @@ function NeuAudioBus(context) {
 
 NeuAudioBus.$name = "NeuAudioBus";
 
+NeuAudioBus.prototype.fade = function(t, val, dur) {
+  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  val = _.finite(val);
+  dur = _.finite(this.$context.toSeconds(dur));
+
+  var v0 = this.$outlet.gain.value;
+  var v1 = val;
+  var vT = v0 + (v1 - v0) * 0.99;
+  var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
+
+  this.$outlet.gain.setTargetAtTime(v1, t, tC);
+  this.$outlet.gain.setValueAtTime(v1, t + dur);
+
+  return this;
+};
+
 NeuAudioBus.prototype.toAudioNode = function() {
   return this.$outlet;
 };
