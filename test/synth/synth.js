@@ -263,6 +263,38 @@ describe("NeuSynth", function() {
     });
   });
 
+  describe("#fade(t, val, dur)", function() {
+    it("works", function() {
+      var synth = new NeuSynth(context, function($) {
+        return $("sin");
+      }, []);
+
+      var outlet = synth.toAudioNode();
+
+      synth.fade(0.000, 0.5, 2);
+      synth.start(1.000);
+      synth.fade(2.000, 0.5, 2);
+
+      audioContext.$processTo("00:02.000");
+
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.250), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.500), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.750), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.000), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.781, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.658, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.588, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.550, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.528, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.515, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.508, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(4.500), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(5.000), 0.500, 1e-2));
+    });
+  });
+
   describe("#call(method, ...args)", function() {
     it("returns self", function() {
       var synth = new NeuSynth(context, NOP, []);

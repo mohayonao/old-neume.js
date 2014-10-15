@@ -182,6 +182,25 @@ NeuSynth.prototype.fadeOut = function(t, dur) {
   return this;
 };
 
+NeuSynth.prototype.fade = function(t, val, dur) {
+  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  val = _.finite(val);
+  dur = _.finite(this.$context.toSeconds(dur));
+
+  if (this._state === START) {
+    var v0 = this.$routes[0].gain.value;
+    var v1 = val;
+    var vT = v0 + (v1 - v0) * 0.99;
+    var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
+    this.$routes.forEach(function(node) {
+      node.gain.setTargetAtTime(v1, t, tC);
+      node.gain.setValueAtTime(v1, t + dur);
+    });
+  }
+
+  return this;
+};
+
 NeuSynth.prototype.apply = function(method, args) {
   iterateOverTargetss(this._db, method, function(ugen, method) {
     ugen.$unit.apply(method, args);
