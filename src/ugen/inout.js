@@ -1,7 +1,7 @@
 module.exports = function(neume, _) {
   "use strict";
 
-  var MAX_AUDIO_BUS_SIZE = neume.MAX_AUDIO_BUS_SIZE;
+  var AUDIO_BUS_CHANNELS = neume.AUDIO_BUS_CHANNELS;
 
   neume.register("in", function(ugen, spec, inputs) {
     var context = ugen.$context;
@@ -23,7 +23,7 @@ module.exports = function(neume, _) {
     var synth   = ugen.$synth;
     var outlet  = context.createSum(inputs);
 
-    var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, MAX_AUDIO_BUS_SIZE);
+    var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
 
     synth.$routes[index] = outlet;
 
@@ -54,7 +54,7 @@ module.exports = function(neume, _) {
     var synth   = ugen.$synth;
     var outlet  = null;
 
-    var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, MAX_AUDIO_BUS_SIZE);
+    var index = _.clip(_.int(_.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
     var bus = getLocalBus(context, synth, index);
 
     outlet = context.createSum(inputs).connect(bus);
@@ -65,13 +65,13 @@ module.exports = function(neume, _) {
   });
 
   function getAudioBus(context, index) {
-    index = _.clip(_.int(_.defaults(index, 0)), 0, MAX_AUDIO_BUS_SIZE);
+    index = _.clip(_.int(_.defaults(index, 0)), 0, AUDIO_BUS_CHANNELS);
 
     return context.getAudioBus(index);
   }
 
   function getLocalBus(context, synth, index) {
-    index = _.clip(_.int(_.defaults(index, 0)), 0, MAX_AUDIO_BUS_SIZE);
+    index = _.clip(_.int(_.defaults(index, 0)), 0, AUDIO_BUS_CHANNELS);
 
     if (!synth.$localBuses[index]) {
       synth.$localBuses[index] = context.createGain();

@@ -134,7 +134,7 @@ NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
 };
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = _.clip(_.int(_.defaults(index, 0)), 0, C.MAX_AUDIO_BUS_SIZE);
+  index = _.clip(_.int(_.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new NeuAudioBus(this);
   }
