@@ -24,14 +24,11 @@ function NeuContext(destination, duration) {
   this.$context = destination.context;
   this.$destination = destination;
 
-  this._transport  = new NeuTransport(this);
-  this.$masterGain = this.$context.createGain();
-  this.$analyser   = this.$context.createAnalyser();
-  this.connect(this.$masterGain, this.$analyser);
-  this.connect(this.$analyser  , this.$destination);
+  this._transport = new NeuTransport(this);
+  this.$analyser = this.$context.createAnalyser();
+  this.connect(this.$analyser, this.$destination);
   this._scriptProcessor = null;
   this._audioBuses   = [];
-  this._controlBuses = [];
 
   this.$inlet  = null;
   this.$outlet = this.$analyser;
@@ -147,10 +144,9 @@ NeuContext.prototype.reset = function() {
   }
 
   this._audioBuses   = [];
-  this._controlBuses = [];
 
   this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
-  this.connect(this.$inlet, this.$masterGain);
+  this.connect(this.$inlet, this.$analyser);
 
   this.disconnect(this._scriptProcessor);
 

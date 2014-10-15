@@ -153,10 +153,6 @@ neume.exports = function(destination) {
           return neume.render(context, duration, func);
         }
       },
-      master: {
-        value: context.$masterGain,
-        enumerable: true
-      },
       analyser: {
         value: context.$analyser,
         enumerable: true

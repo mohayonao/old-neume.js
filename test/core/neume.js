@@ -69,11 +69,6 @@ describe("neume", function() {
         assert(spy.calledOnce);
       });
     });
-    describe(".master", function() {
-      it("points to GainNode", function() {
-        assert(Neume.master instanceof window.GainNode);
-      });
-    });
     describe(".analyser", function() {
       it("points to AnalyserNode", function() {
         assert(Neume.analyser instanceof window.AnalyserNode);
