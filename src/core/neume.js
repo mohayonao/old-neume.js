@@ -3,7 +3,7 @@
 require("./shim");
 
 var _ = require("../utils");
-var VERSION = "0.0.15";
+var VERSION = "0.0.16";
 
 var neume = function(context) {
   function Neume(spec) {
@@ -152,10 +152,6 @@ neume.exports = function(destination) {
         value: function(duration, func) {
           return neume.render(context, duration, func);
         }
-      },
-      master: {
-        value: context.$masterGain,
-        enumerable: true
       },
       analyser: {
         value: context.$analyser,

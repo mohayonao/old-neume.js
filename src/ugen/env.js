@@ -63,11 +63,11 @@ module.exports = function(neume, _) {
   });
 
   neume.register("adsr", function(ugen, spec, inputs) {
-    var a = _.finite(_.defaults(spec.a, 0.01));
-    var d = _.finite(_.defaults(spec.d, 0.30));
-    var s = _.finite(_.defaults(spec.s, 0.50));
-    var r = _.finite(_.defaults(spec.r, 1.00));
-    var curve = _.finite(_.defaults(spec.curve, 0.01));
+    var a = _.defaults(spec.a, 0.01);
+    var d = _.defaults(spec.d, 0.30);
+    var s = _.defaults(spec.s, 0.50);
+    var r = _.defaults(spec.r, 1.00);
+    var curve = _.defaults(spec.curve, 0.01);
 
     var init = 0;
     var table = [
@@ -81,12 +81,12 @@ module.exports = function(neume, _) {
   });
 
   neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = _.finite(_.defaults(spec.delay, 0.1));
-    var a = _.finite(_.defaults(spec.a, 0.01));
-    var d = _.finite(_.defaults(spec.d, 0.30));
-    var s = _.finite(_.defaults(spec.s, 0.50));
-    var r = _.finite(_.defaults(spec.r, 1.00));
-    var curve = _.finite(_.defaults(spec.curve, 0.01));
+    var delay = _.defaults(spec.delay, 0.1);
+    var a = _.defaults(spec.a, 0.01);
+    var d = _.defaults(spec.d, 0.30);
+    var s = _.defaults(spec.s, 0.50);
+    var r = _.defaults(spec.r, 1.00);
+    var curve = _.defaults(spec.curve, 0.01);
 
     var init = 0;
     var table = [
@@ -101,10 +101,10 @@ module.exports = function(neume, _) {
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
-    var a = _.finite(_.defaults(spec.a, 0.01));
-    var s = _.finite(_.defaults(spec.s, 1.00));
-    var r = _.finite(_.defaults(spec.r, 1.00));
-    var curve = _.finite(_.defaults(spec.curve, 0.01));
+    var a = _.defaults(spec.a, 0.01);
+    var s = _.defaults(spec.s, 1.00);
+    var r = _.defaults(spec.r, 1.00);
+    var curve = _.defaults(spec.curve, 0.01);
 
     var init = 0;
     var table = [
@@ -117,9 +117,9 @@ module.exports = function(neume, _) {
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
-    var r = _.finite(_.defaults(spec.r, 0.1));
-    var level = _.finite(_.defaults(spec.level, 1.00));
-    var curve = _.finite(_.defaults(spec.curve, 0.01));
+    var r = _.defaults(spec.r, 0.1);
+    var level = _.defaults(spec.level, 1.00);
+    var curve = _.defaults(spec.curve, 0.01);
 
     var init = level;
     var table = [

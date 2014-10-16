@@ -24,14 +24,11 @@ function NeuContext(destination, duration) {
   this.$context = destination.context;
   this.$destination = destination;
 
-  this._transport  = new NeuTransport(this);
-  this.$masterGain = this.$context.createGain();
-  this.$analyser   = this.$context.createAnalyser();
-  this.connect(this.$masterGain, this.$analyser);
-  this.connect(this.$analyser  , this.$destination);
+  this._transport = new NeuTransport(this);
+  this.$analyser = this.$context.createAnalyser();
+  this.connect(this.$analyser, this.$destination);
   this._scriptProcessor = null;
   this._audioBuses   = [];
-  this._controlBuses = [];
 
   this.$inlet  = null;
   this.$outlet = this.$analyser;
@@ -134,7 +131,7 @@ NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
 };
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = _.clip(_.int(_.defaults(index, 0)), 0, C.MAX_AUDIO_BUS_SIZE);
+  index = _.clip(_.int(_.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new NeuAudioBus(this);
   }
@@ -147,10 +144,9 @@ NeuContext.prototype.reset = function() {
   }
 
   this._audioBuses   = [];
-  this._controlBuses = [];
 
   this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
-  this.connect(this.$inlet, this.$masterGain);
+  this.connect(this.$inlet, this.$analyser);
 
   this.disconnect(this._scriptProcessor);
 
@@ -282,16 +278,19 @@ NeuContext.prototype.connect = function(from, to) {
       } else {
         from = this.toAudioNode(from);
         if (from) {
-          return from.connect(to);
+          from.connect(to);
         }
       }
     } else if (to instanceof window.AudioNode) {
       from = this.toAudioNode(from);
       if (from) {
-        return from.connect(to);
+        from.connect(to);
       }
     } else if (to instanceof NeuAudioBus) {
       this.connect(from, to.toAudioNode());
+    }
+    if (to.onconnected) {
+      to.onconnected(from);
     }
   }
   return this;
@@ -300,7 +299,13 @@ NeuContext.prototype.connect = function(from, to) {
 NeuContext.prototype.disconnect = function(from) {
   if (from && from.disconnect) {
     from.disconnect();
+    if (from.$outputs) {
+      from.$outputs.forEach(function(to) {
+        return to.ondisconnected && to.ondisconnected(from);
+      });
+    }
   }
+  return this;
 };
 
 NeuContext.prototype.getBpm = function() {
