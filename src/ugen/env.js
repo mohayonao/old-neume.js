@@ -54,12 +54,9 @@ module.exports = function(neume, _) {
    *   |
    */
   neume.register("env", function(ugen, spec, inputs) {
-    var init  = _.finite(_.defaults(spec.init, 0));
-    var table = _.isArray(spec.table) ? spec.table : [];
-    var releaseNode = _.int(_.defaults(spec.release, -1));
-    var loopNode    = _.int(_.defaults(spec.loop   , -1));
+    var table = makeEnvTable(ugen.$context, spec);
 
-    return make(init, table, releaseNode, loopNode, ugen, spec, inputs);
+    return make(table, ugen, spec, inputs);
   });
 
   neume.register("adsr", function(ugen, spec, inputs) {
@@ -70,14 +67,16 @@ module.exports = function(neume, _) {
     var curve = _.defaults(spec.curve, 0.01);
 
     var init = 0;
-    var table = [
+    var list = [
       [ 1, a, curve ], // a
       [ s, d, curve ], // d
       [ 0, r, curve ], // r
     ];
     var releaseNode = 2;
 
-    return make(init, table, releaseNode, -1, ugen, spec, inputs);
+    return make({
+      init: init, list: list, releaseNode: releaseNode, loopNode: -1
+    }, ugen, spec, inputs);
   });
 
   neume.register("dadsr", function(ugen, spec, inputs) {
@@ -89,7 +88,7 @@ module.exports = function(neume, _) {
     var curve = _.defaults(spec.curve, 0.01);
 
     var init = 0;
-    var table = [
+    var list = [
       [ 0, delay, curve ], // d
       [ 1, a    , curve ], // a
       [ s, d    , curve ], // d
@@ -97,7 +96,9 @@ module.exports = function(neume, _) {
     ];
     var releaseNode = 3;
 
-    return make(init, table, releaseNode, -1, ugen, spec, inputs);
+    return make({
+      init: init, list: list, releaseNode: releaseNode, loopNode: -1
+    }, ugen, spec, inputs);
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
@@ -107,13 +108,15 @@ module.exports = function(neume, _) {
     var curve = _.defaults(spec.curve, 0.01);
 
     var init = 0;
-    var table = [
+    var list = [
       [ s, a, curve ], // a
       [ 0, r, curve ], // r
     ];
     var releaseNode = 1;
 
-    return make(init, table, releaseNode, -1, ugen, spec, inputs);
+    return make({
+      init: init, list: list, releaseNode: releaseNode, loopNode: -1
+    }, ugen, spec, inputs);
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
@@ -122,20 +125,86 @@ module.exports = function(neume, _) {
     var curve = _.defaults(spec.curve, 0.01);
 
     var init = level;
-    var table = [
+    var list = [
       [ level, 0, 0 ],
       [ 0, r, curve ], // r
     ];
     var releaseNode = 1;
 
-    return make(init, table, releaseNode, -1, ugen, spec, inputs);
+    return make({
+      init: init, list: list, releaseNode: releaseNode, loopNode: -1
+    }, ugen, spec, inputs);
   });
 
-  function make(init, table, releaseNode, loopNode, ugen, spec, inputs) {
+  function makeEnvTable(context, spec) {
+    var table = {};
+    var curve = _.defaults(spec.curve, 0.01);
+
+    if (spec.hasOwnProperty("table")) {
+      table = makeEnvTableFromArrayList(context, spec, curve);
+    } else {
+      table = makeEnvTableFromNumList(context, _.toArray(spec._), curve);
+    }
+
+    return table;
+  }
+
+  function makeEnvTableFromArrayList(context, spec, curve) {
+    var table = {
+      init: _.finite(spec.init),
+      list: [],
+      releaseNode: _.int(_.defaults(spec.release, -1)),
+      loopNode: _.int(_.defaults(spec.loop, -1)),
+    }, list = _.toArray(spec.table);
+
+    for (var i = 0, imax = list.length; i < imax; i++) {
+      /* istanbul ignore else */
+      if (Array.isArray(list[i])) {
+        table.list.push([
+          _.finite(list[i][0]), _.finite(context.toSeconds(list[i][1])), _.finite(_.defaults(list[i][2], curve))
+        ]);
+      }
+    }
+
+    return table;
+  }
+
+  function makeEnvTableFromNumList(context, list, curve) {
+    var table = {
+      init: _.finite(list.shift()),
+      list: [],
+      releaseNode: -1,
+      loopNode: -1,
+    };
+
+    for (var i = 0, imax = list.length; i < imax; ) {
+      var value = list[i++];
+
+      if (typeof value === "string") {
+        if (/^r(elease)?$/i.test(value)) {
+          table.releaseNode = table.list.length;
+        } else if (/^l(oop)?$/i.test(value)) {
+          table.loopNode = table.list.length;
+        }
+      } else {
+        table.list.push([
+          _.finite(value), _.finite(context.toSeconds(list[i++])), curve
+        ]);
+      }
+    }
+
+    return table;
+  }
+
+  function make(table, ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet  = null;
 
-    var index   = 0;
+    var init = table.init;
+    var list = table.list;
+    var releaseNode = table.releaseNode;
+    var loopNode = table.loopNode;
+    var index = 0;
     var schedId = 0;
     var releaseSchedId = 0;
     var param   = context.createParam(init);
@@ -153,11 +222,11 @@ module.exports = function(neume, _) {
       context.unsched(schedId);
       context.unsched(releaseSchedId);
       schedId = 0;
-      index = table.length;
+      index = list.length;
     }
 
     function resume(t0) {
-      var params = table[index];
+      var params = list[index];
 
       /* istanbul ignore next */
       if (params == null) {
@@ -178,7 +247,7 @@ module.exports = function(neume, _) {
         var vT = v0 + (v1 - v0) * (1 - cur);
         var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
 
-        if (index === table.length) {
+        if (index === list.length) {
           t1 = t0 + tC * Math.abs(Math.log(Math.max(1e-6, Math.abs(v1)) / Math.max(1e-6, Math.abs(v0))));
         }
 
@@ -189,7 +258,7 @@ module.exports = function(neume, _) {
         index = loopNode;
       }
 
-      if (index === table.length) {
+      if (index === list.length) {
         schedId = context.sched(t1, function(t) {
           schedId = 0;
           ugen.emit("end", { playbackTime: t }, ugen.$synth);
