@@ -10,7 +10,7 @@ module.exports = function(neume, _) {
    * })
    *
    * env-table:
-   *   [ [ duration, target, curve ], ... ]
+   *   [ [ value, duration, curve ], ... ]
    *
    * aliases:
    *   $("adsr", {
@@ -71,9 +71,9 @@ module.exports = function(neume, _) {
 
     var init = 0;
     var table = [
-      [ a, 1, curve ], // a
-      [ d, s, curve ], // d
-      [ r, 0, curve ], // r
+      [ 1, a, curve ], // a
+      [ s, d, curve ], // d
+      [ 0, r, curve ], // r
     ];
     var releaseNode = 2;
 
@@ -90,10 +90,10 @@ module.exports = function(neume, _) {
 
     var init = 0;
     var table = [
-      [ delay, 0, curve ], // d
-      [ a    , 1, curve ], // a
-      [ d    , s, curve ], // d
-      [ r    , 0, curve ], // r
+      [ 0, delay, curve ], // d
+      [ 1, a    , curve ], // a
+      [ s, d    , curve ], // d
+      [ 0, r    , curve ], // r
     ];
     var releaseNode = 3;
 
@@ -108,8 +108,8 @@ module.exports = function(neume, _) {
 
     var init = 0;
     var table = [
-      [ a, s, curve ], // a
-      [ r, 0, curve ], // r
+      [ s, a, curve ], // a
+      [ 0, r, curve ], // r
     ];
     var releaseNode = 1;
 
@@ -123,8 +123,8 @@ module.exports = function(neume, _) {
 
     var init = level;
     var table = [
-      [ 0, level, 0 ],
-      [ r, 0, curve ], // r
+      [ level, 0, 0 ],
+      [ 0, r, curve ], // r
     ];
     var releaseNode = 1;
 
@@ -166,10 +166,10 @@ module.exports = function(neume, _) {
 
       index += 1;
 
-      var dur = _.finite(context.toSeconds(params[0]));
+      var dur = _.finite(context.toSeconds(params[1]));
       var t1  = t0 + dur;
       var v0  = param.valueOf();
-      var v1  = _.finite(params[1]);
+      var v1  = _.finite(params[0]);
       var cur = _.clip(_.finite(params[2]), 1e-6, 1 - 1e-6);
 
       if (v0 === v1 || dur <= 0) {
