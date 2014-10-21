@@ -101,6 +101,12 @@ describe("ugen/biquad", function() {
       })();
       assert(synth.toAudioNode().$inputs[0].type === "highpass");
     });
+    it("bandpass -> bandpass", function() {
+      var synth = new Neume(function($) {
+        return $("biquad", { type: "bandpass" });
+      })();
+      assert(synth.toAudioNode().$inputs[0].type === "bandpass");
+    });
     it("lowshelf -> lowshelf", function() {
       var synth = new Neume(function($) {
         return $("biquad", { type: "lowshelf" });
@@ -163,6 +169,12 @@ describe("ugen/biquad", function() {
         return $("highpass");
       })();
       assert(synth.toAudioNode().$inputs[0].type === "highpass");
+    });
+    it("bandpass -> bandpass", function() {
+      var synth = new Neume(function($) {
+        return $("bandpass");
+      })();
+      assert(synth.toAudioNode().$inputs[0].type === "bandpass");
     });
     it("lowshelf -> lowshelf", function() {
       var synth = new Neume(function($) {

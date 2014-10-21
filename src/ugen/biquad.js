@@ -3,7 +3,7 @@ module.exports = function(neume, _) {
 
   /**
    * $("biquad", {
-   *   type  : enum[ lowpass, highpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
+   *   type  : enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
    *   freq  : [number|UGen] = 350
    *   detune: [number|UGen] = 0
    *   Q     : [number|UGen] = 1
@@ -11,7 +11,7 @@ module.exports = function(neume, _) {
    * } ... inputs)
    *
    * aliases:
-   *   $("lowpass"), $("highpass"),
+   *   $("lowpass"), $("highpass"), $("bandpass"),
    *   $("lowshelf"), $("highshelf"), $("peaking"), $("notch"), $("allpass")
    *   $("lpf"), $("hpf"), $("bpf")
    *
@@ -33,6 +33,7 @@ module.exports = function(neume, _) {
   var FILTER_TYPES = {
     lowpass  : "lowpass",
     highpass : "highpass",
+    bandpass : "bandpass",
     lowshelf : "lowshelf",
     highshelf: "highshelf",
     peaking  : "peaking",

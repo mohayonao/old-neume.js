@@ -43,14 +43,14 @@ describe("ugen/env", function() {
         return $("env", {
           init: 0,
           table: [
-            [ 0.100, 90, 1e-3 ],
-            [ 0.100, 80, 1e-3 ],
-            [ 0.000, 60, 1e-3 ],
-            [ 0.100, 50, 1e-3 ],
-            [ 0.100, 50, 1e-3 ],
+            [ 90, 0.100, 1e-3 ],
+            [ 80, 0.100, 1e-3 ],
+            [ 60, 0.000, 1e-3 ],
+            [ 50, 0.100, 1e-3 ],
+            [ 50, 0.100, 1e-3 ],
             ///// release /////
-            [ 0.100, 20, 1e-3 ],
-            [ 0.200,  0, 1e-3 ],
+            [ 20, 0.100, 1e-3 ],
+            [  0, 0.200, 1e-3 ],
           ],
           release: 5
         });
@@ -110,14 +110,14 @@ describe("ugen/env", function() {
         return $("env", {
           init: 0,
           table: [
-            [ 0.100, 90, 1e-3 ],
-            [ 0.100, 80, 1e-3 ],
-            [ 0.000, 60, 1e-3 ],
-            [ 0.100, 50, 1e+3 ],
-            [ 0.100, 50, 1e+3 ],
+            [ 90, 0.100, 1e-3 ],
+            [ 80, 0.100, 1e-3 ],
+            [ 60, 0.000, 1e-3 ],
+            [ 50, 0.100, 1e+3 ],
+            [ 50, 0.100, 1e+3 ],
             ///// release /////
-            [ 0.100, 20, 1e-3 ],
-            [ 0.200,  0, 1e-3 ],
+            [ 20, 0.100, 1e-3 ],
+            [  0, 0.200, 1e-3 ],
           ],
           release: 5
         });
@@ -168,14 +168,14 @@ describe("ugen/env", function() {
         return $("env", {
           init: 0,
           table: [
-            [ 0.100, 90, 1e-3 ],
-            [ 0.100, 80, 1e-3 ],
+            [ 90, 0.100, 1e-3 ],
+            [ 80, 0.100, 1e-3 ],
             ////// loop ///////
-            [ 0.050, 60, 1e-3 ],
-            [ 0.050, 50, 1e-3 ],
+            [ 60, 0.050, 1e-3 ],
+            [ 50, 0.050, 1e-3 ],
             ///// release /////
-            [ 0.100, 20, 1e-3 ],
-            [ 0.200,  0, 1e-3 ],
+            [ 20, 0.100, 1e-3 ],
+            [  0, 0.200, 1e-3 ],
           ],
           release: 4, loop: 2
         });
@@ -237,12 +237,12 @@ describe("ugen/env", function() {
         return $("env", {
           init: 0,
           table: [
-            [ 0.100, 90, 1e-3 ],
-            [ 0.100, 80, 1e-3 ],
-            [ 0.100, 60, 1e-3 ],
-            [ 0.100, 50, 1e-3 ],
-            [ 0.100, 20, 1e-3 ],
-            [ 0.200,  0, 1e-3 ],
+            [ 90, 0.100, 1e-3 ],
+            [ 80, 0.100, 1e-3 ],
+            [ 60, 0.100, 1e-3 ],
+            [ 50, 0.100, 1e-3 ],
+            [ 20, 0.100, 1e-3 ],
+            [  0, 0.200, 1e-3 ],
           ],
         });
       })();
@@ -288,6 +288,63 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.0200, 1e-2));
 
       assert(closeTo(ended, 1.086, 1e-2));
+    });
+    it("_ style", function() {
+      var synth = new Neume(function($) {
+        return $("env", { _: [
+          0, 90, 0.100, 80, 0.100, "L", 60, 0.050, 50, 0.050, "R", 20, 0.100, 0, 0.200, "X"
+        ], curve: 1e-3 });
+      })();
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode().$inputs[0];
+      var ended = 0;
+
+      audioContext.$reset();
+      synth.$context.reset();
+
+      // 0.000
+      // 0.100 :  0 <- start
+      // 0.200 : 90
+      // 0.300 : 80
+      // 0.350 : 60 ..
+      // 0.400 : 50 ..
+      // 0.450 : 60 -- loop
+      // 0.500 : 50
+      // 0.550 : 60 -- loop
+      // -----------
+      // 0.600 : 50 <- release
+      // 0.700 : 20
+      // 0.900 :  0 -> end
+
+      synth.start(0.100).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.600);
+
+      audioContext.$processTo("00:01.500");
+
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 0);
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 59.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 59.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50.009, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.948, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750),  3.561, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800),  0.633, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850),  0.112, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900),  0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950),  0.003, 1e-2));
+
+      assert(closeTo(ended, 1.186, 1e-2));
     });
   });
 
@@ -358,7 +415,7 @@ describe("ugen/env", function() {
     });
     it("works", function() {
       var synth = new Neume(function($) {
-        return $("adsr", { a: 0.1, d: 0.2, s: 0.3, r: 0.5 });
+        return $("adsr", { a: 0.1, d: 0.2, s: 0.3, r: 0.5, curve: 0.01 });
       })();
 
       var audioContext = Neume.audioContext;
@@ -424,7 +481,7 @@ describe("ugen/env", function() {
     });
     it("works", function() {
       var synth = new Neume(function($) {
-        return $("dadsr", { delay: 0.1, a: 0.1, d: 0.2, s: 0.3, r: 0.5 });
+        return $("dadsr", { delay: 0.1, a: 0.1, d: 0.2, s: 0.3, r: 0.5, curve: 0.01 });
       })();
 
       var audioContext = Neume.audioContext;
@@ -490,7 +547,7 @@ describe("ugen/env", function() {
     });
     it("works", function() {
       var synth = new Neume(function($) {
-        return $("asr", { a: 0.1, s: 0.3, r: 0.5 });
+        return $("asr", { a: 0.1, s: 0.3, r: 0.5, curve: 0.01 });
       })();
 
       var audioContext = Neume.audioContext;
@@ -555,7 +612,7 @@ describe("ugen/env", function() {
     });
     it("works", function() {
       var synth = new Neume(function($) {
-        return $("cutoff", { r: 0.5, level: 0.8 });
+        return $("cutoff", { r: 0.5, level: 0.8, curve: 0.01 });
       })();
 
       var audioContext = Neume.audioContext;
