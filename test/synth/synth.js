@@ -202,7 +202,7 @@ describe("NeuSynth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.944, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.968, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.982, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.000), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.990, 1e-2));
     });
   });
 
@@ -259,7 +259,7 @@ describe("NeuSynth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.056, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.032, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.018, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.010, 1e-2));
     });
   });
 

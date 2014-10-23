@@ -157,7 +157,6 @@ NeuSynth.prototype.fadeIn = function(t, dur) {
     this.$routes.forEach(function(node) {
       node.gain.value = 0;
       node.gain.setTargetAtTime(1, t, tC);
-      node.gain.setValueAtTime(1, t + dur);
     });
     this.start(t);
   }
@@ -170,11 +169,10 @@ NeuSynth.prototype.fadeOut = function(t, dur) {
   dur = _.finite(this.$context.toSeconds(dur));
 
   if (this._state === START) {
-    var v0 = this.$routes[0].gain.value;
-    var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
     this.$routes.forEach(function(node) {
+      var v0 = node.gain.value;
+      var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
       node.gain.setTargetAtTime(0, t, tC);
-      node.gain.setValueAtTime(0, t + dur);
     });
     this.stop(t + dur);
   }
