@@ -1,25 +1,27 @@
 module.exports = function(neume, _) {
   "use strict";
 
-  neume.register("object", function(ugen, spec, inputs) {
+  neume.register("object", make);
+  neume.register("float32Array", make);
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet  = null;
 
     var data = _.defaults(spec.value, 0);
-    var name = _.defaults(spec.name, "");
+    var key = _.defaults(spec.key, "");
     var interval = _.defaults(spec.interval, 0.250);
     var schedId = 0;
-    var prevVal = 0;
     var valueOf = null;
 
-    if (typeof name === "string" && data.hasOwnProperty(name)) {
-      if (typeof data[name] === "function") {
+    if ((typeof key === "string" || typeof key === "number") && data.hasOwnProperty(key)) {
+      if (typeof data[key] === "function") {
         valueOf = function() {
-          return data[name]();
+          return data[key]();
         };
       } else {
         valueOf = function() {
-          return data[name];
+          return data[key];
         };
       }
     } else {
@@ -36,6 +38,7 @@ module.exports = function(neume, _) {
       interval = Math.max(minInterval, _.finite(context.toSeconds(interval)));
     }
 
+    var prevVal = _.finite(valueOf());
     var param = context.createParam(prevVal, spec);
 
     if (inputs.length) {
@@ -71,5 +74,5 @@ module.exports = function(neume, _) {
         schedId = 0;
       }
     });
-  });
+  }
 };

@@ -38,7 +38,7 @@ describe("ugen/object", function() {
     it("works", function() {
       var obj = { foo: 0 };
       var synth = new Neume(function($) {
-        return $(obj, { name: "foo", interval: 0.05 });
+        return $(obj, { key: "foo", interval: 0.05 });
       })();
 
       var audioContext = Neume.audioContext;
@@ -71,7 +71,7 @@ describe("ugen/object", function() {
       var val = 0;
       var obj = { foo: function() { return val; } };
       var synth = new Neume(function($) {
-        return $(obj, { name: "foo", interval: 0.05 });
+        return $(obj, { key: "foo", interval: 0.05 });
       })();
 
       var audioContext = Neume.audioContext;
@@ -136,7 +136,7 @@ describe("ugen/object", function() {
     it("works with relative interval", function() {
       var obj = { foo: 0 };
       var synth = new Neume(function($) {
-        return $(obj, { name: "foo", interval: "64n" });
+        return $(obj, { key: "foo", interval: "64n" });
       })();
 
       var audioContext = Neume.audioContext;
@@ -151,6 +151,40 @@ describe("ugen/object", function() {
       obj.foo = 10;
       audioContext.$processTo("00:00.050");
       assert(outlet.gain.$valueAtTime(0.050) === 10);
+    });
+  });
+
+  describe("$(new Float32Array())", function() {
+    it("works", function() {
+      var obj = new Float32Array([ 0 ]);
+      var synth = new Neume(function($) {
+        return $(obj, { key: 0, interval: 0.05 });
+      })();
+
+      var audioContext = Neume.audioContext;
+      var outlet = synth.toAudioNode().$inputs[0];
+
+      audioContext.$reset();
+      synth.$context.reset();
+
+      synth.start(0.000);
+      synth.stop(0.200);
+
+      obj[0] = 10;
+      audioContext.$processTo("00:00.050");
+      assert(outlet.gain.$valueAtTime(0.050) === 10);
+
+      obj[0] = 20;
+      audioContext.$processTo("00:00.100");
+      assert(outlet.gain.$valueAtTime(0.100) === 20);
+
+      obj[0] = 30;
+      audioContext.$processTo("00:00.151");
+      assert(outlet.gain.$valueAtTime(0.151) === 30);
+
+      obj[0] = 40;
+      audioContext.$processTo("00:00.201");
+      assert(outlet.gain.$valueAtTime(0.201) === 30);
     });
   });
 
