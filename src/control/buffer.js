@@ -44,11 +44,8 @@ NeuBuffer.create = function(context, channels, length, sampleRate) {
 
 NeuBuffer.from = function(context, data) {
   var buffer = context.createBuffer(1, data.length, context.sampleRate);
-  var chData = buffer.getChannelData(0);
 
-  for (var i = 0, imax = data.length; i < imax; i++) {
-    chData[i] = data[i];
-  }
+  buffer.getChannelData(0).set(data);
 
   return new NeuBuffer(context, buffer);
 };
