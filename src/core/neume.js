@@ -136,7 +136,7 @@ neume.render = function(context, duration, func) {
   });
 };
 
-neume.exports = function(destination) {
+neume.exports = function(destination, spec) {
   if (destination instanceof window.AudioContext) {
     destination = destination.destination;
   }
@@ -144,7 +144,7 @@ neume.exports = function(destination) {
     throw new TypeError("neume(): illegal argument");
   }
 
-  var context = new neume.Context(destination);
+  var context = new neume.Context(destination, Infinity, spec);
 
   return Object.defineProperties(
     neume(context), {
