@@ -11,11 +11,11 @@
     "promise": "^6.0.1"
   },
   "devDependencies": {
-    "browserify": "^6.1.0",
+    "browserify": "^6.2.0",
     "espower-loader": "^0.9.1",
-    "gulp": "^3.8.8",
+    "gulp": "^3.8.9",
     "gulp-istanbul": "^0.3.1",
-    "gulp-jshint": "^1.8.5",
+    "gulp-jshint": "^1.9.0",
     "gulp-mocha": "^1.1.1",
     "gulp-rename": "^1.2.0",
     "gulp-uglify": "^1.0.1",
