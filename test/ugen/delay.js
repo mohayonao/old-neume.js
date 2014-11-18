@@ -8,7 +8,7 @@ describe("ugen/delay", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   describe("$(delay delay:0.5 $(delay))", function() {

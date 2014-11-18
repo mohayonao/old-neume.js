@@ -9,7 +9,7 @@ describe("ugen/biquad", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   describe("$(lpf, $(sin))", function() {

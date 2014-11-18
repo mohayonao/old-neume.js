@@ -10,7 +10,7 @@ describe("NeuDC", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
   });
 
   describe("(context, value)", function() {
@@ -22,7 +22,7 @@ describe("NeuDC", function() {
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
       var dc = new NeuDC(context, 0);
-      assert(dc.toAudioNode() instanceof window.AudioNode);
+      assert(dc.toAudioNode() instanceof global.AudioNode);
       assert(dc.toAudioNode() === dc.toAudioNode());
     });
   });

@@ -11,7 +11,7 @@ describe("NeuParam", function() {
   var param = null;
 
   beforeEach(function() {
-    audioContext = new window.AudioContext();
+    audioContext = new global.AudioContext();
     context = new NeuContext(audioContext.destination);
     param = new NeuParam(context, 440);
   });
@@ -261,7 +261,7 @@ describe("NeuParam", function() {
 
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
-      assert(param.toAudioNode() instanceof window.AudioNode);
+      assert(param.toAudioNode() instanceof global.AudioNode);
     });
   });
 

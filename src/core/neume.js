@@ -127,7 +127,7 @@ neume.render = function(context, duration, func) {
   var length     = _.int(sampleRate * duration);
 
   return new Promise(function(resolve) {
-    var audioContext = new window.OfflineAudioContext(2, length, sampleRate);
+    var audioContext = new global.OfflineAudioContext(2, length, sampleRate);
     audioContext.oncomplete = function(e) {
       resolve(new neume.Buffer(context, e.renderedBuffer));
     };
@@ -137,10 +137,10 @@ neume.render = function(context, duration, func) {
 };
 
 neume.exports = function(destination, spec) {
-  if (destination instanceof window.AudioContext) {
+  if (destination instanceof global.AudioContext) {
     destination = destination.destination;
   }
-  if (!(destination instanceof window.AudioNode)) {
+  if (!(destination instanceof global.AudioNode)) {
     throw new TypeError("neume(): illegal argument");
   }
 

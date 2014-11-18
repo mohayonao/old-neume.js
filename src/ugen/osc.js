@@ -85,7 +85,7 @@ module.exports = function(neume, _) {
   });
 
   function isWave(wave) {
-    if (window.PeriodicWave && wave instanceof window.PeriodicWave) {
+    if (global.PeriodicWave && wave instanceof global.PeriodicWave) {
       return true;
     }
     return false;

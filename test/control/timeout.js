@@ -11,7 +11,7 @@ describe("NeuTimeout", function() {
   var context = null;
 
   beforeEach(function() {
-    audioContext = new window.AudioContext();
+    audioContext = new global.AudioContext();
     context = new NeuContext(audioContext.destination);
   });
 

@@ -10,7 +10,7 @@ describe("NeuTransport", function() {
   var transport = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
     transport = new NeuTransport(context);
   });
 

@@ -2,37 +2,37 @@
 (function() {
   "use strict";
 
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  global.AudioContext = global.AudioContext || global.webkitAudioContext;
+  global.OfflineAudioContext = global.OfflineAudioContext || global.webkitOfflineAudioContext;
 
-  if (typeof window.AudioContext !== "undefined") {
-    if (typeof window.AudioContext.prototype.createGain !== "function"){
-      window.AudioContext.prototype.createGain = window.AudioContext.prototype.createGainNode;
+  if (typeof global.AudioContext !== "undefined") {
+    if (typeof global.AudioContext.prototype.createGain !== "function"){
+      global.AudioContext.prototype.createGain = global.AudioContext.prototype.createGainNode;
     }
-    if (typeof window.AudioContext.prototype.createDelay !== "function"){
-      window.AudioContext.prototype.createDelay = window.AudioContext.prototype.createDelayNode;
+    if (typeof global.AudioContext.prototype.createDelay !== "function"){
+      global.AudioContext.prototype.createDelay = global.AudioContext.prototype.createDelayNode;
     }
-    if (typeof window.AudioContext.prototype.createPeriodicWave !== "function") {
-      window.AudioContext.prototype.createPeriodicWave = window.AudioContext.prototype.createWaveTable;
+    if (typeof global.AudioContext.prototype.createPeriodicWave !== "function") {
+      global.AudioContext.prototype.createPeriodicWave = global.AudioContext.prototype.createWaveTable;
     }
-    if (typeof window.AudioBufferSourceNode.prototype.start !== "function"){
-  		window.AudioBufferSourceNode.prototype.start = window.AudioBufferSourceNode.prototype.noteGrainOn;
+    if (typeof global.AudioBufferSourceNode.prototype.start !== "function"){
+  		global.AudioBufferSourceNode.prototype.start = global.AudioBufferSourceNode.prototype.noteGrainOn;
   	}
-  	if (typeof window.AudioBufferSourceNode.prototype.stop !== "function"){
-  		window.AudioBufferSourceNode.prototype.stop = window.AudioBufferSourceNode.prototype.noteOff;
+  	if (typeof global.AudioBufferSourceNode.prototype.stop !== "function"){
+  		global.AudioBufferSourceNode.prototype.stop = global.AudioBufferSourceNode.prototype.noteOff;
   	}
-  	if (typeof window.OscillatorNode.prototype.start !== "function"){
-  		window.OscillatorNode.prototype.start = window.OscillatorNode.prototype.noteOn;
+  	if (typeof global.OscillatorNode.prototype.start !== "function"){
+  		global.OscillatorNode.prototype.start = global.OscillatorNode.prototype.noteOn;
   	}
-  	if (typeof window.OscillatorNode.prototype.stop !== "function"){
-  		window.OscillatorNode.prototype.stop = window.OscillatorNode.prototype.noteOff;
+  	if (typeof global.OscillatorNode.prototype.stop !== "function"){
+  		global.OscillatorNode.prototype.stop = global.OscillatorNode.prototype.noteOff;
   	}
-    if (typeof window.OscillatorNode.prototype.setPeriodicWave !== "function"){
-  		window.OscillatorNode.prototype.setPeriodicWave = window.OscillatorNode.prototype.setWaveTable;
+    if (typeof global.OscillatorNode.prototype.setPeriodicWave !== "function"){
+  		global.OscillatorNode.prototype.setPeriodicWave = global.OscillatorNode.prototype.setWaveTable;
   	}
-    if (typeof window.PeriodicWave === "undefined" && typeof window.WaveTable !== "undefined") {
-      window.PeriodicWave = window.WaveTable;
-      window.WaveTable.$name = "PeriodicWave";
+    if (typeof global.PeriodicWave === "undefined" && typeof global.WaveTable !== "undefined") {
+      global.PeriodicWave = global.WaveTable;
+      global.WaveTable.$name = "PeriodicWave";
     }
   }
 })();

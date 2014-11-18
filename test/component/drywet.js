@@ -9,7 +9,7 @@ describe("NeuDryWet", function() {
   var context;
 
   beforeEach(function() {
-    context = new neume.Context(new window.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
   describe("(context, dryNode, wetNode, 1)", function() {

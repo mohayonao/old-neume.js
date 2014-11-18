@@ -1,12 +1,10 @@
 "use strict";
 
-global.window = global;
+global.navigator = {};
 
-global.window.navigator = {};
+global.Promise = require("promise");
 
-global.window.Promise = require("promise");
-
-global.window.XMLHttpRequest = (function() {
+global.XMLHttpRequest = (function() {
   function XMLHttpRequest() {
   }
   XMLHttpRequest.prototype.open = function(method, url) {

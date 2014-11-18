@@ -8,7 +8,7 @@ describe("ugen/number", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   describe("$(440)", function() {

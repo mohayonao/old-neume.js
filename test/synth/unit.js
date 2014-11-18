@@ -10,7 +10,7 @@ describe("NeuUnit", function() {
 
   beforeEach(function() {
     spec = {
-      outlet: new window.AudioContext().createGain(),
+      outlet: new global.AudioContext().createGain(),
       start : function() {},
       stop  : function() {},
       methods: {
@@ -64,7 +64,7 @@ describe("NeuUnit", function() {
 
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
-      assert(unit.toAudioNode() instanceof window.AudioNode);
+      assert(unit.toAudioNode() instanceof global.AudioNode);
     });
   });
 

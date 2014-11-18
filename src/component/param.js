@@ -151,7 +151,7 @@ NeuParam.prototype.toAudioNode = function() {
 };
 
 NeuParam.prototype.connect = function(to) {
-  if (to instanceof window.AudioParam) {
+  if (to instanceof global.AudioParam) {
     to.value = this._value;
     to.setValueAtTime(this._value, 0);
     this._params.push(to);

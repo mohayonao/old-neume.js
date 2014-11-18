@@ -6,7 +6,7 @@ describe("NeuAudioBus", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new neume.Context(new window.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
   describe("(context)", function() {
@@ -79,7 +79,7 @@ describe("NeuAudioBus", function() {
     it("returns an AudioNode", function() {
       var bus = new neume.AudioBus(context);
 
-      assert(bus.toAudioNode() instanceof window.AudioNode);
+      assert(bus.toAudioNode() instanceof global.AudioNode);
       assert(bus.toAudioNode() === bus.toAudioNode());
     });
   });

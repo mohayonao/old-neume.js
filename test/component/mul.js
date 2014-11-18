@@ -11,7 +11,7 @@ describe("NeuMul", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
   });
 
   describe("(context, a, b)", function() {
@@ -206,7 +206,7 @@ describe("NeuMul", function() {
       var mul = new NeuMul(
         context, context.createOscillator(), context.createGain()
       );
-      assert(mul.toAudioNode() instanceof window.AudioNode);
+      assert(mul.toAudioNode() instanceof global.AudioNode);
       assert(mul.toAudioNode() === mul.toAudioNode());
     });
   });

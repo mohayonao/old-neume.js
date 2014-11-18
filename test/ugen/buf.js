@@ -10,7 +10,7 @@ describe("ugen/buf", function() {
   var buffer = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   beforeEach(function() {

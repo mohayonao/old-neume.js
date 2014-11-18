@@ -9,7 +9,7 @@ describe("ugen/conv", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   describe("$(conv $(sin))", function() {
@@ -26,7 +26,7 @@ describe("ugen/conv", function() {
      *   |
      */
     it("return a ConvolverNode that is connected with $(sin)", function() {
-      var context = new neume.Context(new window.AudioContext().destination);
+      var context = new neume.Context(new global.AudioContext().destination);
       var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
 
       var synth = new Neume(function($) {
