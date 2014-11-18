@@ -37,7 +37,7 @@ describe("NeuUGen", function() {
   }
 
   beforeEach(function() {
-    var audioContext = new window.AudioContext();
+    var audioContext = new global.AudioContext();
     context = new NeuContext(audioContext.destination);
     synth = {
       $context: context
@@ -289,7 +289,7 @@ describe("NeuUGen", function() {
 
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
-      assert(ugen0.toAudioNode() instanceof window.AudioNode);
+      assert(ugen0.toAudioNode() instanceof global.AudioNode);
     });
   });
 

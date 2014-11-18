@@ -8,7 +8,7 @@ describe("ugen/shaper", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   describe("$(shaper)", function() {

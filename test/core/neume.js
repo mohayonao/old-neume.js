@@ -15,7 +15,7 @@ describe("neume", function() {
     var audioContext = null;
 
     beforeEach(function() {
-      audioContext = new window.AudioContext();
+      audioContext = new global.AudioContext();
     });
 
     it("return Neume", function() {
@@ -57,7 +57,7 @@ describe("neume", function() {
     var Neume = null;
 
     before(function() {
-      Neume = neume.exports(new window.AudioContext());
+      Neume = neume.exports(new global.AudioContext());
     });
 
     describe(".render(duration, func)", function() {
@@ -65,18 +65,18 @@ describe("neume", function() {
         var spy = sinon.spy();
         var promise = Neume.render(10, spy);
 
-        assert(promise instanceof window.Promise);
+        assert(promise instanceof global.Promise);
         assert(spy.calledOnce);
       });
     });
     describe(".analyser", function() {
       it("points to AnalyserNode", function() {
-        assert(Neume.analyser instanceof window.AnalyserNode);
+        assert(Neume.analyser instanceof global.AnalyserNode);
       });
     });
     describe(".audioContext", function() {
       it("points to AudioContext", function() {
-        assert(Neume.audioContext instanceof window.AudioContext);
+        assert(Neume.audioContext instanceof global.AudioContext);
       });
     });
     describe(".context", function() {
@@ -86,7 +86,7 @@ describe("neume", function() {
     });
     describe(".destination", function() {
       it("points to AudioNode", function() {
-        assert(Neume.destination instanceof window.AudioNode);
+        assert(Neume.destination instanceof global.AudioNode);
       });
     });
     describe(".currentTime", function() {
@@ -120,7 +120,7 @@ describe("neume", function() {
       it("return Promise", sinon.test(function() {
         this.spy(neume.Buffer, "load");
 
-        assert(Neume.Buffer.load("url") instanceof window.Promise);
+        assert(Neume.Buffer.load("url") instanceof global.Promise);
         assert(neume.Buffer.load.calledOnce);
         assert.deepEqual(neume.Buffer.load.firstCall.args.slice(1), [
           "url"

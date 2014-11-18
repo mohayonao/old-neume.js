@@ -15,12 +15,12 @@ var NeuAudioBus = require("../control/audio-bus");
 
 var INIT  = 0;
 var START = 1;
-var PROCESS_BUF_SIZE   = C.PROCESS_BUF_SIZE;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
 
-function NeuContext(destination, duration) {
+function NeuContext(destination, duration, spec) {
+  spec = spec || {};
   this.$context = destination.context;
   this.$destination = destination;
 
@@ -28,7 +28,8 @@ function NeuContext(destination, duration) {
   this.$analyser = this.$context.createAnalyser();
   this.connect(this.$analyser, this.$destination);
   this._scriptProcessor = null;
-  this._audioBuses   = [];
+  this._audioBuses = [];
+  this._processBufSize = _.int(_.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
 
   this.$inlet  = null;
   this.$outlet = this.$analyser;
@@ -162,7 +163,7 @@ NeuContext.prototype.reset = function() {
 NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
-    if (this.$context instanceof window.OfflineAudioContext) {
+    if (this.$context instanceof global.OfflineAudioContext) {
       startRendering.call(this);
     } else {
       startAudioTimer.call(this);
@@ -178,10 +179,10 @@ function startRendering() {
 
 function startAudioTimer() {
   var context = this.$context;
-  var scriptProcessor = context.createScriptProcessor(PROCESS_BUF_SIZE, 1, 1);
+  var scriptProcessor = context.createScriptProcessor(this._processBufSize, 1, 1);
   var bufferSource    = context.createBufferSource();
 
-  this._currentTimeIncr = PROCESS_BUF_SIZE / context.sampleRate;
+  this._currentTimeIncr = this._processBufSize / context.sampleRate;
   this._scriptProcessor = scriptProcessor;
   scriptProcessor.onaudioprocess = onaudioprocess.bind(this);
 
@@ -252,7 +253,7 @@ NeuContext.prototype.toAudioNode = function(obj) {
   } else if (typeof obj === "number") {
     obj = this.createDC(obj).toAudioNode();
   }
-  if (!(obj instanceof window.AudioNode)) {
+  if (!(obj instanceof global.AudioNode)) {
     obj = null;
   }
   return obj;
@@ -262,7 +263,7 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
   if (obj && obj.toAudioBuffer) {
     return obj.toAudioBuffer();
   }
-  if (!(obj instanceof window.AudioBuffer)) {
+  if (!(obj instanceof global.AudioBuffer)) {
     obj = null;
   }
   return obj;
@@ -272,7 +273,7 @@ NeuContext.prototype.connect = function(from, to) {
   if (to) {
     if (from instanceof NeuComponent) {
       from.connect(to);
-    } else if (to instanceof window.AudioParam) {
+    } else if (to instanceof global.AudioParam) {
       if (typeof from === "number") {
         to.value = _.finite(from);
       } else {
@@ -281,7 +282,7 @@ NeuContext.prototype.connect = function(from, to) {
           from.connect(to);
         }
       }
-    } else if (to instanceof window.AudioNode) {
+    } else if (to instanceof global.AudioNode) {
       from = this.toAudioNode(from);
       if (from) {
         from.connect(to);

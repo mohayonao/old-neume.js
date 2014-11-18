@@ -12,7 +12,7 @@ describe("NeuSum", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
   });
 
   describe("(context, inputs)", function() {
@@ -152,7 +152,7 @@ describe("NeuSum", function() {
   describe("#toAudioNode()", function() {
     it("return an AudioNode []", function() {
       var sum = new NeuSum(context, []);
-      assert(sum.toAudioNode() instanceof window.AudioNode);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
 
       assert.deepEqual(sum.toAudioNode().toJSON(),DC(0));
@@ -160,7 +160,7 @@ describe("NeuSum", function() {
     });
     it("return an AudioNode [ node ]", function() {
       var sum = new NeuSum(context, [ context.createDelay() ]);
-      assert(sum.toAudioNode() instanceof window.AudioNode);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
 
       assert.deepEqual(sum.toAudioNode().toJSON(), {
@@ -174,7 +174,7 @@ describe("NeuSum", function() {
     });
     it("return an AudioNode [ node, node ]", function() {
       var sum = new NeuSum(context, [ context.createOscillator(), context.createDelay() ]);
-      assert(sum.toAudioNode() instanceof window.AudioNode);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
 
       assert.deepEqual(sum.toAudioNode().toJSON(), {
@@ -210,7 +210,7 @@ describe("NeuSum", function() {
     });
     it("return an AudioNode [ number, number, dc ]", function() {
       var sum = new NeuSum(context, [ 1, 2, new NeuDC(context, 3) ]);
-      assert(sum.toAudioNode() instanceof window.AudioNode);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
 
       assert.deepEqual(sum.toAudioNode().toJSON(), {
@@ -225,7 +225,7 @@ describe("NeuSum", function() {
     });
     it("return an AudioNode [ number, node ]", function() {
       var sum = new NeuSum(context, [ 880, context.createOscillator() ]);
-      assert(sum.toAudioNode() instanceof window.AudioNode);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
 
       assert.deepEqual(sum.toAudioNode().toJSON(), {

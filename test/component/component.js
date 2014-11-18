@@ -9,7 +9,7 @@ describe("NeuComponent", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
   });
 
   describe("(context, node)", function() {
@@ -162,7 +162,7 @@ describe("NeuComponent", function() {
       var component = new NeuComponent(
         context, context.createOscillator()
       );
-      assert(component.toAudioNode() instanceof window.AudioNode);
+      assert(component.toAudioNode() instanceof global.AudioNode);
       assert(component.toAudioNode() === component.toAudioNode());
     });
   });

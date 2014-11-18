@@ -20,7 +20,7 @@ function NeuAudioBus(context) {
     },
     nodes: {
       get: function() {
-        return this.$inputs;
+        return this.$inputs.slice();
       }
     }
   });

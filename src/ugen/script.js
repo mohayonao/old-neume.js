@@ -1,9 +1,12 @@
-module.exports = function(neume) {
+module.exports = function(neume, _) {
   "use strict";
 
   /**
    * $("script", {
-   *   audioprocess: [function] = null
+   *   process: [function] = null,
+   *   bufSize: [number] = 1024,
+   *   numOfInputs : [number] = 1,
+   *   numOfOutputs: [number] = 1,
    * } ... inputs)
    *
    * +--------+
@@ -18,10 +21,14 @@ module.exports = function(neume) {
   neume.register("script", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var outlet = context.createScriptProcessor(512, 1, 1);
+    var bufSize = _.int(_.defaults(spec.bufSize, 1024));
+    var numOfInputs = _.int(_.defaults(spec.numOfInputs, 1));
+    var numOfOutputs = _.int(_.defaults(spec.numOfOutputs, 1));
 
-    if (typeof spec.audioprocess === "function")  {
-      outlet.onaudioprocess = spec.audioprocess;
+    var outlet = context.createScriptProcessor(bufSize, numOfInputs, numOfOutputs);
+
+    if (typeof spec.process === "function")  {
+      outlet.onaudioprocess = spec.process;
     }
 
     context.createSum(inputs).connect(outlet);

@@ -16,7 +16,7 @@ describe("NeuSynth", function() {
   var osc = null;
 
   beforeEach(function() {
-    audioContext = new window.AudioContext();
+    audioContext = new global.AudioContext();
     context = new NeuContext(audioContext.destination);
     osc = context.createOscillator();
   });

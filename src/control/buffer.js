@@ -44,17 +44,14 @@ NeuBuffer.create = function(context, channels, length, sampleRate) {
 
 NeuBuffer.from = function(context, data) {
   var buffer = context.createBuffer(1, data.length, context.sampleRate);
-  var chData = buffer.getChannelData(0);
 
-  for (var i = 0, imax = data.length; i < imax; i++) {
-    chData[i] = data[i];
-  }
+  buffer.getChannelData(0).set(data);
 
   return new NeuBuffer(context, buffer);
 };
 
 NeuBuffer.load = function(context, url) {
-  return new window.Promise(function(resolve, reject) {
+  return new global.Promise(function(resolve, reject) {
     loadWithXHR(url).then(function(audioData) {
       return decodeAudioData(context, audioData);
     }).then(function(decodedData) {
@@ -66,8 +63,8 @@ NeuBuffer.load = function(context, url) {
 };
 
 function loadWithXHR(url) {
-  return new window.Promise(function(resolve, reject) {
-    var xhr = new window.XMLHttpRequest();
+  return new global.Promise(function(resolve, reject) {
+    var xhr = new global.XMLHttpRequest();
 
     xhr.open("GET", url);
     xhr.responseType = "arraybuffer";
@@ -85,7 +82,7 @@ function loadWithXHR(url) {
 }
 
 function decodeAudioData(context, audioData) {
-  return new window.Promise(function(resolve, reject) {
+  return new global.Promise(function(resolve, reject) {
     context.decodeAudioData(audioData, function(decodedData) {
       resolve(decodedData);
     }, function() {

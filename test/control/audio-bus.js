@@ -6,7 +6,7 @@ describe("NeuAudioBus", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new neume.Context(new window.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
   describe("(context)", function() {
@@ -62,13 +62,24 @@ describe("NeuAudioBus", function() {
       assert(closeTo(outlet.gain.$valueAtTime(4.500), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(5.000), 0.500, 1e-2));
     });
+    it("works with no args", function() {
+      var bus = new neume.AudioBus(context);
+      var outlet = bus.toAudioNode();
+
+      bus.fade();
+
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.250), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.500), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.750), 0.000, 1e-2));
+    });
   });
 
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
       var bus = new neume.AudioBus(context);
 
-      assert(bus.toAudioNode() instanceof window.AudioNode);
+      assert(bus.toAudioNode() instanceof global.AudioNode);
       assert(bus.toAudioNode() === bus.toAudioNode());
     });
   });

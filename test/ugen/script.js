@@ -8,7 +8,7 @@ describe("ugen/script", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new window.AudioContext());
+    Neume = neume.exports(new global.AudioContext());
   });
 
   describe("$(script $(script))", function() {
@@ -26,7 +26,7 @@ describe("ugen/script", function() {
       var NOP = function() {};
 
       var synth = new Neume(function($) {
-        return $("script", { audioprocess: NOP }, $("script"));
+        return $("script", { process: NOP }, $("script"));
       })();
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {

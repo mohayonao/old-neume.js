@@ -11,7 +11,7 @@ describe("NeuSynthDef", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
   });
 
   describe("(context, func)", function() {
@@ -44,7 +44,7 @@ describe("NeuSynthDef", function() {
         this.stub(_, "NeuSynth");
 
         var synthDef = new NeuSynthDef(context, NOP);
-        var newContext = new window.AudioContext();
+        var newContext = new global.AudioContext();
 
         newContext.marked = true;
 

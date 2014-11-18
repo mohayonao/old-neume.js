@@ -11,7 +11,7 @@ module.exports = function(neume) {
   });
 
   function setup(ugen, stream) {
-    if (window.MediaStream && stream instanceof window.MediaStream) {
+    if (global.MediaStream && stream instanceof global.MediaStream) {
       return ugen.$context.createMediaStreamSource(stream);
     }
     return null;

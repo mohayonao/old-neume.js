@@ -14,7 +14,7 @@ describe("NeuBuffer", function() {
   var bufferData = [ [ 0, 1, 2, 3, 4, 5, 6, 7 ], [ 7, 6, 5, 4, 3, 2, 1, 0 ] ];
 
   beforeEach(function() {
-    audioContext = new window.AudioContext();
+    audioContext = new global.AudioContext();
     context = new NeuContext(audioContext.destination);
     audioBuffer = audioContext.createBuffer(2, 8, 44100);
     audioBuffer.getChannelData(0).set(new Float32Array(bufferData[0]));
@@ -55,7 +55,7 @@ describe("NeuBuffer", function() {
 
   describe(".load(context, url)", function() {
     it("returns an instance of Promise", function() {
-      assert(NeuBuffer.load(context, "/fail") instanceof window.Promise);
+      assert(NeuBuffer.load(context, "/fail") instanceof global.Promise);
     });
     it("resolves the promise with an instance of NeuBuffer when success", function() {
       audioContext.DECODE_AUDIO_DATA_RESULT = audioBuffer;
@@ -309,14 +309,14 @@ describe("NeuBuffer", function() {
     it("returns an instance of PeriodicWave", function() {
       var wave = buffer.toPeriodicWave();
 
-      assert(wave instanceof window.PeriodicWave);
+      assert(wave instanceof global.PeriodicWave);
     });
     it("clip a buffer if over 4096", sinon.test(function() {
       var spy = this.spy(FFT, "forward");
       var buffer = NeuBuffer.from(context, new Float32Array(8192));
       var wave = buffer.toPeriodicWave();
 
-      assert(wave instanceof window.PeriodicWave);
+      assert(wave instanceof global.PeriodicWave);
       assert(spy.firstCall.args[0].length === 4096);
     }));
   });

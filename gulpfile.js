@@ -23,6 +23,7 @@ gulp.task("test", function() {
 });
 
 gulp.task("cover", function(cb) {
+  require("./test/bootstrap/bootstrap.js");
   gulp.src("src/**/*.js")
     .pipe(istanbul())
     .on("finish", function() {

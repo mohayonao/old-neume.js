@@ -23,7 +23,7 @@ NeuDC.prototype.toAudioNode = function() {
 };
 
 NeuDC.prototype.connect = function(to) {
-  if (to instanceof window.AudioParam) {
+  if (to instanceof global.AudioParam) {
     to.value = this._value;
   } else {
     this.$context.connect(this.toAudioNode(), to);

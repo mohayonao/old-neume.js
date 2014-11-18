@@ -12,7 +12,7 @@ describe("NeuAdd", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new window.AudioContext().destination);
+    context = new NeuContext(new global.AudioContext().destination);
   });
 
   describe("(context, a, b)", function() {
@@ -183,7 +183,7 @@ describe("NeuAdd", function() {
       var add = new NeuAdd(
         context, context.createOscillator(), context.createGain()
       );
-      assert(add.toAudioNode() instanceof window.AudioNode);
+      assert(add.toAudioNode() instanceof global.AudioNode);
       assert(add.toAudioNode() === add.toAudioNode());
     });
   });

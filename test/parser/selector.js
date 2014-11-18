@@ -14,6 +14,7 @@ describe("key-parser", function() {
       assert(selectorParser.isValidUGenName("sin!"));
       assert(selectorParser.isValidUGenName("sin?"));
       assert(selectorParser.isValidUGenName("sin!?"));
+      assert(selectorParser.isValidUGenName("cycle~"));
 
       assert(!selectorParser.isValidUGenName(" sin"));
       assert(!selectorParser.isValidUGenName("sin "));

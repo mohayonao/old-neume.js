@@ -14,7 +14,7 @@ function NeuSynthDef(defaultContext, func) {
     var context = defaultContext;
     var args = _.toArray(arguments);
 
-    if (args[0] instanceof window.AudioContext) {
+    if (args[0] instanceof global.AudioContext) {
       context = args.shift();
     }
 
