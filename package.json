@@ -1,6 +1,6 @@
 {
   "name": "neume",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "neume.js is a library for Web Audio API Programming",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "license": "MIT",
