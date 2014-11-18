@@ -11,17 +11,17 @@
     "promise": "^6.0.1"
   },
   "devDependencies": {
-    "browserify": "^6.2.0",
-    "espower-loader": "^0.9.1",
-    "gulp": "^3.8.9",
+    "browserify": "^6.3.2",
+    "espower-loader": "^0.10.0",
+    "gulp": "^3.8.10",
     "gulp-istanbul": "^0.3.1",
     "gulp-jshint": "^1.9.0",
-    "gulp-mocha": "^1.1.1",
+    "gulp-mocha": "^2.0.0",
     "gulp-rename": "^1.2.0",
     "gulp-uglify": "^1.0.1",
     "jshint-stylish": "^1.0.0",
-    "power-assert": "^0.9.1",
-    "sinon": "^1.10.3",
+    "power-assert": "^0.10.0",
+    "sinon": "^1.12.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "web-audio-test-api": "^0.1.14"
