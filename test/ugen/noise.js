@@ -28,8 +28,8 @@ describe("ugen/noise", function() {
             name: "AudioBufferSourceNode",
             buffer: {
               name: "AudioBuffer",
-              length: 44100,
-              duration: 1,
+              length: 44100 * 4,
+              duration: 4,
               sampleRate: 44100,
               numberOfChannels: 1
             },
@@ -85,8 +85,8 @@ describe("ugen/noise", function() {
             name: "AudioBufferSourceNode",
             buffer: {
               name: "AudioBuffer",
-              length: 44100,
-              duration: 1,
+              length: 44100 * 4,
+              duration: 4,
               sampleRate: 44100,
               numberOfChannels: 1
             },
