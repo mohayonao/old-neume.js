@@ -78,57 +78,77 @@
     -1.000, -0.875, -0.750, -0.625, -0.500, -0.375, -0.250, -0.125 ]).resample(4096, false).toPeriodicWave();
 
   // define synth
-  var Seq1 = new Neume(function($, freq) {
-    return $("xline", { start: 0.05, dur: "8n" },
-      $(famiconTriangle, { freq: freq * 0.99 }), $(famiconTriangle, { freq: freq * 1.01 })
-    ).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-  });
+  function Seq1($, freq) {
+    var out;
 
-  var Seq2 = new Neume(function($, freq) {
-    return $("xline", { start: 0.1, dur: "2nd" },
-      $("sin", { freq: freq * 7 },
-        $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: 1.000 }) })
-      )
-    ).on("end", function(e) {
+    out = [
+      $(famiconTriangle, { freq: freq * 0.99 }),
+      $(famiconTriangle, { freq: freq * 1.01 }),
+    ];
+    out = $("xline", { start: 0.05, dur: "8n" }, out).on("end", function(e) {
       this.stop(e.playbackTime);
     });
-  });
 
-  var HiHat = new Neume(function($, amp) {
-    return $("xline", { start: amp * 0.005, dur: 0.050 },
-      $("hpf", { freq: 8000, Q: 25 }, $("white"))
-    ).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-  });
+    return out;
+  }
 
-  var Snare = new Neume(function($, dur) {
-    return $("xline", { start: 0.1, dur: dur * 0.1 },
-      $("lpf", { freq: 2400, Q: 10 }, $("pink"))
-    ).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-  });
+  function Seq2($, freq) {
+    var out;
 
-  var Bass = new Neume(function($) {
-    return $("xline", { start: 0.8, dur: 0.100 },
-      $("lowshelf", { freq: 120, gain: 10 },
-        $("clip", { mul: 0.4 }, $("tri", { freq: 80, mul: 2 })),
-        $("pink", { mul: 0.05 })
-      )
-    ).on("end", function(e) {
+    out = $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: 1.000 }) });
+    out = $("sin", { freq: freq * 7 }, out);
+    out = $("xline", { start: 0.1, dur: "2nd" }, out).on("end", function(e) {
       this.stop(e.playbackTime);
     });
-  });
+
+    return out;
+  }
+
+  function HiHat($, amp) {
+    var out;
+
+    out = $("white");
+    out = $("hpf", { freq: 8000, Q: 25 }, out);
+    out = $("xline", { start: amp * 0.005, dur: 0.050 }, out).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+
+    return out;
+  }
+
+  function Snare($, dur) {
+    var out;
+
+    out = $("pink");
+    out = $("lpf", { freq: 2400, Q: 10 }, out);
+    out = $("xline", { start: 0.1, dur: dur * 0.1 }, out).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+
+    return out;
+  }
+
+  function Bass($) {
+    var out;
+
+    out = [
+      $("clip", { mul: 0.4 }, $("tri", { freq: 80, mul: 2 })),
+      $("pink", { mul: 0.05 }),
+    ];
+    out = $("lowshelf", { freq: 120, gain: 10 }, out);
+    out = $("xline", { start: 0.8, dur: 0.100 }, out).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+
+    return out;
+  }
 
   var instruments = [
-    { Synth: Seq1 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
-    { Synth: Seq2 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
-    { Synth: HiHat, arg: [ 4, 1, 2, 1 ] },
-    { Synth: Snare, arg: [ 8, 2, 6, 4 ] },
-    { Synth: Bass , arg: [] },
+    { func: Seq1 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
+    { func: Seq2 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
+    { func: HiHat, arg: [ 4, 1, 2, 1 ] },
+    { func: Snare, arg: [ 8, 2, 6, 4 ] },
+    { func: Bass , arg: [] },
   ];
 
   var players = [];
@@ -136,15 +156,14 @@
   function start(score) {
     Neume.context.reset();
 
-    var timer = new Neume.Interval("16n", function(e) {
+    var timer = Neume.Interval("16n", function(e) {
       var index = e.count % 32;
 
       instruments.forEach(function(instrument, i) {
         if (score[i][index].checked) {
-          var arg  = wrapAt(instrument.arg, index);
-          var when = e.playbackTime;
+          var arg = wrapAt(instrument.arg, index);
 
-          new instrument.Synth(arg).start(when);
+          Neume.Synth(instrument.func, arg).start(e.playbackTime);
         }
       });
     });

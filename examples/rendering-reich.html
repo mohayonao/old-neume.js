@@ -28,6 +28,8 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="../build/neume.js"></script>
+  <script src="../plugins/pluck.js"></script>
+  <script src="../plugins/freeverb.js"></script>
 </head>
 <body>
   <div class="container">
@@ -51,46 +53,50 @@
 
   var visualizer = null;
 
-  var rates  = [ 300/300, 299/300 ];
-  var score  = _.range(8);
-  var plucks = [ 69, 71, 72, 76 ].map(function(midi) {
-    return 440 * Math.pow(2, (midi - 69) / 12);
-  }).map(function(frequency) {
-    return new KarplusStrong(Neume.sampleRate, frequency, 2.000);
-  });
+  var score = _.range(8);
+  var freqs = [ 69, 71, 72, 76, 69, 71, 72, 76 ].map(mtof);
+  var rates = [ 300/300, 299/300 ];
 
-  function minimal(Neume) {
-    var Synth = new Neume(function($, buffer) {
-      var adsr = $("adsr", { d: 0.1, s: 0.4, r: 0.750, curve: 0.15, mul: 0.15 },
-        $("+", { mul: 0.4 }, [ 0.999, 1.001 ].map(function(rate) {
-          return $(buffer, { rate: rate });
-        })),
-        $("line", { dur: 0.025, mul: 0.4 }, $("white"))
-      ).on("end", function(e) {
+  function Pluck($, freq) {
+    var out;
+
+    out = [ 0.999, 1.001 ].map(function(rate) {
+      return $("pluck", { freq: freq * rate });
+    });
+    out = out.concat($("line", { dur: 0.025, mul: 0.4 }, $("white")));
+    out = $("adsr", { a: 0, d: 0.1, s: 0.2, r: 0.2, curve: 0.15, mul: 0.1 }, out)
+      .release("+0.01").on("end", function(e) {
         this.stop(e.playbackTime);
       });
+    out = $("lpf", { freq: 3200, Q: 5 }, out);
 
-      $.timeout(0.125, adsr.release);
-
-      return $("lpf", { freq: 3200, Q: 5 }, adsr);
-    });
-
-    var buffers = score.map(function(i) {
-      return Neume.Buffer.from(plucks[i >> 1]);
-    });
-
-    new Neume.Interval(0.250, function(e) {
-      new Synth(buffers[e.count % buffers.length]).start(e.playbackTime);
-    }).start();
+    return out;
   }
 
-  var Tape = new Neume(function($, buffer, rate) {
-    return $("out", { bus: 1 }, $(buffer, { rate: rate, loop: true }));
-  });
+  function Tape($, buffer, rate) {
+    var out;
 
-  var Comp = new Neume(function($) {
-    return $("out", { bus: 0 }, $("comp", $("in", 1)));
-  });
+    out = $(buffer, { rate: rate, loop: true });
+    out = $("out", { bus: 1 }, out);
+
+    return out;
+  }
+
+  function Destination($) {
+    var out;
+
+    out = $("in", 1);
+    out = $("freeverb", { room: 0.75, damp: 0.65, mix: 0.33 }, out);
+    out = $("lpf", { freq: 2400 }, out);
+    out = $("comp", { ratio: 9, thresh: -2 }, out);
+    out = $("out", { bus: 0 }, out);
+
+    return out;
+  }
+
+  function mtof(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
 
   var players = [];
 
@@ -99,17 +105,20 @@
 
     score = _.shuffle(score);
 
-    var comp = new Comp();
-
-    Neume.render(2.000, minimal).then(function(buffer) {
+    Neume.render(2.000, function(Neume) {
+      Neume.Interval(0.250, function(e) {
+        var index = score[e.count % score.length] >> 1;
+        Neume.Synth(Pluck, freqs[index]).start(e.playbackTime);
+      }).start();
+    }).then(function(buffer) {
       rates.forEach(function(rate) {
-        new Tape(buffer, rate).start();
+        Neume.Synth(Tape, buffer, rate).start();
       });
     }).catch(function(e) {
       console.error(e);
     });
 
-    players = [ comp, visualizer ];
+    players = [ Neume.Synth(Destination), visualizer ];
 
     players.forEach(function(player) {
       player.start();
@@ -120,25 +129,6 @@
     players.forEach(function(player) {
       player.stop();
     });
-  }
-
-  // http://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis
-  function KarplusStrong(sampleRate, frequency, duration) {
-    var buffer = new Float32Array(sampleRate * duration);
-
-    var length = Math.round(sampleRate / frequency);
-    var table  = new Float32Array(length);
-    for (var i = 0; i < length; ++i) {
-      table[i] = Math.random() * 2 - 1;
-    }
-
-    var next, prev = 0;
-    for (var j = 0, k = 0, jmax = buffer.length; j < jmax; j++, k++, prev = next) {
-      buffer[j] = next = table[k % length];
-      table[k % length] = (prev + next) * 0.5;
-    }
-
-    return buffer;
   }
   </script>
 

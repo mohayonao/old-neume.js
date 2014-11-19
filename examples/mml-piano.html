@@ -57,7 +57,7 @@
     mmlData = data;
   });
 
-  function createReverbBuffer(spec) {
+  function IRData(spec) {
     var data = new Float32Array(spec.length);
 
     for (var i = 0; i < data.length; i++) {
@@ -69,42 +69,51 @@
     return Neume.Buffer.from(data);
   }
 
-  var Piano = new Neume(function($, freq, dur) {
-    return $("out", { bus: 1 }, $("xline", { start: 0.75, end: 0.01, dur: dur * 5 },
-      $("clip", $("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 10 },
-        $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
-          return $("saw", { freq: freq * x });
-        }))
-      ))
-    ).on("end", function(e) {
-      this.stop(e.playbackTime);
-    }));
-  });
+  function Piano($, freq, dur) {
+    var out;
 
-  var Reverb = new Neume(function($, buffer) {
-    return $("out", $("conv", { buf: buffer, mix: 0.75 }, $("in", 1)));
-  });
+    out = [ 1, 5, 13, 0.5 ].map(function(x, i) {
+      return $("sin", { freq: freq * x });
+    });
+    out = $("+", { mul: 0.75 }, out);
+    out = $("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 10 }, out);
+    out = $("clip", out);
+    out = $("xline", { start: 0.75, end: 0.01, dur: dur * 5 }, out).on("end", function(e) {
+      this.stop(e.playbackTime);
+    });
+    out = $("out", { bus: 1 }, out);
+
+    return out;
+  }
+
+  function Destination($, buffer) {
+    var out;
+
+    out = $("in", 1);
+    out = $("conv", { buf: buffer, mix: 0.75 }, out);
+    out = $("out", { bus: 0 }, out);
+
+    return out;
+  }
 
   var players = [];
 
   function start() {
     Neume.context.reset();
 
-    var reverb = new Reverb(
-      createReverbBuffer({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 })
-    );
+    var irData = new IRData({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 });
 
     mmlEmitter = new MMLEmitter(Neume.context, mmlData);
 
     mmlEmitter.tracks.forEach(function(track) {
       track.on("note", function(e) {
         // routing: Piano[output:0] -> Reverb[input:0] -> destination
-        new Piano(e.frequency, e.duration).start(e.playbackTime);
+        Neume.Synth(Piano, e.frequency, e.duration).start(e.playbackTime);
         visualizer.push(e);
       });
     });
 
-    players = [ reverb, mmlEmitter, visualizer ];
+    players = [ Neume.Synth(Destination, irData), mmlEmitter, visualizer ];
 
     players.forEach(function(player) {
       player.start();
