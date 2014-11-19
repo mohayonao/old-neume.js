@@ -1,4 +1,22 @@
-module.exports = function(neume, _) {
+(function(plugin) {
+  "use strict";
+
+  // Module systems magic dance.
+
+  if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
+    // NodeJS
+    module.exports = plugin;
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(function () {
+        return plugin;
+    });
+  } else {
+    // Other environment (usually <script> tag): plug in to global chai instance directly.
+    neume.use(plugin);
+  }
+
+})(function(neume, _) {
   "use strict";
 
   var MAX_DELAY_SEC = neume.MAX_DELAY_SEC;
@@ -136,4 +154,5 @@ module.exports = function(neume, _) {
 
     return delayNode;
   }
-};
+
+});
