@@ -33,6 +33,12 @@ var neume = function(context) {
       },
       enumerable: true
     },
+    Synth: {
+      value: function(func) {
+        return new neume.SynthDef(context, func).apply(null, _.toArray(arguments).slice(1));
+      },
+      enumerable: true
+    },
     Buffer: {
       value: Object.defineProperties(function(channels, length, sampleRate) {
         return neume.Buffer.create(context, channels, length, sampleRate);

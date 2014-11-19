@@ -4,6 +4,7 @@ var neume = require("../../src");
 var pkg = require("../../package.json");
 
 var NeuContext  = neume.Context;
+var NeuSynth    = neume.Synth;
 var NeuBuffer   = neume.Buffer;
 var NeuInterval = neume.Interval;
 var NeuTimeout  = neume.Timeout;
@@ -92,6 +93,11 @@ describe("neume", function() {
     describe(".currentTime", function() {
       it("points to audioContext.currentTime", function() {
         assert(Neume.currentTime === Neume.context.currentTime);
+      });
+    });
+    describe(".Synth(func ...)", function() {
+      it("return NeuSynth", function() {
+        assert(Neume.Synth(function() {}) instanceof NeuSynth);
       });
     });
     describe(".Buffer(channels, length, sampleRate)", function() {
