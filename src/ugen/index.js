@@ -25,7 +25,6 @@ module.exports = function(neume) {
   neume.use(require("./osc"));
   neume.use(require("./pan"));
   neume.use(require("./pan2"));
-  neume.use(require("./script"));
   neume.use(require("./shaper"));
 
 };
