@@ -206,10 +206,10 @@ NeuContext.prototype.sched = function(time, callback, ctx) {
 
   var events = this._events;
   var event  = {
-    id      : schedId++,
-    time    : time,
+    id: schedId++,
+    time: time,
     callback: callback,
-    context : ctx || this
+    context: ctx || this
   };
 
   if (events.length === 0 || events[events.length - 1].time <= time) {

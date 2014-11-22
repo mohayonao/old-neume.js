@@ -3,11 +3,11 @@ module.exports = function(neume, _) {
 
   /**
    * $("biquad", {
-   *   type  : enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
-   *   freq  : [number|UGen] = 350
+   *   type: enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
+   *   freq: [number|UGen] = 350
    *   detune: [number|UGen] = 0
-   *   Q     : [number|UGen] = 1
-   *   gain  : [number|UGen] = 0
+   *   Q: [number|UGen] = 1
+   *   gain: [number|UGen] = 0
    * } ... inputs)
    *
    * aliases:
@@ -31,17 +31,17 @@ module.exports = function(neume, _) {
    */
 
   var FILTER_TYPES = {
-    lowpass  : "lowpass",
-    highpass : "highpass",
-    bandpass : "bandpass",
-    lowshelf : "lowshelf",
+    lowpass: "lowpass",
+    highpass: "highpass",
+    bandpass: "bandpass",
+    lowshelf: "lowshelf",
     highshelf: "highshelf",
-    peaking  : "peaking",
-    notch    : "notch",
-    allpass  : "allpass",
-    lpf      : "lowpass",
-    hpf      : "highpass",
-    bpf      : "bandpass",
+    peaking: "peaking",
+    notch: "notch",
+    allpass: "allpass",
+    lpf: "lowpass",
+    hpf: "highpass",
+    bpf: "bandpass",
   };
 
   neume.register("biquad", function(ugen, spec, inputs) {

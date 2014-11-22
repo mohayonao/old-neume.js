@@ -15,12 +15,12 @@ module.exports = function(neume, _) {
    *   |
    */
   var PannerNodeParams = {
-    refDistance   : true,
-    maxDistance   : true,
-    rolloffFactor : true,
+    refDistance: true,
+    maxDistance: true,
+    rolloffFactor: true,
     coneInnerAngle: true,
     coneOuterAngle: true,
-    coneOuterGain : true
+    coneOuterGain: true
   };
 
   neume.register("pan", function(ugen, spec, inputs) {
@@ -30,11 +30,11 @@ module.exports = function(neume, _) {
 
     pan.panningModel = {
       equalpower: "equalpower",
-      eq        : "equalpower"
+      eq: "equalpower"
     }[spec.panningModel] || "HRTF";
 
     pan.distanceModel = {
-      linear     : "linear",
+      linear: "linear",
       exponential: "exponential",
       lin: "linear",
       exp: "exponential",

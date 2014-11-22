@@ -55,29 +55,29 @@ NeuTransport.prototype.toSeconds = function(value) {
   if (typeof value === "string") {
     var m, offset = 0, time = 0;
 
-		if (value.charAt(0) === "+") {
-			offset = this.$context.currentTime;
-			value  = value.slice(1);
-		}
+    if (value.charAt(0) === "+") {
+      offset = this.$context.currentTime;
+      value  = value.slice(1);
+    }
 
     var components = value.split(/[\(\)\-\+\/\*]/);
 
-		if (components.length > 1) {
-			var oringalTime = value;
+    if (components.length > 1) {
+      var oringalTime = value;
       var expr = value;
 
-			for (var i = 0, imax = components.length; i < imax; i++) {
+      for (var i = 0, imax = components.length; i < imax; i++) {
         var symb = components[i].trim();
         if (symb !== "") {
-					expr = expr.replace(symb, this.toSeconds(symb));
-				}
-			}
+          expr = expr.replace(symb, this.toSeconds(symb));
+        }
+      }
 
-			try {
-				time = eval(expr); // jshint ignore:line
-			} catch (e){
-				throw new EvalError("Invalid Time Value Syntax: " + oringalTime);
-			}
+      try {
+        time = eval(expr); // jshint ignore:line
+      } catch (e) {
+        throw new EvalError("Invalid Time Value Syntax: " + oringalTime);
+      }
 
     } else if ((m = /^(\d+)ms$/.exec(value)) !== null) {
       time = +m[1] * 0.001;

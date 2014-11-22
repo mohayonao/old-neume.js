@@ -8,8 +8,8 @@
     module.exports = plugin;
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(function () {
-        return plugin;
+    define(function() {
+      return plugin;
     });
   } else {
     // Other environment (usually <script> tag): plug in to global chai instance directly.

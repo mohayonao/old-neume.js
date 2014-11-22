@@ -3,11 +3,11 @@ module.exports = function(neume, _) {
 
   /**
    * $("buf", {
-   *   buf  : [AudioBuffer|NeuBuffer] = null
-   *   rate : [number|UGen] = 1
-   *   loop : [boolean] = false
+   *   buf: [AudioBuffer|NeuBuffer] = null
+   *   rate: [number|UGen] = 1
+   *   loop: [boolean] = false
    *   start: [number] = 0
-   *   end  : [number] = 0
+   *   end: [number] = 0
    * })
    *
    * aliases:
@@ -84,8 +84,8 @@ module.exports = function(neume, _) {
 
     return new neume.Unit({
       outlet: bufSrc,
-      start : start,
-      stop  : stop
+      start: start,
+      stop: stop
     });
   }
 

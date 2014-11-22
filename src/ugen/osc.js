@@ -5,8 +5,8 @@ module.exports = function(neume, _) {
 
   /**
    * $("osc", {
-   *   type  : [string|PeriodicWave]="sin",
-   *   freq  : [number|UGen]=440,
+   *   type: [string|PeriodicWave]="sin",
+   *   freq: [number|UGen]=440,
    *   detune: [number|UGen]=0
    * } ... inputs)
    *
@@ -42,10 +42,10 @@ module.exports = function(neume, _) {
    */
 
   var WAVE_TYPES = {
-    sin   : "sine",
+    sin: "sine",
     square: "square",
-    saw   : "sawtooth",
-    tri   : "triangle"
+    saw: "sawtooth",
+    tri: "triangle"
   };
 
   neume.register("osc", function(ugen, spec, inputs) {

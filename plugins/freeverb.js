@@ -8,8 +8,8 @@
     module.exports = plugin;
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(function () {
-        return plugin;
+    define(function() {
+      return plugin;
     });
   } else {
     // Other environment (usually <script> tag): plug in to global chai instance directly.
@@ -37,21 +37,21 @@
     dryNode.connect(inlet);
 
     var lbfc = [
-      createLBCF(context, 1557/44100, room, damp),
-      createLBCF(context, 1617/44100, room, damp),
-      createLBCF(context, 1491/44100, room, damp),
-      createLBCF(context, 1422/44100, room, damp),
-      createLBCF(context, 1277/44100, room, damp),
-      createLBCF(context, 1356/44100, room, damp),
-      createLBCF(context, 1188/44100, room, damp),
-      createLBCF(context, 1116/44100, room, damp),
+      createLBCF(context, 1557 / 44100, room, damp),
+      createLBCF(context, 1617 / 44100, room, damp),
+      createLBCF(context, 1491 / 44100, room, damp),
+      createLBCF(context, 1422 / 44100, room, damp),
+      createLBCF(context, 1277 / 44100, room, damp),
+      createLBCF(context, 1356 / 44100, room, damp),
+      createLBCF(context, 1188 / 44100, room, damp),
+      createLBCF(context, 1116 / 44100, room, damp),
     ];
 
     var ap = [
-      createAP(context, 255/44100),
-      createAP(context, 556/44100),
-      createAP(context, 441/44100),
-      createAP(context, 341/44100),
+      createAP(context, 255 / 44100),
+      createAP(context, 556 / 44100),
+      createAP(context, 441 / 44100),
+      createAP(context, 341 / 44100),
     ];
 
     lbfc.forEach(function(lbfc) {

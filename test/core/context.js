@@ -364,12 +364,18 @@ describe("NeuContext", function() {
     it("append the callback and order by specified time", function() {
       var passed = 0;
 
+      var pass = function(i) {
+        return function() {
+          passed = i;
+        };
+      };
+
       context.start();
-      context.sched(0.100, function() { passed = 1; });
-      context.sched(0.500, function() { passed = 5; });
-      context.sched(0.200, function() { passed = 2; });
-      context.sched(0.400, function() { passed = 4; });
-      context.sched(0.300, function() { passed = 3; });
+      context.sched(0.100, pass(1));
+      context.sched(0.500, pass(5));
+      context.sched(0.200, pass(2));
+      context.sched(0.400, pass(4));
+      context.sched(0.300, pass(3));
 
       assert(passed === 0, "00:00.000");
 
@@ -391,12 +397,18 @@ describe("NeuContext", function() {
     it("same time order", function() {
       var passed = [];
 
+      var pass = function(i) {
+        return function() {
+          passed.push(i);
+        };
+      };
+
       context.start();
-      context.sched(0.100, function() { passed.push(1); });
-      context.sched(0.100, function() { passed.push(2); });
-      context.sched(0.100, function() { passed.push(3); });
-      context.sched(0.100, function() { passed.push(4); });
-      context.sched(0.100, function() { passed.push(5); });
+      context.sched(0.100, pass(1));
+      context.sched(0.100, pass(2));
+      context.sched(0.100, pass(3));
+      context.sched(0.100, pass(4));
+      context.sched(0.100, pass(5));
 
       assert.deepEqual(passed, [], "00:00.000");
 
@@ -413,12 +425,18 @@ describe("NeuContext", function() {
       var passed = 0;
       var schedIds = [];
 
+      var pass = function(i) {
+        return function() {
+          passed = i;
+        };
+      };
+
       context.start();
-      schedIds[1] = context.sched(0.100, function() { passed = 1; });
-      schedIds[5] = context.sched(0.500, function() { passed = 5; });
-      schedIds[2] = context.sched(0.200, function() { passed = 2; });
-      schedIds[4] = context.sched(0.400, function() { passed = 4; });
-      schedIds[3] = context.sched(0.300, function() { passed = 3; });
+      schedIds[1] = context.sched(0.100, pass(1));
+      schedIds[5] = context.sched(0.500, pass(5));
+      schedIds[2] = context.sched(0.200, pass(2));
+      schedIds[4] = context.sched(0.400, pass(4));
+      schedIds[3] = context.sched(0.300, pass(3));
 
       context.unsched(schedIds[2]);
 
@@ -447,7 +465,9 @@ describe("NeuContext", function() {
 
       context.start();
 
-      context.nextTick(function() { passed = 1; });
+      context.nextTick(function() {
+        passed = 1;
+      });
 
       assert(passed === 0);
 
@@ -754,11 +774,17 @@ describe("NeuContext", function() {
       var context = new NeuContext(audioContext.destination, 2);
       var passed = [ ];
 
-      context.sched(0.100, function() { passed.push(1); });
-      context.sched(0.500, function() { passed.push(5); });
-      context.sched(0.200, function() { passed.push(2); });
-      context.sched(0.400, function() { passed.push(4); });
-      context.sched(0.300, function() { passed.push(3); });
+      var pass = function(i) {
+        return function() {
+          passed.push(i);
+        };
+      };
+
+      context.sched(0.100, pass(1));
+      context.sched(0.500, pass(5));
+      context.sched(0.200, pass(2));
+      context.sched(0.400, pass(4));
+      context.sched(0.300, pass(3));
       context.start();
 
       assert.deepEqual(passed, [ 1, 2, 3, 4, 5 ]);

@@ -281,7 +281,7 @@ function parseEvent(event) {
   }
 
   if (matched[3] != null) {
-    return { selector: null, name: matched[3]};
+    return { selector: null, name: matched[3] };
   }
 
   return { selector: matched[1], name: matched[2] };

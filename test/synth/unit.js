@@ -11,8 +11,8 @@ describe("NeuUnit", function() {
   beforeEach(function() {
     spec = {
       outlet: new global.AudioContext().createGain(),
-      start : function() {},
-      stop  : function() {},
+      start: function() {},
+      stop: function() {},
       methods: {
         bang: function() {}
       }

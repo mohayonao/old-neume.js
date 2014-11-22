@@ -129,7 +129,7 @@ function getParams(n) {
   }
 
   getParams.cache[n] = {
-    bitrev  : bitrev,
+    bitrev: bitrev,
     sintable: sintable,
     costable: costable,
   };

@@ -185,7 +185,7 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.375), 440.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440.000, 1e-2));
 
-      assert(closeTo(ended, 0.300, 12-2));
+      assert(closeTo(ended, 0.300, 1e-2));
     });
 
     it("works with _ style", function() {

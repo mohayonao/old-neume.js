@@ -22,7 +22,7 @@ describe("NeuSynthDef", function() {
     describe("#context", function() {
       it("is an instance of AudioContext", function() {
         var synthDef = new NeuSynthDef(context, NOP);
-          assert(synthDef.context instanceof neume.Context);
+        assert(synthDef.context instanceof neume.Context);
       });
     });
 

@@ -8,8 +8,8 @@
     module.exports = plugin;
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(function () {
-        return plugin;
+    define(function() {
+      return plugin;
     });
   } else {
     // Other environment (usually <script> tag): plug in to global chai instance directly.
@@ -62,9 +62,9 @@
    */
   neume.register("comb", function(ugen, spec, inputs) {
     return make(ugen, {
-      gain   : spec.gain,
-      ffGain : spec.ffGain,
-      fbGain : spec.fbGain,
+      gain: spec.gain,
+      ffGain: spec.ffGain,
+      fbGain: spec.fbGain,
       ffDelay: spec.delay,
       fbDelay: spec.delay,
       ffMaxDelayTime: spec.maxDelayTime,
@@ -74,9 +74,9 @@
 
   neume.register("teeth", function(ugen, spec, inputs) {
     return make(ugen, {
-      gain   : spec.gain,
-      ffGain : spec.ffGain,
-      fbGain : spec.fbGain,
+      gain: spec.gain,
+      ffGain: spec.ffGain,
+      fbGain: spec.fbGain,
       ffDelay: spec.ffDelay,
       fbDelay: spec.fbDelay,
       ffMaxDelayTime: spec.ffMaxDelayTime,

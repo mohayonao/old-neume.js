@@ -36,42 +36,42 @@ describe("key-parser", function() {
     it("returns object { key: id: class: }", function() {
       assert.deepEqual(selectorParser.parse(""), {
         key: "",
-        id : null,
+        id: null,
         class: []
       });
       assert.deepEqual(selectorParser.parse("sin"), {
         key: "sin",
-        id : null,
+        id: null,
         class: []
       });
       assert.deepEqual(selectorParser.parse("sin#id"), {
         key: "sin",
-        id : "id",
+        id: "id",
         class: []
       });
       assert.deepEqual(selectorParser.parse("sin#id#ignoreSecondId"), {
         key: "sin",
-        id : "id",
+        id: "id",
         class: []
       });
       assert.deepEqual(selectorParser.parse("sin.ar"), {
         key: "sin",
-        id : null,
+        id: null,
         class: [ "ar" ]
       });
       assert.deepEqual(selectorParser.parse("sin.ar.amp"), {
         key: "sin",
-        id : null,
+        id: null,
         class: [ "ar", "amp" ]
       });
       assert.deepEqual(selectorParser.parse("sin.ar.amp#id"), {
         key: "sin",
-        id : "id",
+        id: "id",
         class: [ "ar", "amp" ]
       });
       assert.deepEqual(selectorParser.parse("sin#id.ar.amp"), {
         key: "sin",
-        id : "id",
+        id: "id",
         class: [ "ar", "amp" ]
       });
     });

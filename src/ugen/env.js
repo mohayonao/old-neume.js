@@ -270,10 +270,10 @@ module.exports = function(neume, _) {
 
     return new neume.Unit({
       outlet: outlet,
-      start : function(t0) {
+      start: function(t0) {
         context.sched(t0, resume);
       },
-      stop  : stop,
+      stop: stop,
       methods: {
         release: function(t0) {
           if (releaseNode > 0 && releaseSchedId === 0) {

@@ -4,14 +4,14 @@ module.exports = function(neume, _) {
   /*
    * $("line", {
    *   start: [number] = 1
-   *   end  : [number] = 0
-   *   dur  : [number] = 1
+   *   end: [number] = 0
+   *   dur: [number] = 1
    * } ... inputs)
    *
    * $("xline", {
    *   start: [number] = 1
-   *   end  : [number] = 0
-   *   dur  : [number] = 1
+   *   end: [number] = 0
+   *   dur: [number] = 1
    * } ... inputs)
    *
    * +--------+      +-------+
@@ -66,7 +66,7 @@ module.exports = function(neume, _) {
     for (var i = 1, imax = list.length; i < imax; i += 2) {
       result.push([
         _.finite(list[i]),
-        _.finite(context.toSeconds(list[i+1]))
+        _.finite(context.toSeconds(list[i + 1]))
       ]);
     }
 
@@ -111,8 +111,8 @@ module.exports = function(neume, _) {
 
     return new neume.Unit({
       outlet: outlet,
-      start : start,
-      stop  : stop
+      start: start,
+      stop: stop
     });
   }
 

@@ -39,7 +39,9 @@ describe("ugen/function", function() {
     });
     it("works", function() {
       var synth = new Neume(function($) {
-        return $(function(t, count) { return count; });
+        return $(function(t, count) {
+          return count;
+        });
       })();
 
       var audioContext = Neume.audioContext;

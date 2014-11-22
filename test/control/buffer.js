@@ -211,7 +211,9 @@ describe("NeuBuffer", function() {
     it("returns new NeuBuffer instance that normalized", function() {
       var normalized = buffer.normalize();
 
-      var div7 = function(x) { return x / 7; };
+      var div7 = function(x) {
+        return x / 7;
+      };
 
       assert(normalized instanceof NeuBuffer);
       assert.deepEqual(normalized[0], new Float32Array(bufferData[0].map(div7)));
