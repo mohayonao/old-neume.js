@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 
 var INIT = 0;
 var START = 1;
@@ -16,7 +16,7 @@ function NeuInterval(context, interval, callback) {
     this._interval = interval;
   } else {
     this._relative = false;
-    this._interval = Math.max(this._minInterval, _.finite(context.toSeconds(interval)));
+    this._interval = Math.max(this._minInterval, util.finite(context.toSeconds(interval)));
   }
   this._callback = callback;
   this._oninterval = oninterval.bind(this);
@@ -46,14 +46,14 @@ function NeuInterval(context, interval, callback) {
 NeuInterval.$name = "NeuInterval";
 
 NeuInterval.prototype.start = function(t) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
     this._stateString = "SCHEDULED";
     this._startTime = t;
 
-    if (_.isFunction(this._callback)) {
+    if (util.isFunction(this._callback)) {
       this.$context.sched(this._startTime, function(t) {
         this._stateString = "PLAYING";
         this._oninterval(t);
@@ -67,7 +67,7 @@ NeuInterval.prototype.start = function(t) {
 };
 
 NeuInterval.prototype.stop = function(t) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === START) {
     this._state = STOP;
@@ -85,7 +85,7 @@ function oninterval(t) {
     this._callback({ playbackTime: t, count: this._count++ });
 
     var nextTime = this._relative ?
-      t + Math.max(this._minInterval, _.finite(this.$context.toSeconds(this._interval))) :
+      t + Math.max(this._minInterval, util.finite(this.$context.toSeconds(this._interval))) :
       this._startTime + this._interval * this._count;
 
     this.$context.sched(nextTime, this._oninterval);

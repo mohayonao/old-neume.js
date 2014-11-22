@@ -2,7 +2,8 @@
 
 require("./shim");
 
-var _ = require("../utils");
+var util = require("../util");
+
 var VERSION = "0.0.23";
 
 var neume = function(context) {
@@ -35,7 +36,7 @@ var neume = function(context) {
     },
     Synth: {
       value: function(func) {
-        return new neume.SynthDef(context, func).apply(null, _.toArray(arguments).slice(1));
+        return new neume.SynthDef(context, func).apply(null, util.toArray(arguments).slice(1));
       },
       enumerable: true
     },
@@ -85,7 +86,7 @@ var neume = function(context) {
   return Neume;
 };
 
-neume._ = _;
+neume.util = util;
 neume.Context = require("./context");
 neume.Transport = require("./transport");
 neume.Component = require("../component/component");
@@ -121,7 +122,7 @@ neume.register = function(name, func) {
 neume.use = function(fn) {
   /* istanbul ignore else */
   if (neume.use.used.indexOf(fn) === -1) {
-    fn(neume, _);
+    fn(neume, util);
     neume.use.used.push(fn);
   }
   return neume;
@@ -130,7 +131,7 @@ neume.use.used = [];
 
 neume.render = function(context, duration, func) {
   var sampleRate = context.sampleRate;
-  var length = _.int(sampleRate * duration);
+  var length = util.int(sampleRate * duration);
 
   return new Promise(function(resolve) {
     var audioContext = new global.OfflineAudioContext(2, length, sampleRate);

@@ -16,14 +16,14 @@
     neume.use(plugin);
   }
 
-})(function(neume, _) {
+})(function(neume, util) {
   "use strict";
 
   neume.register("pluck", function(ugen, spec) {
     var context = ugen.$context;
     var outlet = null;
 
-    var frequency = context.toFrequency(_.defaults(spec.freq, 440));
+    var frequency = context.toFrequency(util.defaults(spec.freq, 440));
 
     var noise = createNoiseChunk(Math.round(context.sampleRate / frequency));
     var bufSrc = createNoiseChunkBufferSource(context, noise);

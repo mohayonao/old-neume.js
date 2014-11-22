@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /* istanbul ignore next */
@@ -30,7 +30,7 @@ module.exports = function(neume, _) {
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;
 
-    var prevValue = _.finite(data(0, count++));
+    var prevValue = util.finite(data(0, count++));
     var param = context.createParam(prevValue, spec);
 
     if (inputs.length) {
@@ -55,13 +55,13 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (typeof value === "function") {
-            context.sched(_.finite(context.toSeconds(t)), function() {
+            context.sched(util.finite(context.toSeconds(t)), function() {
               data = value;
             });
           }
         },
         evaluate: function(t) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
+          context.sched(util.finite(context.toSeconds(t)), function(t) {
             update(t);
           });
         }

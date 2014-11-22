@@ -1,13 +1,13 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 
 var INIT = 0;
 var START = 1;
 var STOP = 2;
 
 function NeuTimeout(context, interval, callback) {
-  interval = _.finite(context.toSeconds(interval));
+  interval = util.finite(context.toSeconds(interval));
 
   this.$context = context;
 
@@ -39,14 +39,14 @@ function NeuTimeout(context, interval, callback) {
 NeuTimeout.$name = "NeuTimeout";
 
 NeuTimeout.prototype.start = function(t) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
     this._stateString = "SCHEDULED";
     this._startTime = t + this._interval;
 
-    if (_.isFunction(this._callback)) {
+    if (util.isFunction(this._callback)) {
       this.$context.sched(this._startTime, function(t) {
         if (t < this._stopTime) {
           this._stateString = "PLAYING";
@@ -65,7 +65,7 @@ NeuTimeout.prototype.start = function(t) {
 };
 
 NeuTimeout.prototype.stop = function(t) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === START) {
     this._state = STOP;

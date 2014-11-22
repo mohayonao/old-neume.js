@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
@@ -53,7 +53,7 @@ module.exports = function(neume, _) {
 
     if (!isWave(type)) {
       if (type === "pulse") {
-        type = makePulseWave(ugen.$context, _.finite(_.defaults(spec.width, 0.5)));
+        type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
       } else {
         type = WAVE_TYPES[type] || "sine";
       }
@@ -80,7 +80,7 @@ module.exports = function(neume, _) {
   });
 
   neume.register("pulse", function(ugen, spec, inputs) {
-    var type = makePulseWave(ugen.$context, _.finite(_.defaults(spec.width, 0.5)));
+    var type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
     return make(setup(type, ugen, spec, inputs));
   });
 
@@ -120,8 +120,8 @@ module.exports = function(neume, _) {
     }
     osc.frequency.value = 0;
     osc.detune.value = 0;
-    context.connect(_.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
-    context.connect(_.defaults(spec.detune, 0), osc.detune);
+    context.connect(util.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
+    context.connect(util.defaults(spec.detune, 0), osc.detune);
 
     return osc;
   }
@@ -148,7 +148,7 @@ module.exports = function(neume, _) {
   var _wave = new Array(256);
 
   function makePulseWave(context, width) {
-    width = _.int(_.clip(width, 0, 1) * 256);
+    width = util.int(util.clip(width, 0, 1) * 256);
 
     if (_wave[width]) {
       return _wave[width];

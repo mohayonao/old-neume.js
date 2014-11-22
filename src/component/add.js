@@ -1,13 +1,13 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 var NeuComponent = require("./component");
 
 function NeuAdd(context, a, b) {
-  if (a instanceof _.NeuDC) {
+  if (a instanceof util.NeuDC) {
     a = a.valueOf();
   }
-  if (b instanceof _.NeuDC) {
+  if (b instanceof util.NeuDC) {
     b = b.valueOf();
   }
   if (typeof a === "number" && typeof b === "number") {
@@ -24,16 +24,16 @@ function NeuAdd(context, a, b) {
   this._a = a;
   this._b = b;
 }
-_.inherits(NeuAdd, NeuComponent);
+util.inherits(NeuAdd, NeuComponent);
 
 NeuAdd.$name = "NeuAdd";
 
 NeuAdd.prototype.add = function(value) {
-  if (value instanceof _.NeuDC) {
+  if (value instanceof util.NeuDC) {
     value = value.valueOf();
   }
   if (typeof this._b === "number" && typeof value === "number") {
-    return this.$context.createAdd(this._a, _.finite(this._b + value));
+    return this.$context.createAdd(this._a, util.finite(this._b + value));
   }
   return this.$context.createSum([ this._a, this._b, value ]);
 };
@@ -48,7 +48,7 @@ NeuAdd.prototype.toAudioNode = function() {
 };
 
 NeuAdd.prototype.connect = function(to) {
-  if (this._a instanceof _.NeuParam) {
+  if (this._a instanceof util.NeuParam) {
     this.$context.connect(this._a, to);
     this.$context.connect(this.$context.toAudioNode(this._b), to);
   } else {
@@ -64,4 +64,4 @@ NeuAdd.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = _.NeuAdd = NeuAdd;
+module.exports = util.NeuAdd = NeuAdd;

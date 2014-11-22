@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("../utils");
 var C = require("../const");
+var util = require("../util");
 var NeuComponent = require("./component");
 
 var filled0 = new FilledFloat32Array(C.DC_BUF_SIZE, 0);
@@ -9,9 +9,9 @@ var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
 
 function NeuDC(context, value) {
   NeuComponent.call(this, context);
-  this._value = _.finite(value);
+  this._value = util.finite(value);
 }
-_.inherits(NeuDC, NeuComponent);
+util.inherits(NeuDC, NeuComponent);
 
 NeuDC.$name = "NeuDC";
 
@@ -63,11 +63,11 @@ function createDCNode(context, value) {
 
   if (value !== 0 && value !== 1) {
     node = context.createGain();
-    node.gain.value = _.finite(value);
+    node.gain.value = util.finite(value);
     context.connect(bufSrc, node);
   }
 
   return node;
 }
 
-module.exports = _.NeuDC = NeuDC;
+module.exports = util.NeuDC = NeuDC;

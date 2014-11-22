@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -29,13 +29,13 @@ module.exports = function(neume, _) {
     var buffer = context.toAudioBuffer(spec.buf);
     var conv = context.createConvolver();
 
-    var mix = _.defaults(spec.mix, 1);
+    var mix = util.defaults(spec.mix, 1);
 
     /* istanbul ignore else */
     if (buffer != null) {
       conv.buffer = buffer;
     }
-    conv.normalize = !!_.defaults(spec.normalize, true);
+    conv.normalize = !!util.defaults(spec.normalize, true);
 
     var sum = context.createSum(inputs);
 

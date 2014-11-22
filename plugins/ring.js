@@ -16,7 +16,7 @@
     neume.use(plugin);
   }
 
-})(function(neume, _) {
+})(function(neume, util) {
   "use strict";
 
   neume.register("ring1", function(ugen, spec, inputs) {
@@ -25,7 +25,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, b).add(a);
 
@@ -40,7 +40,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, b).add(a).add(b);
 
@@ -55,7 +55,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).mul(b);
 
@@ -70,7 +70,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).mul(b).add(
       context.createMul(a, b).mul(b).mul(-1)
@@ -87,7 +87,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).add(
       context.createMul(b, b).mul(-1)
@@ -104,7 +104,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).add(
       context.createMul(b, b)
@@ -121,7 +121,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, context.createMul(b, -1));
     outlet = context.createMul(outlet, outlet);
@@ -137,7 +137,7 @@
     var outlet = null;
 
     var a = context.createSum(inputs);
-    var b = _.defaults(spec.mod, 0);
+    var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, b);
     outlet = context.createMul(outlet, outlet);

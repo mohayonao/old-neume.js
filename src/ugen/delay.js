@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   var WEB_AUDIO_MAX_DELAY_TIME = neume.MAX_DELAY_SEC;
@@ -22,16 +22,16 @@ module.exports = function(neume, _) {
   neume.register("delay", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var delayTime = _.defaults(context.toSeconds(spec.delay), 0);
+    var delayTime = util.defaults(context.toSeconds(spec.delay), 0);
     var maxDelayTime;
 
     if (typeof delayTime === "number") {
-      delayTime = _.clip(_.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
+      delayTime = util.clip(util.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
       maxDelayTime = delayTime;
     } else {
-      maxDelayTime = _.finite(_.defaults(context.toSeconds(spec.maxDelayTime), 1));
+      maxDelayTime = util.finite(util.defaults(context.toSeconds(spec.maxDelayTime), 1));
     }
-    maxDelayTime = _.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
+    maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
 
     var delay = context.createDelay(maxDelayTime);
 

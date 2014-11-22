@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
@@ -25,7 +25,7 @@ module.exports = function(neume, _) {
   neume.register("shaper", function(ugen, spec, inputs) {
     var curve = null;
     if (typeof spec.curve === "number") {
-      curve = createCurve(_.finite(spec.curve));
+      curve = createCurve(util.finite(spec.curve));
     } else {
       curve = spec.curve;
     }
@@ -60,7 +60,7 @@ module.exports = function(neume, _) {
   var curves = {};
 
   function createCurve(amount) {
-    amount = _.clip(amount, 0, 1);
+    amount = util.clip(amount, 0, 1);
 
     if (!curves[amount]) {
       curves[amount] = (amount === 1) ? createSquare() : createWSCurve(amount);

@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("../utils");
 var C = require("../const");
+var util = require("../util");
 
 function NeuAudioBus(context) {
   this.$context = context;
@@ -12,7 +12,7 @@ function NeuAudioBus(context) {
   Object.defineProperties(this, {
     maxNodes: {
       set: function(value) {
-        this.$maxNodes = Math.max(0, _.int(value));
+        this.$maxNodes = Math.max(0, util.int(value));
       },
       get: function() {
         return this.$maxNodes;
@@ -29,9 +29,9 @@ function NeuAudioBus(context) {
 NeuAudioBus.$name = "NeuAudioBus";
 
 NeuAudioBus.prototype.fade = function(t, val, dur) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  val = _.finite(val);
-  dur = _.finite(this.$context.toSeconds(dur));
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  val = util.finite(val);
+  dur = util.finite(this.$context.toSeconds(dur));
 
   var v0 = this.$outlet.gain.value;
   var v1 = val;

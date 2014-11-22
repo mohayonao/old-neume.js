@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -33,11 +33,11 @@ module.exports = function(neume, _) {
     comp.ratio.value = 0;
     comp.attack.value = 0;
     comp.release.value = 0;
-    context.connect(_.defaults(spec.thresh, -24), comp.threshold);
-    context.connect(_.defaults(spec.knee, 30), comp.knee);
-    context.connect(_.defaults(spec.ratio, 12), comp.ratio);
-    context.connect(_.defaults(context.toSeconds(spec.a), 0.003), comp.attack);
-    context.connect(_.defaults(context.toSeconds(spec.r), 0.250), comp.release);
+    context.connect(util.defaults(spec.thresh, -24), comp.threshold);
+    context.connect(util.defaults(spec.knee, 30), comp.knee);
+    context.connect(util.defaults(spec.ratio, 12), comp.ratio);
+    context.connect(util.defaults(context.toSeconds(spec.a), 0.003), comp.attack);
+    context.connect(util.defaults(context.toSeconds(spec.r), 0.250), comp.release);
 
     context.createSum(inputs).connect(comp);
 

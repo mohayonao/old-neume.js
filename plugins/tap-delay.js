@@ -16,7 +16,7 @@
     neume.use(plugin);
   }
 
-})(function(neume, _) {
+})(function(neume, util) {
   "use strict";
 
   var MAX_DELAY_SEC = neume.MAX_DELAY_SEC;
@@ -79,9 +79,9 @@
     var outlet = context.createGain();
 
     var delays = spec.delays;
-    var gain = _.defaults(spec.gain, 0.5);
-    var feedback = _.defaults(spec.feedback, 0);
-    var maxDelayTime = _.defaults(context.toSeconds(spec.maxDelayTime), 1);
+    var gain = util.defaults(spec.gain, 0.5);
+    var feedback = util.defaults(spec.feedback, 0);
+    var maxDelayTime = util.defaults(context.toSeconds(spec.maxDelayTime), 1);
 
     if (Array.isArray(delays)) {
       delays = delays.reduce(function(a, b) {
@@ -140,12 +140,12 @@
 
   function createDelay(context, delayTime, maxDelayTime) {
     if (typeof delayTime === "number") {
-      delayTime = _.clip(delayTime, 0, MAX_DELAY_SEC);
+      delayTime = util.clip(delayTime, 0, MAX_DELAY_SEC);
       maxDelayTime = delayTime;
     } else {
-      maxDelayTime = _.finite(_.defaults(context.toSeconds(maxDelayTime), 1));
+      maxDelayTime = util.finite(util.defaults(context.toSeconds(maxDelayTime), 1));
     }
-    maxDelayTime = _.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
+    maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
 
     var delayNode = context.createDelay(maxDelayTime);
 

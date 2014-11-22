@@ -1,13 +1,13 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 var NeuComponent = require("./component");
 
 function NeuMul(context, a, b) {
-  if (a instanceof _.NeuDC) {
+  if (a instanceof util.NeuDC) {
     a = a.valueOf();
   }
-  if (b instanceof _.NeuDC) {
+  if (b instanceof util.NeuDC) {
     b = b.valueOf();
   }
   if (typeof a === "number" && typeof b === "number") {
@@ -26,16 +26,16 @@ function NeuMul(context, a, b) {
   this._a = a;
   this._b = b;
 }
-_.inherits(NeuMul, NeuComponent);
+util.inherits(NeuMul, NeuComponent);
 
 NeuMul.$name = "NeuMul";
 
 NeuMul.prototype.mul = function(value) {
-  if (value instanceof _.NeuDC) {
+  if (value instanceof util.NeuDC) {
     value = value.valueOf();
   }
   if (typeof this._b === "number" && typeof value === "number") {
-    return this.$context.createMul(this._a, _.finite(this._b * value));
+    return this.$context.createMul(this._a, util.finite(this._b * value));
   }
   return this.$context.createMul(this.toAudioNode(), value);
 };
@@ -60,4 +60,4 @@ NeuMul.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = _.NeuMul = NeuMul;
+module.exports = util.NeuMul = NeuMul;

@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   neume.register("object", make);
@@ -8,9 +8,9 @@ module.exports = function(neume, _) {
     var context = ugen.$context;
     var outlet = null;
 
-    var data = _.defaults(spec.value, 0);
-    var key = _.defaults(spec.key, "");
-    var interval = _.defaults(spec.interval, 0.250);
+    var data = util.defaults(spec.value, 0);
+    var key = util.defaults(spec.key, "");
+    var interval = util.defaults(spec.interval, 0.250);
     var schedId = 0;
     var valueOf = null;
 
@@ -35,10 +35,10 @@ module.exports = function(neume, _) {
 
     if (!/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
       relativeInterval = false;
-      interval = Math.max(minInterval, _.finite(context.toSeconds(interval)));
+      interval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
     }
 
-    var prevVal = _.finite(valueOf());
+    var prevVal = util.finite(valueOf());
     var param = context.createParam(prevVal, spec);
 
     if (inputs.length) {
@@ -50,7 +50,7 @@ module.exports = function(neume, _) {
     }
 
     function update(t0) {
-      var value = _.finite(valueOf());
+      var value = util.finite(valueOf());
 
       if (value !== prevVal) {
         param.update(t0, value, prevVal);
@@ -58,7 +58,7 @@ module.exports = function(neume, _) {
       }
 
       var nextTime = relativeInterval ?
-        t0 + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+        t0 + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
         t0 + interval;
 
       schedId = context.sched(nextTime, update);

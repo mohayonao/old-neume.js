@@ -2,7 +2,6 @@
 
 var neume = require("../../src");
 
-var _ = neume._;
 var NeuContext = neume.Context;
 var NeuSynth = neume.Synth;
 var NeuUGen = neume.UGen;

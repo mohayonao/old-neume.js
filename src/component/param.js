@@ -1,12 +1,12 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 var NeuComponent = require("./component");
 
 function NeuParam(context, value, spec) {
   spec = spec || {};
   NeuComponent.call(this, context);
-  this._value = _.finite(value);
+  this._value = util.finite(value);
   this._params = [];
 
   if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(spec.timeConstant)) {
@@ -14,10 +14,10 @@ function NeuParam(context, value, spec) {
     this._timeConstant = spec.timeConstant;
   } else {
     this._relative = false;
-    this._timeConstant = Math.max(0, _.finite(spec.timeConstant));
+    this._timeConstant = Math.max(0, util.finite(spec.timeConstant));
   }
 }
-_.inherits(NeuParam, NeuComponent);
+util.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
@@ -26,7 +26,7 @@ NeuParam.prototype.valueOf = function() {
 };
 
 NeuParam.prototype.set = function(value) {
-  value = _.finite(value);
+  value = util.finite(value);
 
   var startTime = this.$context.currentTime;
   var params = this._params;
@@ -42,8 +42,8 @@ NeuParam.prototype.set = function(value) {
 };
 
 NeuParam.prototype.setAt = function(value, startTime) {
-  value = _.finite(value);
-  startTime = _.finite(this.$context.toSeconds(startTime));
+  value = util.finite(value);
+  startTime = util.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -55,8 +55,8 @@ NeuParam.prototype.setAt = function(value, startTime) {
 };
 
 NeuParam.prototype.linTo = function(value, endTime) {
-  value = _.finite(value);
-  endTime = _.finite(this.$context.toSeconds(endTime));
+  value = util.finite(value);
+  endTime = util.finite(this.$context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -68,8 +68,8 @@ NeuParam.prototype.linTo = function(value, endTime) {
 };
 
 NeuParam.prototype.expTo = function(value, endTime) {
-  value = _.finite(value);
-  endTime = _.finite(this.$context.toSeconds(endTime));
+  value = util.finite(value);
+  endTime = util.finite(this.$context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -81,9 +81,9 @@ NeuParam.prototype.expTo = function(value, endTime) {
 };
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
-  target = _.finite(target);
-  startTime = _.finite(this.$context.toSeconds(startTime));
-  timeConstant = _.finite(this.$context.toSeconds(timeConstant));
+  target = util.finite(target);
+  startTime = util.finite(this.$context.toSeconds(startTime));
+  timeConstant = util.finite(this.$context.toSeconds(timeConstant));
 
   var params = this._params;
 
@@ -95,8 +95,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
 };
 
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
-  startTime = _.finite(this.$context.toSeconds(startTime));
-  duration = _.finite(this.$context.toSeconds(duration));
+  startTime = util.finite(this.$context.toSeconds(startTime));
+  duration = util.finite(this.$context.toSeconds(duration));
 
   var params = this._params;
 
@@ -108,7 +108,7 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 };
 
 NeuParam.prototype.cancel = function(startTime) {
-  startTime = _.finite(this.$context.toSeconds(startTime));
+  startTime = util.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -120,9 +120,9 @@ NeuParam.prototype.cancel = function(startTime) {
 };
 
 NeuParam.prototype.update = function(t0, v1, v0) {
-  t0 = _.finite(this.$context.toSeconds(t0));
-  v1 = _.finite(v1);
-  v0 = _.finite(_.defaults(v0, v1));
+  t0 = util.finite(this.$context.toSeconds(t0));
+  v1 = util.finite(v1);
+  v0 = util.finite(util.defaults(v0, v1));
 
   if (this._timeConstant === 0 || v0 === v1) {
     this.setAt(v1, t0);
@@ -166,4 +166,4 @@ NeuParam.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = _.NeuParam = NeuParam;
+module.exports = util.NeuParam = NeuParam;

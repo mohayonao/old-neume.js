@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   var ITERATE = 0;
@@ -28,7 +28,7 @@ module.exports = function(neume, _) {
     var context = ugen.$context;
     var outlet = null;
 
-    var iter = _.defaults(spec.iter, null);
+    var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
     var prevValue = 0;
     var param = context.createParam(prevValue, spec);
@@ -48,7 +48,7 @@ module.exports = function(neume, _) {
       var items;
       if (typeof iter.next === "function") {
         items = iter.next();
-        if (!_.isObject(items)) {
+        if (!util.isObject(items)) {
           items = { value: items, done: false };
         }
       } else {
@@ -66,18 +66,18 @@ module.exports = function(neume, _) {
           state = FINISHED;
           ugen.emit("end", { playbackTime: t }, ugen.$synth);
         } else {
-          prevValue = _.finite(items.value);
+          prevValue = util.finite(items.value);
           param.setAt(prevValue, t);
         }
       },
       methods: {
         setValue: function(t, value) {
-          context.sched(_.finite(context.toSeconds(t)), function() {
-            iter = _.defaults(value, {});
+          context.sched(util.finite(context.toSeconds(t)), function() {
+            iter = util.defaults(value, {});
           });
         },
         next: function(t) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
+          context.sched(util.finite(context.toSeconds(t)), function(t) {
             if (state === ITERATE) {
               var items = iterNext();
               var value;
@@ -86,7 +86,7 @@ module.exports = function(neume, _) {
                 state = FINISHED;
                 ugen.emit("end", { playbackTime: t }, ugen.$synth);
               } else {
-                value = _.finite(items.value);
+                value = util.finite(items.value);
                 param.update(t, value, prevValue);
                 prevValue = value;
               }

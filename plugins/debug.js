@@ -16,14 +16,14 @@
     neume.use(plugin);
   }
 
-})(function(neume, _) {
+})(function(neume, util) {
   "use strict";
 
   neume.register("debug~", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet = context.createScriptProcessor(2048, 1, 1);
 
-    var interval = _.finite(_.defaults(spec.interval, 1)) * context.sampleRate;
+    var interval = util.finite(util.defaults(spec.interval, 1)) * context.sampleRate;
     var label = String(spec.label || "");
     var samples = 0;
 

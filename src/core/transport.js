@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 
 function NeuTransport(context) {
   this.$context = context;
@@ -27,9 +27,9 @@ NeuTransport.prototype.getBpm = function() {
 };
 
 NeuTransport.prototype.setBpm = function(value, rampTime) {
-  rampTime = this.toSeconds(_.defaults(rampTime, 0));
+  rampTime = this.toSeconds(util.defaults(rampTime, 0));
 
-  var bpm = _.clip(_.finite(value), 1, 1000);
+  var bpm = util.clip(util.finite(value), 1, 1000);
 
   if (rampTime <= 0) {
     this._bpm = bpm;
@@ -49,7 +49,7 @@ NeuTransport.prototype.setBpm = function(value, rampTime) {
 
 NeuTransport.prototype.toSeconds = function(value) {
   if (typeof value === "number") {
-    return _.finite(value);
+    return util.finite(value);
   }
 
   if (typeof value === "string") {
@@ -82,7 +82,7 @@ NeuTransport.prototype.toSeconds = function(value) {
     } else if ((m = /^(\d+)ms$/.exec(value)) !== null) {
       time = +m[1] * 0.001;
     } else if ((m = /^(\d+(?:\.\d+)?)hz$/.exec(value)) !== null) {
-      time = _.finite(1 / +m[1]);
+      time = util.finite(1 / +m[1]);
     } else if ((m = /^(\d+)ticks$/.exec(value)) !== null) {
       time = ticks2sec(+m[1], this.getBpm());
     } else if ((m = /^(\d+)(n[td]?)$/.exec(value)) !== null) {
@@ -96,7 +96,7 @@ NeuTransport.prototype.toSeconds = function(value) {
     } else if (value === "now") {
       return this.$context.currentTime;
     } else {
-      time = _.finite(+value);
+      time = util.finite(+value);
     }
 
     return time + offset;
@@ -107,10 +107,10 @@ NeuTransport.prototype.toSeconds = function(value) {
 
 NeuTransport.prototype.toFrequency = function(value) {
   if (typeof value === "number") {
-    return _.finite(value);
+    return util.finite(value);
   }
   if (typeof value === "string") {
-    return _.finite(1 / this.toSeconds(value));
+    return util.finite(1 / this.toSeconds(value));
   }
   return value;
 };

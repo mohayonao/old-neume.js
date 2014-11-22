@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -23,7 +23,7 @@ module.exports = function(neume, _) {
     var context = ugen.$context;
     var outlet = null;
 
-    var data = _.finite(spec.value);
+    var data = util.finite(spec.value);
     var param = context.createParam(data, spec);
 
     if (inputs.length) {
@@ -43,8 +43,8 @@ module.exports = function(neume, _) {
       outlet: outlet,
       methods: {
         setValue: function(t, value) {
-          if (_.isFinite(value)) {
-            context.sched(_.finite(context.toSeconds(t)), function() {
+          if (util.isFinite(value)) {
+            context.sched(util.finite(context.toSeconds(t)), function() {
               update(t, data, value, value);
             });
           }

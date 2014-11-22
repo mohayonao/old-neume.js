@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
 
@@ -60,11 +60,11 @@ module.exports = function(neume, _) {
   });
 
   neume.register("adsr", function(ugen, spec, inputs) {
-    var a = _.defaults(spec.a, 0.01);
-    var d = _.defaults(spec.d, 0.30);
-    var s = _.defaults(spec.s, 0.50);
-    var r = _.defaults(spec.r, 1.00);
-    var curve = _.defaults(spec.curve, 0.05);
+    var a = util.defaults(spec.a, 0.01);
+    var d = util.defaults(spec.d, 0.30);
+    var s = util.defaults(spec.s, 0.50);
+    var r = util.defaults(spec.r, 1.00);
+    var curve = util.defaults(spec.curve, 0.05);
 
     var init = 0;
     var list = [
@@ -80,12 +80,12 @@ module.exports = function(neume, _) {
   });
 
   neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = _.defaults(spec.delay, 0.1);
-    var a = _.defaults(spec.a, 0.01);
-    var d = _.defaults(spec.d, 0.30);
-    var s = _.defaults(spec.s, 0.50);
-    var r = _.defaults(spec.r, 1.00);
-    var curve = _.defaults(spec.curve, 0.05);
+    var delay = util.defaults(spec.delay, 0.1);
+    var a = util.defaults(spec.a, 0.01);
+    var d = util.defaults(spec.d, 0.30);
+    var s = util.defaults(spec.s, 0.50);
+    var r = util.defaults(spec.r, 1.00);
+    var curve = util.defaults(spec.curve, 0.05);
 
     var init = 0;
     var list = [
@@ -102,10 +102,10 @@ module.exports = function(neume, _) {
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
-    var a = _.defaults(spec.a, 0.01);
-    var s = _.defaults(spec.s, 1.00);
-    var r = _.defaults(spec.r, 1.00);
-    var curve = _.defaults(spec.curve, 0.05);
+    var a = util.defaults(spec.a, 0.01);
+    var s = util.defaults(spec.s, 1.00);
+    var r = util.defaults(spec.r, 1.00);
+    var curve = util.defaults(spec.curve, 0.05);
 
     var init = 0;
     var list = [
@@ -120,9 +120,9 @@ module.exports = function(neume, _) {
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
-    var r = _.defaults(spec.r, 0.1);
-    var level = _.defaults(spec.level, 1.00);
-    var curve = _.defaults(spec.curve, 0.05);
+    var r = util.defaults(spec.r, 0.1);
+    var level = util.defaults(spec.level, 1.00);
+    var curve = util.defaults(spec.curve, 0.05);
 
     var init = level;
     var list = [
@@ -138,12 +138,12 @@ module.exports = function(neume, _) {
 
   function makeEnvTable(context, spec) {
     var table = {};
-    var curve = _.defaults(spec.curve, 0.05);
+    var curve = util.defaults(spec.curve, 0.05);
 
     if (spec.hasOwnProperty("table")) {
       table = makeEnvTableFromArrayList(context, spec, curve);
     } else {
-      table = makeEnvTableFromNumList(context, _.toArray(spec._), curve);
+      table = makeEnvTableFromNumList(context, util.toArray(spec._), curve);
     }
 
     return table;
@@ -151,17 +151,17 @@ module.exports = function(neume, _) {
 
   function makeEnvTableFromArrayList(context, spec, curve) {
     var table = {
-      init: _.finite(spec.init),
+      init: util.finite(spec.init),
       list: [],
-      releaseNode: _.int(_.defaults(spec.release, -1)),
-      loopNode: _.int(_.defaults(spec.loop, -1)),
-    }, list = _.toArray(spec.table);
+      releaseNode: util.int(util.defaults(spec.release, -1)),
+      loopNode: util.int(util.defaults(spec.loop, -1)),
+    }, list = util.toArray(spec.table);
 
     for (var i = 0, imax = list.length; i < imax; i++) {
       /* istanbul ignore else */
       if (Array.isArray(list[i])) {
         table.list.push([
-          _.finite(list[i][0]), _.finite(context.toSeconds(list[i][1])), _.finite(_.defaults(list[i][2], curve))
+          util.finite(list[i][0]), util.finite(context.toSeconds(list[i][1])), util.finite(util.defaults(list[i][2], curve))
         ]);
       }
     }
@@ -171,7 +171,7 @@ module.exports = function(neume, _) {
 
   function makeEnvTableFromNumList(context, list, curve) {
     var table = {
-      init: _.finite(list.shift()),
+      init: util.finite(list.shift()),
       list: [],
       releaseNode: -1,
       loopNode: -1,
@@ -188,7 +188,7 @@ module.exports = function(neume, _) {
         }
       } else {
         table.list.push([
-          _.finite(value), _.finite(context.toSeconds(list[i++])), curve
+          util.finite(value), util.finite(context.toSeconds(list[i++])), curve
         ]);
       }
     }
@@ -235,11 +235,11 @@ module.exports = function(neume, _) {
 
       index += 1;
 
-      var dur = _.finite(context.toSeconds(params[1]));
+      var dur = util.finite(context.toSeconds(params[1]));
       var t1 = t0 + dur;
       var v0 = param.valueOf();
-      var v1 = _.finite(params[0]);
-      var cur = _.clip(_.finite(params[2]), 1e-6, 1 - 1e-6);
+      var v1 = util.finite(params[0]);
+      var cur = util.clip(util.finite(params[2]), 1e-6, 1 - 1e-6);
 
       if (v0 === v1 || dur <= 0) {
         param.setAt(v1, t1);
@@ -277,7 +277,7 @@ module.exports = function(neume, _) {
       methods: {
         release: function(t0) {
           if (releaseNode > 0 && releaseSchedId === 0) {
-            releaseSchedId = context.sched(_.finite(context.toSeconds(t0)), function(t0) {
+            releaseSchedId = context.sched(util.finite(context.toSeconds(t0)), function(t0) {
               context.unsched(schedId);
               schedId = 0;
               index = releaseNode;

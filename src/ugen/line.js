@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /*
@@ -25,22 +25,22 @@ module.exports = function(neume, _) {
    *   |
    */
   neume.register("line", function(ugen, spec, inputs) {
-    var list = spec.hasOwnProperty("_") ? makeListFromNumArray(ugen.$context, _.toArray(spec._)) : [
-      _.finite(_.defaults(spec.start, 1)),
+    var list = spec.hasOwnProperty("_") ? makeListFromNumArray(ugen.$context, util.toArray(spec._)) : [
+      util.finite(util.defaults(spec.start, 1)),
       [
-        _.finite(_.defaults(spec.end, 0)),
-        _.finite(_.defaults(ugen.$context.toSeconds(spec.dur), 1))
+        util.finite(util.defaults(spec.end, 0)),
+        util.finite(util.defaults(ugen.$context.toSeconds(spec.dur), 1))
       ]
     ];
     return make("linTo", ugen, list, inputs);
   });
 
   neume.register("xline", function(ugen, spec, inputs) {
-    var list = spec.hasOwnProperty("_") ? makeListFromNumArray(ugen.$context, _.toArray(spec._)) : [
-      _.finite(_.defaults(spec.start, 1)),
+    var list = spec.hasOwnProperty("_") ? makeListFromNumArray(ugen.$context, util.toArray(spec._)) : [
+      util.finite(util.defaults(spec.start, 1)),
       [
-        _.finite(_.defaults(spec.end, 0)),
-        _.finite(_.defaults(ugen.$context.toSeconds(spec.dur), 1))
+        util.finite(util.defaults(spec.end, 0)),
+        util.finite(util.defaults(ugen.$context.toSeconds(spec.dur), 1))
       ]
     ];
 
@@ -60,13 +60,13 @@ module.exports = function(neume, _) {
 
   function makeListFromNumArray(context, list) {
     var result = [
-      _.finite(list[0])
+      util.finite(list[0])
     ];
 
     for (var i = 1, imax = list.length; i < imax; i += 2) {
       result.push([
-        _.finite(list[i]),
-        _.finite(context.toSeconds(list[i + 1]))
+        util.finite(list[i]),
+        util.finite(context.toSeconds(list[i + 1]))
       ]);
     }
 

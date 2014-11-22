@@ -16,7 +16,7 @@
     neume.use(plugin);
   }
 
-})(function(neume, _) {
+})(function(neume, util) {
   "use strict";
 
   var MAX_DELAY_SEC = neume.MAX_DELAY_SEC;
@@ -89,23 +89,23 @@
     var outlet = null;
     var gainNode, ffNode, fbNode;
 
-    var gain = _.defaults(spec.gain, 0);
-    var ffGain = _.defaults(spec.ffGain, 0);
-    var fbGain = _.defaults(spec.fbGain, 0);
-    var ffDelay = _.defaults(context.toSeconds(spec.ffDelay), 0.001);
-    var fbDelay = _.defaults(context.toSeconds(spec.fbDelay), 0.001);
+    var gain = util.defaults(spec.gain, 0);
+    var ffGain = util.defaults(spec.ffGain, 0);
+    var fbGain = util.defaults(spec.fbGain, 0);
+    var ffDelay = util.defaults(context.toSeconds(spec.ffDelay), 0.001);
+    var fbDelay = util.defaults(context.toSeconds(spec.fbDelay), 0.001);
 
     var sum = context.createSum(inputs);
 
     if (gain !== 0) {
-      outlet = _.defaults(outlet, context.createGain());
+      outlet = util.defaults(outlet, context.createGain());
       gainNode = createGain(context, gain);
       context.connect(sum, gainNode.inlet);
       context.connect(gainNode.outlet, outlet);
     }
 
     if (ffGain !== 0) {
-      outlet = _.defaults(outlet, context.createGain());
+      outlet = util.defaults(outlet, context.createGain());
       if (ffDelay !== 0) {
         ffNode = createDelayGain(context, ffDelay, spec.ffMaxDelayTime, ffGain);
       } else {
@@ -161,12 +161,12 @@
 
   function createDelay(context, delayTime, maxDelayTime) {
     if (typeof delayTime === "number") {
-      delayTime = _.clip(delayTime, 0, MAX_DELAY_SEC);
+      delayTime = util.clip(delayTime, 0, MAX_DELAY_SEC);
       maxDelayTime = delayTime;
     } else {
-      maxDelayTime = _.finite(_.defaults(context.toSeconds(maxDelayTime), 1));
+      maxDelayTime = util.finite(util.defaults(context.toSeconds(maxDelayTime), 1));
     }
-    maxDelayTime = _.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
+    maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
 
     var delayNode = context.createDelay(maxDelayTime);
 

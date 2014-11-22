@@ -1,9 +1,9 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 
 function forward(_buffer) {
-  var n = 1 << Math.ceil(Math.log(_.finite(_buffer.length)) * Math.LOG2E);
+  var n = 1 << Math.ceil(Math.log(util.finite(_buffer.length)) * Math.LOG2E);
   var buffer = new Float32Array(n);
   var real = new Float32Array(n);
   var imag = new Float32Array(n);
@@ -43,7 +43,7 @@ function forward(_buffer) {
 }
 
 function inverse(_real, _imag) {
-  var n = 1 << Math.ceil(Math.log(_.finite(_real.length)) * Math.LOG2E);
+  var n = 1 << Math.ceil(Math.log(util.finite(_real.length)) * Math.LOG2E);
   var buffer = new Float32Array(n);
   var real = new Float32Array(n);
   var imag = new Float32Array(n);

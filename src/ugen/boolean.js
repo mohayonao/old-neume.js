@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -27,8 +27,8 @@ module.exports = function(neume, _) {
     var outlet = null;
 
     var data = !!spec.value;
-    var trueVal = _.finite(_.defaults(spec.true, 1));
-    var falseVal = _.finite(_.defaults(spec.false, 0));
+    var trueVal = util.finite(util.defaults(spec.true, 1));
+    var falseVal = util.finite(util.defaults(spec.false, 0));
     var param = context.createParam(data ? trueVal : falseVal, spec);
 
     if (inputs.length) {
@@ -49,7 +49,7 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (typeof value === "boolean") {
-            context.sched(_.finite(context.toSeconds(t)), function(t) {
+            context.sched(util.finite(context.toSeconds(t)), function(t) {
               var v0 = data  ? trueVal : falseVal;
               var v1 = value ? trueVal : falseVal;
               update(t, v0, v1, value);
@@ -57,7 +57,7 @@ module.exports = function(neume, _) {
           }
         },
         toggle: function(t) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
+          context.sched(util.finite(context.toSeconds(t)), function(t) {
             var v0 = data ? trueVal : falseVal;
             var v1 = data ? falseVal : trueVal;
             update(t, v0, v1, !data);
