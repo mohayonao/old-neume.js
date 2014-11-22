@@ -3,7 +3,7 @@ module.exports = function(neume, _) {
 
   /**
    * $(boolean, {
-   *   true : [number] = 1
+   *   true: [number] = 1
    *   false: [number] = 0
    *   timeConstant: [number] = 0
    * } ... inputs)
@@ -24,10 +24,10 @@ module.exports = function(neume, _) {
    */
   neume.register("boolean", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var data = !!spec.value;
-    var trueVal  = _.finite(_.defaults(spec.true , 1));
+    var trueVal = _.finite(_.defaults(spec.true, 1));
     var falseVal = _.finite(_.defaults(spec.false, 0));
     var param = context.createParam(data ? trueVal : falseVal, spec);
 

@@ -24,9 +24,9 @@ module.exports = function(neume, _) {
    */
   neume.register("*", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
-    var nodes    = [];
+    var nodes = [];
     var multiple = 1;
 
     inputs.forEach(function(node) {

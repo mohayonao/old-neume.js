@@ -2,8 +2,8 @@
 
 var neume = require("../../src");
 
-var _           = neume._;
-var NeuContext  = neume.Context;
+var _ = neume._;
+var NeuContext = neume.Context;
 var NeuSynthDef = neume.SynthDef;
 var NOP = function() {};
 

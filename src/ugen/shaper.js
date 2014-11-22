@@ -85,7 +85,7 @@ module.exports = function(neume, _) {
 
   function createSquare() {
     var curve = new Float32Array(WS_CURVE_SIZE);
-    var half  = WS_CURVE_SIZE >> 1;
+    var half = WS_CURVE_SIZE >> 1;
 
     for (var i = 0; i < WS_CURVE_SIZE; i++) {
       curve[i] = i < half ? -1 : +1;

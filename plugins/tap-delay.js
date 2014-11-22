@@ -75,12 +75,12 @@
    */
   neume.register("tap-delay", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var inlet   = context.createGain();
-    var outlet  = context.createGain();
+    var inlet = context.createGain();
+    var outlet = context.createGain();
 
-    var delays       = spec.delays;
-    var gain         = _.defaults(spec.gain, 0.5);
-    var feedback     = _.defaults(spec.feedback, 0);
+    var delays = spec.delays;
+    var gain = _.defaults(spec.gain, 0.5);
+    var feedback = _.defaults(spec.feedback, 0);
     var maxDelayTime = _.defaults(context.toSeconds(spec.maxDelayTime), 1);
 
     if (Array.isArray(delays)) {
@@ -128,7 +128,7 @@
 
   function createDelayGain(context, delayTime, maxDelayTime, gain) {
     var delayNode = createDelay(context, delayTime, maxDelayTime);
-    var gainNode  = context.createGain();
+    var gainNode = context.createGain();
 
     gainNode.gain.value = 0;
     context.connect(gain, gainNode.gain);

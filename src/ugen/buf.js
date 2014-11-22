@@ -43,7 +43,7 @@ module.exports = function(neume, _) {
 
   function make(buffer, ugen, spec) {
     var context = ugen.$context;
-    var bufSrc  = context.createBufferSource();
+    var bufSrc = context.createBufferSource();
 
     buffer = context.toAudioBuffer(buffer);
 
@@ -53,7 +53,7 @@ module.exports = function(neume, _) {
     }
     bufSrc.loop = !!_.defaults(spec.loop, false);
     bufSrc.loopStart = _.finite(_.defaults(spec.start, 0));
-    bufSrc.loopEnd   = _.finite(_.defaults(spec.end  , 0));
+    bufSrc.loopEnd = _.finite(_.defaults(spec.end, 0));
 
     bufSrc.playbackRate.value = 0;
     context.connect(_.defaults(spec.rate, 1), bufSrc.playbackRate);

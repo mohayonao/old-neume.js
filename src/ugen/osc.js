@@ -119,7 +119,7 @@ module.exports = function(neume, _) {
       osc.type = type;
     }
     osc.frequency.value = 0;
-    osc.detune.value    = 0;
+    osc.detune.value = 0;
     context.connect(_.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
     context.connect(_.defaults(spec.detune, 0), osc.detune);
 
@@ -134,7 +134,7 @@ module.exports = function(neume, _) {
   function hasInputs(type, ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var osc  = createOscillator(context, type, spec, 2);
+    var osc = createOscillator(context, type, spec, 2);
     var gain = ugen.$context.createGain();
 
     gain.gain.value = 0;

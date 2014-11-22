@@ -3,9 +3,9 @@ module.exports = function(neume, _) {
 
   /**
    * $("conv", {
-   *   buf      : [AudioBuffer|NeuBuffer] = null
-   *   normalize: [boolean]               = true
-   *   mix      : [number|UGen]           = 1
+   *   buf: [AudioBuffer|NeuBuffer] = null
+   *   normalize: [boolean] = true
+   *   mix: [number|UGen] = 1
    * } ... inputs)
    *
    * +--------+

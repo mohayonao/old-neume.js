@@ -86,12 +86,12 @@
 
   function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
     var gainNode, ffNode, fbNode;
 
-    var gain    = _.defaults(spec.gain  , 0);
-    var ffGain  = _.defaults(spec.ffGain, 0);
-    var fbGain  = _.defaults(spec.fbGain, 0);
+    var gain = _.defaults(spec.gain, 0);
+    var ffGain = _.defaults(spec.ffGain, 0);
+    var fbGain = _.defaults(spec.fbGain, 0);
     var ffDelay = _.defaults(context.toSeconds(spec.ffDelay), 0.001);
     var fbDelay = _.defaults(context.toSeconds(spec.fbDelay), 0.001);
 
@@ -140,7 +140,7 @@
 
   function createDelayGain(context, delayTime, maxDelayTime, gain) {
     var delayNode = createDelay(context, delayTime, maxDelayTime);
-    var gainNode  = context.createGain();
+    var gainNode = context.createGain();
 
     gainNode.gain.value = 0;
     context.connect(gain, gainNode.gain);

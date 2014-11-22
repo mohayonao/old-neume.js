@@ -5,8 +5,8 @@ var _ = require("../utils");
 function forward(_buffer) {
   var n = 1 << Math.ceil(Math.log(_.finite(_buffer.length)) * Math.LOG2E);
   var buffer = new Float32Array(n);
-  var real   = new Float32Array(n);
-  var imag   = new Float32Array(n);
+  var real = new Float32Array(n);
+  var imag = new Float32Array(n);
   var params = getParams(n);
   var bitrev = params.bitrev;
   var sintable = params.sintable;
@@ -15,8 +15,8 @@ function forward(_buffer) {
 
   for (i = 0; i < n; i++) {
     buffer[i] = _buffer[i];
-    real[i]   = _buffer[bitrev[i]];
-    imag[i]   = 0.0;
+    real[i] = _buffer[bitrev[i]];
+    imag[i] = 0.0;
   }
 
   for (k = 1; k < n; k = k2) {
@@ -45,8 +45,8 @@ function forward(_buffer) {
 function inverse(_real, _imag) {
   var n = 1 << Math.ceil(Math.log(_.finite(_real.length)) * Math.LOG2E);
   var buffer = new Float32Array(n);
-  var real   = new Float32Array(n);
-  var imag   = new Float32Array(n);
+  var real = new Float32Array(n);
+  var imag = new Float32Array(n);
   var params = getParams(n);
   var bitrev = params.bitrev;
   var sintable = params.sintable;

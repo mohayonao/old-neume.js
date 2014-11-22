@@ -6,7 +6,7 @@ module.exports = function(neume, _) {
 
   function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var data = _.defaults(spec.value, 0);
     var key = _.defaults(spec.key, "");

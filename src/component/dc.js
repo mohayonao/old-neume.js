@@ -51,14 +51,14 @@ function FilledFloat32Array(size, value) {
 }
 
 function createDCNode(context, value) {
-  var node   = null;
-  var buf    = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
+  var node = null;
+  var buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
   var bufSrc = (node = context.createBufferSource());
 
   buf.getChannelData(0).set(value === 0 ? filled0 : filled1);
 
   bufSrc.buffer = buf;
-  bufSrc.loop   = true;
+  bufSrc.loop = true;
   bufSrc.start(0);
 
   if (value !== 0 && value !== 1) {

@@ -29,7 +29,7 @@ function NeuAudioBus(context) {
 NeuAudioBus.$name = "NeuAudioBus";
 
 NeuAudioBus.prototype.fade = function(t, val, dur) {
-  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
   val = _.finite(val);
   dur = _.finite(this.$context.toSeconds(dur));
 

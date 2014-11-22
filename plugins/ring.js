@@ -22,7 +22,7 @@
   neume.register("ring1", function(ugen, spec, inputs) {
     // (a * b) + a
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -37,7 +37,7 @@
   neume.register("ring2", function(ugen, spec, inputs) {
     // ((a * b) + a + b)
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -52,7 +52,7 @@
   neume.register("ring3", function(ugen, spec, inputs) {
     // (a * a * b)
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -67,7 +67,7 @@
   neume.register("ring4", function(ugen, spec, inputs) {
     // ((a * a * b) - (a * b * b))
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -84,7 +84,7 @@
   neume.register("difsqr", function(ugen, spec, inputs) {
     // (a * a) - (b * b)
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -101,7 +101,7 @@
   neume.register("sumsqr", function(ugen, spec, inputs) {
     // (a * a) + (b * b)
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -118,7 +118,7 @@
   neume.register("sqrdif", function(ugen, spec, inputs) {
     // (a - b) ** 2
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);
@@ -134,7 +134,7 @@
   neume.register("sqrsum", function(ugen, spec, inputs) {
     // (a + b) ** 2
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var a = context.createSum(inputs);
     var b = _.defaults(spec.mod, 0);

@@ -25,9 +25,9 @@ module.exports = function(neume, _) {
    */
   neume.register("function", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
-    var data  = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
+    var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;
 
     var prevValue = _.finite(data(0, count++));

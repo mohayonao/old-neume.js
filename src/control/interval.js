@@ -2,9 +2,9 @@
 
 var _ = require("../utils");
 
-var INIT  = 0;
+var INIT = 0;
 var START = 1;
-var STOP  = 2;
+var STOP = 2;
 
 function NeuInterval(context, interval, callback) {
   this.$context = context;

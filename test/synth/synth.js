@@ -2,12 +2,12 @@
 
 var neume = require("../../src");
 
-var _          = neume._;
+var _ = neume._;
 var NeuContext = neume.Context;
-var NeuSynth   = neume.Synth;
-var NeuUGen    = neume.UGen;
-var NeuIn      = neume.In;
-var NeuParam   = neume.Param;
+var NeuSynth = neume.Synth;
+var NeuUGen = neume.UGen;
+var NeuIn = neume.In;
+var NeuParam = neume.Param;
 var NOP = function() {};
 
 describe("NeuSynth", function() {
@@ -357,16 +357,16 @@ describe("NeuSynth", function() {
       it("checks if event targets have any listeners", function() {
         synth.on(".amp:end", it);
 
-        assert(synth.hasListeners("end")        === true);
-        assert(synth.hasListeners("line:end")   === true);
-        assert(synth.hasListeners("adsr:end")   === true);
+        assert(synth.hasListeners("end") === true);
+        assert(synth.hasListeners("line:end") === true);
+        assert(synth.hasListeners("adsr:end") === true);
         assert(synth.hasListeners("#ugen1:end") === true);
         assert(synth.hasListeners("#ugen2:end") === true);
         assert(synth.hasListeners("#ugen3:end") === false);
         assert(synth.hasListeners("#ugen4:end") === false);
-        assert(synth.hasListeners(".amp:end")   === true);
-        assert(synth.hasListeners(".lfo:end")   === false);
-        assert(synth.hasListeners("done")       === false);
+        assert(synth.hasListeners(".amp:end") === true);
+        assert(synth.hasListeners(".lfo:end") === false);
+        assert(synth.hasListeners("done") === false);
       });
       it("case of an invalid event name", function() {
         synth.on("*", it);

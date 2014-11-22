@@ -6,8 +6,8 @@ var Emitter = require("../event/emitter");
 function NeuComponent(context, node) {
   Emitter.call(this);
   this.$context = context;
-  this.$outlet  = null;
-  this._node    = _.defaults(node, null);
+  this.$outlet = null;
+  this._node = _.defaults(node, null);
 }
 _.inherits(NeuComponent, Emitter);
 

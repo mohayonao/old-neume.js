@@ -3,11 +3,11 @@
 var neume = require("../../src");
 
 var _ = neume._;
-var NeuContext   = neume.Context;
+var NeuContext = neume.Context;
 var NeuComponent = neume.Component;
-var NeuUGen      = neume.UGen;
-var NeuUnit      = neume.Unit;
-var Emitter      = neume.Emitter;
+var NeuUGen = neume.UGen;
+var NeuUnit = neume.Unit;
+var Emitter = neume.Emitter;
 
 require("../../src/ugen/osc");
 require("../../src/ugen/add");

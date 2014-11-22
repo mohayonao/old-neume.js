@@ -4,9 +4,9 @@ module.exports = function(neume, _) {
 
   /**
    * $("env", {
-   *   init   : [number]    = 0
-   *   table  : [env-table] = []
-   *   release: [number]    = Infinity
+   *   init: [number] = 0
+   *   table: [env-table] = []
+   *   release: [number] = Infinity
    * })
    *
    * env-table:
@@ -14,31 +14,31 @@ module.exports = function(neume, _) {
    *
    * aliases:
    *   $("adsr", {
-   *     a    : [number] = 0.01  attackTime
-   *     d    : [number] = 0.30  decayTime
-   *     s    : [number] = 0.50  sustainLevel
-   *     r    : [number] = 1.00  releaseTime
+   *     a: [number] = 0.01  attackTime
+   *     d: [number] = 0.30  decayTime
+   *     s: [number] = 0.50  sustainLevel
+   *     r: [number] = 1.00  releaseTime
    *     curve: [number] = 0.01  curve
    *   })
    *
    *   $("dadsr", {
-   *     delay : [number] = 0.10  delayTime
-   *     a     : [number] = 0.01  attackTime
-   *     d     : [number] = 0.30  decayTime
-   *     s     : [number] = 0.50  sustainLevel
-   *     r     : [number] = 1.00  releaseTime
-   *     curve : [number] = 0.01  curve
+   *     delay: [number] = 0.10  delayTime
+   *     a: [number] = 0.01  attackTime
+   *     d: [number] = 0.30  decayTime
+   *     s: [number] = 0.50  sustainLevel
+   *     r: [number] = 1.00  releaseTime
+   *     curve: [number] = 0.01  curve
    *   })
    *
    *   $("asr", {
-   *     a    : [number] = 0.01  attackTime
-   *     s    : [number] = 1.00  sustainLevel
-   *     r    : [number] = 1.00  releaseTime
+   *     a: [number] = 0.01  attackTime
+   *     s: [number] = 1.00  sustainLevel
+   *     r: [number] = 1.00  releaseTime
    *     curve: [number] = 0.01  curve
    *   })
    *
    *   $("cutoff", {
-   *     r    : [number] = 0.1   releaseTime
+   *     r: [number] = 0.1   releaseTime
    *     level: [number] = 1.00  peakLevel
    *     curve: [number] = 0.01  curve
    *   })
@@ -90,9 +90,9 @@ module.exports = function(neume, _) {
     var init = 0;
     var list = [
       [ 0, delay, curve ], // d
-      [ 1, a    , curve ], // a
-      [ s, d    , curve ], // d
-      [ 0, r    , curve ], // r
+      [ 1, a, curve ], // a
+      [ s, d, curve ], // d
+      [ 0, r, curve ], // r
     ];
     var releaseNode = 3;
 
@@ -198,7 +198,7 @@ module.exports = function(neume, _) {
 
   function make(table, ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var init = table.init;
     var list = table.list;
@@ -207,7 +207,7 @@ module.exports = function(neume, _) {
     var index = 0;
     var schedId = 0;
     var releaseSchedId = 0;
-    var param   = context.createParam(init);
+    var param = context.createParam(init);
 
     if (inputs.length) {
       outlet = context.createGain();
@@ -236,9 +236,9 @@ module.exports = function(neume, _) {
       index += 1;
 
       var dur = _.finite(context.toSeconds(params[1]));
-      var t1  = t0 + dur;
-      var v0  = param.valueOf();
-      var v1  = _.finite(params[0]);
+      var t1 = t0 + dur;
+      var v0 = param.valueOf();
+      var v1 = _.finite(params[0]);
       var cur = _.clip(_.finite(params[2]), 1e-6, 1 - 1e-6);
 
       if (v0 === v1 || dur <= 0) {

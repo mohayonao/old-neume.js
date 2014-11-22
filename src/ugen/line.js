@@ -75,7 +75,7 @@ module.exports = function(neume, _) {
 
   function make(curve, ugen, list, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var schedId = 0;
     var param = context.createParam(list[0]);

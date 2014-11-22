@@ -3,8 +3,8 @@
 var neume = require("../../src");
 
 var NeuContext = neume.Context;
-var NeuBuffer  = neume.Buffer;
-var FFT        = neume.FFT;
+var NeuBuffer = neume.Buffer;
+var FFT = neume.FFT;
 
 describe("NeuBuffer", function() {
   var audioContext = null;

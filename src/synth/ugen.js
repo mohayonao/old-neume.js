@@ -14,9 +14,9 @@ function NeuUGen(synth, key, spec, inputs) {
   }
 
   this.$synth = synth;
-  this.$key   = parsed.key;
+  this.$key = parsed.key;
   this.$class = parsed.class;
-  this.$id    = parsed.id;
+  this.$id = parsed.id;
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 

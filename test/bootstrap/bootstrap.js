@@ -28,7 +28,7 @@ global.XMLHttpRequest = (function() {
 require("web-audio-test-api");
 
 global.assert = require("power-assert");
-global.sinon  = require("sinon");
+global.sinon = require("sinon");
 
 if (process.argv.indexOf("--no-power-assert") === -1) {
   require("espower-loader")({

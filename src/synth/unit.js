@@ -2,14 +2,14 @@
 
 var _ = require("../utils");
 
-var INIT  = 0;
+var INIT = 0;
 var START = 1;
-var STOP  = 2;
+var STOP = 2;
 
 function NeuUnit(spec) {
-  this._spec   = spec;
-  this._state  = INIT;
-  this.$outlet  = _.defaults(spec.outlet, null);
+  this._spec = spec;
+  this._state = INIT;
+  this.$outlet = _.defaults(spec.outlet, null);
   this.$methods = _.defaults(spec.methods, {});
   this.$isOutput = !!spec.isOutput;
 }

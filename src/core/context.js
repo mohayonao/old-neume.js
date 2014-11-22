@@ -13,7 +13,7 @@ var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
 var NeuAudioBus = require("../control/audio-bus");
 
-var INIT  = 0;
+var INIT = 0;
 var START = 1;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
@@ -31,7 +31,7 @@ function NeuContext(destination, duration, spec) {
   this._audioBuses = [];
   this._processBufSize = _.int(_.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
 
-  this.$inlet  = null;
+  this.$inlet = null;
   this.$outlet = this.$analyser;
 
   Object.defineProperties(this, {
@@ -144,7 +144,7 @@ NeuContext.prototype.reset = function() {
     this.$inlet.disconnect();
   }
 
-  this._audioBuses   = [];
+  this._audioBuses = [];
 
   this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
   this.connect(this.$inlet, this.$analyser);
@@ -180,7 +180,7 @@ function startRendering() {
 function startAudioTimer() {
   var context = this.$context;
   var scriptProcessor = context.createScriptProcessor(this._processBufSize, 1, 1);
-  var bufferSource    = context.createBufferSource();
+  var bufferSource = context.createBufferSource();
 
   this._currentTimeIncr = this._processBufSize / context.sampleRate;
   this._scriptProcessor = scriptProcessor;
@@ -205,7 +205,7 @@ NeuContext.prototype.sched = function(time, callback, ctx) {
   }
 
   var events = this._events;
-  var event  = {
+  var event = {
     id: schedId++,
     time: time,
     callback: callback,
@@ -328,7 +328,7 @@ NeuContext.prototype.toFrequency = function(value) {
 
 function onaudioprocess(e) {
   // Safari 7.0.6 does not support e.playbackTime
-  var currentTime     = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;
+  var currentTime = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;
   var nextCurrentTime = currentTime + this._currentTimeIncr;
   var events = this._events;
 

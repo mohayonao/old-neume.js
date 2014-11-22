@@ -1,21 +1,21 @@
 "use strict";
 
 var _ = require("../utils");
-var NeuParam   = require("../component/param");
+var NeuParam = require("../component/param");
 var NeuSynthDB = require("./db");
-var NeuUGen    = require("./ugen");
+var NeuUGen = require("./ugen");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();
 
-  this.db      = db;
-  this.params  = {};
+  this.db = db;
+  this.params = {};
   this.methods = {};
-  this.timers  = [];
+  this.timers = [];
 
   function builder() {
     var args = _.toArray(arguments);
-    var key  = args.shift();
+    var key = args.shift();
     var spec = _.isDictionary(args[0]) ? args.shift() : {};
     var inputs = Array.prototype.concat.apply([], args);
     var ugen = NeuUGen.build(synth, key, spec, inputs);
@@ -25,12 +25,12 @@ function NeuSynthDollar(synth) {
     return ugen;
   }
 
-  builder.param    = $param(synth, this.params);
-  builder.method   = $method(synth, this.methods);
-  builder.timeout  = $timeout(synth, this.timers);
+  builder.param = $param(synth, this.params);
+  builder.method = $method(synth, this.methods);
+  builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
-  builder.sec      = $sec(synth);
-  builder.freq     = $freq(synth);
+  builder.sec = $sec(synth);
+  builder.freq = $freq(synth);
 
   this.builder = builder;
 }
@@ -76,13 +76,13 @@ function $timeout(synth, timers) {
   return function(timeout) {
     timeout = Math.max(0, _.finite(context.toSeconds(timeout)));
 
-    var schedId   = 0;
+    var schedId = 0;
     var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
 
     function sched(t) {
       schedId = context.sched(t, function(t) {
         schedId = 0;
-        for (var i = 0 , imax = callbacks.length; i < imax; i++) {
+        for (var i = 0, imax = callbacks.length; i < imax; i++) {
           callbacks[i].call(synth, t, 1);
         }
       });
@@ -114,10 +114,10 @@ function $interval(synth, timers) {
       interval = Math.max(minInterval, _.finite(context.toSeconds(interval)));
     }
 
-    var schedId   = 0;
+    var schedId = 0;
     var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
     var startTime = 0;
-    var count     = 0;
+    var count = 0;
 
     function sched(t) {
       schedId = context.sched(t, function(t) {

@@ -2,11 +2,11 @@
 
 var neume = require("../../src");
 
-var NeuContext   = neume.Context;
+var NeuContext = neume.Context;
 var NeuComponent = neume.Component;
-var NeuDC        = neume.DC;
-var NeuParam     = neume.Param;
-var NeuSum       = neume.Sum;
+var NeuDC = neume.DC;
+var NeuParam = neume.Param;
+var NeuSum = neume.Sum;
 
 describe("NeuSum", function() {
   var context = null;

@@ -1,12 +1,12 @@
 module.exports = function(neume, _) {
   "use strict";
 
-  var ITERATE  = 0;
+  var ITERATE = 0;
   var FINISHED = 1;
 
   /**
    * $("iter", {
-   *   iter : [iterator] = null
+   *   iter: [iterator] = null
    *   timeConstant: [number] = 0
    * } ... inputs)
    *
@@ -26,9 +26,9 @@ module.exports = function(neume, _) {
    */
   neume.register("iter", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
-    var iter  = _.defaults(spec.iter, null);
+    var iter = _.defaults(spec.iter, null);
     var state = ITERATE;
     var prevValue = 0;
     var param = context.createParam(prevValue, spec);

@@ -2,7 +2,7 @@
 
 var neume = require("../../src");
 
-var NeuContext  = neume.Context;
+var NeuContext = neume.Context;
 var NeuInterval = neume.Interval;
 var NOP = function() {};
 

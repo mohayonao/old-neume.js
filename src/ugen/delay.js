@@ -5,8 +5,8 @@ module.exports = function(neume, _) {
 
   /**
    * $("delay", {
-   *   delay       : [number|UGen] = 0
-   *   maxDelayTime: [number]      = delay
+   *   delay: [number|UGen] = 0
+   *   maxDelayTime: [number] = delay
    * } ... inputs)
    *
    * +--------+
@@ -26,7 +26,7 @@ module.exports = function(neume, _) {
     var maxDelayTime;
 
     if (typeof delayTime === "number") {
-      delayTime    = _.clip(_.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
+      delayTime = _.clip(_.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
       maxDelayTime = delayTime;
     } else {
       maxDelayTime = _.finite(_.defaults(context.toSeconds(spec.maxDelayTime), 1));

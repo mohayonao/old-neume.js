@@ -28,9 +28,9 @@ NeuSum.prototype.toAudioNode = function() {
 
 NeuSum.prototype.connect = function(to) {
   var context = this.$context;
-  var number  = 0;
-  var param   = null;
-  var inputs  = this._inputs;
+  var number = 0;
+  var param = null;
+  var inputs = this._inputs;
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
     if (typeof inputs[i] === "number") {
@@ -57,7 +57,7 @@ NeuSum.prototype.connect = function(to) {
 };
 
 function createSumNode(context, inputs) {
-  var node   = null;
+  var node = null;
   var number = 0;
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {

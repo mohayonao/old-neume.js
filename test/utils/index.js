@@ -35,43 +35,43 @@ describe("utils", function() {
 
   describe(".isFinite(value)", function() {
     it("checks if value is, or can be coerced to, a finite number", function() {
-      assert(_.isFinite(10)       === true);
+      assert(_.isFinite(10) === true);
       assert(_.isFinite(Infinity) === false);
-      assert(_.isFinite(NaN)      === false);
-      assert(_.isFinite("10")     === false);
+      assert(_.isFinite(NaN) === false);
+      assert(_.isFinite("10") === false);
     });
   });
 
   describe(".isNaN", function() {
     it("checks if value is NaN.", function() {
-      assert(_.isNaN(NaN)      === true);
-      assert(_.isNaN(10)       === false);
+      assert(_.isNaN(NaN) === true);
+      assert(_.isNaN(10) === false);
       assert(_.isNaN(Infinity) === false);
-      assert(_.isNaN("NaN")    === false);
+      assert(_.isNaN("NaN") === false);
     });
   });
 
   describe(".isNull(value)", function() {
     it("checks if value is null", function() {
-      assert(_.isNull(null)      === true);
-      assert(_.isNull(0)         === false);
+      assert(_.isNull(null) === true);
+      assert(_.isNull(0) === false);
       assert(_.isNull(undefined) === false);
     });
   });
 
   describe(".isNumber(value)", function() {
     it("checks if value is a number", function() {
-      assert(_.isNumber(10)       === true);
+      assert(_.isNumber(10) === true);
       assert(_.isNumber(Infinity) === true);
-      assert(_.isNumber(NaN)      === false);
-      assert(_.isNumber("10")     === false);
+      assert(_.isNumber(NaN) === false);
+      assert(_.isNumber("10") === false);
     });
   });
 
   describe(".isObject(value)", function() {
     it("checks if value is the language type of Object", function() {
-      assert(_.isObject({})   === true);
-      assert(_.isObject(it)   === true);
+      assert(_.isObject({}) === true);
+      assert(_.isObject(it) === true);
       assert(_.isObject(null) === false);
       assert(_.isObject(1000) === false);
       assert(_.isObject("10") === false);
@@ -88,12 +88,12 @@ describe("utils", function() {
   describe(".isTypedArray(value)", function() {
     it("checks if value is an instance of TypedArray", function() {
       assert(_.isTypedArray(new Float32Array()) === true);
-      assert(_.isTypedArray(new Uint8Array())   === true);
-      assert(_.isTypedArray(new Int8Array())    === true);
-      assert(_.isTypedArray(new Uint16Array())  === true);
-      assert(_.isTypedArray(new Int16Array())   === true);
-      assert(_.isTypedArray(new Uint32Array())  === true);
-      assert(_.isTypedArray(new Int32Array())   === true);
+      assert(_.isTypedArray(new Uint8Array()) === true);
+      assert(_.isTypedArray(new Int8Array()) === true);
+      assert(_.isTypedArray(new Uint16Array()) === true);
+      assert(_.isTypedArray(new Int16Array()) === true);
+      assert(_.isTypedArray(new Uint32Array()) === true);
+      assert(_.isTypedArray(new Int32Array()) === true);
       assert(_.isTypedArray(new Float64Array()) === true);
       assert(_.isTypedArray(new Uint8ClampedArray()) === true);
       assert(_.isTypedArray([]) === false);
@@ -104,8 +104,8 @@ describe("utils", function() {
   describe(".isUndefined(value)", function() {
     it("checks if value is undefined", function() {
       assert(_.isUndefined(undefined) === true);
-      assert(_.isUndefined(0)         === false);
-      assert(_.isUndefined(null)      === false);
+      assert(_.isUndefined(0) === false);
+      assert(_.isUndefined(null) === false);
     });
   });
 
@@ -113,7 +113,7 @@ describe("utils", function() {
     it("converts the list to an array", function() {
       assert.deepEqual(_.toArray(arguments), []);
       assert.deepEqual(_.toArray([ 5, 10 ]), [ 5, 10 ]);
-      assert.deepEqual(_.toArray(null)     , []);
+      assert.deepEqual(_.toArray(null), []);
     });
   });
 
@@ -218,33 +218,33 @@ describe("utils", function() {
 
   describe(".num(value)", function() {
     it("converts into a number", function() {
-      assert(_.num(10)       === 10);
-      assert(_.num("10")     === 10);
+      assert(_.num(10) === 10);
+      assert(_.num("10") === 10);
       assert(_.num(Infinity) === Infinity);
-      assert(_.num(NaN)      === 0);
-      assert(_.num("zero")   === 0);
+      assert(_.num(NaN) === 0);
+      assert(_.num("zero") === 0);
     });
   });
 
   describe(".int(value)", function() {
     it("converts into an integer", function() {
-      assert(_.int(10.5)     === 10);
-      assert(_.int("10.5")   === 10);
+      assert(_.int(10.5) === 10);
+      assert(_.int("10.5") === 10);
       assert(_.int(Infinity) === 0);
-      assert(_.int(NaN)      === 0);
-      assert(_.int("zero")   === 0);
+      assert(_.int(NaN) === 0);
+      assert(_.int("zero") === 0);
     });
   });
 
   describe(".finite(value)", function() {
     it("converts into a finite number", function() {
-      assert(_.finite(10)       === 10);
-      assert(_.finite(10.5)     === 10.5);
-      assert(_.finite("10")     === 10);
-      assert(_.finite("10.5")   === 10.5);
+      assert(_.finite(10) === 10);
+      assert(_.finite(10.5) === 10.5);
+      assert(_.finite("10") === 10);
+      assert(_.finite("10.5") === 10.5);
       assert(_.finite(Infinity) === 0);
-      assert(_.finite(NaN)      === 0);
-      assert(_.finite("zero")   === 0);
+      assert(_.finite(NaN) === 0);
+      assert(_.finite("zero") === 0);
     });
   });
 
@@ -284,7 +284,7 @@ describe("utils", function() {
     it("return default value if it receives null or undefined", function() {
       assert(_.defaults(1, 10) === 1);
       assert(_.defaults(0, 10) === 0);
-      assert(_.defaults(null, 10)      === 10);
+      assert(_.defaults(null, 10) === 10);
       assert(_.defaults(undefined, 10) === 10);
     });
   });

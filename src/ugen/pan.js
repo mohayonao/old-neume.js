@@ -40,12 +40,12 @@ module.exports = function(neume, _) {
       exp: "exponential",
     }[spec.distanceModel] || "inverse";
 
-    pan.refDistance    = _.finite(_.defaults(spec.refDistance   , 1));
-    pan.maxDistance    = _.finite(_.defaults(spec.maxDistance   , 10000));
-    pan.rolloffFactor  = _.finite(_.defaults(spec.rolloffFactor , 1));
+    pan.refDistance = _.finite(_.defaults(spec.refDistance, 1));
+    pan.maxDistance = _.finite(_.defaults(spec.maxDistance, 10000));
+    pan.rolloffFactor = _.finite(_.defaults(spec.rolloffFactor, 1));
     pan.coneInnerAngle = _.finite(_.defaults(spec.coneInnerAngle, 360));
     pan.coneOuterAngle = _.finite(_.defaults(spec.coneOuterAngle, 360));
-    pan.coneOuterGain  = _.finite(_.defaults(spec.coneOuterGain , 0));
+    pan.coneOuterGain = _.finite(_.defaults(spec.coneOuterGain, 0));
 
     new neume.Sum(context, inputs).connect(pan);
 

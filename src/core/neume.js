@@ -85,27 +85,27 @@ var neume = function(context) {
   return Neume;
 };
 
-neume._        = _;
-neume.Context  = require("./context");
+neume._ = _;
+neume.Context = require("./context");
 neume.Transport = require("./transport");
 neume.Component = require("../component/component");
-neume.Add      = require("../component/add");
-neume.DC       = require("../component/dc");
-neume.DryWet   = require("../component/drywet");
-neume.Mul      = require("../component/mul");
-neume.Sum      = require("../component/sum");
-neume.Param    = require("../component/param");
+neume.Add = require("../component/add");
+neume.DC = require("../component/dc");
+neume.DryWet = require("../component/drywet");
+neume.Mul = require("../component/mul");
+neume.Sum = require("../component/sum");
+neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
-neume.Buffer   = require("../control/buffer");
+neume.Buffer = require("../control/buffer");
 neume.Interval = require("../control/interval");
-neume.Timeout  = require("../control/timeout");
-neume.FFT      = require("../dsp/fft");
-neume.Emitter  = require("../event/emitter");
-neume.SynthDB  = require("../synth/db");
-neume.Synth    = require("../synth/synth");
+neume.Timeout = require("../control/timeout");
+neume.FFT = require("../dsp/fft");
+neume.Emitter = require("../event/emitter");
+neume.SynthDB = require("../synth/db");
+neume.Synth = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
-neume.UGen     = require("../synth/ugen");
-neume.Unit     = require("../synth/unit");
+neume.UGen = require("../synth/ugen");
+neume.Unit = require("../synth/unit");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {
@@ -130,7 +130,7 @@ neume.use.used = [];
 
 neume.render = function(context, duration, func) {
   var sampleRate = context.sampleRate;
-  var length     = _.int(sampleRate * duration);
+  var length = _.int(sampleRate * duration);
 
   return new Promise(function(resolve) {
     var audioContext = new global.OfflineAudioContext(2, length, sampleRate);

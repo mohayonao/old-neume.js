@@ -3,7 +3,7 @@
 var neume = require("../../src");
 
 var NeuContext = neume.Context;
-var NeuParam   = neume.Param;
+var NeuParam = neume.Param;
 
 describe("NeuParam", function() {
   var audioContext = null;

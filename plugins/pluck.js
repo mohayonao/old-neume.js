@@ -21,7 +21,7 @@
 
   neume.register("pluck", function(ugen, spec) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var frequency = context.toFrequency(_.defaults(spec.freq, 440));
 

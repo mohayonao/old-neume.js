@@ -2,7 +2,7 @@
 
 var neume = require("../../src");
 
-var NeuContext   = neume.Context;
+var NeuContext = neume.Context;
 var NeuComponent = neume.Component;
 
 describe("NeuComponent", function() {

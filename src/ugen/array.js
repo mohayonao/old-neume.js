@@ -25,11 +25,11 @@ module.exports = function(neume, _) {
    */
   neume.register("array", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var index = 0;
-    var data  = spec.value;
-    var mode  = {
+    var data = spec.value;
+    var mode = {
       clip: _.clipAt,
       wrap: _.wrapAt,
       fold: _.foldAt,

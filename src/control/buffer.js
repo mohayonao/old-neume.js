@@ -1,6 +1,6 @@
 "use strict";
 
-var _   = require("../utils");
+var _ = require("../utils");
 var FFT = require("../dsp/fft");
 
 function NeuBuffer(context, buffer) {
@@ -35,8 +35,8 @@ function NeuBuffer(context, buffer) {
 NeuBuffer.$name = "NeuBuffer";
 
 NeuBuffer.create = function(context, channels, length, sampleRate) {
-  channels   = _.int(_.defaults(channels, 1));
-  length     = _.int(_.defaults(length, 0));
+  channels = _.int(_.defaults(channels, 1));
+  length = _.int(_.defaults(length, 0));
   sampleRate = _.int(_.defaults(sampleRate, context.sampleRate));
 
   return new NeuBuffer(context, context.createBuffer(channels, length, sampleRate));
@@ -114,7 +114,7 @@ NeuBuffer.prototype.concat = function() {
 
   for (var i = 0; i < channels; i++) {
     var data = buffer.getChannelData(i);
-    var pos  = 0;
+    var pos = 0;
     for (var j = 0; j < argslen; j++) {
       data.set(args[j][i], pos);
       pos += args[j].length;
@@ -137,7 +137,7 @@ NeuBuffer.prototype.reverse = function() {
 
 NeuBuffer.prototype.slice = function(start, end) {
   start = _.int(_.defaults(start, 0));
-  end   = _.int(_.defaults(end  , this.length));
+  end = _.int(_.defaults(end, this.length));
 
   if (start < 0) {
     start += this.length;
@@ -177,7 +177,7 @@ NeuBuffer.prototype.split = function(n) {
   var result = new Array(n);
   var len = this.length / n;
   var start = 0;
-  var end   = 0;
+  var end = 0;
 
   for (var i = 0; i < n; i++) {
     end = Math.round(start + len);
@@ -287,7 +287,7 @@ function resample1(data, size) {
   var len = data.length - 1;
 
   for (var i = 0; i < size; i++) {
-    var x  = i * factor;
+    var x = i * factor;
     var x0 = x|0;
     var x1 = Math.min(x0 + 1, len);
     result[i] = data[x0] + Math.abs(x - x0) * (data[x1] - data[x0]);

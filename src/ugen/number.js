@@ -21,9 +21,9 @@ module.exports = function(neume, _) {
    */
   neume.register("number", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
-    var data  = _.finite(spec.value);
+    var data = _.finite(spec.value);
     var param = context.createParam(data, spec);
 
     if (inputs.length) {

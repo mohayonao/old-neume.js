@@ -4,7 +4,7 @@ var _ = require("../utils");
 
 function NeuTransport(context) {
   this.$context = context;
-  this._bpm  = 120;
+  this._bpm = 120;
   this._ramp = null;
 }
 NeuTransport.$name = "NeuTransport";
@@ -15,7 +15,7 @@ NeuTransport.prototype.getBpm = function() {
   if (ramp !== null) {
     var t = this.$context.currentTime;
     if (ramp.t1 <= t) {
-      this._bpm  = ramp.v1;
+      this._bpm = ramp.v1;
       this._ramp = null;
     } else {
       var dt = (t - ramp.t0) / (ramp.t1 - ramp.t0);
@@ -32,7 +32,7 @@ NeuTransport.prototype.setBpm = function(value, rampTime) {
   var bpm = _.clip(_.finite(value), 1, 1000);
 
   if (rampTime <= 0) {
-    this._bpm  = bpm;
+    this._bpm = bpm;
     this._ramp = null;
   } else {
     var t0 = this.$context.currentTime;
@@ -57,7 +57,7 @@ NeuTransport.prototype.toSeconds = function(value) {
 
     if (value.charAt(0) === "+") {
       offset = this.$context.currentTime;
-      value  = value.slice(1);
+      value = value.slice(1);
     }
 
     var components = value.split(/[\(\)\-\+\/\*]/);

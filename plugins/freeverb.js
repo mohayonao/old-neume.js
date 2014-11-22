@@ -24,11 +24,11 @@
 
   neume.register("freeverb", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var room = context.createComponent(_.defaults(spec.room, 0.5)).madd(0.28, 0.7);
     var damp = context.createComponent(_.defaults(spec.damp, 0.20)).mul(0.5);
-    var mix  = _.defaults(spec.mix , 0.33);
+    var mix = _.defaults(spec.mix, 0.33);
     var inlet = context.createGain();
 
     var dryNode = context.createSum(inputs);
