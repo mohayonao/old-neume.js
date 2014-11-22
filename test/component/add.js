@@ -2,11 +2,11 @@
 
 var neume = require("../../src");
 
-var NeuContext   = neume.Context;
+var NeuContext = neume.Context;
 var NeuComponent = neume.Component;
-var NeuDC        = neume.DC;
-var NeuParam     = neume.Param;
-var NeuAdd       = neume.Add;
+var NeuDC = neume.DC;
+var NeuParam = neume.Param;
+var NeuAdd = neume.Add;
 
 describe("NeuAdd", function() {
   var context = null;
@@ -35,13 +35,13 @@ describe("NeuAdd", function() {
     });
     it("returns a node when node + 0", function() {
       var node = context.createGain();
-      var mul  = new NeuAdd(context, node, 0);
+      var mul = new NeuAdd(context, node, 0);
       assert(mul instanceof NeuComponent);
       assert(mul.toAudioNode() === node);
     });
     it("returns a node when 0 + node", function() {
       var node = context.createGain();
-      var mul  = new NeuAdd(context, 0, node);
+      var mul = new NeuAdd(context, 0, node);
       assert(mul instanceof NeuComponent);
       assert(mul.toAudioNode() === node);
     });

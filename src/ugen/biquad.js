@@ -1,13 +1,13 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
    * $("biquad", {
-   *   type  : enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
-   *   freq  : [number|UGen] = 350
+   *   type: enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
+   *   freq: [number|UGen] = 350
    *   detune: [number|UGen] = 0
-   *   Q     : [number|UGen] = 1
-   *   gain  : [number|UGen] = 0
+   *   Q: [number|UGen] = 1
+   *   gain: [number|UGen] = 0
    * } ... inputs)
    *
    * aliases:
@@ -31,17 +31,17 @@ module.exports = function(neume, _) {
    */
 
   var FILTER_TYPES = {
-    lowpass  : "lowpass",
-    highpass : "highpass",
-    bandpass : "bandpass",
-    lowshelf : "lowshelf",
+    lowpass: "lowpass",
+    highpass: "highpass",
+    bandpass: "bandpass",
+    lowshelf: "lowshelf",
     highshelf: "highshelf",
-    peaking  : "peaking",
-    notch    : "notch",
-    allpass  : "allpass",
-    lpf      : "lowpass",
-    hpf      : "highpass",
-    bpf      : "bandpass",
+    peaking: "peaking",
+    notch: "notch",
+    allpass: "allpass",
+    lpf: "lowpass",
+    hpf: "highpass",
+    bpf: "bandpass",
   };
 
   neume.register("biquad", function(ugen, spec, inputs) {
@@ -58,17 +58,17 @@ module.exports = function(neume, _) {
 
   function setup(type, ugen, spec, inputs) {
     var context = ugen.$context;
-    var biquad  = context.createBiquadFilter();
+    var biquad = context.createBiquadFilter();
 
     biquad.type = type;
     biquad.frequency.value = 0;
-    biquad.detune.value    = 0;
-    biquad.Q.value         = 0;
-    biquad.gain.value      = 0;
-    context.connect(_.defaults(context.toFrequency(spec.freq), 350), biquad.frequency);
-    context.connect(_.defaults(spec.detune,   0), biquad.detune);
-    context.connect(_.defaults(spec.Q     ,   1), biquad.Q);
-    context.connect(_.defaults(spec.gain  ,   0), biquad.gain);
+    biquad.detune.value = 0;
+    biquad.Q.value = 0;
+    biquad.gain.value = 0;
+    context.connect(util.defaults(context.toFrequency(spec.freq), 350), biquad.frequency);
+    context.connect(util.defaults(spec.detune, 0), biquad.detune);
+    context.connect(util.defaults(spec.Q, 1), biquad.Q);
+    context.connect(util.defaults(spec.gain, 0), biquad.gain);
 
     context.createSum(inputs).connect(biquad);
 

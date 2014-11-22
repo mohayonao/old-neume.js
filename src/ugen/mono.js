@@ -18,7 +18,7 @@ module.exports = function(neume) {
    */
   neume.register("mono", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = context.createGain();
+    var outlet = context.createGain();
 
     outlet.channelCount = 1;
     outlet.channelCountMode = "explicit";

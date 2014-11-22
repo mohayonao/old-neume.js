@@ -1,12 +1,12 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
 
   /**
    * $("osc", {
-   *   type  : [string|PeriodicWave]="sin",
-   *   freq  : [number|UGen]=440,
+   *   type: [string|PeriodicWave]="sin",
+   *   freq: [number|UGen]=440,
    *   detune: [number|UGen]=0
    * } ... inputs)
    *
@@ -42,10 +42,10 @@ module.exports = function(neume, _) {
    */
 
   var WAVE_TYPES = {
-    sin   : "sine",
+    sin: "sine",
     square: "square",
-    saw   : "sawtooth",
-    tri   : "triangle"
+    saw: "sawtooth",
+    tri: "triangle"
   };
 
   neume.register("osc", function(ugen, spec, inputs) {
@@ -53,7 +53,7 @@ module.exports = function(neume, _) {
 
     if (!isWave(type)) {
       if (type === "pulse") {
-        type = makePulseWave(ugen.$context, _.finite(_.defaults(spec.width, 0.5)));
+        type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
       } else {
         type = WAVE_TYPES[type] || "sine";
       }
@@ -80,7 +80,7 @@ module.exports = function(neume, _) {
   });
 
   neume.register("pulse", function(ugen, spec, inputs) {
-    var type = makePulseWave(ugen.$context, _.finite(_.defaults(spec.width, 0.5)));
+    var type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
     return make(setup(type, ugen, spec, inputs));
   });
 
@@ -119,9 +119,9 @@ module.exports = function(neume, _) {
       osc.type = type;
     }
     osc.frequency.value = 0;
-    osc.detune.value    = 0;
-    context.connect(_.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
-    context.connect(_.defaults(spec.detune, 0), osc.detune);
+    osc.detune.value = 0;
+    context.connect(util.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
+    context.connect(util.defaults(spec.detune, 0), osc.detune);
 
     return osc;
   }
@@ -134,7 +134,7 @@ module.exports = function(neume, _) {
   function hasInputs(type, ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var osc  = createOscillator(context, type, spec, 2);
+    var osc = createOscillator(context, type, spec, 2);
     var gain = ugen.$context.createGain();
 
     gain.gain.value = 0;
@@ -148,7 +148,7 @@ module.exports = function(neume, _) {
   var _wave = new Array(256);
 
   function makePulseWave(context, width) {
-    width = _.int(_.clip(width, 0, 1) * 256);
+    width = util.int(util.clip(width, 0, 1) * 256);
 
     if (_wave[width]) {
       return _wave[width];

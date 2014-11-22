@@ -5,6 +5,7 @@ var browserify = require("browserify");
 var source = require("vinyl-source-stream");
 var buffer = require("vinyl-buffer");
 var jshint = require("gulp-jshint");
+var jscs = require("gulp-jscs");
 var mocha = require("gulp-mocha");
 var istanbul = require("gulp-istanbul");
 var uglify = require("gulp-uglify");
@@ -15,6 +16,11 @@ gulp.task("lint", function() {
     .pipe(jshint())
     .pipe(jshint.reporter(require("jshint-stylish")))
     .pipe(jshint.reporter("fail"));
+});
+
+gulp.task("jscs", function() {
+  return gulp.src([ "gulpfile.js", "src/**/*.js", "test/**/*.js", "plugins/**/*.js" ])
+    .pipe(jscs());
 });
 
 gulp.task("test", function() {
@@ -47,5 +53,5 @@ gulp.task("build", function() {
     .pipe(gulp.dest("build"));
 });
 
-gulp.task("travis", [ "lint", "cover" ]);
-gulp.task("default", [ "lint", "cover", "build" ]);
+gulp.task("travis", [ "lint", "jscs", "cover" ]);
+gulp.task("default", [ "lint", "jscs", "cover", "build" ]);

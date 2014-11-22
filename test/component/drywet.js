@@ -3,7 +3,7 @@
 var neume = require("../../src");
 
 var NeuComponent = neume.Component;
-var NeuDryWet    = neume.DryWet;
+var NeuDryWet = neume.DryWet;
 
 describe("NeuDryWet", function() {
   var context;

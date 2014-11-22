@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
@@ -49,10 +49,10 @@ module.exports = function(neume, _) {
     gainR.channelCountMode = "explicit";
     gainR.channelInterpretation = "speakers";
 
-    var pos = _.defaults(spec.pos, 0);
+    var pos = util.defaults(spec.pos, 0);
 
     if (typeof pos === "number") {
-      pos = _.clip(pos, -1, +1) * 0.5 + 0.5;
+      pos = util.clip(pos, -1, +1) * 0.5 + 0.5;
       gainL.gain.value = Math.cos(pos * Math.PI * 0.5);
       gainR.gain.value = Math.sin(pos * Math.PI * 0.5);
     } else {

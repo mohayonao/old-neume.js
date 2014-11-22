@@ -1,6 +1,6 @@
 "use strict";
 
-var _   = require("../utils");
+var util = require("../util");
 var FFT = require("../dsp/fft");
 
 function NeuBuffer(context, buffer) {
@@ -35,9 +35,9 @@ function NeuBuffer(context, buffer) {
 NeuBuffer.$name = "NeuBuffer";
 
 NeuBuffer.create = function(context, channels, length, sampleRate) {
-  channels   = _.int(_.defaults(channels, 1));
-  length     = _.int(_.defaults(length, 0));
-  sampleRate = _.int(_.defaults(sampleRate, context.sampleRate));
+  channels = util.int(util.defaults(channels, 1));
+  length = util.int(util.defaults(length, 0));
+  sampleRate = util.int(util.defaults(sampleRate, context.sampleRate));
 
   return new NeuBuffer(context, context.createBuffer(channels, length, sampleRate));
 };
@@ -92,13 +92,13 @@ function decodeAudioData(context, audioData) {
 }
 
 NeuBuffer.prototype.getChannelData = function(ch) {
-  ch = _.clip(_.int(ch), 0, this.numberOfChannels - 1);
+  ch = util.clip(util.int(ch), 0, this.numberOfChannels - 1);
 
   return this._buffer.getChannelData(ch);
 };
 
 NeuBuffer.prototype.concat = function() {
-  var args = _.toArray(arguments).filter(function(elem) {
+  var args = util.toArray(arguments).filter(function(elem) {
     return (elem instanceof NeuBuffer) && (this.numberOfChannels === elem.numberOfChannels);
   }, this);
   var channels = this.numberOfChannels;
@@ -114,7 +114,7 @@ NeuBuffer.prototype.concat = function() {
 
   for (var i = 0; i < channels; i++) {
     var data = buffer.getChannelData(i);
-    var pos  = 0;
+    var pos = 0;
     for (var j = 0; j < argslen; j++) {
       data.set(args[j][i], pos);
       pos += args[j].length;
@@ -129,15 +129,15 @@ NeuBuffer.prototype.reverse = function() {
   var buffer = this.$context.createBuffer(channels, this.length, this.sampleRate);
 
   for (var i = 0; i < channels; i++) {
-    buffer.getChannelData(i).set(_.toArray(this[i]).reverse());
+    buffer.getChannelData(i).set(util.toArray(this[i]).reverse());
   }
 
   return new NeuBuffer(this.$context, buffer);
 };
 
 NeuBuffer.prototype.slice = function(start, end) {
-  start = _.int(_.defaults(start, 0));
-  end   = _.int(_.defaults(end  , this.length));
+  start = util.int(util.defaults(start, 0));
+  end = util.int(util.defaults(end, this.length));
 
   if (start < 0) {
     start += this.length;
@@ -168,7 +168,7 @@ NeuBuffer.prototype.slice = function(start, end) {
 };
 
 NeuBuffer.prototype.split = function(n) {
-  n = _.int(_.defaults(n, 2));
+  n = util.int(util.defaults(n, 2));
 
   if (n <= 0) {
     return [];
@@ -177,7 +177,7 @@ NeuBuffer.prototype.split = function(n) {
   var result = new Array(n);
   var len = this.length / n;
   var start = 0;
-  var end   = 0;
+  var end = 0;
 
   for (var i = 0; i < n; i++) {
     end = Math.round(start + len);
@@ -200,8 +200,8 @@ NeuBuffer.prototype.normalize = function() {
 };
 
 NeuBuffer.prototype.resample = function(size, interpolation) {
-  size = Math.max(0, _.int(_.defaults(size, this.length)));
-  interpolation = !!_.defaults(interpolation, true);
+  size = Math.max(0, util.int(util.defaults(size, this.length)));
+  interpolation = !!util.defaults(interpolation, true);
 
   var channels = this.numberOfChannels;
   var buffer = this.$context.createBuffer(channels, size, this.sampleRate);
@@ -218,7 +218,7 @@ NeuBuffer.prototype.toAudioBuffer = function() {
 };
 
 NeuBuffer.prototype.toPeriodicWave = function(ch) {
-  ch = _.clip(_.int(ch), 0, this.numberOfChannels - 1);
+  ch = util.clip(util.int(ch), 0, this.numberOfChannels - 1);
 
   var buffer = this._buffer.getChannelData(ch);
 
@@ -287,7 +287,7 @@ function resample1(data, size) {
   var len = data.length - 1;
 
   for (var i = 0; i < size; i++) {
-    var x  = i * factor;
+    var x = i * factor;
     var x0 = x|0;
     var x1 = Math.min(x0 + 1, len);
     result[i] = data[x0] + Math.abs(x - x0) * (data[x1] - data[x0]);

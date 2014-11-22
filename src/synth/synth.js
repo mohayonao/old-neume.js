@@ -1,13 +1,13 @@
 "use strict";
 
-var _              = require("../utils");
-var NeuSynthDB     = require("./db");
+var util = require("../util");
+var NeuSynthDB = require("./db");
 var NeuSynthDollar = require("./dollar");
 
 var EMPTY_DB = new NeuSynthDB();
-var INIT  = 0;
+var INIT = 0;
 var START = 1;
-var STOP  = 2;
+var STOP = 2;
 
 function NeuSynth(context, func, args) {
   this.$context = context;
@@ -44,7 +44,7 @@ function NeuSynth(context, func, args) {
 
     Object.defineProperty(this, methodName, {
       value: function() {
-        method.apply(this, _.toArray(arguments));
+        method.apply(this, util.toArray(arguments));
         return this;
       }
     });
@@ -56,7 +56,7 @@ function NeuSynth(context, func, args) {
         methodNames.push(methodName);
         Object.defineProperty(this, methodName, {
           value: function() {
-            this.apply(methodName, _.toArray(arguments));
+            this.apply(methodName, util.toArray(arguments));
             return this;
           }
         });
@@ -90,7 +90,7 @@ function NeuSynth(context, func, args) {
 NeuSynth.$name = "NeuSynth";
 
 NeuSynth.prototype.start = function(t) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   if (this._state === INIT) {
     this._state = START;
@@ -119,7 +119,7 @@ NeuSynth.prototype.start = function(t) {
 };
 
 NeuSynth.prototype.stop = function(t) {
-  t = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
   var context = this.$context;
 
@@ -149,8 +149,8 @@ NeuSynth.prototype.stop = function(t) {
 };
 
 NeuSynth.prototype.fadeIn = function(t, dur) {
-  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  dur = _.finite(this.$context.toSeconds(dur));
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  dur = util.finite(this.$context.toSeconds(dur));
 
   if (this._state === INIT) {
     var tC = -Math.max(1e-6, dur) / -4.605170185988091;
@@ -165,8 +165,8 @@ NeuSynth.prototype.fadeIn = function(t, dur) {
 };
 
 NeuSynth.prototype.fadeOut = function(t, dur) {
-  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  dur = _.finite(this.$context.toSeconds(dur));
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  dur = util.finite(this.$context.toSeconds(dur));
 
   if (this._state === START) {
     this.$routes.forEach(function(node) {
@@ -181,9 +181,9 @@ NeuSynth.prototype.fadeOut = function(t, dur) {
 };
 
 NeuSynth.prototype.fade = function(t, val, dur) {
-  t   = _.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  val = _.finite(val);
-  dur = _.finite(this.$context.toSeconds(dur));
+  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+  val = util.finite(val);
+  dur = util.finite(this.$context.toSeconds(dur));
 
   if (this._state === START) {
     var v0 = this.$routes[0].gain.value;
@@ -207,7 +207,7 @@ NeuSynth.prototype.apply = function(method, args) {
 };
 
 NeuSynth.prototype.call = function() {
-  var args = _.toArray(arguments);
+  var args = util.toArray(arguments);
   var method = args.shift();
 
   return this.apply(method, args);
@@ -281,7 +281,7 @@ function parseEvent(event) {
   }
 
   if (matched[3] != null) {
-    return { selector: null, name: matched[3]};
+    return { selector: null, name: matched[3] };
   }
 
   return { selector: matched[1], name: matched[2] };

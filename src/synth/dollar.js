@@ -1,22 +1,22 @@
 "use strict";
 
-var _ = require("../utils");
-var NeuParam   = require("../component/param");
+var util = require("../util");
+var NeuParam = require("../component/param");
 var NeuSynthDB = require("./db");
-var NeuUGen    = require("./ugen");
+var NeuUGen = require("./ugen");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();
 
-  this.db      = db;
-  this.params  = {};
+  this.db = db;
+  this.params = {};
   this.methods = {};
-  this.timers  = [];
+  this.timers = [];
 
   function builder() {
-    var args = _.toArray(arguments);
-    var key  = args.shift();
-    var spec = _.isDictionary(args[0]) ? args.shift() : {};
+    var args = util.toArray(arguments);
+    var key = args.shift();
+    var spec = util.isDictionary(args[0]) ? args.shift() : {};
     var inputs = Array.prototype.concat.apply([], args);
     var ugen = NeuUGen.build(synth, key, spec, inputs);
 
@@ -25,12 +25,12 @@ function NeuSynthDollar(synth) {
     return ugen;
   }
 
-  builder.param    = $param(synth, this.params);
-  builder.method   = $method(synth, this.methods);
-  builder.timeout  = $timeout(synth, this.timers);
+  builder.param = $param(synth, this.params);
+  builder.method = $method(synth, this.methods);
+  builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
-  builder.sec      = $sec(synth);
-  builder.freq     = $freq(synth);
+  builder.sec = $sec(synth);
+  builder.freq = $freq(synth);
 
   this.builder = builder;
 }
@@ -41,7 +41,7 @@ function $param(synth, params) {
       return params[name];
     }
 
-    defaultValue = _.finite(_.defaults(defaultValue, 0));
+    defaultValue = util.finite(util.defaults(defaultValue, 0));
 
     validateParam(name, defaultValue);
 
@@ -74,15 +74,15 @@ function $timeout(synth, timers) {
   var context = synth.$context;
 
   return function(timeout) {
-    timeout = Math.max(0, _.finite(context.toSeconds(timeout)));
+    timeout = Math.max(0, util.finite(context.toSeconds(timeout)));
 
-    var schedId   = 0;
-    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
+    var schedId = 0;
+    var callbacks = util.toArray(arguments).slice(1).filter(util.isFunction);
 
     function sched(t) {
       schedId = context.sched(t, function(t) {
         schedId = 0;
-        for (var i = 0 , imax = callbacks.length; i < imax; i++) {
+        for (var i = 0, imax = callbacks.length; i < imax; i++) {
           callbacks[i].call(synth, t, 1);
         }
       });
@@ -111,13 +111,13 @@ function $interval(synth, timers) {
       relative = true;
     } else {
       relative = false;
-      interval = Math.max(minInterval, _.finite(context.toSeconds(interval)));
+      interval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
     }
 
-    var schedId   = 0;
-    var callbacks = _.toArray(arguments).slice(1).filter(_.isFunction);
+    var schedId = 0;
+    var callbacks = util.toArray(arguments).slice(1).filter(util.isFunction);
     var startTime = 0;
-    var count     = 0;
+    var count = 0;
 
     function sched(t) {
       schedId = context.sched(t, function(t) {
@@ -128,7 +128,7 @@ function $interval(synth, timers) {
         }
 
         var nextTime = relative ?
-          t + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+          t + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
           startTime + interval * (count + 1);
 
         sched(nextTime);
@@ -140,7 +140,7 @@ function $interval(synth, timers) {
         startTime = t;
 
         var nextTime = relative ?
-          startTime + Math.max(minInterval, _.finite(context.toSeconds(interval))) :
+          startTime + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
           startTime + interval;
 
         sched(nextTime);
@@ -167,7 +167,7 @@ function $freq(synth) {
 
 function validateParam(name) {
   if (!/^[a-z]\w*$/.test(name)) {
-    throw new TypeError(_.format(
+    throw new TypeError(util.format(
       "invalid parameter name: #{name}", { name: name }
     ));
   }

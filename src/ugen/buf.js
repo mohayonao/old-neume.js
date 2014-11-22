@@ -1,13 +1,13 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
    * $("buf", {
-   *   buf  : [AudioBuffer|NeuBuffer] = null
-   *   rate : [number|UGen] = 1
-   *   loop : [boolean] = false
+   *   buf: [AudioBuffer|NeuBuffer] = null
+   *   rate: [number|UGen] = 1
+   *   loop: [boolean] = false
    *   start: [number] = 0
-   *   end  : [number] = 0
+   *   end: [number] = 0
    * })
    *
    * aliases:
@@ -43,7 +43,7 @@ module.exports = function(neume, _) {
 
   function make(buffer, ugen, spec) {
     var context = ugen.$context;
-    var bufSrc  = context.createBufferSource();
+    var bufSrc = context.createBufferSource();
 
     buffer = context.toAudioBuffer(buffer);
 
@@ -51,17 +51,17 @@ module.exports = function(neume, _) {
     if (buffer != null) {
       bufSrc.buffer = buffer;
     }
-    bufSrc.loop = !!_.defaults(spec.loop, false);
-    bufSrc.loopStart = _.finite(_.defaults(spec.start, 0));
-    bufSrc.loopEnd   = _.finite(_.defaults(spec.end  , 0));
+    bufSrc.loop = !!util.defaults(spec.loop, false);
+    bufSrc.loopStart = util.finite(util.defaults(spec.start, 0));
+    bufSrc.loopEnd = util.finite(util.defaults(spec.end, 0));
 
     bufSrc.playbackRate.value = 0;
-    context.connect(_.defaults(spec.rate, 1), bufSrc.playbackRate);
+    context.connect(util.defaults(spec.rate, 1), bufSrc.playbackRate);
 
-    var offset = _.finite(_.defaults(spec.offset, 0));
-    var duration = _.defaults(context.toSeconds(spec.dur), null);
+    var offset = util.finite(util.defaults(spec.offset, 0));
+    var duration = util.defaults(context.toSeconds(spec.dur), null);
     if (duration != null) {
-      duration = _.finite(duration);
+      duration = util.finite(duration);
     }
 
     function start(t) {
@@ -84,8 +84,8 @@ module.exports = function(neume, _) {
 
     return new neume.Unit({
       outlet: bufSrc,
-      start : start,
-      stop  : stop
+      start: start,
+      stop: stop
     });
   }
 

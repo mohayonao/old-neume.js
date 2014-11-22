@@ -69,7 +69,9 @@ describe("ugen/object", function() {
 
     it("works with function", function() {
       var val = 0;
-      var obj = { foo: function() { return val; } };
+      var obj = { foo: function() {
+        return val;
+      } };
       var synth = new Neume(function($) {
         return $(obj, { key: "foo", interval: 0.05 });
       })();
@@ -102,7 +104,9 @@ describe("ugen/object", function() {
 
     it("works with valueOf", function() {
       var val = 0;
-      var obj = { valueOf: function() { return val; } };
+      var obj = { valueOf: function() {
+        return val;
+      } };
       var synth = new Neume(function($) {
         return $(obj, { interval: 0.05 });
       })();

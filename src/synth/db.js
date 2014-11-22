@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 var selectorParser = require("../parser/selector");
 
 function NeuSynthDB() {
@@ -9,7 +9,7 @@ function NeuSynthDB() {
 }
 
 NeuSynthDB.prototype.append = function(obj) {
-  if (_.isObject(obj)) {
+  if (util.isObject(obj)) {
     this._all.push(obj);
     if (obj.hasOwnProperty("$id")) {
       this._ids[obj.$id] = obj;

@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("../utils");
 var C = require("../const");
+var util = require("../util");
 
 var NeuTransport = require("./transport");
 var NeuComponent = require("../component/component");
@@ -13,7 +13,7 @@ var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
 var NeuAudioBus = require("../control/audio-bus");
 
-var INIT  = 0;
+var INIT = 0;
 var START = 1;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
@@ -29,9 +29,9 @@ function NeuContext(destination, duration, spec) {
   this.connect(this.$analyser, this.$destination);
   this._scriptProcessor = null;
   this._audioBuses = [];
-  this._processBufSize = _.int(_.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
+  this._processBufSize = util.int(util.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
 
-  this.$inlet  = null;
+  this.$inlet = null;
   this.$outlet = this.$analyser;
 
   Object.defineProperties(this, {
@@ -108,7 +108,7 @@ NeuContext.prototype.createComponent = function(node) {
 };
 
 NeuContext.prototype.createDC = function(value) {
-  return new NeuDC(this, _.finite(value));
+  return new NeuDC(this, util.finite(value));
 };
 
 NeuContext.prototype.createMul = function(a, b) {
@@ -124,7 +124,7 @@ NeuContext.prototype.createSum = function(inputs) {
 };
 
 NeuContext.prototype.createParam = function(value, spec) {
-  return new NeuParam(this, _.finite(value), spec);
+  return new NeuParam(this, util.finite(value), spec);
 };
 
 NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
@@ -132,7 +132,7 @@ NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
 };
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = _.clip(_.int(_.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
+  index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new NeuAudioBus(this);
   }
@@ -144,7 +144,7 @@ NeuContext.prototype.reset = function() {
     this.$inlet.disconnect();
   }
 
-  this._audioBuses   = [];
+  this._audioBuses = [];
 
   this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
   this.connect(this.$inlet, this.$analyser);
@@ -173,14 +173,14 @@ NeuContext.prototype.start = function() {
 };
 
 function startRendering() {
-  this._currentTimeIncr = _.clip(_.finite(this._duration), 0, MAX_RENDERING_SEC);
+  this._currentTimeIncr = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
   onaudioprocess.call(this, { playbackTime: 0 });
 }
 
 function startAudioTimer() {
   var context = this.$context;
   var scriptProcessor = context.createScriptProcessor(this._processBufSize, 1, 1);
-  var bufferSource    = context.createBufferSource();
+  var bufferSource = context.createBufferSource();
 
   this._currentTimeIncr = this._processBufSize / context.sampleRate;
   this._scriptProcessor = scriptProcessor;
@@ -198,18 +198,18 @@ NeuContext.prototype.stop = function() {
 };
 
 NeuContext.prototype.sched = function(time, callback, ctx) {
-  time = _.finite(time);
+  time = util.finite(time);
 
-  if (!_.isFunction(callback)) {
+  if (!util.isFunction(callback)) {
     return 0;
   }
 
   var events = this._events;
-  var event  = {
-    id      : schedId++,
-    time    : time,
+  var event = {
+    id: schedId++,
+    time: time,
     callback: callback,
-    context : ctx || this
+    context: ctx || this
   };
 
   if (events.length === 0 || events[events.length - 1].time <= time) {
@@ -227,7 +227,7 @@ NeuContext.prototype.sched = function(time, callback, ctx) {
 };
 
 NeuContext.prototype.unsched = function(id) {
-  id = _.finite(id);
+  id = util.finite(id);
 
   if (id !== 0) {
     var events = this._events;
@@ -275,7 +275,7 @@ NeuContext.prototype.connect = function(from, to) {
       from.connect(to);
     } else if (to instanceof global.AudioParam) {
       if (typeof from === "number") {
-        to.value = _.finite(from);
+        to.value = util.finite(from);
       } else {
         from = this.toAudioNode(from);
         if (from) {
@@ -328,7 +328,7 @@ NeuContext.prototype.toFrequency = function(value) {
 
 function onaudioprocess(e) {
   // Safari 7.0.6 does not support e.playbackTime
-  var currentTime     = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;
+  var currentTime = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;
   var nextCurrentTime = currentTime + this._currentTimeIncr;
   var events = this._events;
 

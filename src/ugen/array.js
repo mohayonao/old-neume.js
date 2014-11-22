@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -25,21 +25,21 @@ module.exports = function(neume, _) {
    */
   neume.register("array", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
     var index = 0;
-    var data  = spec.value;
-    var mode  = {
-      clip: _.clipAt,
-      wrap: _.wrapAt,
-      fold: _.foldAt,
-    }[spec.mode] || /* istanbul ignore next*/ _.clipAt;
+    var data = spec.value;
+    var mode = {
+      clip: util.clipAt,
+      wrap: util.wrapAt,
+      fold: util.foldAt,
+    }[spec.mode] || /* istanbul ignore next*/ util.clipAt;
 
     if (!Array.isArray(data) || data.length === 0)  {
       data = [ 0 ];
     }
 
-    var prevValue = _.finite(data[0]);
+    var prevValue = util.finite(data[0]);
     var param = context.createParam(prevValue, spec);
 
     if (inputs.length) {
@@ -65,23 +65,23 @@ module.exports = function(neume, _) {
       methods: {
         setValue: function(t, value) {
           if (Array.isArray(value)) {
-            context.sched(_.finite(context.toSeconds(t)), function() {
+            context.sched(util.finite(context.toSeconds(t)), function() {
               data = value;
             });
           }
         },
         at: function(t, index) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
-            update(t, _.int(index));
+          context.sched(util.finite(context.toSeconds(t)), function(t) {
+            update(t, util.int(index));
           });
         },
         next: function(t) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
+          context.sched(util.finite(context.toSeconds(t)), function(t) {
             update(t, index + 1);
           });
         },
         prev: function(t) {
-          context.sched(_.finite(context.toSeconds(t)), function(t) {
+          context.sched(util.finite(context.toSeconds(t)), function(t) {
             update(t, index - 1);
           });
         }

@@ -31,7 +31,7 @@ module.exports = function(neume) {
     buf.getChannelData(0).set(data);
 
     bufSrc.buffer = buf;
-    bufSrc.loop   = true;
+    bufSrc.loop = true;
 
     return new neume.Unit({
       outlet: bufSrc,
@@ -45,7 +45,7 @@ module.exports = function(neume) {
   }
 
   var whiteNoise = null;
-  var pinkNoise  = null;
+  var pinkNoise = null;
 
   function WhiteNoise(length) {
     var data = new Float32Array(length);

@@ -124,7 +124,7 @@ describe("Emitter", function() {
   });
 
   describe("#off(event)", function() {
-    it("removes all listeners from the event", function(){
+    it("removes all listeners from the event", function() {
       var passed = [];
 
       emitter.once("bang", function(val) {
@@ -147,7 +147,7 @@ describe("Emitter", function() {
   });
 
   describe("#off()", function() {
-    it("removes all listeners", function(){
+    it("removes all listeners", function() {
       var passed = [];
 
       emitter.once("bang", function(val) {

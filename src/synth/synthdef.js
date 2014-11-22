@@ -1,24 +1,24 @@
 "use strict";
 
-var _ = require("../utils");
+var util = require("../util");
 
 // TODO: FIX ME
-_.NeuSynth = require("./synth");
+util.NeuSynth = require("./synth");
 
 function NeuSynthDef(defaultContext, func) {
-  if (!_.isFunction(func)) {
+  if (!util.isFunction(func)) {
     throw new TypeError("NeuSynthDef func is not a function");
   }
 
   function SynthDef() {
     var context = defaultContext;
-    var args = _.toArray(arguments);
+    var args = util.toArray(arguments);
 
     if (args[0] instanceof global.AudioContext) {
       context = args.shift();
     }
 
-    return new _.NeuSynth(context, func, args);
+    return new util.NeuSynth(context, func, args);
   }
 
   Object.defineProperties(SynthDef, {

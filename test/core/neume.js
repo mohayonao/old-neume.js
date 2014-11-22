@@ -3,11 +3,11 @@
 var neume = require("../../src");
 var pkg = require("../../package.json");
 
-var NeuContext  = neume.Context;
-var NeuSynth    = neume.Synth;
-var NeuBuffer   = neume.Buffer;
+var NeuContext = neume.Context;
+var NeuSynth = neume.Synth;
+var NeuBuffer = neume.Buffer;
 var NeuInterval = neume.Interval;
-var NeuTimeout  = neume.Timeout;
+var NeuTimeout = neume.Timeout;
 var NOP = function() {};
 
 describe("neume", function() {

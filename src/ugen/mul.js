@@ -1,4 +1,4 @@
-module.exports = function(neume, _) {
+module.exports = function(neume, util) {
   "use strict";
 
   /*
@@ -24,9 +24,9 @@ module.exports = function(neume, _) {
    */
   neume.register("*", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
+    var outlet = null;
 
-    var nodes    = [];
+    var nodes = [];
     var multiple = 1;
 
     inputs.forEach(function(node) {
@@ -36,7 +36,7 @@ module.exports = function(neume, _) {
         nodes.push(node);
       }
     });
-    multiple = _.finite(multiple);
+    multiple = util.finite(multiple);
 
     if (nodes.length === 0) {
       nodes.push(1);

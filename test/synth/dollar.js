@@ -2,13 +2,12 @@
 
 var neume = require("../../src");
 
-var _          = neume._;
 var NeuContext = neume.Context;
-var NeuSynth   = neume.Synth;
-var NeuUGen    = neume.UGen;
+var NeuSynth = neume.Synth;
+var NeuUGen = neume.UGen;
 var NeuControlBus = neume.ControlBus;
 var NeuAudioBus = neume.AudioBus;
-var NeuParam   = neume.Param;
+var NeuParam = neume.Param;
 var NOP = function() {};
 
 describe("NeuSynthDollar", function() {
@@ -43,15 +42,15 @@ describe("NeuSynthDollar", function() {
 
           var synth = new NeuSynth(context, function($) {
             params.freq = $.param("freq", 440);
-            params.amp  = $.param("amp", 0.25);
+            params.amp = $.param("amp", 0.25);
             params.amp2 = $.param("amp");
           }, []);
 
           assert(params.freq instanceof NeuParam);
           assert(params.amp  instanceof NeuParam);
           assert(params.freq === synth.freq);
-          assert(params.amp  === synth.amp );
-          assert(params.amp  === params.amp2);
+          assert(params.amp === synth.amp );
+          assert(params.amp === params.amp2);
 
           synth.freq = 880;
 

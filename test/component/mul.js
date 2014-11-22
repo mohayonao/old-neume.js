@@ -2,10 +2,10 @@
 
 var neume = require("../../src");
 
-var NeuContext   = neume.Context;
+var NeuContext = neume.Context;
 var NeuComponent = neume.Component;
-var NeuDC        = neume.DC;
-var NeuMul       = neume.Mul;
+var NeuDC = neume.DC;
+var NeuMul = neume.Mul;
 
 describe("NeuMul", function() {
   var context = null;
@@ -34,25 +34,25 @@ describe("NeuMul", function() {
     });
     it("returns a NeuDC when node * 0", function() {
       var node = context.createGain();
-      var mul  = new NeuMul(context, node, 0);
+      var mul = new NeuMul(context, node, 0);
       assert(mul instanceof NeuDC);
       assert(mul.valueOf() === 0);
     });
     it("returns a NeuDC when 0 * node", function() {
       var node = context.createGain();
-      var mul  = new NeuMul(context, node, 0);
+      var mul = new NeuMul(context, node, 0);
       assert(mul instanceof NeuDC);
       assert(mul.valueOf() === 0);
     });
     it("returns a node when node * 1", function() {
       var node = context.createGain();
-      var mul  = new NeuMul(context, node, 1);
+      var mul = new NeuMul(context, node, 1);
       assert(mul instanceof NeuComponent);
       assert(mul.toAudioNode() === node);
     });
     it("returns a node when 1 * node", function() {
       var node = context.createGain();
-      var mul  = new NeuMul(context, 1, node);
+      var mul = new NeuMul(context, 1, node);
       assert(mul instanceof NeuComponent);
       assert(mul.toAudioNode() === node);
     });

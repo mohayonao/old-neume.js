@@ -2,9 +2,8 @@
 
 var neume = require("../../src");
 
-var _          = neume._;
 var NeuContext = neume.Context;
-var NeuDC      = neume.DC;
+var NeuDC = neume.DC;
 
 describe("NeuDC", function() {
   var context = null;

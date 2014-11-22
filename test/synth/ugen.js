@@ -2,12 +2,12 @@
 
 var neume = require("../../src");
 
-var _ = neume._;
-var NeuContext   = neume.Context;
+var util = neume.util;
+var NeuContext = neume.Context;
 var NeuComponent = neume.Component;
-var NeuUGen      = neume.UGen;
-var NeuUnit      = neume.Unit;
-var Emitter      = neume.Emitter;
+var NeuUGen = neume.UGen;
+var NeuUnit = neume.Unit;
+var Emitter = neume.Emitter;
 
 require("../../src/ugen/osc");
 require("../../src/ugen/add");
@@ -21,20 +21,6 @@ describe("NeuUGen", function() {
   var synth = null;
   var ugen0 = null;
   var registered = null;
-
-  function make(id) {
-    return function(unit, spec, inputs) {
-      var gain = context.createGain();
-
-      gain.$id = unit.$id || id;
-
-      inputs.forEach(function(node) {
-        _.connect({ from: node, to: gain });
-      });
-
-      return new NeuUnit({ outlet: gain });
-    };
-  }
 
   beforeEach(function() {
     var audioContext = new global.AudioContext();

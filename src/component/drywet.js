@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require("../utils");
 var C = require("../const");
+var util = require("../util");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
 var halfSize = WS_CURVE_SIZE >> 1;
@@ -51,7 +51,7 @@ function DryWetNode(context, dryNode, wetNode, mix) {
 }
 
 function DryWetNumber(context, dryNode, wetNode, mix) {
-  mix = _.clip(_.finite(mix), 0, 1);
+  mix = util.clip(util.finite(mix), 0, 1);
 
   var wet = mix;
   var dry = 1 - mix;
@@ -79,4 +79,4 @@ function DryWetNumber(context, dryNode, wetNode, mix) {
   return context.createComponent(gainMix);
 }
 
-module.exports = _.NeuDryWet = NeuDryWet;
+module.exports = util.NeuDryWet = NeuDryWet;

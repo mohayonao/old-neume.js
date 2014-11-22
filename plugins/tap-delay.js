@@ -8,15 +8,15 @@
     module.exports = plugin;
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(function () {
-        return plugin;
+    define(function() {
+      return plugin;
     });
   } else {
     // Other environment (usually <script> tag): plug in to global chai instance directly.
     neume.use(plugin);
   }
 
-})(function(neume, _) {
+})(function(neume, util) {
   "use strict";
 
   var MAX_DELAY_SEC = neume.MAX_DELAY_SEC;
@@ -75,13 +75,13 @@
    */
   neume.register("tap-delay", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var inlet   = context.createGain();
-    var outlet  = context.createGain();
+    var inlet = context.createGain();
+    var outlet = context.createGain();
 
-    var delays       = spec.delays;
-    var gain         = _.defaults(spec.gain, 0.5);
-    var feedback     = _.defaults(spec.feedback, 0);
-    var maxDelayTime = _.defaults(context.toSeconds(spec.maxDelayTime), 1);
+    var delays = spec.delays;
+    var gain = util.defaults(spec.gain, 0.5);
+    var feedback = util.defaults(spec.feedback, 0);
+    var maxDelayTime = util.defaults(context.toSeconds(spec.maxDelayTime), 1);
 
     if (Array.isArray(delays)) {
       delays = delays.reduce(function(a, b) {
@@ -128,7 +128,7 @@
 
   function createDelayGain(context, delayTime, maxDelayTime, gain) {
     var delayNode = createDelay(context, delayTime, maxDelayTime);
-    var gainNode  = context.createGain();
+    var gainNode = context.createGain();
 
     gainNode.gain.value = 0;
     context.connect(gain, gainNode.gain);
@@ -140,12 +140,12 @@
 
   function createDelay(context, delayTime, maxDelayTime) {
     if (typeof delayTime === "number") {
-      delayTime = _.clip(delayTime, 0, MAX_DELAY_SEC);
+      delayTime = util.clip(delayTime, 0, MAX_DELAY_SEC);
       maxDelayTime = delayTime;
     } else {
-      maxDelayTime = _.finite(_.defaults(context.toSeconds(maxDelayTime), 1));
+      maxDelayTime = util.finite(util.defaults(context.toSeconds(maxDelayTime), 1));
     }
-    maxDelayTime = _.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
+    maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, MAX_DELAY_SEC);
 
     var delayNode = context.createDelay(maxDelayTime);
 
