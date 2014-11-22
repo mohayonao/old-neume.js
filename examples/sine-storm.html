@@ -49,33 +49,42 @@
 
   var visualizer = null;
 
-  var Sine = new Neume(function($) {
+  function Sine($) {
     // `$.param` is used to export the parameter to a synth.
     // so you can operate this parameter like `synth.freq = 880` later.
 
+    var out;
     var mod  = $.param("mod" , exprand( 0.01,  20.0));
     var freq = $.param("freq", exprand(55.00, 880.0));
-    var amp  = $.param("amp" , exprand( 0.05,   0.2));
+    var amp  = $.param("amp" , exprand( 0.05,   0.1));
 
-    return $("out", { bus: 1 }, $("sin", { freq: mod, mul: amp }, $("sin", { freq: freq, mul: amp })));
-  });
+    out = $("sin", { freq: freq, mul: amp });
+    out = $("sin", { freq: mod }, out);
+    out = $("out", { bus: 1 }, out);
 
-  var Out = new Neume(function($) {
-    return $("out", { bus: 0 }, $("comp", { mul: 0.8 }, $("in", 1)));
-  });
+    return out;
+  }
+
+  function Destination($) {
+    var out;
+
+    out = $("in", 1);
+    out = $("comp", { mul: 0.8 }, out);
+    out = $("out", { bus: 0 }, out);
+
+    return out;
+  }
 
   var players = [];
 
   function start() {
     Neume.context.reset();
 
-    var out = new Out();
-
     var sines = _.range(25).map(function() {
-      return new Sine().start();
+      return Neume.Synth(Sine).start();
     });
 
-    var timer = new Neume.Interval(4.000, function(e) {
+    var timer = Neume.Interval(4.000, function(e) {
       var t = e.playbackTime;
       var sine = _.sample(sines);
       var startTime = t + Math.random() * 2;
@@ -83,10 +92,10 @@
 
       sine.mod .targetAt(exprand( 0.01,  20.0), startTime, timeConstant);
       sine.freq.targetAt(exprand(55.00, 880.0), startTime, timeConstant);
-      sine.amp .targetAt(exprand( 0.05,   0.2), startTime, timeConstant);
+      sine.amp .targetAt(exprand( 0.05,   0.1), startTime, timeConstant);
     });
 
-    players = [ out, timer, visualizer ];
+    players = [ Neume.Synth(Destination), timer, visualizer ];
 
     players.forEach(function(player) {
       player.start();

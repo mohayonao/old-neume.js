@@ -3,7 +3,7 @@
 require("./shim");
 
 var _ = require("../utils");
-var VERSION = "0.0.22";
+var VERSION = "0.0.23";
 
 var neume = function(context) {
   function Neume(spec) {
@@ -30,6 +30,12 @@ var neume = function(context) {
     currentTime: {
       get: function() {
         return context.currentTime;
+      },
+      enumerable: true
+    },
+    Synth: {
+      value: function(func) {
+        return new neume.SynthDef(context, func).apply(null, _.toArray(arguments).slice(1));
       },
       enumerable: true
     },

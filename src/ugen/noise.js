@@ -1,6 +1,8 @@
 module.exports = function(neume) {
   "use strict";
 
+  var NOISE_DURATION = 4;
+
   /**
    * $("white")
    *
@@ -13,12 +15,12 @@ module.exports = function(neume) {
    *   |
    */
   neume.register("white", function(ugen) {
-    whiteNoise = whiteNoise || generateWhiteNoise(ugen.$context.sampleRate);
+    whiteNoise = whiteNoise || new WhiteNoise(ugen.$context.sampleRate * NOISE_DURATION);
     return make(whiteNoise, ugen);
   });
 
   neume.register("pink", function(ugen) {
-    pinkNoise = pinkNoise || generatePinkNoise(ugen.$context.sampleRate);
+    pinkNoise = pinkNoise || new PinkNoise(ugen.$context.sampleRate * NOISE_DURATION);
     return make(pinkNoise, ugen);
   });
 
@@ -45,21 +47,21 @@ module.exports = function(neume) {
   var whiteNoise = null;
   var pinkNoise  = null;
 
-  function generateWhiteNoise(sampleRate) {
-    var noise = new Float32Array(sampleRate);
+  function WhiteNoise(length) {
+    var data = new Float32Array(length);
 
-    for (var i = 0, imax = noise.length; i < imax; i++) {
-      noise[i] = Math.random() * 2.0 - 1.0;
+    for (var i = 0, imax = data.length; i < imax; i++) {
+      data[i] = Math.random() * 2 - 1;
     }
 
-    return noise;
+    return data;
   }
 
-  function generatePinkNoise(sampleRate) {
+  function PinkNoise(length) {
     // DSP generation of Pink (1/f) Noise
     // http://www.firstpr.com.au/dsp/pink-noise/
 
-    var noise = new Float32Array(sampleRate);
+    var data = new Float32Array(length);
 
     var white;
     var b0 = 0;
@@ -70,7 +72,7 @@ module.exports = function(neume) {
     var b5 = 0;
     var b6 = 0;
 
-    for (var i = 0, imax = noise.length; i < imax; i++) {
+    for (var i = 0, imax = data.length; i < imax; i++) {
       white = Math.random() * 2 - 1;
       b0 = 0.99886 * b0 + white * 0.0555179;
       b1 = 0.99332 * b1 + white * 0.0750759;
@@ -78,11 +80,11 @@ module.exports = function(neume) {
       b3 = 0.86650 * b3 + white * 0.3104856;
       b4 = 0.55000 * b4 + white * 0.5329522;
       b5 = -0.7616 * b5 - white * 0.0168980;
-      noise[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-      noise[i] *= 0.12; // adjust gain
+      data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+      data[i] *= 0.12; // adjust gain
       b6 = white * 0.115926;
     }
 
-    return noise;
+    return data;
   }
 };

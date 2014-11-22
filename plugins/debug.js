@@ -19,7 +19,7 @@
 })(function(neume, _) {
   "use strict";
 
-  neume.register("debug", function(ugen, spec, inputs) {
+  neume.register("debug~", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet  = context.createScriptProcessor(2048, 1, 1);
 

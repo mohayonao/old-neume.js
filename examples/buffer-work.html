@@ -58,13 +58,19 @@
     console.error("Neume.Buffer.load: failed");
   });
 
-  var Granular = new Neume(function($, buffer, depth) {
-    return $("xline", { start: 0.2, end: _.random(50, 750) * 0.001, dur: _.sample([ 0.25, 0.5, 1.0, 2.0, 4.0 ]) },
-      $("buf", { buf: glitch(buffer, depth), loop: true })
-    ).on("end", function(e) {
+  function Granular($, buffer, depth) {
+    var out;
+
+    var end = _.random(50, 750) * 0.001;
+    var dur = _.sample([ 0.25, 0.5, 1.0, 2.0, 4.0 ]);
+
+    out = $("buf", { buf: glitch(buffer, depth), loop: true });
+    out = $("xline", { start: 0.2, end: end, dur: dur }, out).on("end", function(e) {
       this.stop(e.playbackTime);
     });
-  });
+
+    return out;
+  }
 
   function glitch(buffer, n) {
     if (n === 0) {
@@ -117,8 +123,8 @@
     Neume.context.reset();
 
     if (buffer) {
-      players = [ new Neume.Interval(0.500, function(e) {
-        new Granular(buffer, 4).start(e.playbackTime);
+      players = [ Neume.Interval(0.500, function(e) {
+        Neume.Synth(Granular, buffer, 4).start(e.playbackTime);
       }), visualizer ];
     }
 
