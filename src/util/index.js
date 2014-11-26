@@ -164,7 +164,7 @@ utils.typeOf = function(value) {
     if (typeof value.constructor.$name === "string") {
       return value.constructor.$name.toLowerCase();
     }
-    if (typeof value.constructor.name === "string") {
+    if (value.constructor.name && typeof value.constructor.name === "string") {
       return value.constructor.name.toLowerCase();
     }
   }
