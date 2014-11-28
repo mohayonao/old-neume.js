@@ -18,7 +18,7 @@ NeuComponent.prototype.mul = function(value) {
 };
 
 NeuComponent.prototype.add = function(value) {
-  return this.$context.createAdd(util.defaults(this._node, this), util.defaults(value, 0));
+  return this.$context.createSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
 };
 
 NeuComponent.prototype.madd = function(mul, add) {

@@ -90,7 +90,6 @@ neume.util = util;
 neume.Context = require("./context");
 neume.Transport = require("./transport");
 neume.Component = require("../component/component");
-neume.Add = require("../component/add");
 neume.DC = require("../component/dc");
 neume.DryWet = require("../component/drywet");
 neume.Mul = require("../component/mul");

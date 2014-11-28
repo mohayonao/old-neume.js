@@ -22,7 +22,7 @@ function NeuUGen(synth, key, spec, inputs) {
 
   this._node = unit.$outlet;
   this._node = this.$context.createMul(this._node, util.defaults(spec.mul, 1));
-  this._node = this.$context.createAdd(this._node, util.defaults(spec.add, 0));
+  this._node = this.$context.createSum([ this._node, util.defaults(spec.add, 0) ]);
   this.$isOutput = unit.$isOutput;
 
   this.$unit = unit;

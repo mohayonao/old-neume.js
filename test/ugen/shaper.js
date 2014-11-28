@@ -27,7 +27,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });
@@ -50,7 +50,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });
@@ -77,7 +77,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });
@@ -106,12 +106,12 @@ describe("ugen/shaper", function() {
               {
                 name: "WaveShaperNode",
                 oversample: "none",
-                inputs: []
+                inputs: [ DC(0) ]
               },
               {
                 name: "WaveShaperNode",
                 oversample: "none",
-                inputs: []
+                inputs: [ DC(0) ]
               }
             ]
           }
@@ -139,7 +139,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });

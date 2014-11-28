@@ -48,7 +48,7 @@ describe("ugen/delay", function() {
                   value: 0,
                   inputs: []
                 },
-                inputs: []
+                inputs: [ DC(0) ]
               }
             ]
           }
@@ -82,7 +82,7 @@ describe("ugen/delay", function() {
                     value: 0,
                     inputs: []
                   },
-                  inputs: []
+                  inputs: [ DC(0) ]
                 }
               ]
             },
@@ -93,7 +93,7 @@ describe("ugen/delay", function() {
                   value: 0,
                   inputs: []
                 },
-                inputs: []
+                inputs: [ DC(0) ]
               }
             ]
           }

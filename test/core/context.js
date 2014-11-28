@@ -304,16 +304,11 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createAdd(a, b)", function() {
-    it("returns a NeuAdd", function() {
-      assert(context.createAdd({}, {}) instanceof neume.Add);
-    });
-  });
-
   describe("#createSum(inputs)", function() {
     it("returns a NeuSum", function() {
-      assert(context.createSum({}) instanceof neume.Sum);
-      assert(context.createSum([]) instanceof neume.Sum);
+      assert(context.createSum([
+        context.createOscillator(), context.createOscillator()
+      ]) instanceof neume.Sum);
     });
   });
 
