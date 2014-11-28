@@ -158,6 +158,14 @@ describe("NeuSum", function() {
       assert.deepEqual(sum.toAudioNode().toJSON(),DC(0));
       assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
+    it("return an AudioNode [ 1 ]", function() {
+      var sum = new NeuSum(context, [ 1 ]);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
+      assert(sum.toAudioNode() === sum.toAudioNode());
+
+      assert.deepEqual(sum.toAudioNode().toJSON(),DC(1));
+      assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 1);
+    });
     it("return an AudioNode [ node ]", function() {
       var sum = new NeuSum(context, [ context.createDelay() ]);
       assert(sum.toAudioNode() instanceof global.AudioNode);
@@ -170,6 +178,51 @@ describe("NeuSum", function() {
           inputs: []
         },
         inputs: []
+      });
+    });
+    it("return an AudioNode [ node, 0 ]", function() {
+      var sum = new NeuSum(context, [ context.createDelay() ]);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
+      assert(sum.toAudioNode() === sum.toAudioNode());
+
+      assert.deepEqual(sum.toAudioNode().toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("return an AudioNode [ node, param ]", function() {
+      var sum = new NeuSum(context, [ context.createDelay(), new NeuParam(context, 440) ]);
+      assert(sum.toAudioNode() instanceof global.AudioNode);
+      assert(sum.toAudioNode() === sum.toAudioNode());
+
+      assert.deepEqual(sum.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "DelayNode",
+            delayTime: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          },
+          {
+            name: "GainNode",
+            gain: {
+              value: 440,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
     it("return an AudioNode [ node, node ]", function() {

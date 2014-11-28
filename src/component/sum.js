@@ -40,12 +40,32 @@ NeuSum.prototype.add = function(value) {
 
 NeuSum.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
-    if (this._inputs.length === 1) {
-      this.$outlet = this.$context.toAudioNode(this._inputs[0]);
+    var context = this.$context;
+    var number = this._number;
+    var param = this._param;
+    var nodes = this._nodes;
+
+    if (param === null && nodes.length === 0) {
+      this.$outlet = context.createDC(number).toAudioNode();
+    } else if (number === 0 && param === null && nodes.length === 1) {
+      this.$outlet = context.toAudioNode(nodes[0]);
     } else {
-      this.$outlet = createSumNode(this.$context, this._inputs);
+      var sumNode = context.createGain();
+
+      for (var i = 0, imax = nodes.length; i < imax; i++) {
+        context.connect(nodes[i], sumNode);
+      }
+      if (param)  {
+        context.connect(param, sumNode);
+      }
+      if (number) {
+        context.connect(number, sumNode);
+      }
+
+      this.$outlet = sumNode;
     }
   }
+
   return this.$outlet;
 };
 
@@ -76,34 +96,6 @@ NeuSum.prototype.connect = function(to) {
 
   return this;
 };
-
-function createSumNode(context, inputs) {
-  var node = null;
-  var number = 0;
-
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    if (typeof inputs[i] === "number") {
-      number += util.finite(inputs[i]);
-    } else if (inputs[i] instanceof util.NeuDC) {
-      number += inputs[i].valueOf();
-    } else {
-      if (node === null) {
-        node = context.createGain();
-      }
-      context.connect(inputs[i], node);
-    }
-  }
-
-  if (node) {
-    if (number !== 0) {
-      context.connect(context.createDC(number), node);
-    }
-  } else {
-    node = context.createDC(number).toAudioNode();
-  }
-
-  return node;
-}
 
 NeuSum.prototype.disconnect = function() {
   var context = this.$context;
