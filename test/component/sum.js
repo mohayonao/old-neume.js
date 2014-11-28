@@ -16,16 +16,28 @@ describe("NeuSum", function() {
   });
 
   describe("(context, inputs)", function() {
-    it("returns an instanceof NeuSum", function() {
-      var sum = new NeuSum(context, []);
+    it("returns an instanceof NeuSum when given [ node, node ]", function() {
+      var sum = new NeuSum(context, [ context.createOscillator(), context.createOscillator() ]);
       assert(sum instanceof NeuSum);
       assert(sum instanceof NeuComponent);
+    });
+    it("returns an instanceof NeuComponent when given [ node ]", function() {
+      var sum = new NeuSum(context, [ context.createOscillator() ]);
+      assert(sum instanceof NeuComponent);
+    });
+    it("returns an instanceof NeuDC when given [ number, number ]", function() {
+      var sum = new NeuSum(context, [ 1, context.createDC(2) ]);
+      assert(sum instanceof NeuDC);
+    });
+    it("returns an instanceof NeuParam when given [ param ]", function() {
+      var sum = new NeuSum(context, [ context.createParam(0) ]);
+      assert(sum instanceof NeuParam);
     });
   });
 
   describe("#add(value)", function() {
     it("works", function() {
-      var add = new NeuSum(context, [ context.createGain() ])
+      var add = new NeuSum(context, [ context.createGain(), context.createGain() ])
         .add(10).add([ new NeuDC(context, -5), context.createOscillator() ]).toAudioNode();
 
       assert(add.toJSON(), {
@@ -35,6 +47,14 @@ describe("NeuSum", function() {
           inputs: []
         },
         inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              intpus: []
+            },
+            inputs: []
+          },
           {
             name: "GainNode",
             gain: {
@@ -372,7 +392,7 @@ describe("NeuSum", function() {
           value: 1,
           inputs: []
         },
-        inputs: []
+        inputs: [ DC(0) ]
       });
     });
     it("[] connect to param", function() {
@@ -383,7 +403,7 @@ describe("NeuSum", function() {
       assert.deepEqual(to.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 1,
+          value: 0,
           inputs: []
         },
         inputs: []

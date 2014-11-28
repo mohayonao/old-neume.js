@@ -24,6 +24,18 @@ function NeuSum(context, inputs) {
       nodes.push(inputs[i]);
     }
   }
+
+  if (nodes.length === 0) {
+    if (param) {
+      return param;
+    }
+    return context.createDC(number);
+  }
+
+  if (number === 0 && param === null && nodes.length === 1) {
+    return context.createComponent(nodes[0]);
+  }
+
   this._hasNumber = hasNumber;
   this._number = number;
   this._param = param;
@@ -41,29 +53,21 @@ NeuSum.prototype.add = function(value) {
 NeuSum.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
     var context = this.$context;
-    var number = this._number;
-    var param = this._param;
     var nodes = this._nodes;
 
-    if (param === null && nodes.length === 0) {
-      this.$outlet = context.createDC(number).toAudioNode();
-    } else if (number === 0 && param === null && nodes.length === 1) {
-      this.$outlet = context.toAudioNode(nodes[0]);
-    } else {
-      var sumNode = context.createGain();
+    var sumNode = context.createGain();
 
-      for (var i = 0, imax = nodes.length; i < imax; i++) {
-        context.connect(nodes[i], sumNode);
-      }
-      if (param)  {
-        context.connect(param, sumNode);
-      }
-      if (number) {
-        context.connect(number, sumNode);
-      }
-
-      this.$outlet = sumNode;
+    for (var i = 0, imax = nodes.length; i < imax; i++) {
+      context.connect(nodes[i], sumNode);
     }
+    if (this._param)  {
+      context.connect(this._param, sumNode);
+    }
+    if (this._number) {
+      context.connect(this._number, sumNode);
+    }
+
+    this.$outlet = sumNode;
   }
 
   return this.$outlet;
@@ -75,23 +79,17 @@ NeuSum.prototype.connect = function(to) {
   var param = this._param;
   var nodes = this._nodes;
 
-  if (number === 0 && param === null && nodes.length === 0) {
-    if (this._hasNumber) {
-      context.connect(number, to);
-    }
-  } else {
-    for (var i = 0, imax = nodes.length; i < imax; i++) {
-      context.connect(context.toAudioNode(nodes[i]), to);
-    }
+  for (var i = 0, imax = nodes.length; i < imax; i++) {
+    context.connect(context.toAudioNode(nodes[i]), to);
+  }
 
-    if (param) {
-      context.connect(param, to);
-      if (number !== 0) {
-        context.connect(context.createDC(number).toAudioNode(), to);
-      }
-    } else if (number !== 0) {
-      context.connect(number, to);
+  if (param) {
+    context.connect(param, to);
+    if (number !== 0) {
+      context.connect(context.createDC(number).toAudioNode(), to);
     }
+  } else if (number !== 0) {
+    context.connect(number, to);
   }
 
   return this;
