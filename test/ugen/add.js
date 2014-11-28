@@ -31,7 +31,7 @@ describe("ugen/add", function() {
           value: 1,
           inputs: [],
         },
-        inputs: []
+        inputs: [ DC(0) ]
       });
     });
   });

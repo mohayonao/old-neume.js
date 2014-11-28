@@ -308,6 +308,62 @@ describe("NeuSum", function() {
         ]
       });
     });
+    it("[] connect to node", function() {
+      var to = context.createGain();
+
+      new NeuSum(context, []).connect(to);
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("[] connect to param", function() {
+      var to = context.createGain();
+
+      new NeuSum(context, []).connect(to.gain);
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("[ 0 ] connect to node", function() {
+      var to = context.createGain();
+
+      new NeuSum(context, [ 0 ]).connect(to);
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(0) ]
+      });
+    });
+    it("[ 0 ] connect to param", function() {
+      var to = context.createGain();
+
+      new NeuSum(context, [ 0 ]).connect(to.gain);
+
+      assert.deepEqual(to.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 0,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
     it("[ node, param, number ] connect to param", function() {
       var to = context.createGain();
 
