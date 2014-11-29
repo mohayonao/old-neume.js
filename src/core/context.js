@@ -76,29 +76,17 @@ function NeuContext(destination, duration, spec) {
 }
 NeuContext.$name = "NeuContext";
 
-[
-  "createBuffer",
-  "createBufferSource",
-  "createMediaElementSource",
-  "createMediaStreamSource",
-  "createMediaStreamDestination",
-  "createScriptProcessor",
-  "createAnalyser",
-  "createGain",
-  "createDelay",
-  "createBiquadFilter",
-  "createWaveShaper",
-  "createPanner",
-  "createConvolver",
-  "createChannelSplitter",
-  "createChannelMerger",
-  "createDynamicsCompressor",
-  "createOscillator",
-  "createPeriodicWave",
-  "decodeAudioData",
-].forEach(function(methodName) {
-  NeuContext.prototype[methodName] = function() {
-    return this.$context[methodName].apply(this.$context, arguments);
+Object.keys(global.AudioContext.prototype).forEach(function(key) {
+  var desc = Object.getOwnPropertyDescriptor(global.AudioContext.prototype, key);
+
+  if (typeof desc.value !== "function") {
+    return;
+  }
+
+  var method = global.AudioContext.prototype[key];
+
+  NeuContext.prototype[key] = function() {
+    return method.apply(this.$context, arguments);
   };
 });
 
