@@ -124,51 +124,6 @@ describe("NeuSum", function() {
     });
   });
 
-  describe("#mul(value)", function() {
-    it("works", function() {
-      var mul = new NeuSum(context, [
-        context.createOscillator(), context.createDelay()
-      ]).mul(context.createWaveShaper()).toAudioNode();
-
-      assert.deepEqual(mul.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 0,
-          inputs: [
-            {
-              name: "WaveShaperNode",
-              oversample: "none",
-              inputs: []
-            }
-          ]
-        },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
-  });
-
   describe("#toAudioNode()", function() {
     it("return an AudioNode []", function() {
       var sum = new NeuSum(context, []);

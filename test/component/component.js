@@ -21,46 +21,6 @@ describe("NeuComponent", function() {
     });
   });
 
-  describe("#mul(value)", function() {
-    it("works", function() {
-      var mul = new NeuComponent(
-        context, context.createOscillator()
-      ).mul(context.createDelay()).toAudioNode();
-
-      assert.deepEqual(mul.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 0,
-          inputs: [
-            {
-              name: "DelayNode",
-              delayTime: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
-        },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
-  });
-
   describe("#add(value)", function() {
     it("works", function() {
       var add = new NeuComponent(
@@ -94,63 +54,6 @@ describe("NeuComponent", function() {
               inputs: []
             },
             inputs: []
-          }
-        ]
-      });
-    });
-  });
-
-  describe("#madd(mul, add)", function() {
-    it("works", function() {
-      var madd = new NeuComponent(
-        context, context.createOscillator()
-      ).madd(context.createDelay(), 100).toAudioNode();
-
-      assert.deepEqual(madd.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 0,
-              inputs: [
-                {
-                  name: "DelayNode",
-                  delayTime: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
-            },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
-          },
-          {
-            name: "GainNode",
-            gain: {
-              value: 100,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
           }
         ]
       });

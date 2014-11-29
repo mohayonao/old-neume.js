@@ -13,16 +13,8 @@ util.inherits(NeuComponent, Emitter);
 
 NeuComponent.$name = "NeuComponent";
 
-NeuComponent.prototype.mul = function(value) {
-  return this.$context.createNeuMul(util.defaults(this._node, this), util.defaults(value, 1));
-};
-
 NeuComponent.prototype.add = function(value) {
   return this.$context.createNeuSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
-};
-
-NeuComponent.prototype.madd = function(mul, add) {
-  return this.mul(util.defaults(mul, 1)).add(util.defaults(add, 0));
 };
 
 NeuComponent.prototype.toAudioNode = function() {

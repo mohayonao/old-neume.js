@@ -30,16 +30,6 @@ util.inherits(NeuMul, NeuComponent);
 
 NeuMul.$name = "NeuMul";
 
-NeuMul.prototype.mul = function(value) {
-  if (value instanceof util.NeuDC) {
-    value = value.valueOf();
-  }
-  if (typeof this._b === "number" && typeof value === "number") {
-    return this.$context.createNeuMul(this._a, util.finite(this._b * value));
-  }
-  return this.$context.createNeuMul(this.toAudioNode(), value);
-};
-
 NeuMul.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
     this.$outlet = this.$context.createGain();
