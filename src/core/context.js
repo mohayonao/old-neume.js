@@ -11,6 +11,7 @@ var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
 var NeuAudioBus = require("../control/audio-bus");
+var NeuUGen = require("../synth/ugen");
 
 var INIT = 0;
 var START = 1;
@@ -254,7 +255,7 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
 
 NeuContext.prototype.connect = function(from, to) {
   if (to) {
-    if (from instanceof NeuComponent) {
+    if (from instanceof NeuComponent || from instanceof NeuUGen) {
       from.connect(to);
     } else if (to instanceof global.AudioParam) {
       if (typeof from === "number") {

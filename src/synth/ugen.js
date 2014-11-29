@@ -1,11 +1,11 @@
 "use strict";
 
 var util = require("../util");
-var NeuComponent = require("../component/component");
+var Emitter = require("../event/emitter");
 var SelectorParser = require("../parser/selector");
 
 function NeuUGen(synth, key, spec, inputs) {
-  NeuComponent.call(this, synth.$context);
+  Emitter.call(this);
 
   var parsed = SelectorParser.parse(key);
 
@@ -13,10 +13,12 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
+  this.$context = synth.$context;
   this.$synth = synth;
   this.$key = parsed.key;
   this.$class = parsed.class;
   this.$id = parsed.id;
+  this.$outlet = null;
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
@@ -37,7 +39,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 }
-util.inherits(NeuUGen, NeuComponent);
+util.inherits(NeuUGen, Emitter);
 
 NeuUGen.$name = "NeuUGen";
 
