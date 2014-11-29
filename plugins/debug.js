@@ -48,7 +48,7 @@
       e.outputBuffer.getChannelData(0).set(input);
     };
 
-    context.createSum(inputs).connect(outlet);
+    context.createNeuSum(inputs).connect(outlet);
 
     return new neume.Unit({
       outlet: outlet

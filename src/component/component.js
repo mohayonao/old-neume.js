@@ -14,11 +14,11 @@ util.inherits(NeuComponent, Emitter);
 NeuComponent.$name = "NeuComponent";
 
 NeuComponent.prototype.mul = function(value) {
-  return this.$context.createMul(util.defaults(this._node, this), util.defaults(value, 1));
+  return this.$context.createNeuMul(util.defaults(this._node, this), util.defaults(value, 1));
 };
 
 NeuComponent.prototype.add = function(value) {
-  return this.$context.createSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
+  return this.$context.createNeuSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
 };
 
 NeuComponent.prototype.madd = function(mul, add) {

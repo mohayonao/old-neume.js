@@ -25,7 +25,7 @@ module.exports = function(neume) {
 
   function setup(context, audioNode, inputs) {
     if (audioNode.numberOfInputs) {
-      context.createSum(inputs).connect(audioNode);
+      context.createNeuSum(inputs).connect(audioNode);
     }
     return audioNode;
   }

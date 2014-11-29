@@ -16,7 +16,7 @@ module.exports = function(neume) {
    */
   neume.register("+", function(ugen, spec, inputs) {
     return new neume.Unit({
-      outlet: ugen.$context.createSum(inputs)
+      outlet: ugen.$context.createNeuSum(inputs)
     });
   });
 

@@ -23,8 +23,8 @@ function NeuUGen(synth, key, spec, inputs) {
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   this._node = unit.$outlet;
-  this._node = this.$context.createMul(this._node, util.defaults(spec.mul, 1));
-  this._node = this.$context.createSum([ this._node, util.defaults(spec.add, 0) ]);
+  this._node = this.$context.createNeuMul(this._node, util.defaults(spec.mul, 1));
+  this._node = this.$context.createNeuSum([ this._node, util.defaults(spec.add, 0) ]);
   this.$isOutput = unit.$isOutput;
 
   this.$unit = unit;

@@ -26,11 +26,11 @@ describe("NeuSum", function() {
       assert(sum instanceof NeuComponent);
     });
     it("returns an instanceof NeuDC when given [ number, number ]", function() {
-      var sum = new NeuSum(context, [ 1, context.createDC(2) ]);
+      var sum = new NeuSum(context, [ 1, context.createNeuDC(2) ]);
       assert(sum instanceof NeuDC);
     });
     it("returns an instanceof NeuParam when given [ param ]", function() {
-      var sum = new NeuSum(context, [ context.createParam(0) ]);
+      var sum = new NeuSum(context, [ context.createNeuParam(0) ]);
       assert(sum instanceof NeuParam);
     });
   });

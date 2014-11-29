@@ -11,7 +11,7 @@ function NeuMul(context, a, b) {
     b = b.valueOf();
   }
   if (typeof a === "number" && typeof b === "number") {
-    return context.createDC(a * b);
+    return context.createNeuDC(a * b);
   }
   NeuComponent.call(this, context);
 
@@ -19,9 +19,9 @@ function NeuMul(context, a, b) {
     var t = a; a = b; b = t;
   }
   if (b === 0) {
-    return context.createDC(0);
+    return context.createNeuDC(0);
   } else if (b === 1) {
-    return context.createComponent(a);
+    return context.createNeuComponent(a);
   }
   this._a = a;
   this._b = b;
@@ -35,9 +35,9 @@ NeuMul.prototype.mul = function(value) {
     value = value.valueOf();
   }
   if (typeof this._b === "number" && typeof value === "number") {
-    return this.$context.createMul(this._a, util.finite(this._b * value));
+    return this.$context.createNeuMul(this._a, util.finite(this._b * value));
   }
-  return this.$context.createMul(this.toAudioNode(), value);
+  return this.$context.createNeuMul(this.toAudioNode(), value);
 };
 
 NeuMul.prototype.toAudioNode = function() {

@@ -140,7 +140,7 @@ module.exports = function(neume, util) {
     gain.gain.value = 0;
     context.connect(osc, gain.gain);
 
-    context.createSum(inputs).connect(gain);
+    context.createNeuSum(inputs).connect(gain);
 
     return { outlet: gain, ctrl: osc };
   }

@@ -29,11 +29,11 @@ function NeuSum(context, inputs) {
     if (param) {
       return param;
     }
-    return context.createDC(number);
+    return context.createNeuDC(number);
   }
 
   if (number === 0 && param === null && nodes.length === 1) {
-    return context.createComponent(nodes[0]);
+    return context.createNeuComponent(nodes[0]);
   }
 
   this._hasNumber = hasNumber;
@@ -47,7 +47,7 @@ util.inherits(NeuSum, NeuComponent);
 NeuSum.$name = "NeuSum";
 
 NeuSum.prototype.add = function(value) {
-  return this.$context.createSum(this._inputs.concat(value));
+  return this.$context.createNeuSum(this._inputs.concat(value));
 };
 
 NeuSum.prototype.toAudioNode = function() {
@@ -86,7 +86,7 @@ NeuSum.prototype.connect = function(to) {
   if (param) {
     context.connect(param, to);
     if (number !== 0) {
-      context.connect(context.createDC(number).toAudioNode(), to);
+      context.connect(context.createNeuDC(number).toAudioNode(), to);
     }
   } else if (number !== 0) {
     context.connect(number, to);

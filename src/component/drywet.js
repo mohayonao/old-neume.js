@@ -47,7 +47,7 @@ function DryWetNode(context, dryNode, wetNode, mix) {
   context.connect(gainWet, gainMix);
   context.connect(gainDry, gainMix);
 
-  return context.createComponent(gainMix);
+  return context.createNeuComponent(gainMix);
 }
 
 function DryWetNumber(context, dryNode, wetNode, mix) {
@@ -57,11 +57,11 @@ function DryWetNumber(context, dryNode, wetNode, mix) {
   var dry = 1 - mix;
 
   if (wet === 1) {
-    return context.createComponent(wetNode);
+    return context.createNeuComponent(wetNode);
   }
 
   if (dry === 1) {
-    return context.createComponent(dryNode);
+    return context.createNeuComponent(dryNode);
   }
 
   var gainWet = context.createGain();
@@ -76,7 +76,7 @@ function DryWetNumber(context, dryNode, wetNode, mix) {
   context.connect(gainWet, gainMix);
   context.connect(gainDry, gainMix);
 
-  return context.createComponent(gainMix);
+  return context.createNeuComponent(gainMix);
 }
 
 module.exports = util.NeuDryWet = NeuDryWet;

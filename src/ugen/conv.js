@@ -37,11 +37,11 @@ module.exports = function(neume, util) {
     }
     conv.normalize = !!util.defaults(spec.normalize, true);
 
-    var sum = context.createSum(inputs);
+    var sum = context.createNeuSum(inputs);
 
     context.connect(sum, conv);
 
-    var outlet = context.createDryWet(sum, conv, mix);
+    var outlet = context.createNeuDryWet(sum, conv, mix);
 
     return new neume.Unit({
       outlet: outlet

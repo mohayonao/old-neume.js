@@ -14,7 +14,7 @@ describe("NeuDryWet", function() {
 
   describe("(context, dryNode, wetNode, 1)", function() {
     it("returns wetNode", function() {
-      var dryNode = context.createSum([
+      var dryNode = context.createNeuSum([
         context.createOscillator(), context.createOscillator()
       ]);
       var wetNode = context.createConvolver();
@@ -60,7 +60,7 @@ describe("NeuDryWet", function() {
 
   describe("(context, dryNode, wetNode, 0)", function() {
     it("returns inputs[0]", function() {
-      var dryNode = context.createSum([
+      var dryNode = context.createNeuSum([
         context.createOscillator()
       ]);
       var wetNode = context.createConvolver();
@@ -84,7 +84,7 @@ describe("NeuDryWet", function() {
       });
     });
     it("returns sum inputs", function() {
-      var dryNode = context.createSum([
+      var dryNode = context.createNeuSum([
         context.createOscillator(), context.createOscillator()
       ]);
       var wetNode = context.createConvolver();
@@ -133,7 +133,7 @@ describe("NeuDryWet", function() {
 
   describe("(context, dryNode, wetNode, 0.25)", function() {
     it("returns mixNode", function() {
-      var dryNode = context.createSum([
+      var dryNode = context.createNeuSum([
         context.createOscillator()
       ]);
       var wetNode = context.createConvolver();
@@ -207,7 +207,7 @@ describe("NeuDryWet", function() {
   describe("(context, dryNode, wetNode, node)", function() {
     it("2return mixNode", function() {
       var node = context.createGain();
-      var dryNode = context.createSum([
+      var dryNode = context.createNeuSum([
         context.createOscillator()
       ]);
       var wetNode = context.createConvolver();

@@ -91,27 +91,27 @@ Object.keys(global.AudioContext.prototype).forEach(function(key) {
   };
 });
 
-NeuContext.prototype.createComponent = function(node) {
+NeuContext.prototype.createNeuComponent = function(node) {
   return new NeuComponent(this, node);
 };
 
-NeuContext.prototype.createDC = function(value) {
+NeuContext.prototype.createNeuDC = function(value) {
   return new NeuDC(this, util.finite(value));
 };
 
-NeuContext.prototype.createMul = function(a, b) {
+NeuContext.prototype.createNeuMul = function(a, b) {
   return new NeuMul(this, a, b);
 };
 
-NeuContext.prototype.createSum = function(inputs) {
+NeuContext.prototype.createNeuSum = function(inputs) {
   return new NeuSum(this, inputs);
 };
 
-NeuContext.prototype.createParam = function(value, spec) {
+NeuContext.prototype.createNeuParam = function(value, spec) {
   return new NeuParam(this, util.finite(value), spec);
 };
 
-NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
+NeuContext.prototype.createNeuDryWet = function(dryNode, wetNode, mix) {
   return new NeuDryWet(this, dryNode, wetNode, mix);
 };
 
@@ -235,7 +235,7 @@ NeuContext.prototype.toAudioNode = function(obj) {
   if (obj && obj.toAudioNode) {
     obj = obj.toAudioNode();
   } else if (typeof obj === "number") {
-    obj = this.createDC(obj).toAudioNode();
+    obj = this.createNeuDC(obj).toAudioNode();
   }
   if (!(obj instanceof global.AudioNode)) {
     obj = null;

@@ -44,9 +44,9 @@ module.exports = function(neume, util) {
 
     outlet = nodes[0];
     for (var i = 1, imax = nodes.length; i < imax; i++) {
-      outlet = context.createMul(outlet, nodes[i]);
+      outlet = context.createNeuMul(outlet, nodes[i]);
     }
-    outlet = context.createMul(outlet, multiple);
+    outlet = context.createNeuMul(outlet, multiple);
 
     return new neume.Unit({
       outlet: outlet

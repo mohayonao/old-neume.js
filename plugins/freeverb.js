@@ -31,7 +31,7 @@
     var mix = util.defaults(spec.mix, 0.33);
     var inlet = context.createGain();
 
-    var dryNode = context.createSum(inputs);
+    var dryNode = context.createNeuSum(inputs);
     var wetNode;
 
     dryNode.connect(inlet);
@@ -65,7 +65,7 @@
 
     wetNode = ap[3].outlet;
 
-    outlet = context.createDryWet(dryNode, wetNode, mix);
+    outlet = context.createNeuDryWet(dryNode, wetNode, mix);
 
     return new neume.Unit({
       outlet: outlet
