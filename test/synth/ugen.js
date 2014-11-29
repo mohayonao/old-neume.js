@@ -259,4 +259,109 @@ describe("NeuUGen", function() {
     });
   });
 
+  describe("mul(a, b)", function() {
+    it("return a when a * 1", function() {
+      var node = context.createGain();
+
+      var b = 1;
+      var a = NeuUGen.build(synth, "sin", { mul: b }, []);
+
+      a.connect(node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+    it("return DC(0) when a * 0", function() {
+      var node = context.createGain();
+
+      var b = 0;
+      var a = NeuUGen.build(synth, "sin", { mul: b }, []);
+
+      a.connect(node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(0) ]
+      });
+    });
+    it("return a * b", function() {
+      var node = context.createGain();
+
+      var b = NeuUGen.build(synth, "saw", {}, []);
+      var a = NeuUGen.build(synth, "sin", { mul: b }, []);
+
+      a.connect(node);
+
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sawtooth",
+                  frequency: {
+                    value: 440,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
 });

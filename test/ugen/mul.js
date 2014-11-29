@@ -148,6 +148,99 @@ describe("ugen/mul", function() {
     });
   });
 
+  describe("$(* 1 $(sin freq:1) $(sin freq:2) $(sin freq:3))", function() {
+    /*
+    * +----------------+
+    * | $(sin, freq:1) |
+    * +----------------+
+    *   |
+    * +-----------+
+    * | GainNode  |  +----------------+
+    * | - gain: 0 |--| $(sin, freq:2) |
+    * +-----------+  +----------------+
+    *   |
+    * +-----------+
+    * | GainNode  |  +----------------+
+    * | - gain: 0 |--| $(sin, freq:3) |
+    * +-----------+  +----------------+
+    *   |
+    */
+    it("returns chain of GainNodes", function() {
+      var synth = new Neume(function($) {
+        return $("*", 1, $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
+      })();
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sine",
+                  frequency: {
+                    value: 3,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: [
+                    {
+                      name: "OscillatorNode",
+                      type: "sine",
+                      frequency: {
+                        value: 2,
+                        inputs: []
+                      },
+                      detune: {
+                        value: 0,
+                        inputs: []
+                      },
+                      inputs: []
+                    }
+                  ]
+                },
+                inputs: [
+                  {
+                    name: "OscillatorNode",
+                    type: "sine",
+                    frequency: {
+                      value: 1,
+                      inputs: []
+                    },
+                    detune: {
+                      value: 0,
+                      inputs: []
+                    },
+                    inputs: []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
   describe("$(* 1 $(sin freq:1) 2 $(sin freq:2) 3 $(sin freq:3))", function() {
     /*
      * +----------------+

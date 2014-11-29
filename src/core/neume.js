@@ -92,7 +92,6 @@ neume.Transport = require("./transport");
 neume.Component = require("../component/component");
 neume.DC = require("../component/dc");
 neume.DryWet = require("../component/drywet");
-neume.Mul = require("../component/mul");
 neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");

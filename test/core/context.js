@@ -298,12 +298,6 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createNeuMul(a, b)", function() {
-    it("returns a NeuMul", function() {
-      assert(context.createNeuMul({}, {}) instanceof neume.Mul);
-    });
-  });
-
   describe("#createNeuSum(inputs)", function() {
     it("returns a NeuSum", function() {
       assert(context.createNeuSum([

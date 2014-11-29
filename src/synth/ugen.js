@@ -23,8 +23,9 @@ function NeuUGen(synth, key, spec, inputs) {
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   this._node = unit.$outlet;
-  this._node = this.$context.createNeuMul(this._node, util.defaults(spec.mul, 1));
-  this._node = this.$context.createNeuSum([ this._node, util.defaults(spec.add, 0) ]);
+  this._node = mul(this.$context, this._node, util.defaults(spec.mul, 1));
+  this._node = add(this.$context, this._node, util.defaults(spec.add, 0));
+
   this.$isOutput = unit.$isOutput;
 
   this.$unit = unit;
@@ -71,8 +72,8 @@ NeuUGen.build = function(synth, key, spec, inputs) {
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.$outlet === null && this._node !== null) {
-    this.$outlet = this._node.toAudioNode();
+  if (this.$outlet === null) {
+    this.$outlet = this.$context.toAudioNode(this._node);
   }
   return this.$outlet;
 };
@@ -86,5 +87,27 @@ NeuUGen.prototype.disconnect = function() {
   this._node.disconnect();
   return this;
 };
+
+function mul(context, a, b) {
+  if (b === 1) {
+    return a;
+  }
+  if (b === 0) {
+    return context.createNeuDC(0);
+  }
+
+  var mulNode = context.createGain();
+
+  mulNode.gain.value = 0;
+
+  context.connect(a, mulNode);
+  context.connect(b, mulNode.gain);
+
+  return mulNode;
+}
+
+function add(context, a, b) {
+  return context.createNeuSum([ a, b ]);
+}
 
 module.exports = NeuUGen;
