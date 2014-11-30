@@ -2,7 +2,7 @@ module.exports = function(neume, util) {
   "use strict";
 
   neume.register("object", make);
-  neume.register("float32Array", make);
+  neume.register("Float32Array", make);
 
   function make(ugen, spec, inputs) {
     var context = ugen.$context;

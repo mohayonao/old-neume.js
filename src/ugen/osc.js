@@ -62,7 +62,7 @@ module.exports = function(neume, util) {
     return make(setup(type, ugen, spec, inputs));
   });
 
-  neume.register("periodicwave", function(ugen, spec, inputs) {
+  neume.register("PeriodicWave", function(ugen, spec, inputs) {
     var type = spec.value;
 
     if (!isWave(type)) {

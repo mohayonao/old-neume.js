@@ -160,15 +160,26 @@ utils.typeOf = function(value) {
   if (utils.isNaN(value)) {
     return "nan";
   }
+
+  var name;
+
   if (value.constructor) {
     if (typeof value.constructor.$name === "string") {
-      return value.constructor.$name.toLowerCase();
-    }
-    if (value.constructor.name && typeof value.constructor.name === "string") {
-      return value.constructor.name.toLowerCase();
+      name = value.constructor.$name;
+    } else if (value.constructor.name && typeof value.constructor.name === "string") {
+      name = value.constructor.name;
     }
   }
-  return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
+
+  if (!name) {
+    name = Object.prototype.toString.call(value).slice(8, -1);
+  }
+
+  if (name === "Object") {
+    name = "object";
+  }
+
+  return name;
 };
 
 utils.defaults = function(value, defaultValue) {

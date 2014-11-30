@@ -33,11 +33,11 @@ module.exports = function(neume, util) {
     return make(spec.buf, ugen, spec);
   });
 
-  neume.register("audiobuffer", function(ugen, spec) {
+  neume.register("AudioBuffer", function(ugen, spec) {
     return make(spec.value, ugen, spec);
   });
 
-  neume.register("neubuffer", function(ugen, spec) {
+  neume.register("NeuBuffer", function(ugen, spec) {
     return make(spec.value, ugen, spec);
   });
 

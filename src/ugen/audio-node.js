@@ -16,8 +16,6 @@ module.exports = function(neume) {
     "WaveShaperNode",
     "OscillatorNode",
   ].forEach(function(name) {
-    name = name.toLowerCase();
-
     neume.register(name, function(ugen, spec, inputs) {
       return make(setup(ugen.$context, spec.value, inputs));
     });

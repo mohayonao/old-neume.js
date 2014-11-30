@@ -225,9 +225,9 @@ describe("ugen/osc", function() {
       })();
       assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
-    it("invalid periodicwave -> sine", function() {
+    it("invalid PeriodicWave -> sine", function() {
       var synth = new Neume(function($) {
-        return $("periodicwave");
+        return $("PeriodicWave");
       })();
       assert(synth.toAudioNode().$inputs[0].type === "sine");
     });

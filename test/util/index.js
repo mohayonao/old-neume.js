@@ -263,11 +263,12 @@ describe("utils", function() {
       assert(util.typeOf([]) === "array");
       assert(util.typeOf("") === "string");
       assert(util.typeOf(it) === "function");
+      assert(util.typeOf({}) === "object");
       assert(util.typeOf(true) === "boolean");
       assert(util.typeOf(null) === "null");
       assert(util.typeOf(undefined) === "undefined");
       assert(util.typeOf(NaN) === "nan");
-      assert(util.typeOf(new Float32Array()) === "float32array");
+      assert(util.typeOf(new Float32Array()) === "Float32Array");
       assert(util.typeOf({ constructor: null }) === "object");
       assert(util.typeOf({ constructor: true }) === "object");
 
@@ -276,7 +277,7 @@ describe("utils", function() {
 
       var a = new A();
 
-      assert(util.typeOf(a) === "neubuffer");
+      assert(util.typeOf(a) === "NeuBuffer");
     });
   });
 
