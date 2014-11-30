@@ -9,7 +9,7 @@ describe("ugen/comp", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   describe("$(comp thresh:-20 knee:25 ratio:10 a:0.05 r:0.1 $(sin))", function() {

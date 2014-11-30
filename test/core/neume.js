@@ -12,7 +12,7 @@ var NOP = function() {};
 
 describe("neume", function() {
 
-  describe(".exports(destination)", function() {
+  describe("(destination)", function() {
     var audioContext = null;
 
     beforeEach(function() {
@@ -20,14 +20,14 @@ describe("neume", function() {
     });
 
     it("return Neume", function() {
-      var Neume = neume.exports(audioContext);
+      var Neume = neume(audioContext);
       assert(typeof Neume === "function");
       assert(Neume.audioContext === audioContext);
       assert(Neume.destination === audioContext.destination);
     });
     it("custom destination", function() {
       var lpf = audioContext.createBiquadFilter();
-      var Neume = neume.exports(lpf);
+      var Neume = neume(lpf);
       assert(typeof Neume === "function");
       assert(Neume.audioContext === audioContext);
       assert(Neume.destination === lpf);
@@ -38,13 +38,13 @@ describe("neume", function() {
       }, TypeError);
     });
     describe(".use(fn)", function() {
-      it("points to neume.use(fn)", function() {
-        assert(neume.exports.use === neume.use);
+      it("is a function", function() {
+        assert(typeof neume.use === "function");
       });
     });
     describe(".version", function() {
       it("points to version that defined in package.json", function() {
-        assert(neume.exports.version === pkg.version);
+        assert(neume.version === pkg.version);
       });
     });
     describe(".PROCESS_BUF_SIZE", function() {
@@ -58,7 +58,7 @@ describe("neume", function() {
     var Neume = null;
 
     before(function() {
-      Neume = neume.exports(new global.AudioContext());
+      Neume = neume(new global.AudioContext());
     });
 
     describe(".render(duration, func)", function() {

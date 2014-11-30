@@ -9,7 +9,7 @@ describe("ugen/audio-node", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   it("$(gain, $(sin))", function() {

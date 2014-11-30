@@ -8,7 +8,7 @@ describe("ugen/noise", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   describe("$(white)", function() {
