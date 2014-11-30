@@ -21,45 +21,6 @@ describe("NeuComponent", function() {
     });
   });
 
-  describe("#add(value)", function() {
-    it("works", function() {
-      var add = new NeuComponent(
-        context, context.createOscillator()
-      ).add(context.createDelay()).toAudioNode();
-
-      assert.deepEqual(add.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
-  });
-
   describe("#toAudioNode()", function() {
     it("return an AudioNode", function() {
       var component = new NeuComponent(
