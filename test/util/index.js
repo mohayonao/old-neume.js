@@ -2,7 +2,7 @@
 
 var util = require("../../src/util");
 
-describe("utils", function() {
+describe("util", function() {
 
   describe(".isArray(value)", function() {
     it("checks if value is an array", function() {
