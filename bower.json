@@ -1,0 +1,27 @@
+{
+  "name": "neume.js",
+  "main": "build/neume.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/mohayonao/neume.js",
+  "authors": [
+    "Nao Yonamine <mohayonao@gmail.com>"
+  ],
+  "keywords": [
+    "music",
+    "sound",
+    "compose",
+    "web audio api"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "coverage",
+    "examples",
+    "src",
+    "test",
+    "gulpfile.js",
+    "index.js"
+  ]
+}
