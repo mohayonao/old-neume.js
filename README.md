@@ -1,4 +1,5 @@
 # neume.js
+[![Bower](https://img.shields.io/bower/v/neume.js.svg?style=flat)](https://github.com/mohayonao/neume.js)
 [![Build Status](http://img.shields.io/travis/mohayonao/neume.js.svg?style=flat)](https://travis-ci.org/mohayonao/neume.js)
 [![Coverage Status](http://img.shields.io/coveralls/mohayonao/neume.js.svg?style=flat)](https://coveralls.io/r/mohayonao/neume.js?branch=master)
 [![Dependency Status](http://img.shields.io/david/mohayonao/neume.js.svg?style=flat)](https://david-dm.org/mohayonao/neume.js)
@@ -19,14 +20,16 @@
     - toy piano with Music Macro Language
   - [rendering-reich](http://mohayonao.github.io/neume.js/examples/rendering-reich.html)
     - rendering audio and play it
-  - [sine-storm](http://mohayonao.github.io/neume.js/examples/sine-storm.html)
-    - parameters changing gradually
-  - [snippets](http://mohayonao.github.io/neume.js/examples/snippets.html)
-    - tiny samples and tests
 
 ## Installation
 
-##### browser
+##### Bower
+
+```sh
+$ bower install neume.js
+```
+
+##### Downloads
 
   - [neume.js](http://mohayonao.github.io/neume.js/build/neume.js)
   - [neume.min.js](http://mohayonao.github.io/neume.js/build/neume.min.js)
@@ -44,7 +47,7 @@ neume.js is dependent on `Web Audio API` and `Promise`.
 This code generates an audio graph like below.
 
 ```javascript
-var Synth = new Neume(function($) {
+var synth = new Neume.Synth(function($) {
   return $("xline", { start: 0.25, end: 0.001, dur: 1},
     $("tri", { freq: $("sin", { freq: 2, mul: 20, add: 880 } )})
   ).on("end", function(e) {
