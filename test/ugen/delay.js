@@ -24,9 +24,9 @@ describe("ugen/delay", function() {
      *   |
      */
     it("return a DelayNode that is connected with $(delay)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("delay", { delay: 0.5 }, $("delay"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -60,9 +60,9 @@ describe("ugen/delay", function() {
   });
   describe("$(delay delay:$(delay) $(delay))", function() {
     it("return a DelayNode that is connected with $(delay)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("delay", { delay: $("delay") }, $("delay"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

@@ -29,9 +29,9 @@ describe("ugen/conv", function() {
       var context = new neume.Context(new global.AudioContext().destination);
       var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
 
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("conv", { buf: buffer, normalize: false }, $("sin"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

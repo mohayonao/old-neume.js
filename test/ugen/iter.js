@@ -13,9 +13,9 @@ describe("ugen/iter", function() {
 
   describe("$(iter)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("iter");
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -55,9 +55,9 @@ describe("ugen/iter", function() {
       };
     });
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("iter", { init: 3, iter: iter });
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -78,9 +78,9 @@ describe("ugen/iter", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("iter", { iter: iter });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -118,9 +118,9 @@ describe("ugen/iter", function() {
     });
 
     it("works with null", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("iter");
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -148,9 +148,9 @@ describe("ugen/iter", function() {
     });
 
     it("works with setValue", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("iter", { iter: iter });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -189,9 +189,9 @@ describe("ugen/iter", function() {
 
   describe("$(iter, $(iter), $(iter))", function() {
     it("returns a GainNode that is connected with $(iter) x2", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("iter", $("iter"), $("iter"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

@@ -29,11 +29,11 @@ describe("ugen/comp", function() {
      *   |
      */
     it("return a DynamicsCompressorNode that is connected with $(sin)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("comp", {
           thresh: -20, knee: 25, ratio: 10, a: 0.05, r: 0.1
         }, $("sin"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

@@ -15,9 +15,9 @@ describe("ugen/mono", function() {
   describe("$(mono, $(sin))", function() {
     it("graph", function() {
       var audioContext = Neume.context;
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("mono", $("sin"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
