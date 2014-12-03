@@ -26,7 +26,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
-  <script src="//mohayonao.github.io/MMLEmitter/build/MMLEmitter.min.js"></script>
+  <script src="//mohayonao.github.io/mml-emitter/build/mml-emitter.min.js"></script>
   <script src="../build/neume.js"></script>
 </head>
 <body>
@@ -50,7 +50,7 @@
   var Neume = neume(new AudioContext());
 
   var mmlData    = null;
-  var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/MMLEmitter/
+  var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/mml-emitter/
   var visualizer = null; // three.js  : http://threejs.org/
 
   $.get("./invention.mml").then(function(data) {
