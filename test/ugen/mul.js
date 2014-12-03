@@ -9,7 +9,7 @@ describe("ugen/mul", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   describe("$(*)", function() {
@@ -20,9 +20,9 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a DC(1)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("*");
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -44,9 +44,9 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a DC(0)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("*", $("sin"), 0);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -68,9 +68,9 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns $(sin)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("*", $("sin"), 1);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -110,9 +110,9 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a GainNode(0.5) that is connected with $(sin)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("*", $("sin"), 0.5);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -148,6 +148,99 @@ describe("ugen/mul", function() {
     });
   });
 
+  describe("$(* 1 $(sin freq:1) $(sin freq:2) $(sin freq:3))", function() {
+    /*
+    * +----------------+
+    * | $(sin, freq:1) |
+    * +----------------+
+    *   |
+    * +-----------+
+    * | GainNode  |  +----------------+
+    * | - gain: 0 |--| $(sin, freq:2) |
+    * +-----------+  +----------------+
+    *   |
+    * +-----------+
+    * | GainNode  |  +----------------+
+    * | - gain: 0 |--| $(sin, freq:3) |
+    * +-----------+  +----------------+
+    *   |
+    */
+    it("returns chain of GainNodes", function() {
+      var synth = new Neume.Synth(function($) {
+        return $("*", 1, $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sine",
+                  frequency: {
+                    value: 3,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: [
+                    {
+                      name: "OscillatorNode",
+                      type: "sine",
+                      frequency: {
+                        value: 2,
+                        inputs: []
+                      },
+                      detune: {
+                        value: 0,
+                        inputs: []
+                      },
+                      inputs: []
+                    }
+                  ]
+                },
+                inputs: [
+                  {
+                    name: "OscillatorNode",
+                    type: "sine",
+                    frequency: {
+                      value: 1,
+                      inputs: []
+                    },
+                    detune: {
+                      value: 0,
+                      inputs: []
+                    },
+                    inputs: []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
   describe("$(* 1 $(sin freq:1) 2 $(sin freq:2) 3 $(sin freq:3))", function() {
     /*
      * +----------------+
@@ -171,9 +264,9 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns chain of GainNodes", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), 2, $("sin", { freq: 2 }), 3, $("sin", { freq: 3 }));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

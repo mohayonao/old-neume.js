@@ -16,21 +16,15 @@ module.exports = function(neume) {
     "WaveShaperNode",
     "OscillatorNode",
   ].forEach(function(name) {
-    name = name.toLowerCase();
-
     neume.register(name, function(ugen, spec, inputs) {
-      var node = spec.value;
-
-      if (node && node.numberOfInputs === 0) {
-        inputs = [];
-      }
-
-      return make(setup(ugen.$context, node, inputs));
+      return make(setup(ugen.$context, spec.value, inputs));
     });
   });
 
   function setup(context, audioNode, inputs) {
-    context.createSum(inputs).connect(audioNode);
+    if (audioNode.numberOfInputs) {
+      context.createNeuSum(inputs).connect(audioNode);
+    }
     return audioNode;
   }
 

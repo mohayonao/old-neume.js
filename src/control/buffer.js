@@ -51,7 +51,7 @@ NeuBuffer.from = function(context, data) {
 };
 
 NeuBuffer.load = function(context, url) {
-  return new global.Promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     loadWithXHR(url).then(function(audioData) {
       return decodeAudioData(context, audioData);
     }).then(function(decodedData) {
@@ -63,7 +63,7 @@ NeuBuffer.load = function(context, url) {
 };
 
 function loadWithXHR(url) {
-  return new global.Promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     var xhr = new global.XMLHttpRequest();
 
     xhr.open("GET", url);
@@ -82,7 +82,7 @@ function loadWithXHR(url) {
 }
 
 function decodeAudioData(context, audioData) {
-  return new global.Promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     context.decodeAudioData(audioData, function(decodedData) {
       resolve(decodedData);
     }, function() {

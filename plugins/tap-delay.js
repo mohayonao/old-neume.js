@@ -94,7 +94,7 @@
       delays = [];
     }
 
-    context.createSum(inputs).connect(inlet);
+    context.createNeuSum(inputs).connect(inlet);
 
     var gainNode = context.createGain();
 

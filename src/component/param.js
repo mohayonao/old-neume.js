@@ -145,7 +145,7 @@ NeuParam.prototype.toAudioNode = function() {
     this.$outlet.gain.value = this._value;
     this.$outlet.gain.setValueAtTime(this._value, 0);
     this._params.push(this.$outlet.gain);
-    this.$context.connect(this.$context.createDC(1), this.$outlet);
+    this.$context.connect(this.$context.createNeuDC(1), this.$outlet);
   }
   return this.$outlet;
 };

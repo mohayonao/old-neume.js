@@ -55,7 +55,7 @@ describe("NeuBuffer", function() {
 
   describe(".load(context, url)", function() {
     it("returns an instance of Promise", function() {
-      assert(NeuBuffer.load(context, "/fail") instanceof global.Promise);
+      assert(NeuBuffer.load(context, "/fail") instanceof Promise);
     });
     it("resolves the promise with an instance of NeuBuffer when success", function() {
       audioContext.DECODE_AUDIO_DATA_RESULT = audioBuffer;

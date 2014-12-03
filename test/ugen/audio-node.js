@@ -9,18 +9,18 @@ describe("ugen/audio-node", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   it("$(gain, $(sin))", function() {
     var audioContext = Neume.context;
-    var synth = new Neume(function($) {
+    var synth = new Neume.Synth(function($) {
       var gain = audioContext.createGain();
 
       gain.$id = "gain";
 
       return $(gain, $("sin"));
-    })();
+    });
 
     assert.deepEqual(synth.toAudioNode().toJSON(), {
       name: "GainNode",
@@ -56,13 +56,13 @@ describe("ugen/audio-node", function() {
   });
   it("$(osc, $(sin))", function() {
     var audioContext = Neume.context;
-    var synth = new Neume(function($) {
+    var synth = new Neume.Synth(function($) {
       var osc = audioContext.createOscillator();
 
       osc.$id = "osc";
 
       return $(osc, $("sin"));
-    })();
+    });
 
     assert.deepEqual(synth.toAudioNode().toJSON(), {
       name: "GainNode",

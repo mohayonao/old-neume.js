@@ -1,11 +1,11 @@
 "use strict";
 
 var util = require("../util");
-var NeuComponent = require("../component/component");
+var Emitter = require("../event/emitter");
 var SelectorParser = require("../parser/selector");
 
 function NeuUGen(synth, key, spec, inputs) {
-  NeuComponent.call(this, synth.$context);
+  Emitter.call(this);
 
   var parsed = SelectorParser.parse(key);
 
@@ -13,16 +13,19 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
+  this.$context = synth.$context;
   this.$synth = synth;
   this.$key = parsed.key;
   this.$class = parsed.class;
   this.$id = parsed.id;
+  this.$outlet = null;
 
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   this._node = unit.$outlet;
-  this._node = this.$context.createMul(this._node, util.defaults(spec.mul, 1));
-  this._node = this.$context.createAdd(this._node, util.defaults(spec.add, 0));
+  this._node = mul(this.$context, this._node, util.defaults(spec.mul, 1));
+  this._node = add(this.$context, this._node, util.defaults(spec.add, 0));
+
   this.$isOutput = unit.$isOutput;
 
   this.$unit = unit;
@@ -37,7 +40,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 }
-util.inherits(NeuUGen, NeuComponent);
+util.inherits(NeuUGen, Emitter);
 
 NeuUGen.$name = "NeuUGen";
 
@@ -69,8 +72,8 @@ NeuUGen.build = function(synth, key, spec, inputs) {
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.$outlet === null && this._node !== null) {
-    this.$outlet = this._node.toAudioNode();
+  if (this.$outlet === null) {
+    this.$outlet = this.$context.toAudioNode(this._node);
   }
   return this.$outlet;
 };
@@ -84,5 +87,27 @@ NeuUGen.prototype.disconnect = function() {
   this._node.disconnect();
   return this;
 };
+
+function mul(context, a, b) {
+  if (b === 1) {
+    return a;
+  }
+  if (b === 0) {
+    return context.createNeuDC(0);
+  }
+
+  var mulNode = context.createGain();
+
+  mulNode.gain.value = 0;
+
+  context.connect(a, mulNode);
+  context.connect(b, mulNode.gain);
+
+  return mulNode;
+}
+
+function add(context, a, b) {
+  return context.createNeuSum([ a, b ]);
+}
 
 module.exports = NeuUGen;

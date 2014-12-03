@@ -15,15 +15,12 @@ module.exports = function(neume) {
   neume.use(require("./inout"));
   neume.use(require("./iter"));
   neume.use(require("./line"));
-  neume.use(require("./media-stream"));
-  neume.use(require("./media"));
   neume.use(require("./mono"));
   neume.use(require("./mul"));
   neume.use(require("./noise"));
   neume.use(require("./number"));
   neume.use(require("./object"));
   neume.use(require("./osc"));
-  neume.use(require("./pan"));
   neume.use(require("./pan2"));
   neume.use(require("./shaper"));
 

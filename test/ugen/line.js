@@ -8,14 +8,14 @@ describe("ugen/line", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   describe("$(line)", function() {
     it("returns a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("line");
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -36,9 +36,9 @@ describe("ugen/line", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -66,9 +66,9 @@ describe("ugen/line", function() {
       assert(closeTo(ended, 0.300, 1e-2));
     });
     it("works with stop", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -97,9 +97,9 @@ describe("ugen/line", function() {
       assert(ended === 0);
     });
     it("works with _ style", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("line", { _: [ 0, 0.5, 0.100, 0.2, 0.100, 0.4, 0.100 ] });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -130,9 +130,9 @@ describe("ugen/line", function() {
 
   describe("$(xline)", function() {
     it("returns a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("xline");
-      })();
+      });
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -152,9 +152,9 @@ describe("ugen/line", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("xline", { start: 880, end: 440, dur: 0.200 });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -189,9 +189,9 @@ describe("ugen/line", function() {
     });
 
     it("works with _ style", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("xline", { _: [ 0, 0.5, 0.100, 0.2, 0.100, 0.4, 0.100 ] });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -228,9 +228,9 @@ describe("ugen/line", function() {
 
   describe("$(line $(line) $(line))", function() {
     it("returns a GainNode that is connected inputs", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("line", $("line"), $("line"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

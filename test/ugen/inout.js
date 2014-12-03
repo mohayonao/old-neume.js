@@ -9,14 +9,14 @@ describe("ugen/inout", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   describe("$(in)", function() {
     it("graph", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("in", 1);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -41,9 +41,9 @@ describe("ugen/inout", function() {
 
   describe("$(out)", function() {
     it("graph", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("out", { bus: 1 }, $("osc"));
-      })();
+      });
 
       synth.start(0);
 
@@ -83,9 +83,9 @@ describe("ugen/inout", function() {
 
   describe("$(local-in)", function() {
     it("graph", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("local-in", 1);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -109,9 +109,9 @@ describe("ugen/inout", function() {
 
   describe("$(local-out)", function() {
     it("graph", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("local-out", { bus: 1 }, $("osc"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -140,9 +140,9 @@ describe("ugen/inout", function() {
 
   describe("$(local-out { bus: 0 } $(osc mul:$(local-in 0)))", function() {
     it("graph", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("local-out", { bus: 0 }, $("osc", { mul: $("local-in", 0) }));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

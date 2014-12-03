@@ -6,12 +6,11 @@ var util = require("../util");
 var NeuTransport = require("./transport");
 var NeuComponent = require("../component/component");
 var NeuDC = require("../component/dc");
-var NeuMul = require("../component/mul");
-var NeuAdd = require("../component/add");
 var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
 var NeuAudioBus = require("../control/audio-bus");
+var NeuUGen = require("../synth/ugen");
 
 var INIT = 0;
 var START = 1;
@@ -77,58 +76,38 @@ function NeuContext(destination, duration, spec) {
 }
 NeuContext.$name = "NeuContext";
 
-[
-  "createBuffer",
-  "createBufferSource",
-  "createMediaElementSource",
-  "createMediaStreamSource",
-  "createMediaStreamDestination",
-  "createScriptProcessor",
-  "createAnalyser",
-  "createGain",
-  "createDelay",
-  "createBiquadFilter",
-  "createWaveShaper",
-  "createPanner",
-  "createConvolver",
-  "createChannelSplitter",
-  "createChannelMerger",
-  "createDynamicsCompressor",
-  "createOscillator",
-  "createPeriodicWave",
-  "decodeAudioData",
-].forEach(function(methodName) {
-  NeuContext.prototype[methodName] = function() {
-    return this.$context[methodName].apply(this.$context, arguments);
+Object.keys(global.AudioContext.prototype).forEach(function(key) {
+  var desc = Object.getOwnPropertyDescriptor(global.AudioContext.prototype, key);
+
+  if (typeof desc.value !== "function") {
+    return;
+  }
+
+  var method = global.AudioContext.prototype[key];
+
+  NeuContext.prototype[key] = function() {
+    return method.apply(this.$context, arguments);
   };
 });
 
-NeuContext.prototype.createComponent = function(node) {
+NeuContext.prototype.createNeuComponent = function(node) {
   return new NeuComponent(this, node);
 };
 
-NeuContext.prototype.createDC = function(value) {
+NeuContext.prototype.createNeuDC = function(value) {
   return new NeuDC(this, util.finite(value));
 };
 
-NeuContext.prototype.createMul = function(a, b) {
-  return new NeuMul(this, a, b);
-};
-
-NeuContext.prototype.createAdd = function(a, b) {
-  return new NeuAdd(this, a, b);
-};
-
-NeuContext.prototype.createSum = function(inputs) {
+NeuContext.prototype.createNeuSum = function(inputs) {
   return new NeuSum(this, inputs);
 };
 
-NeuContext.prototype.createParam = function(value, spec) {
+NeuContext.prototype.createNeuParam = function(value, spec) {
   return new NeuParam(this, util.finite(value), spec);
 };
 
-NeuContext.prototype.createDryWet = function(dryNode, wetNode, mix) {
-  return new NeuDryWet(this, dryNode, wetNode, mix);
+NeuContext.prototype.createNeuDryWet = function(dryIn, wetIn, mixIn) {
+  return new NeuDryWet(this, dryIn, wetIn, mixIn);
 };
 
 NeuContext.prototype.getAudioBus = function(index) {
@@ -251,7 +230,7 @@ NeuContext.prototype.toAudioNode = function(obj) {
   if (obj && obj.toAudioNode) {
     obj = obj.toAudioNode();
   } else if (typeof obj === "number") {
-    obj = this.createDC(obj).toAudioNode();
+    obj = this.createNeuDC(obj).toAudioNode();
   }
   if (!(obj instanceof global.AudioNode)) {
     obj = null;
@@ -271,7 +250,7 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
 
 NeuContext.prototype.connect = function(from, to) {
   if (to) {
-    if (from instanceof NeuComponent) {
+    if (from instanceof NeuComponent || from instanceof NeuUGen) {
       from.connect(to);
     } else if (to instanceof global.AudioParam) {
       if (typeof from === "number") {

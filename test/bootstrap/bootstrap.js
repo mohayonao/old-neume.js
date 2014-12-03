@@ -1,9 +1,5 @@
 "use strict";
 
-global.navigator = {};
-
-global.Promise = require("promise");
-
 global.XMLHttpRequest = (function() {
   function XMLHttpRequest() {
   }
@@ -29,13 +25,6 @@ require("web-audio-test-api");
 
 global.assert = require("power-assert");
 global.sinon = require("sinon");
-
-if (process.argv.indexOf("--no-power-assert") === -1) {
-  require("espower-loader")({
-    cwd: process.cwd(),
-    pattern: "test/**/*.js"
-  });
-}
 
 global.closeTo = function(actual, expected, delta) {
   return Math.abs(actual - expected) <= delta;

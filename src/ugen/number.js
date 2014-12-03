@@ -24,11 +24,11 @@ module.exports = function(neume, util) {
     var outlet = null;
 
     var data = util.finite(spec.value);
-    var param = context.createParam(data, spec);
+    var param = context.createNeuParam(data, spec);
 
     if (inputs.length) {
       outlet = context.createGain();
-      context.createSum(inputs).connect(outlet);
+      context.createNeuSum(inputs).connect(outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;

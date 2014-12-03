@@ -8,14 +8,14 @@ describe("ugen/shaper", function() {
   var Neume = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   describe("$(shaper)", function() {
     it("return a WaveShaperNode", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("shaper");
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -27,7 +27,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });
@@ -36,9 +36,9 @@ describe("ugen/shaper", function() {
 
   describe("$(shaper curve:curve)", function() {
     it("return a WaveShaperNode", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("shaper", { curve: new Float32Array([ -1, +1 ]) });
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -50,22 +50,22 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });
       assert.deepEqual(synth.toAudioNode().$inputs[0].curve, new Float32Array([ -1, +1 ]));
     });
     it("return a WaveShaperNode with curve number", function() {
-      var synth1 = new Neume(function($) {
+      var synth1 = new Neume.Synth(function($) {
         return $("shaper", { curve: 1 });
-      })();
-      var synth2 = new Neume(function($) {
+      });
+      var synth2 = new Neume.Synth(function($) {
         return $("shaper", { curve: 1 });
-      })();
-      var synth3 = new Neume(function($) {
+      });
+      var synth3 = new Neume.Synth(function($) {
         return $("shaper", { curve: 0.5 });
-      })();
+      });
 
       assert.deepEqual(synth1.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -77,7 +77,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });
@@ -88,9 +88,9 @@ describe("ugen/shaper", function() {
 
   describe("$(shaper, $(shaper), $(shaper))", function() {
     it("return a WaveShaperNode", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("shaper", $("shaper"), $("shaper"));
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -106,12 +106,12 @@ describe("ugen/shaper", function() {
               {
                 name: "WaveShaperNode",
                 oversample: "none",
-                inputs: []
+                inputs: [ DC(0) ]
               },
               {
                 name: "WaveShaperNode",
                 oversample: "none",
-                inputs: []
+                inputs: [ DC(0) ]
               }
             ]
           }
@@ -122,12 +122,12 @@ describe("ugen/shaper", function() {
 
   describe("$(clip)", function() {
     it("return a WaveShaperNode", function() {
-      var synth1 = new Neume(function($) {
+      var synth1 = new Neume.Synth(function($) {
         return $("clip");
-      })();
-      var synth2 = new Neume(function($) {
+      });
+      var synth2 = new Neume.Synth(function($) {
         return $("clip");
-      })();
+      });
 
       assert.deepEqual(synth1.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -139,7 +139,7 @@ describe("ugen/shaper", function() {
           {
             name: "WaveShaperNode",
             oversample: "none",
-            inputs: []
+            inputs: [ DC(0) ]
           }
         ]
       });

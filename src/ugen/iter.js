@@ -31,11 +31,11 @@ module.exports = function(neume, util) {
     var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
     var prevValue = 0;
-    var param = context.createParam(prevValue, spec);
+    var param = context.createNeuParam(prevValue, spec);
 
     if (inputs.length) {
       outlet = context.createGain();
-      context.createSum(inputs).connect(outlet);
+      context.createNeuSum(inputs).connect(outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;

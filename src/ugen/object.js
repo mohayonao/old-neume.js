@@ -2,7 +2,7 @@ module.exports = function(neume, util) {
   "use strict";
 
   neume.register("object", make);
-  neume.register("float32Array", make);
+  neume.register("Float32Array", make);
 
   function make(ugen, spec, inputs) {
     var context = ugen.$context;
@@ -39,11 +39,11 @@ module.exports = function(neume, util) {
     }
 
     var prevVal = util.finite(valueOf());
-    var param = context.createParam(prevVal, spec);
+    var param = context.createNeuParam(prevVal, spec);
 
     if (inputs.length) {
       outlet = context.createGain();
-      context.createSum(inputs).connect(outlet);
+      context.createNeuSum(inputs).connect(outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;

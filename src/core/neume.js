@@ -4,14 +4,14 @@ require("./shim");
 
 var util = require("../util");
 
-var VERSION = "0.0.24";
+var VERSION = "0.1.0";
 
-var neume = function(context) {
-  function Neume(spec) {
+function Neume(context) {
+  function fn(spec) {
     return new neume.SynthDef(context, spec);
   }
 
-  Object.defineProperties(Neume, {
+  Object.defineProperties(fn, {
     audioContext: {
       value: context.audioContext,
       enumerable: true
@@ -83,17 +83,50 @@ var neume = function(context) {
     },
   });
 
-  return Neume;
+  return fn;
+}
+
+var neume = function(destination, spec) {
+  if (destination instanceof global.AudioContext) {
+    destination = destination.destination;
+  }
+  if (!(destination instanceof global.AudioNode)) {
+    throw new TypeError("neume(): illegal argument");
+  }
+
+  var context = new neume.Context(destination, Infinity, spec);
+
+  return Object.defineProperties(
+    new Neume(context), {
+      render: {
+        value: function(duration, func) {
+          var sampleRate = context.sampleRate;
+          var length = util.int(sampleRate * duration);
+
+          return new Promise(function(resolve) {
+            var audioContext = new global.OfflineAudioContext(2, length, sampleRate);
+            audioContext.oncomplete = function(e) {
+              resolve(new neume.Buffer(context, e.renderedBuffer));
+            };
+            func(new Neume(new neume.Context(audioContext.destination, duration)));
+            audioContext.startRendering();
+          });
+        }
+      },
+      analyser: {
+        value: context.$analyser,
+        enumerable: true
+      }
+    }
+  );
 };
 
 neume.util = util;
 neume.Context = require("./context");
 neume.Transport = require("./transport");
 neume.Component = require("../component/component");
-neume.Add = require("../component/add");
 neume.DC = require("../component/dc");
 neume.DryWet = require("../component/drywet");
-neume.Mul = require("../component/mul");
 neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
@@ -129,46 +162,6 @@ neume.use = function(fn) {
 };
 neume.use.used = [];
 
-neume.render = function(context, duration, func) {
-  var sampleRate = context.sampleRate;
-  var length = util.int(sampleRate * duration);
-
-  return new Promise(function(resolve) {
-    var audioContext = new global.OfflineAudioContext(2, length, sampleRate);
-    audioContext.oncomplete = function(e) {
-      resolve(new neume.Buffer(context, e.renderedBuffer));
-    };
-    func(neume(new neume.Context(audioContext.destination, duration)));
-    audioContext.startRendering();
-  });
-};
-
-neume.exports = function(destination, spec) {
-  if (destination instanceof global.AudioContext) {
-    destination = destination.destination;
-  }
-  if (!(destination instanceof global.AudioNode)) {
-    throw new TypeError("neume(): illegal argument");
-  }
-
-  var context = new neume.Context(destination, Infinity, spec);
-
-  return Object.defineProperties(
-    neume(context), {
-      render: {
-        value: function(duration, func) {
-          return neume.render(context, duration, func);
-        }
-      },
-      analyser: {
-        value: context.$analyser,
-        enumerable: true
-      }
-    }
-  );
-};
-
-neume.exports.use = neume.use;
-neume.exports.version = VERSION;
+neume.version = VERSION;
 
 module.exports = neume;

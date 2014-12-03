@@ -11,7 +11,7 @@ module.exports = function(neume, util) {
       return getAudioBus(context, index);
     });
 
-    outlet = context.createSum(inputs);
+    outlet = context.createNeuSum(inputs);
 
     return new neume.Unit({
       outlet: outlet
@@ -21,7 +21,7 @@ module.exports = function(neume, util) {
   neume.register("out", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var synth = ugen.$synth;
-    var outlet = context.createSum(inputs);
+    var outlet = context.createNeuSum(inputs);
 
     var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
 
@@ -42,7 +42,7 @@ module.exports = function(neume, util) {
       return getLocalBus(context, synth, index);
     });
 
-    outlet = context.createSum(inputs);
+    outlet = context.createNeuSum(inputs);
 
     return new neume.Unit({
       outlet: outlet
@@ -57,7 +57,7 @@ module.exports = function(neume, util) {
     var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
     var bus = getLocalBus(context, synth, index);
 
-    outlet = context.createSum(inputs).connect(bus);
+    outlet = context.createNeuSum(inputs).connect(bus);
 
     return new neume.Unit({
       outlet: outlet

@@ -24,6 +24,10 @@ gulp.task("jscs", function() {
 });
 
 gulp.task("test", function() {
+  require("espower-loader")({
+    cwd: process.cwd(),
+    pattern: "test/**/*.js"
+  });
   return gulp.src("test/**/*.js")
     .pipe(mocha());
 });

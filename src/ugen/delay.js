@@ -38,7 +38,7 @@ module.exports = function(neume, util) {
     delay.delayTime.value = 0;
     context.connect(delayTime, delay.delayTime);
 
-    context.createSum(inputs).connect(delay);
+    context.createNeuSum(inputs).connect(delay);
 
     return new neume.Unit({
       outlet: delay

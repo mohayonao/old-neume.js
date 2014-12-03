@@ -10,7 +10,7 @@ describe("ugen/buf", function() {
   var buffer = null;
 
   before(function() {
-    Neume = neume.exports(new global.AudioContext());
+    Neume = neume(new global.AudioContext());
   });
 
   beforeEach(function() {
@@ -29,9 +29,9 @@ describe("ugen/buf", function() {
     });
 
     it("returns a BufferSourceNode", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("buf", { buf: buffer });
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -63,9 +63,9 @@ describe("ugen/buf", function() {
     });
 
     it("works", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("buf", { buf: buffer });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -86,9 +86,9 @@ describe("ugen/buf", function() {
     });
 
     it("works without duration", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("buf", { buf: buffer, offset: 5 });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -106,9 +106,9 @@ describe("ugen/buf", function() {
     });
 
     it("works duration", function() {
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $("buf", { buf: buffer, offset: 5, dur: 10 });
-      })();
+      });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
@@ -130,9 +130,9 @@ describe("ugen/buf", function() {
   describe("$(AudioBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var audioBuffer = context.createBuffer(1, 128, 44100);
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $(audioBuffer);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -167,9 +167,9 @@ describe("ugen/buf", function() {
   describe("$(NeuBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
-      var synth = new Neume(function($) {
+      var synth = new Neume.Synth(function($) {
         return $(buffer);
-      })();
+      });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",

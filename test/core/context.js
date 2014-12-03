@@ -286,45 +286,35 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createComponent(node)", function() {
+  describe("#createNeuComponent(node)", function() {
     it("returns a NeuComponent", function() {
-      assert(context.createComponent({}) instanceof neume.Component);
+      assert(context.createNeuComponent({}) instanceof neume.Component);
     });
   });
 
-  describe("#createDC(value)", function() {
+  describe("#createNeuDC(value)", function() {
     it("returns a NeuDC", function() {
-      assert(context.createDC(0) instanceof neume.DC);
+      assert(context.createNeuDC(0) instanceof neume.DC);
     });
   });
 
-  describe("#createMul(a, b)", function() {
-    it("returns a NeuMul", function() {
-      assert(context.createMul({}, {}) instanceof neume.Mul);
-    });
-  });
-
-  describe("#createAdd(a, b)", function() {
-    it("returns a NeuAdd", function() {
-      assert(context.createAdd({}, {}) instanceof neume.Add);
-    });
-  });
-
-  describe("#createSum(inputs)", function() {
+  describe("#createNeuSum(inputs)", function() {
     it("returns a NeuSum", function() {
-      assert(context.createSum({}) instanceof neume.Sum);
-      assert(context.createSum([]) instanceof neume.Sum);
+      assert(context.createNeuSum([
+        context.createOscillator(), context.createOscillator()
+      ]) instanceof neume.Sum);
     });
   });
 
-  describe("#createParam(inputs)", function() {
+  describe("#createNeuParam(value, spec)", function() {
     it("returns a NeuParam", function() {
-      assert(context.createParam(0) instanceof neume.Param);
+      assert(context.createNeuParam(0) instanceof neume.Param);
     });
   });
 
-  describe.skip("#createDryWet(dryNode, wetNode, mix)", function() {
+  describe.skip("#createNeuDryWet(dryIn, wetIn, mixIn)", function() {
     it("returns a NeuDryWet", function() {
+      assert(context.createNeuDryWet(0, 0, 0) instanceof neume.DryWet);
     });
   });
 
