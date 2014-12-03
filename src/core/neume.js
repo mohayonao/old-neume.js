@@ -4,7 +4,7 @@ require("./shim");
 
 var util = require("../util");
 
-var VERSION = "0.0.24";
+var VERSION = "0.1.0";
 
 function Neume(context) {
   function fn(spec) {
