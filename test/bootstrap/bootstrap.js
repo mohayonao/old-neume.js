@@ -1,7 +1,5 @@
 "use strict";
 
-global.Promise = require("promise");
-
 global.XMLHttpRequest = (function() {
   function XMLHttpRequest() {
   }

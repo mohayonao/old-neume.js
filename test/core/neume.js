@@ -66,7 +66,7 @@ describe("neume", function() {
         var spy = sinon.spy();
         var promise = Neume.render(10, spy);
 
-        assert(promise instanceof global.Promise);
+        assert(promise instanceof Promise);
         assert(spy.calledOnce);
       });
     });
@@ -126,7 +126,7 @@ describe("neume", function() {
       it("return Promise", sinon.test(function() {
         this.spy(neume.Buffer, "load");
 
-        assert(Neume.Buffer.load("url") instanceof global.Promise);
+        assert(Neume.Buffer.load("url") instanceof Promise);
         assert(neume.Buffer.load.calledOnce);
         assert.deepEqual(neume.Buffer.load.firstCall.args.slice(1), [
           "url"
