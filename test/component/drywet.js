@@ -193,4 +193,71 @@ describe("NeuDryWet", function() {
     });
   });
 
+  describe("#connect(to)", function() {
+    it("works", function() {
+      var gain = context.createGain();
+      var mixNode = new NeuDryWet(context, context.createGain(), context.createOscillator(), 0.2);
+
+      mixNode.connect(gain);
+
+      assert.deepEqual(gain.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 1,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.2,
+                  inputs: []
+                },
+                inputs: [
+                  {
+                    name: "OscillatorNode",
+                    type: "sine",
+                    frequency: {
+                      value: 440,
+                      inputs: []
+                    },
+                    detune: {
+                      value: 0,
+                      inputs: []
+                    },
+                    inputs: []
+                  }
+                ]
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.8,
+                  inputs: []
+                },
+                inputs: [
+                  {
+                    name: "GainNode",
+                    gain: {
+                      value: 1,
+                      inputs: []
+                    },
+                    inputs: []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
 });

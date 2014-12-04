@@ -48,6 +48,11 @@ NeuDryWet.prototype.toAudioNode = function() {
   return this.$outlet;
 };
 
+NeuDryWet.prototype.connect = function(to) {
+  this.$context.connect(this.toAudioNode(), to);
+  return this;
+};
+
 function createMixNodeWithNumber(context, dryIn, wetIn, mix) {
   mix = util.clip(util.finite(mix), 0, 1);
 
