@@ -26,8 +26,8 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var room = context.createComponent(util.defaults(spec.room, 0.5)).madd(0.28, 0.7);
-    var damp = context.createComponent(util.defaults(spec.damp, 0.20)).mul(0.5);
+    var room = context.createNeuComponent(util.defaults(spec.room, 0.5)).mul(0.28).add(0.7);
+    var damp = context.createNeuComponent(util.defaults(spec.damp, 0.20)).mul(0.5);
     var mix = util.defaults(spec.mix, 0.33);
     var inlet = context.createGain();
 
