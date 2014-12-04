@@ -10,6 +10,7 @@ var mocha = require("gulp-mocha");
 var istanbul = require("gulp-istanbul");
 var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
+var sourcemaps = require("gulp-sourcemaps");
 
 gulp.task("lint", function() {
   return gulp.src([ "gulpfile.js", "src/**/*.js", "test/**/*.js", "plugins/**/*.js" ])
@@ -33,7 +34,6 @@ gulp.task("test", function() {
 });
 
 gulp.task("cover", function(cb) {
-  require("./test/bootstrap/bootstrap.js");
   gulp.src("src/**/*.js")
     .pipe(istanbul())
     .on("finish", function() {
@@ -52,8 +52,12 @@ gulp.task("build", function() {
     .pipe(gulp.dest("build"))
     /* neume.min.js */
     .pipe(buffer())
+    .pipe(sourcemaps.init())
     .pipe(uglify())
     .pipe(rename("neume.min.js"))
+    .pipe(gulp.dest("build"))
+    // neume.min.js.map
+    .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("build"));
 });
 
