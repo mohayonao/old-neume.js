@@ -11,7 +11,56 @@ if (typeof window !== "undefined") {
 
 module.exports = neume;
 
-},{"./src/":18,"./src/ugen/":37}],2:[function(require,module,exports){
+},{"./src/":20,"./src/ugen/":39}],2:[function(require,module,exports){
+(function (global){
+(function(global) {
+  "use strict";
+
+  var SCRandom = function(seed) {
+    if (typeof seed !== "number" || !isFinite(seed)) {
+      seed = Date.now();
+    }
+
+    seed += ~(seed <<  15);
+    seed ^=   seed >>> 10;
+    seed +=   seed <<  3;
+    seed ^=   seed >>> 6;
+    seed += ~(seed <<  11);
+    seed ^=   seed >>> 16;
+
+    var s1 = (1243598713 ^ seed) >>> 0;
+    var s2 = (3093459404 ^ seed) >>> 0;
+    var s3 = (1821928721 ^ seed) >>> 0;
+
+    if (s1 <  2) {
+      s1 = 1243598713;
+    }
+    if (s2 <  8) {
+      s2 = 3093459404;
+    }
+    if (s3 < 16) {
+      s3 = 1821928721;
+    }
+
+    return {
+      random: function() {
+        s1 = ((s1 & 4294967294) << 12) ^ (((s1 << 13) ^  s1) >>> 19);
+        s2 = ((s2 & 4294967288) <<  4) ^ (((s2 <<  2) ^  s2) >>> 25);
+        s3 = ((s3 & 4294967280) << 17) ^ (((s3 <<  3) ^  s3) >>> 11);
+        return ((s1 ^ s2 ^ s3) >>> 0) / 4294967296;
+      }
+    };
+  };
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = SCRandom;
+  } else {
+    global.SCRandom = SCRandom;
+  }
+})(this.self || global);
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -26,6 +75,14 @@ function NeuComponent(context, node) {
 util.inherits(NeuComponent, Emitter);
 
 NeuComponent.$name = "NeuComponent";
+
+NeuComponent.prototype.mul = function(value) {
+  return this.$context.createNeuMul(util.defaults(this._node, this), util.defaults(value, 1));
+};
+
+NeuComponent.prototype.add = function(value) {
+  return this.$context.createNeuSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
+};
 
 NeuComponent.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
@@ -46,7 +103,7 @@ NeuComponent.prototype.disconnect = function() {
 
 module.exports = util.NeuComponent = NeuComponent;
 
-},{"../event/emitter":17,"../util":49}],3:[function(require,module,exports){
+},{"../event/emitter":19,"../util":51}],4:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -123,7 +180,7 @@ function createDCNode(context, value) {
 module.exports = util.NeuDC = NeuDC;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../const":7,"../util":49,"./component":2}],4:[function(require,module,exports){
+},{"../const":9,"../util":51,"./component":3}],5:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
@@ -172,6 +229,11 @@ NeuDryWet.prototype.toAudioNode = function() {
     this._mixIn = null;
   }
   return this.$outlet;
+};
+
+NeuDryWet.prototype.connect = function(to) {
+  this.$context.connect(this.toAudioNode(), to);
+  return this;
 };
 
 function createMixNodeWithNumber(context, dryIn, wetIn, mix) {
@@ -228,7 +290,72 @@ function createMixNodeWithNode(context, dryIn, wetIn, mixIn) {
 
 module.exports = NeuDryWet;
 
-},{"../const":7,"../util":49,"./component":2}],5:[function(require,module,exports){
+},{"../const":9,"../util":51,"./component":3}],6:[function(require,module,exports){
+"use strict";
+
+var util = require("../util");
+var NeuComponent = require("./component");
+
+function NeuMul(context, a, b) {
+  if (a instanceof util.NeuDC) {
+    a = a.valueOf();
+  }
+  if (b instanceof util.NeuDC) {
+    b = b.valueOf();
+  }
+  if (typeof a === "number" && typeof b === "number") {
+    return context.createNeuDC(a * b);
+  }
+  NeuComponent.call(this, context);
+
+  if (typeof a === "number") {
+    var t = a; a = b; b = t;
+  }
+  if (b === 0) {
+    return context.createNeuDC(0);
+  } else if (b === 1) {
+    return context.createNeuComponent(a);
+  }
+  this._a = a;
+  this._b = b;
+}
+util.inherits(NeuMul, NeuComponent);
+
+NeuMul.$name = "NeuMul";
+
+NeuMul.prototype.mul = function(value) {
+  if (value instanceof util.NeuDC) {
+    value = value.valueOf();
+  }
+  if (typeof this._b === "number" && typeof value === "number") {
+    return this.$context.createNeuMul(this._a, util.finite(this._b * value));
+  }
+  return this.$context.createNeuMul(this.toAudioNode(), value);
+};
+
+NeuMul.prototype.toAudioNode = function() {
+  if (this.$outlet === null) {
+    this.$outlet = this.$context.createGain();
+    this.$outlet.gain.value = 0;
+    this.$context.connect(this._a, this.$outlet);
+    this.$context.connect(this._b, this.$outlet.gain);
+  }
+  return this.$outlet;
+};
+
+NeuMul.prototype.connect = function(to) {
+  this.$context.connect(this.toAudioNode(), to);
+  return this;
+};
+
+NeuMul.prototype.disconnect = function() {
+  this.$context.disconnect(this.$outlet);
+  return this;
+};
+
+module.exports = util.NeuMul = NeuMul;
+
+},{"../util":51,"./component":3}],7:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -248,6 +375,14 @@ function NeuParam(context, value, spec) {
     this._relative = false;
     this._timeConstant = Math.max(0, util.finite(spec.timeConstant));
   }
+
+  this._events = [
+    {
+      type: "SetValue",
+      value: this._value,
+      time: context.currentTime,
+    }
+  ];
 }
 util.inherits(NeuParam, NeuComponent);
 
@@ -255,6 +390,46 @@ NeuParam.$name = "NeuParam";
 
 NeuParam.prototype.valueOf = function() {
   return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
+};
+
+NeuParam.prototype.valueAtTime = function(t) {
+  t = util.finite(this.$context.toSeconds(t));
+
+  var value  = this._value;
+  var events = this._events;
+  var t0;
+
+  for (var i = 0; i < events.length; i++) {
+    var e0 = events[i];
+    var e1 = events[i + 1];
+
+    if (t < e0.time) {
+      break;
+    }
+    t0 = Math.min(t, e1 ? e1.time : t);
+
+    if (e1 && e1.type === "LinearRampToValue") {
+      value = linTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+    } else if (e1 && e1.type === "ExponentialRampToValue") {
+      value = expTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+    } else {
+      switch (e0.type) {
+      case "SetValue":
+      case "LinearRampToValue":
+      case "ExponentialRampToValue":
+        value = e0.value;
+        break;
+      case "SetTarget":
+        value = setTarget(value, e0.value, t0, e0.time, e0.timeConstant);
+        break;
+      case "SetValueCurve":
+        value = setCurveValue(value, t0, e0.time, e0.time + e0.duration, e0.curve);
+        break;
+      }
+    }
+  }
+
+  return value;
 };
 
 NeuParam.prototype.set = function(value) {
@@ -270,6 +445,12 @@ NeuParam.prototype.set = function(value) {
     params[i].setValueAtTime(value, startTime);
   }
 
+  insertEvent(this, {
+    type: "SetValue",
+    value: value,
+    time: startTime,
+  });
+
   return this;
 };
 
@@ -282,6 +463,12 @@ NeuParam.prototype.setAt = function(value, startTime) {
   for (var i = 0, imax = params.length; i < imax; i++) {
     params[i].setValueAtTime(value, startTime);
   }
+
+  insertEvent(this, {
+    type: "SetValue",
+    value: value,
+    time: startTime,
+  });
 
   return this;
 };
@@ -296,6 +483,12 @@ NeuParam.prototype.linTo = function(value, endTime) {
     params[i].linearRampToValueAtTime(value, endTime);
   }
 
+  insertEvent(this, {
+    type: "LinearRampToValue",
+    value: value,
+    time: endTime,
+  });
+
   return this;
 };
 
@@ -308,6 +501,12 @@ NeuParam.prototype.expTo = function(value, endTime) {
   for (var i = 0, imax = params.length; i < imax; i++) {
     params[i].exponentialRampToValueAtTime(value, endTime);
   }
+
+  insertEvent(this, {
+    type: "ExponentialRampToValue",
+    value: value,
+    time: endTime,
+  });
 
   return this;
 };
@@ -323,6 +522,13 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
     params[i].setTargetAtTime(target, startTime, timeConstant);
   }
 
+  insertEvent(this, {
+    type: "SetTarget",
+    value: target,
+    time: startTime,
+    timeConstant: timeConstant
+  });
+
   return this;
 };
 
@@ -336,6 +542,13 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
     params[i].setValueCurveAtTime(values, startTime, duration);
   }
 
+  insertEvent(this, {
+    type: "SetValueCurve",
+    time: startTime,
+    duration: duration,
+    curve: values
+  });
+
   return this;
 };
 
@@ -343,9 +556,18 @@ NeuParam.prototype.cancel = function(startTime) {
   startTime = util.finite(this.$context.toSeconds(startTime));
 
   var params = this._params;
+  var events = this._events;
+  var i, imax;
 
-  for (var i = 0, imax = params.length; i < imax; i++) {
+  for (i = 0, imax = params.length; i < imax; i++) {
     params[i].cancelScheduledValues(startTime);
+  }
+
+  for (i = 0, imax = events.length; i < imax; ++i) {
+    if (events[i].time >= startTime) {
+      events.splice(i);
+      break;
+    }
   }
 
   return this;
@@ -398,10 +620,58 @@ NeuParam.prototype.disconnect = function() {
   return this;
 };
 
+function insertEvent(_this, event) {
+  var time = event.time;
+  var events = _this._events;
+  var replace = 0;
+  var i, imax;
+
+  for (i = 0, imax = events.length; i < imax; ++i) {
+    if (events[i].time === time && events[i].type === event.type) {
+      replace = 1;
+      break;
+    }
+
+    if (events[i].time > time) {
+      break;
+    }
+  }
+
+  events.splice(i, replace, event);
+}
+
+function linTo(v, v0, v1, t, t0, t1) {
+  var dt = (t - t0) / (t1 - t0);
+  return (1 - dt) * v0 + dt * v1;
+}
+
+function expTo(v, v0, v1, t, t0, t1) {
+  var dt = (t - t0) / (t1 - t0);
+  return 0 < v0 && 0 < v1 ? v0 * Math.pow(v1 / v0, dt) : /* istanbul ignore next */ v;
+}
+
+function setTarget(v0, v1, t, t0, timeConstant) {
+  return v1 + (v0 - v1) * Math.exp((t0 - t) / timeConstant);
+}
+
+function setCurveValue(v, t, t0, t1, curve) {
+  var dt = (t - t0) / (t1 - t0);
+
+  if (dt <= 0) {
+    return util.defaults(curve[0], v);
+  }
+
+  if (1 <= dt) {
+    return util.defaults(curve[curve.length - 1], v);
+  }
+
+  return util.defaults(curve[(curve.length * dt)|0], v);
+}
+
 module.exports = util.NeuParam = NeuParam;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../util":49,"./component":2}],6:[function(require,module,exports){
+},{"../util":51,"./component":3}],8:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -449,6 +719,10 @@ function NeuSum(context, inputs) {
 util.inherits(NeuSum, NeuComponent);
 
 NeuSum.$name = "NeuSum";
+
+NeuSum.prototype.add = function(value) {
+  return this.$context.createNeuSum(this._inputs.concat(value));
+};
 
 NeuSum.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
@@ -508,7 +782,7 @@ NeuSum.prototype.disconnect = function() {
 
 module.exports = util.NeuSum = NeuSum;
 
-},{"../util":49,"./component":2}],7:[function(require,module,exports){
+},{"../util":51,"./component":3}],9:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -521,7 +795,7 @@ module.exports = {
   DEFAULT_MAX_NODES_OF_BUS: 64,
 };
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
@@ -618,7 +892,7 @@ NeuAudioBus.prototype.ondisconnected = function(from) {
 
 module.exports = NeuAudioBus;
 
-},{"../const":7,"../util":49}],9:[function(require,module,exports){
+},{"../const":9,"../util":51}],11:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -921,7 +1195,7 @@ function resample1(data, size) {
 module.exports = NeuBuffer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../dsp/fft":16,"../util":49}],10:[function(require,module,exports){
+},{"../dsp/fft":18,"../util":51}],12:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1018,7 +1292,7 @@ function oninterval(t) {
 
 module.exports = NeuInterval;
 
-},{"../util":49}],11:[function(require,module,exports){
+},{"../util":51}],13:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1101,7 +1375,7 @@ NeuTimeout.prototype.stop = function(t) {
 
 module.exports = NeuTimeout;
 
-},{"../util":49}],12:[function(require,module,exports){
+},{"../util":51}],14:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1111,6 +1385,7 @@ var util = require("../util");
 var NeuTransport = require("./transport");
 var NeuComponent = require("../component/component");
 var NeuDC = require("../component/dc");
+var NeuMul = require("../component/mul");
 var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
@@ -1201,6 +1476,10 @@ NeuContext.prototype.createNeuComponent = function(node) {
 
 NeuContext.prototype.createNeuDC = function(value) {
   return new NeuDC(this, util.finite(value));
+};
+
+NeuContext.prototype.createNeuMul = function(a, b) {
+  return new NeuMul(this, a, b);
 };
 
 NeuContext.prototype.createNeuSum = function(inputs) {
@@ -1434,7 +1713,7 @@ function onaudioprocess(e) {
 module.exports = NeuContext;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../component/component":2,"../component/dc":3,"../component/drywet":4,"../component/param":5,"../component/sum":6,"../const":7,"../control/audio-bus":8,"../synth/ugen":24,"../util":49,"./transport":15}],13:[function(require,module,exports){
+},{"../component/component":3,"../component/dc":4,"../component/drywet":5,"../component/mul":6,"../component/param":7,"../component/sum":8,"../const":9,"../control/audio-bus":10,"../synth/ugen":26,"../util":51,"./transport":17}],15:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1442,7 +1721,7 @@ require("./shim");
 
 var util = require("../util");
 
-var VERSION = "0.1.0";
+var VERSION = "0.2.0";
 
 function Neume(context) {
   function fn(spec) {
@@ -1469,6 +1748,15 @@ function Neume(context) {
     currentTime: {
       get: function() {
         return context.currentTime;
+      },
+      enumerable: true
+    },
+    bpm: {
+      get: function() {
+        return context.bpm;
+      },
+      set: function(value) {
+        context.bpm = value;
       },
       enumerable: true
     },
@@ -1565,6 +1853,7 @@ neume.Transport = require("./transport");
 neume.Component = require("../component/component");
 neume.DC = require("../component/dc");
 neume.DryWet = require("../component/drywet");
+neume.Mul = require("../component/mul");
 neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
@@ -1578,6 +1867,7 @@ neume.Synth = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
 neume.UGen = require("../synth/ugen");
 neume.Unit = require("../synth/unit");
+neume.Random = require("sc-random");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {
@@ -1605,7 +1895,7 @@ neume.version = VERSION;
 module.exports = neume;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../component/component":2,"../component/dc":3,"../component/drywet":4,"../component/param":5,"../component/sum":6,"../const":7,"../control/audio-bus":8,"../control/buffer":9,"../control/interval":10,"../control/timeout":11,"../dsp/fft":16,"../event/emitter":17,"../synth/db":20,"../synth/synth":22,"../synth/synthdef":23,"../synth/ugen":24,"../synth/unit":25,"../util":49,"./context":12,"./shim":14,"./transport":15}],14:[function(require,module,exports){
+},{"../component/component":3,"../component/dc":4,"../component/drywet":5,"../component/mul":6,"../component/param":7,"../component/sum":8,"../const":9,"../control/audio-bus":10,"../control/buffer":11,"../control/interval":12,"../control/timeout":13,"../dsp/fft":18,"../event/emitter":19,"../synth/db":22,"../synth/synth":24,"../synth/synthdef":25,"../synth/ugen":26,"../synth/unit":27,"../util":51,"./context":14,"./shim":16,"./transport":17,"sc-random":2}],16:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 (function() {
@@ -1647,7 +1937,7 @@ module.exports = neume;
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1779,7 +2069,7 @@ function note2sec(num, note, bpm) {
 
 module.exports = NeuTransport;
 
-},{"../util":49}],16:[function(require,module,exports){
+},{"../util":51}],18:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1925,7 +2215,7 @@ module.exports = {
   inverse: inverse,
 };
 
-},{"../util":49}],17:[function(require,module,exports){
+},{"../util":51}],19:[function(require,module,exports){
 "use strict";
 
 function Emitter() {
@@ -1990,10 +2280,10 @@ Emitter.prototype.emit = function(event, payload, ctx) {
 
 module.exports = Emitter;
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports = require("./core/neume");
 
-},{"./core/neume":13}],19:[function(require,module,exports){
+},{"./core/neume":15}],21:[function(require,module,exports){
 "use strict";
 
 var reUGenName = /^([a-zA-Z](-?[a-zA-Z0-9]+)*!?\??~?|[-+*\/%<=>!?&|@]+~?)/;
@@ -2036,7 +2326,7 @@ module.exports = {
   parse: parse
 };
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2089,7 +2379,7 @@ NeuSynthDB.prototype.find = function(selector) {
 
 module.exports = NeuSynthDB;
 
-},{"../parser/selector":19,"../util":49}],21:[function(require,module,exports){
+},{"../parser/selector":21,"../util":51}],23:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2267,7 +2557,7 @@ function validateParam(name) {
 
 module.exports = NeuSynthDollar;
 
-},{"../component/param":5,"../util":49,"./db":20,"./ugen":24}],22:[function(require,module,exports){
+},{"../component/param":7,"../util":51,"./db":22,"./ugen":26}],24:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2358,6 +2648,10 @@ function NeuSynth(context, func, args) {
   });
 }
 NeuSynth.$name = "NeuSynth";
+
+NeuSynth.prototype.find = function(selector) {
+  return this._db.find(selector);
+};
 
 NeuSynth.prototype.start = function(t) {
   t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
@@ -2470,7 +2764,7 @@ NeuSynth.prototype.fade = function(t, val, dur) {
 };
 
 NeuSynth.prototype.apply = function(method, args) {
-  iterateOverTargetss(this._db, method, function(ugen, method) {
+  iterateOverTargets(this._db, method, function(ugen, method) {
     ugen.$unit.apply(method, args);
   });
   return this;
@@ -2490,7 +2784,7 @@ NeuSynth.prototype.toAudioNode = function() {
 NeuSynth.prototype.hasListeners = function(event) {
   var result = false;
 
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     result = result || ugen.hasListeners(event);
   });
 
@@ -2500,7 +2794,7 @@ NeuSynth.prototype.hasListeners = function(event) {
 NeuSynth.prototype.listeners = function(event) {
   var listeners = [];
 
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.listeners(event).forEach(function(listener) {
       if (listeners.indexOf(listener) === -1) {
         listeners.push(listener);
@@ -2512,32 +2806,35 @@ NeuSynth.prototype.listeners = function(event) {
 };
 
 NeuSynth.prototype.on = function(event, listener) {
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.on(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.once = function(event, listener) {
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.once(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.off = function(event, listener) {
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.off(event, listener);
   });
   return this;
 };
 
-function iterateOverTargetss(db, event, callback) {
+function getTargets(db, selector) {
+  return selector ? db.find(selector) : db.all();
+}
+
+function iterateOverTargets(db, event, callback) {
   var parsed = parseEvent(event);
 
   if (parsed) {
-    var targets = parsed.selector ? db.find(parsed.selector) : db.all();
-    targets.forEach(function(ugen) {
+    getTargets(db, parsed.selector).forEach(function(ugen) {
       callback(ugen, parsed.name);
     });
   }
@@ -2559,7 +2856,7 @@ function parseEvent(event) {
 
 module.exports = NeuSynth;
 
-},{"../util":49,"./db":20,"./dollar":21}],23:[function(require,module,exports){
+},{"../util":51,"./db":22,"./dollar":23}],25:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -2597,7 +2894,7 @@ function NeuSynthDef(defaultContext, func) {
 module.exports = NeuSynthDef;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../util":49,"./synth":22}],24:[function(require,module,exports){
+},{"../util":51,"./synth":24}],26:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2712,7 +3009,7 @@ function add(context, a, b) {
 
 module.exports = NeuUGen;
 
-},{"../event/emitter":17,"../parser/selector":19,"../util":49}],25:[function(require,module,exports){
+},{"../event/emitter":19,"../parser/selector":21,"../util":51}],27:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2756,7 +3053,7 @@ NeuUnit.prototype.toAudioNode = function() {
 
 module.exports = NeuUnit;
 
-},{"../util":49}],26:[function(require,module,exports){
+},{"../util":51}],28:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -2781,7 +3078,7 @@ module.exports = function(neume) {
 
 };
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -2875,7 +3172,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -2914,7 +3211,7 @@ module.exports = function(neume) {
 
 };
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3000,7 +3297,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3072,7 +3369,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3166,7 +3463,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3217,7 +3514,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3261,7 +3558,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3311,7 +3608,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3605,7 +3902,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3679,7 +3976,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -3708,7 +4005,7 @@ module.exports = function(neume) {
 
 };
 
-},{"./add":26,"./array":27,"./audio-node":28,"./biquad":29,"./boolean":30,"./buf":31,"./comp":32,"./conv":33,"./delay":34,"./env":35,"./function":36,"./inout":38,"./iter":39,"./line":40,"./mono":41,"./mul":42,"./noise":43,"./number":44,"./object":45,"./osc":46,"./pan2":47,"./shaper":48}],38:[function(require,module,exports){
+},{"./add":28,"./array":29,"./audio-node":30,"./biquad":31,"./boolean":32,"./buf":33,"./comp":34,"./conv":35,"./delay":36,"./env":37,"./function":38,"./inout":40,"./iter":41,"./line":42,"./mono":43,"./mul":44,"./noise":45,"./number":46,"./object":47,"./osc":48,"./pan2":49,"./shaper":50}],40:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3792,7 +4089,7 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3894,7 +4191,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4015,7 +4312,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -4050,7 +4347,7 @@ module.exports = function(neume) {
   });
 };
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4148,7 +4445,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -4240,7 +4537,7 @@ module.exports = function(neume) {
   }
 };
 
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4298,7 +4595,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4378,7 +4675,7 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (global){
 module.exports = function(neume, util) {
   "use strict";
@@ -4555,7 +4852,7 @@ module.exports = function(neume, util) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4643,7 +4940,7 @@ module.exports = function(neume, util) {
   });
 };
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4741,7 +5038,7 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 
 var util = {};
