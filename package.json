@@ -12,7 +12,9 @@
     "build": "gulp build",
     "travis": "gulp travis"
   },
-  "dependencies": {},
+  "dependencies": {
+    "sc-random": "^1.0.0"
+  },
   "devDependencies": {
     "browserify": "^6.3.3",
     "coveralls": "^2.11.2",
