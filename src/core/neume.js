@@ -34,6 +34,15 @@ function Neume(context) {
       },
       enumerable: true
     },
+    bpm: {
+      get: function() {
+        return context.bpm;
+      },
+      set: function(value) {
+        context.bpm = value;
+      },
+      enumerable: true
+    },
     Synth: {
       value: function(func) {
         return new neume.SynthDef(context, func).apply(null, util.toArray(arguments).slice(1));
