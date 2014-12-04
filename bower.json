@@ -23,5 +23,8 @@
     "test",
     "gulpfile.js",
     "index.js"
-  ]
+  ],
+  "dependencies": {
+    "es6-promise": "2.0.0"
+  }
 }
