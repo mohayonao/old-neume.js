@@ -1,6 +1,6 @@
 {
   "name": "neume",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "neume.js is a library for Web Audio API Programming",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "license": "MIT",
@@ -12,7 +12,9 @@
     "build": "gulp build",
     "travis": "gulp travis"
   },
-  "dependencies": {},
+  "dependencies": {
+    "sc-random": "^1.0.0"
+  },
   "devDependencies": {
     "browserify": "^6.3.3",
     "coveralls": "^2.11.2",
@@ -23,6 +25,7 @@
     "gulp-jshint": "^1.9.0",
     "gulp-mocha": "^2.0.0",
     "gulp-rename": "^1.2.0",
+    "gulp-sourcemaps": "^1.2.8",
     "gulp-uglify": "^1.0.1",
     "jshint-stylish": "^1.0.0",
     "power-assert": "^0.10.0",

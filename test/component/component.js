@@ -21,6 +21,28 @@ describe("NeuComponent", function() {
     });
   });
 
+  describe("#mul(value)", function() {
+    it("works", function() {
+      var a = new NeuComponent(context, context.createNeuDC(2));
+
+      var result = a.mul(10);
+
+      assert(result instanceof NeuComponent);
+      assert(result.valueOf() === 20);
+    });
+  });
+
+  describe("#add(value)", function() {
+    it("works", function() {
+      var a = new NeuComponent(context, context.createNeuDC(2));
+
+      var result = a.add(10);
+
+      assert(result instanceof NeuComponent);
+      assert(result.valueOf() === 12);
+    });
+  });
+
   describe("#toAudioNode()", function() {
     it("return an AudioNode", function() {
       var component = new NeuComponent(

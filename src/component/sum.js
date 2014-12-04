@@ -46,6 +46,10 @@ util.inherits(NeuSum, NeuComponent);
 
 NeuSum.$name = "NeuSum";
 
+NeuSum.prototype.add = function(value) {
+  return this.$context.createNeuSum(this._inputs.concat(value));
+};
+
 NeuSum.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
     var context = this.$context;

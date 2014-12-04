@@ -6,6 +6,7 @@ var util = require("../util");
 var NeuTransport = require("./transport");
 var NeuComponent = require("../component/component");
 var NeuDC = require("../component/dc");
+var NeuMul = require("../component/mul");
 var NeuSum = require("../component/sum");
 var NeuParam = require("../component/param");
 var NeuDryWet = require("../component/drywet");
@@ -96,6 +97,10 @@ NeuContext.prototype.createNeuComponent = function(node) {
 
 NeuContext.prototype.createNeuDC = function(value) {
   return new NeuDC(this, util.finite(value));
+};
+
+NeuContext.prototype.createNeuMul = function(a, b) {
+  return new NeuMul(this, a, b);
 };
 
 NeuContext.prototype.createNeuSum = function(inputs) {

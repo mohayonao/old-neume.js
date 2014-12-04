@@ -95,6 +95,19 @@ describe("neume", function() {
         assert(Neume.currentTime === Neume.context.currentTime);
       });
     });
+    describe(".bpm", function() {
+      var savedBPM;
+      before(function() {
+        savedBPM = Neume.bpm;
+      });
+      after(function() {
+        Neume.bpm = savedBPM;
+      });
+      it("points to context.bpm", function() {
+        Neume.bpm = 240;
+        assert(Neume.bpm === Neume.context.bpm);
+      });
+    });
     describe(".Synth(func ...)", function() {
       it("return NeuSynth", function() {
         assert(Neume.Synth(function() {}) instanceof NeuSynth);

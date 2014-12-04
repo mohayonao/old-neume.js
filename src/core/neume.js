@@ -4,7 +4,7 @@ require("./shim");
 
 var util = require("../util");
 
-var VERSION = "0.1.0";
+var VERSION = "0.2.0";
 
 function Neume(context) {
   function fn(spec) {
@@ -31,6 +31,15 @@ function Neume(context) {
     currentTime: {
       get: function() {
         return context.currentTime;
+      },
+      enumerable: true
+    },
+    bpm: {
+      get: function() {
+        return context.bpm;
+      },
+      set: function(value) {
+        context.bpm = value;
       },
       enumerable: true
     },
@@ -127,6 +136,7 @@ neume.Transport = require("./transport");
 neume.Component = require("../component/component");
 neume.DC = require("../component/dc");
 neume.DryWet = require("../component/drywet");
+neume.Mul = require("../component/mul");
 neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
@@ -140,6 +150,7 @@ neume.Synth = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
 neume.UGen = require("../synth/ugen");
 neume.Unit = require("../synth/unit");
+neume.Random = require("sc-random");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {

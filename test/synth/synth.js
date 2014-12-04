@@ -66,6 +66,22 @@ describe("NeuSynth", function() {
     }));
   });
 
+  describe("#find(selector)", function() {
+    it("return ugens", function() {
+      var a, b, c;
+      var synth = new NeuSynth(context, function($) {
+        a = $("sin");
+        b = $("tri");
+        c = $("sin");
+        return $("+", a, b, c);
+      }, []);
+
+      assert.deepEqual(synth.find("sin"), [ a, c ]);
+      assert.deepEqual(synth.find("tri"), [ b ]);
+      assert.deepEqual(synth.find("saw"), []);
+    });
+  });
+
   describe("#start(t)", function() {
     it("returns self", function() {
       var synth = new NeuSynth(context, NOP, []);

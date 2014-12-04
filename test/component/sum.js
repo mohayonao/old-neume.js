@@ -35,6 +35,22 @@ describe("NeuSum", function() {
     });
   });
 
+  describe("#add(value)", function() {
+    it("works", function() {
+      var a = context.createGain();
+      var b = context.createGain();
+      var c = context.createGain();
+
+      var sum = new NeuSum(context, [ a, b ]);
+
+      var result = sum.add(c);
+
+      assert(result instanceof NeuSum);
+      assert(result !== sum);
+      assert.deepEqual(result._inputs, [ a, b, c ]);
+    });
+  });
+
   describe("#toAudioNode()", function() {
     it("return an AudioNode []", function() {
       var sum = new NeuSum(context, []);

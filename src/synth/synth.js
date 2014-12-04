@@ -89,6 +89,10 @@ function NeuSynth(context, func, args) {
 }
 NeuSynth.$name = "NeuSynth";
 
+NeuSynth.prototype.find = function(selector) {
+  return this._db.find(selector);
+};
+
 NeuSynth.prototype.start = function(t) {
   t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
 
@@ -200,7 +204,7 @@ NeuSynth.prototype.fade = function(t, val, dur) {
 };
 
 NeuSynth.prototype.apply = function(method, args) {
-  iterateOverTargetss(this._db, method, function(ugen, method) {
+  iterateOverTargets(this._db, method, function(ugen, method) {
     ugen.$unit.apply(method, args);
   });
   return this;
@@ -220,7 +224,7 @@ NeuSynth.prototype.toAudioNode = function() {
 NeuSynth.prototype.hasListeners = function(event) {
   var result = false;
 
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     result = result || ugen.hasListeners(event);
   });
 
@@ -230,7 +234,7 @@ NeuSynth.prototype.hasListeners = function(event) {
 NeuSynth.prototype.listeners = function(event) {
   var listeners = [];
 
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.listeners(event).forEach(function(listener) {
       if (listeners.indexOf(listener) === -1) {
         listeners.push(listener);
@@ -242,32 +246,35 @@ NeuSynth.prototype.listeners = function(event) {
 };
 
 NeuSynth.prototype.on = function(event, listener) {
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.on(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.once = function(event, listener) {
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.once(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.off = function(event, listener) {
-  iterateOverTargetss(this._db, event, function(ugen, event) {
+  iterateOverTargets(this._db, event, function(ugen, event) {
     ugen.off(event, listener);
   });
   return this;
 };
 
-function iterateOverTargetss(db, event, callback) {
+function getTargets(db, selector) {
+  return selector ? db.find(selector) : db.all();
+}
+
+function iterateOverTargets(db, event, callback) {
   var parsed = parseEvent(event);
 
   if (parsed) {
-    var targets = parsed.selector ? db.find(parsed.selector) : db.all();
-    targets.forEach(function(ugen) {
+    getTargets(db, parsed.selector).forEach(function(ugen) {
       callback(ugen, parsed.name);
     });
   }
