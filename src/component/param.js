@@ -17,13 +17,7 @@ function NeuParam(context, value, spec) {
     this._timeConstant = Math.max(0, util.finite(spec.timeConstant));
   }
 
-  this._events = [
-    {
-      type: "SetValue",
-      value: this._value,
-      time: context.currentTime,
-    }
-  ];
+  this._events = [];
 }
 util.inherits(NeuParam, NeuComponent);
 
@@ -76,21 +70,13 @@ NeuParam.prototype.valueAtTime = function(t) {
 NeuParam.prototype.set = function(value) {
   value = util.finite(value);
 
-  var startTime = this.$context.currentTime;
   var params = this._params;
 
   this._value = value;
 
   for (var i = 0, imax = params.length; i < imax; i++) {
     params[i].value = value;
-    params[i].setValueAtTime(value, startTime);
   }
-
-  insertEvent(this, {
-    type: "SetValue",
-    value: value,
-    time: startTime,
-  });
 
   return this;
 };
@@ -248,7 +234,6 @@ NeuParam.prototype.toAudioNode = function() {
 NeuParam.prototype.connect = function(to) {
   if (to instanceof global.AudioParam) {
     to.value = this._value;
-    to.setValueAtTime(this._value, 0);
     this._params.push(to);
   } else {
     this.$context.connect(this.toAudioNode(), to);

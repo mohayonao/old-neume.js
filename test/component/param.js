@@ -74,6 +74,7 @@ describe("NeuParam", function() {
     it("works", function() {
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.linTo(880, 1.000);
       assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.000");
 
@@ -104,6 +105,7 @@ describe("NeuParam", function() {
     it("works", function() {
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.expTo(880, 1.000);
       assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.000");
 
@@ -383,7 +385,7 @@ describe("NeuParam", function() {
       assert(to3.gain.value === 440);
       assert(to4.gain.value === 440);
 
-      param.set(220);
+      param.setAt(220, 0);
 
       assert(to1.$inputs[0].gain.value === 220);
       assert(to2.$inputs[0].gain.value === 220);
