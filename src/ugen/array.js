@@ -54,7 +54,7 @@ module.exports = function(neume, util) {
       var v0 = prevValue;
       var v1 = mode(data, nextIndex);
 
-      param.update(t0, v1, v0);
+      param.update(v1, v0, t0);
 
       prevValue = v1;
       index = nextIndex;

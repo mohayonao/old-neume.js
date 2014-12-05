@@ -35,7 +35,7 @@ module.exports = function(neume, util) {
     }
 
     function update(t0, v0, v1, nextData) {
-      param.update(t0, v1, v0);
+      param.update(v1, v0, t0);
       data = nextData;
     }
 

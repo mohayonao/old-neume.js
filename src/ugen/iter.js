@@ -87,7 +87,7 @@ module.exports = function(neume, util) {
                 ugen.emit("end", { playbackTime: t }, ugen.$synth);
               } else {
                 value = util.finite(items.value);
-                param.update(t, value, prevValue);
+                param.update(value, prevValue, t);
                 prevValue = value;
               }
             }

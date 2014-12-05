@@ -212,7 +212,7 @@ NeuParam.prototype.cancel = function(startTime) {
 
 NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
-NeuParam.prototype.update = function(t0, v1, v0) {
+NeuParam.prototype.update = function(v1, v0, t0) {
   t0 = util.finite(this.$context.toSeconds(t0));
   v1 = util.finite(v1);
   v0 = util.finite(util.defaults(v0, v1));

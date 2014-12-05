@@ -53,7 +53,7 @@ module.exports = function(neume, util) {
       var value = util.finite(valueOf());
 
       if (value !== prevVal) {
-        param.update(t0, value, prevVal);
+        param.update(value, prevVal, t0);
         prevVal = value;
       }
 

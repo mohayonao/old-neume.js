@@ -256,13 +256,13 @@ describe("NeuParam", function() {
     });
   });
 
-  describe("#update(t0, v1, v0)", function() {
+  describe("#update(v1, v0, t0)", function() {
     it("works1", function() {
       param = new NeuParam(context, 440);
       param.connect(context.destination);
 
-      param.update(0.2, 660, 440);
-      param.update(0.4, 220, 660);
+      param.update(660, 440, 0.2);
+      param.update(220, 660, 0.4);
 
       assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.000");
 
@@ -285,8 +285,8 @@ describe("NeuParam", function() {
       param = new NeuParam(context, 440, { timeConstant: 0.1 });
       param.connect(context.destination);
 
-      param.update(0.2, 660, 440);
-      param.update(0.4, 220, 660);
+      param.update(660, 440, 0.2);
+      param.update(220, 660, 0.4);
 
       assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.000");
 
@@ -309,9 +309,9 @@ describe("NeuParam", function() {
       param = new NeuParam(context, 440, { timeConstant: "32n" });
       param.connect(context.destination);
 
-      param.update(0.2, 660, 440);
+      param.update(660, 440, 0.2);
       context.bpm = 240;
-      param.update(0.4, 220, 660);
+      param.update(220, 660, 0.4);
 
       assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.000");
 
