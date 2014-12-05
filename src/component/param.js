@@ -100,6 +100,8 @@ NeuParam.prototype.setAt = function(value, startTime) {
   return this;
 };
 
+NeuParam.prototype.setValueAtTime = NeuParam.prototype.setAt;
+
 NeuParam.prototype.linTo = function(value, endTime) {
   value = util.finite(value);
   endTime = util.finite(this.$context.toSeconds(endTime));
@@ -119,6 +121,8 @@ NeuParam.prototype.linTo = function(value, endTime) {
   return this;
 };
 
+NeuParam.prototype.linearRampToValueAtTime = NeuParam.prototype.linTo;
+
 NeuParam.prototype.expTo = function(value, endTime) {
   value = util.finite(value);
   endTime = util.finite(this.$context.toSeconds(endTime));
@@ -137,6 +141,8 @@ NeuParam.prototype.expTo = function(value, endTime) {
 
   return this;
 };
+
+NeuParam.prototype.exponentialRampToValueAtTime = NeuParam.prototype.expTo;
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   target = util.finite(target);
@@ -159,6 +165,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   return this;
 };
 
+NeuParam.prototype.setTargetAtTime = NeuParam.prototype.targetAt;
+
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
   startTime = util.finite(this.$context.toSeconds(startTime));
   duration = util.finite(this.$context.toSeconds(duration));
@@ -178,6 +186,8 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 
   return this;
 };
+
+NeuParam.prototype.setValueCurveAtTime = NeuParam.prototype.curveAt;
 
 NeuParam.prototype.cancel = function(startTime) {
   startTime = util.finite(this.$context.toSeconds(startTime));
@@ -199,6 +209,8 @@ NeuParam.prototype.cancel = function(startTime) {
 
   return this;
 };
+
+NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
 NeuParam.prototype.update = function(t0, v1, v0) {
   t0 = util.finite(this.$context.toSeconds(t0));

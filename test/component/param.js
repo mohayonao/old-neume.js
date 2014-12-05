@@ -67,6 +67,12 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#setValueAtTime", function() {
+    it("alias of #setAt", function() {
+      assert(param.setValueAtTime === param.setAt);
+    });
+  });
+
   describe("#linTo(value, endTime)", function() {
     it("returns self", function() {
       assert(param.linTo(880, 1) === param);
@@ -95,6 +101,12 @@ describe("NeuParam", function() {
       assert(closeTo(param.valueAtTime(0.500), 660.000, 1e-2));
       assert(closeTo(param.valueAtTime(0.750), 770.000, 1e-2));
       assert(closeTo(param.valueAtTime(1.000), 880.000, 1e-2));
+    });
+  });
+
+  describe("#linearRampToValueAtTime", function() {
+    it("alias of #linTo", function() {
+      assert(param.linearRampToValueAtTime === param.linTo);
     });
   });
 
@@ -129,6 +141,12 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#exponentialRampToValueAtTime", function() {
+    it("alias of #expTo", function() {
+      assert(param.exponentialRampToValueAtTime === param.expTo);
+    });
+  });
+
   describe("#targetAt(target, startTime, timeConstant)", function() {
     it("returns self", function() {
       assert(param.targetAt(880, 0.500, 0.25) === param);
@@ -156,6 +174,12 @@ describe("NeuParam", function() {
       assert(closeTo(param.valueAtTime(0.500), 718.133, 1e-2));
       assert(closeTo(param.valueAtTime(0.750), 820.452, 1e-2));
       assert(closeTo(param.valueAtTime(1.000), 858.093, 1e-2));
+    });
+  });
+
+  describe("#setTargetAtTime", function() {
+    it("alias of #targetAt", function() {
+      assert(param.setTargetAtTime === param.targetAt);
     });
   });
 
@@ -193,6 +217,12 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#setValueCurveAtTime", function() {
+    it("alias of #curveAt", function() {
+      assert(param.setValueCurveAtTime === param.curveAt);
+    });
+  });
+
   describe("#cancel(startTime)", function() {
     it("returns self", function() {
       assert(param.cancel() === param);
@@ -217,6 +247,12 @@ describe("NeuParam", function() {
 
       audioContext.$processTo("00:01.000");
       assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:01.000");
+    });
+  });
+
+  describe("#cancelScheduledValues", function() {
+    it("alias of #cancel", function() {
+      assert(param.cancelScheduledValues === param.cancel);
     });
   });
 
