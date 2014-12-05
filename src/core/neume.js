@@ -150,7 +150,6 @@ neume.Synth = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
 neume.UGen = require("../synth/ugen");
 neume.Unit = require("../synth/unit");
-neume.Random = require("sc-random");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {
