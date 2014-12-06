@@ -48,21 +48,22 @@ describe("ugen/boolean", function() {
       synth.start(0);
 
       synth.toggle(0.100);
-      synth.toggle(0.300);
-      synth.setValue(0.400, 0);
-      synth.setValue(0.400, true);
+      synth.toggle(0.200);
+      synth.setValue(0.300, 0);
+      synth.setValue(0.300, true);
+      synth.setValue(0.400, false);
 
       audioContext.$processTo("00:00.500");
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
       assert(outlet.gain.$valueAtTime(0.150) === 1);
-      assert(outlet.gain.$valueAtTime(0.200) === 1);
-      assert(outlet.gain.$valueAtTime(0.250) === 1);
-      assert(outlet.gain.$valueAtTime(0.300) === 0);
-      assert(outlet.gain.$valueAtTime(0.350) === 0);
-      assert(outlet.gain.$valueAtTime(0.400) === 1);
-      assert(outlet.gain.$valueAtTime(0.450) === 1);
-      assert(outlet.gain.$valueAtTime(0.500) === 1);
+      assert(outlet.gain.$valueAtTime(0.200) === 0);
+      assert(outlet.gain.$valueAtTime(0.250) === 0);
+      assert(outlet.gain.$valueAtTime(0.300) === 1);
+      assert(outlet.gain.$valueAtTime(0.350) === 1);
+      assert(outlet.gain.$valueAtTime(0.400) === 0);
+      assert(outlet.gain.$valueAtTime(0.450) === 0);
+      assert(outlet.gain.$valueAtTime(0.500) === 0);
     });
   });
 
