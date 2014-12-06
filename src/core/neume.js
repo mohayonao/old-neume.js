@@ -68,15 +68,21 @@ function Neume(context) {
       }),
       enumerable: true
     },
+    Sched: {
+      value: function(callback) {
+        return new neume.Sched(context, 0, callback);
+      },
+      enumerable: true
+    },
     Interval: {
-      value: function(interval, callback) {
-        return new neume.Interval(context, interval, callback);
+      value: function(schedTime, callback) {
+        return new neume.Interval(context, schedTime, callback);
       },
       enumerable: true
     },
     Timeout: {
-      value: function(interval, callback) {
-        return new neume.Timeout(context, interval, callback);
+      value: function(schedTime, callback) {
+        return new neume.Timeout(context, schedTime, callback);
       },
       enumerable: true
     },
@@ -141,6 +147,7 @@ neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
 neume.Buffer = require("../control/buffer");
+neume.Sched = require("../control/sched");
 neume.Interval = require("../control/interval");
 neume.Timeout = require("../control/timeout");
 neume.FFT = require("../dsp/fft");

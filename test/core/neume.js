@@ -2,12 +2,6 @@
 
 var neume = require("../../src");
 var pkg = require("../../package.json");
-
-var NeuContext = neume.Context;
-var NeuSynth = neume.Synth;
-var NeuBuffer = neume.Buffer;
-var NeuInterval = neume.Interval;
-var NeuTimeout = neume.Timeout;
 var NOP = function() {};
 
 describe("neume", function() {
@@ -81,8 +75,8 @@ describe("neume", function() {
       });
     });
     describe(".context", function() {
-      it("points to NeuContext", function() {
-        assert(Neume.context instanceof NeuContext);
+      it("points to neume.Context", function() {
+        assert(Neume.context instanceof neume.Context);
       });
     });
     describe(".destination", function() {
@@ -109,15 +103,15 @@ describe("neume", function() {
       });
     });
     describe(".Synth(func ...)", function() {
-      it("return NeuSynth", function() {
-        assert(Neume.Synth(function() {}) instanceof NeuSynth);
+      it("return neume.Synth", function() {
+        assert(Neume.Synth(function() {}) instanceof neume.Synth);
       });
     });
     describe(".Buffer(channels, length, sampleRate)", function() {
-      it("return NeuBuffer", sinon.test(function() {
+      it("return neume.Buffer", sinon.test(function() {
         this.spy(neume.Buffer, "create");
 
-        assert(Neume.Buffer(2, 4096, 8192) instanceof NeuBuffer);
+        assert(Neume.Buffer(2, 4096, 8192) instanceof neume.Buffer);
         assert(neume.Buffer.create.calledOnce);
         assert.deepEqual(neume.Buffer.create.firstCall.args.slice(1), [
           2, 4096, 8192
@@ -125,10 +119,10 @@ describe("neume", function() {
       }));
     });
     describe(".Buffer.from(data)", function() {
-      it("return NeuBuffer", sinon.test(function() {
+      it("return neume.Buffer", sinon.test(function() {
         this.spy(neume.Buffer, "from");
 
-        assert(Neume.Buffer.from([ 1, 2, 3, 4 ]) instanceof NeuBuffer);
+        assert(Neume.Buffer.from([ 1, 2, 3, 4 ]) instanceof neume.Buffer);
         assert(neume.Buffer.from.calledOnce);
         assert.deepEqual(neume.Buffer.from.firstCall.args.slice(1), [
           [ 1, 2, 3, 4 ]
@@ -146,14 +140,19 @@ describe("neume", function() {
         ]);
       }));
     });
+    describe(".Sched(callback)", function() {
+      it("return neume.Sched", function() {
+        assert(Neume.Sched(0) instanceof neume.Sched);
+      });
+    });
     describe(".Interval(interval, callback)", function() {
-      it("return NeuInterval", function() {
-        assert(Neume.Interval(0, NOP) instanceof NeuInterval);
+      it("return neume.Interval", function() {
+        assert(Neume.Interval(0, NOP) instanceof neume.Interval);
       });
     });
     describe(".Timeout(interval, callback)", function() {
-      it("return NeuTimeout", function() {
-        assert(Neume.Timeout(0, NOP) instanceof NeuTimeout);
+      it("return neume.Timeout", function() {
+        assert(Neume.Timeout(0, NOP) instanceof neume.Timeout);
       });
     });
     describe(".toSeconds(value)", function() {

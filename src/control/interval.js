@@ -2,94 +2,34 @@
 
 var util = require("../util");
 
-var INIT = 0;
-var START = 1;
-var STOP = 2;
+var NeuSched = require("./sched");
 
-function NeuInterval(context, interval, callback) {
-  this.$context = context;
-
-  this._minInterval = 1 / context.sampleRate;
-
-  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
-    this._relative = true;
-    this._interval = interval;
-  } else {
-    this._relative = false;
-    this._interval = Math.max(this._minInterval, util.finite(context.toSeconds(interval)));
-  }
-  this._callback = callback;
-  this._oninterval = oninterval.bind(this);
-  this._state = INIT;
-  this._stateString = "UNSCHEDULED";
-  this._startTime = 0;
-  this._stopTime = Infinity;
-  this._count = 0;
-
-  Object.defineProperties(this, {
-    context: {
-      value: this.$context,
-      enumerable: true
-    },
-    outlet: {
-      value: null,
-      enumerable: true
-    },
-    state: {
-      get: function() {
-        return this._stateString;
-      },
-      enumerable: true
-    },
-  });
+function NeuInterval(context, schedTime, callback) {
+  NeuSched.call(this, context, schedTime, callback);
 }
+util.inherits(NeuInterval, NeuSched);
+
 NeuInterval.$name = "NeuInterval";
 
-NeuInterval.prototype.start = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-
-  if (this._state === INIT) {
-    this._state = START;
-    this._stateString = "SCHEDULED";
-    this._startTime = t;
-
-    if (util.isFunction(this._callback)) {
-      this.$context.sched(this._startTime, function(t) {
-        this._stateString = "PLAYING";
-        this._oninterval(t);
-      }, this);
-    }
-
-    this.$context.start(); // auto start(?)
+NeuInterval.prototype._onsched = function(t0) {
+  if (this._stopTime <= t0) {
+    this._state = NeuSched.STATE_STOP;
+    this._stateString = "FINISHED";
+    return;
   }
 
-  return this;
+  this._stateString = "PLAYING";
+  this._callback({
+    playbackTime: t0,
+    count: this._count++
+  });
+
+  var context = this.$context;
+  var schedTime = util.finite(context.toSeconds(this._schedTime));
+
+  schedTime = Math.max(1 / context.sampleRate, schedTime);
+
+  context.sched(t0 + schedTime, this._onsched, this);
 };
-
-NeuInterval.prototype.stop = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-
-  if (this._state === START) {
-    this._state = STOP;
-    this._stopTime = t;
-    this.$context.sched(this._stopTime, function() {
-      this._stateString = "FINISHED";
-    }, this);
-  }
-
-  return this;
-};
-
-function oninterval(t) {
-  if (t < this._stopTime) {
-    this._callback({ playbackTime: t, count: this._count++ });
-
-    var nextTime = this._relative ?
-      t + Math.max(this._minInterval, util.finite(this.$context.toSeconds(this._interval))) :
-      this._startTime + this._interval * this._count;
-
-    this.$context.sched(nextTime, this._oninterval);
-  }
-}
 
 module.exports = NeuInterval;
