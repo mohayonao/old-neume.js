@@ -5,14 +5,13 @@ var pkg = require("../../package.json");
 var NOP = function() {};
 
 describe("neume", function() {
+  var audioContext = null;
+
+  beforeEach(function() {
+    audioContext = new global.AudioContext();
+  });
 
   describe("(destination)", function() {
-    var audioContext = null;
-
-    beforeEach(function() {
-      audioContext = new global.AudioContext();
-    });
-
     it("return Neume", sinon.test(function() {
       var Neume = neume(audioContext);
 
@@ -77,13 +76,25 @@ describe("neume", function() {
     });
 
     describe(".render(duration, func)", function() {
-      it("points to neume.render(context, duration, func)", function() {
+      it("points to neume.render(context, duration, func)", sinon.test(function(done) {
+        var OfflineAudioContext = global.OfflineAudioContext;
+        var offlineContext = null;
+
+        this.stub(global, "OfflineAudioContext", function(ch, len, sampleRate) {
+          return (offlineContext = new OfflineAudioContext(ch, len, sampleRate));
+        });
+
         var spy = sinon.spy();
-        var promise = Neume.render(10, spy);
+        var promise = Neume.render(0.1, spy).then(function(buffer) {
+          assert(buffer instanceof neume.Buffer);
+          done();
+        });
+
+        offlineContext.$processTo("00:00.125");
 
         assert(promise instanceof Promise);
         assert(spy.calledOnce);
-      });
+      }));
     });
     describe(".analyser", function() {
       it("points to AnalyserNode", function() {
