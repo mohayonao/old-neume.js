@@ -22,7 +22,7 @@ module.exports = function(neume, util) {
     var context = ugen.$context;
     var outlet = null;
 
-    var buffer = context.toAudioBuffer(spec.buf);
+    var buffer = context.toAudioBuffer(spec.buf || spec.buffer);
 
     outlet = context.createConvolver();
 

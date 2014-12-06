@@ -49,7 +49,7 @@ module.exports = function(neume, util) {
     gainR.channelCountMode = "explicit";
     gainR.channelInterpretation = "speakers";
 
-    var pos = util.defaults(spec.pos, 0);
+    var pos = util.defaults(spec.pos, spec.pan, 0);
 
     if (typeof pos === "number") {
       pos = util.clip(pos, -1, +1) * 0.5 + 0.5;

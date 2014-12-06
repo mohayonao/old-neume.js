@@ -4,7 +4,7 @@ module.exports = function(neume, util) {
   /**
    * $([], {
    *   mode: enum[ clip, wrap, fold ] = clip
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:

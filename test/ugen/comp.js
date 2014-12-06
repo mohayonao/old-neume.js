@@ -89,4 +89,29 @@ describe("ugen/comp", function() {
     });
   });
 
+  describe("parameter check", function() {
+    it("full name", function() {
+      var json = new Neume.Synth(function($) {
+        return $("comp", { threshold: 1, knee: 2, ratio: 3, attack: 4, release: 5 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert(json.threshold.value === 1);
+      assert(json.knee.value === 2);
+      assert(json.ratio.value === 3);
+      assert(json.attack.value === 4);
+      assert(json.release.value === 5);
+    });
+    it("alias", function() {
+      var json = new Neume.Synth(function($) {
+        return $("comp", { thresh: 1, knee: 2, ratio: 3, a: 4, r: 5 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert(json.threshold.value === 1);
+      assert(json.knee.value === 2);
+      assert(json.ratio.value === 3);
+      assert(json.attack.value === 4);
+      assert(json.release.value === 5);
+    });
+  });
+
 });

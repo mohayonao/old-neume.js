@@ -9,12 +9,14 @@ function NeuParam(context, value, spec) {
   this._value = util.finite(value);
   this._params = [];
 
-  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(spec.timeConstant)) {
+  var timeConstant = util.defaults(spec.tC, spec.timeConstant, 0);
+
+  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(timeConstant)) {
     this._relative = true;
-    this._timeConstant = spec.timeConstant;
+    this._timeConstant = timeConstant;
   } else {
     this._relative = false;
-    this._timeConstant = Math.max(0, util.finite(spec.timeConstant));
+    this._timeConstant = Math.max(0, util.finite(timeConstant));
   }
 
   this._events = [];

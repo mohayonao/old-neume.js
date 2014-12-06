@@ -82,6 +82,27 @@ describe("ugen/biquad", function() {
     });
   });
 
+  describe("parameter check", function() {
+    it("full name", function() {
+      var json = new Neume.Synth(function($) {
+        return $("lpf", { frequency: 220, detune: 1200, Q: 10, gain: 5 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert(json.frequency.value === 220);
+      assert(json.detune.value === 1200);
+      assert(json.Q.value === 10);
+      assert(json.gain.value === 5);
+    });
+    it("alias", function() {
+      var json = new Neume.Synth(function($) {
+        return $("lpf", { freq: 220, dt: 1200 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert(json.frequency.value === 220);
+      assert(json.detune.value === 1200);
+    });
+  });
+
   describe("type", function() {
     it("(default) -> lowpass", function() {
       var synth = new Neume.Synth(function($) {

@@ -72,4 +72,29 @@ describe("ugen/conv", function() {
     });
   });
 
+  describe("parameter check", function() {
+    var buffer;
+
+    beforeEach(function() {
+      buffer = Neume.Buffer.from([ 1, 2, 3, 4 ]);
+    });
+
+    it("full name", function() {
+      var json = new Neume.Synth(function($) {
+        return $("conv", { buffer: buffer, normalize: false });
+      }).toAudioNode().toJSON().inputs[0];
+
+      // assert.deepEqual(json.buffer, buffer.toAudioBuffer().toJSON());
+      assert(json.normalize === false);
+    });
+    it("alias", function() {
+      var json = new Neume.Synth(function($) {
+        return $("conv", { buf: buffer, normalize: false });
+      }).toAudioNode().toJSON().inputs[0];
+
+      // assert.deepEqual(json.buffer, buffer.toAudioBuffer().toJSON());
+      assert(json.normalize === false);
+    });
+  });
+
 });

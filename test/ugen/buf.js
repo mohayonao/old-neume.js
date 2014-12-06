@@ -25,7 +25,7 @@ describe("ugen/buf", function() {
      *   |
      */
     beforeEach(function() {
-      buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
+      buffer = Neume.Buffer.from([ 1, 2, 3, 4 ]);
     });
 
     it("returns a BufferSourceNode", function() {
@@ -124,7 +124,6 @@ describe("ugen/buf", function() {
       assert(spy.calledOnce === true);
       assert.deepEqual(spy.firstCall.args, [ 0.100, 5, 10 ]);
     });
-
   });
 
   describe("$(AudioBuffer)", function() {
@@ -198,6 +197,35 @@ describe("ugen/buf", function() {
           }
         ]
       });
+    });
+  });
+
+  describe("parameter check", function() {
+    var buffer;
+
+    beforeEach(function() {
+      buffer = Neume.Buffer.from([ 1, 2, 3, 4 ]);
+    });
+
+    it("full name", function() {
+      var json = new Neume.Synth(function($) {
+        return $("buf", { buffer: buffer, loop: true, loopStart: 1, loopEnd: 2 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert.deepEqual(json.buffer, buffer.toAudioBuffer().toJSON());
+      assert(json.loop === true);
+      assert(json.loopStart === 1);
+      assert(json.loopEnd === 2);
+    });
+    it("alias", function() {
+      var json = new Neume.Synth(function($) {
+        return $("buf", { buf: buffer, loop: true, start: 1, end: 2 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert.deepEqual(json.buffer, buffer.toAudioBuffer().toJSON());
+      assert(json.loop === true);
+      assert(json.loopStart === 1);
+      assert(json.loopEnd === 2);
     });
   });
 

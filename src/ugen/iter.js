@@ -7,7 +7,7 @@ module.exports = function(neume, util) {
   /**
    * $("iter", {
    *   iter: [iterator] = null
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:

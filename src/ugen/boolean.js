@@ -5,7 +5,7 @@ module.exports = function(neume, util) {
    * $(boolean, {
    *   true: [number] = 1
    *   false: [number] = 0
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:

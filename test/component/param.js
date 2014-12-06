@@ -330,6 +330,31 @@ describe("NeuParam", function() {
       audioContext.$processTo("00:00.500");
       assert(closeTo(param.valueOf(), 237.569, 1e-2), "00:00.500");
     });
+    it("works with relative tC", function() {
+      param = new NeuParam(context, 440, { tC: "32n" });
+      param.connect(context.destination);
+
+      param.update(660, 440, 0.2);
+      context.bpm = 240;
+      param.update(220, 660, 0.4);
+
+      assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.000");
+
+      audioContext.$processTo("00:00.100");
+      assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.100");
+
+      audioContext.$processTo("00:00.200");
+      assert(closeTo(param.valueOf(), 440.000, 1e-2), "00:00.200");
+
+      audioContext.$processTo("00:00.300");
+      assert(closeTo(param.valueOf(), 615.582, 1e-2), "00:00.300");
+
+      audioContext.$processTo("00:00.400");
+      assert(closeTo(param.valueOf(), 651.032, 1e-2), "00:00.400");
+
+      audioContext.$processTo("00:00.500");
+      assert(closeTo(param.valueOf(), 237.569, 1e-2), "00:00.500");
+    });
   });
 
   describe("#toAudioNode()", function() {

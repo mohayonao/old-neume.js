@@ -5,7 +5,7 @@ module.exports = function(neume, util) {
    * $("biquad", {
    *   type: enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
    *   freq: [number|UGen] = 350
-   *   detune: [number|UGen] = 0
+   *   dt: [number|UGen] = 0
    *   Q: [number|UGen] = 1
    *   gain: [number|UGen] = 0
    * } ... inputs)
@@ -22,7 +22,7 @@ module.exports = function(neume, util) {
    * +-------------------------+
    * | BiquadFilterNode        |
    * | - type: type            |
-   * | - freqquency: freq(350) |
+   * | - frequency: freq(350)  |
    * | - detune: detune(0)     |
    * | - Q: Q(1)               |
    * | - gain: gain(0)         |
@@ -65,10 +65,16 @@ module.exports = function(neume, util) {
     biquad.detune.value = 0;
     biquad.Q.value = 0;
     biquad.gain.value = 0;
-    context.connect(util.defaults(context.toFrequency(spec.freq), 350), biquad.frequency);
-    context.connect(util.defaults(spec.detune, 0), biquad.detune);
-    context.connect(util.defaults(spec.Q, 1), biquad.Q);
-    context.connect(util.defaults(spec.gain, 0), biquad.gain);
+
+    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, 350));
+    var detune = util.defaults(spec.dt, spec.detune, 0);
+    var q = util.defaults(spec.Q, 1);
+    var gain = util.defaults(spec.gain, 0);
+
+    context.connect(frequency, biquad.frequency);
+    context.connect(detune, biquad.detune);
+    context.connect(q, biquad.Q);
+    context.connect(gain, biquad.gain);
 
     context.createNeuSum(inputs).connect(biquad);
 

@@ -3,7 +3,7 @@ module.exports = function(neume, util) {
 
   /**
    * $(number, {
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:

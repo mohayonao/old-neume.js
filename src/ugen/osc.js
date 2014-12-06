@@ -7,7 +7,7 @@ module.exports = function(neume, util) {
    * $("osc", {
    *   type: [string|PeriodicWave]="sin",
    *   freq: [number|UGen]=440,
-   *   detune: [number|UGen]=0
+   *   dt: [number|UGen]=0
    * } ... inputs)
    *
    * aliases:
@@ -120,8 +120,12 @@ module.exports = function(neume, util) {
     }
     osc.frequency.value = 0;
     osc.detune.value = 0;
-    context.connect(util.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
-    context.connect(util.defaults(spec.detune, 0), osc.detune);
+
+    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, defaultFreq));
+    var detune = util.defaults(spec.dt, spec.detune, 0);
+
+    context.connect(frequency, osc.frequency);
+    context.connect(detune, osc.detune);
 
     return osc;
   }

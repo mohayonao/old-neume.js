@@ -60,10 +60,10 @@ module.exports = function(neume, util) {
   });
 
   neume.register("adsr", function(ugen, spec, inputs) {
-    var a = util.defaults(spec.a, 0.01);
-    var d = util.defaults(spec.d, 0.30);
-    var s = util.defaults(spec.s, 0.50);
-    var r = util.defaults(spec.r, 1.00);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var d = util.defaults(spec.d, spec.decayTime, 0.30);
+    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
     var curve = util.defaults(spec.curve, 0.05);
 
     var init = 0;
@@ -80,11 +80,11 @@ module.exports = function(neume, util) {
   });
 
   neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = util.defaults(spec.delay, 0.1);
-    var a = util.defaults(spec.a, 0.01);
-    var d = util.defaults(spec.d, 0.30);
-    var s = util.defaults(spec.s, 0.50);
-    var r = util.defaults(spec.r, 1.00);
+    var delay = util.defaults(spec.delay, spec.delayTime, 0.1);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var d = util.defaults(spec.d, spec.decayTime, 0.30);
+    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
     var curve = util.defaults(spec.curve, 0.05);
 
     var init = 0;
@@ -102,9 +102,9 @@ module.exports = function(neume, util) {
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
-    var a = util.defaults(spec.a, 0.01);
-    var s = util.defaults(spec.s, 1.00);
-    var r = util.defaults(spec.r, 1.00);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var s = util.defaults(spec.s, spec.sustainLevel, 1.00);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
     var curve = util.defaults(spec.curve, 0.05);
 
     var init = 0;
@@ -120,7 +120,7 @@ module.exports = function(neume, util) {
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
-    var r = util.defaults(spec.r, 0.1);
+    var r = util.defaults(spec.r, spec.releaseTime, 0.1);
     var level = util.defaults(spec.level, 1.00);
     var curve = util.defaults(spec.curve, 0.05);
 
@@ -153,8 +153,8 @@ module.exports = function(neume, util) {
     var table = {
       init: util.finite(spec.init),
       list: [],
-      releaseNode: util.int(util.defaults(spec.release, -1)),
-      loopNode: util.int(util.defaults(spec.loop, -1)),
+      releaseNode: util.int(util.defaults(spec.release, spec.releaseNode, -1)),
+      loopNode: util.int(util.defaults(spec.loop, spec.loopNode, -1)),
     }, list = util.toArray(spec.table);
 
     for (var i = 0, imax = list.length; i < imax; i++) {

@@ -102,4 +102,21 @@ describe("ugen/delay", function() {
     });
   });
 
+  describe("parameter check", function() {
+    it("full name", function() {
+      var json = new Neume.Synth(function($) {
+        return $("delay", { delayTime: 1 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert(json.delayTime.value === 1);
+    });
+    it("alias", function() {
+      var json = new Neume.Synth(function($) {
+        return $("delay", { delay: 1 });
+      }).toAudioNode().toJSON().inputs[0];
+
+      assert(json.delayTime.value === 1);
+    });
+  });
+
 });

@@ -33,11 +33,18 @@ module.exports = function(neume, util) {
     comp.ratio.value = 0;
     comp.attack.value = 0;
     comp.release.value = 0;
-    context.connect(util.defaults(spec.thresh, -24), comp.threshold);
-    context.connect(util.defaults(spec.knee, 30), comp.knee);
-    context.connect(util.defaults(spec.ratio, 12), comp.ratio);
-    context.connect(util.defaults(context.toSeconds(spec.a), 0.003), comp.attack);
-    context.connect(util.defaults(context.toSeconds(spec.r), 0.250), comp.release);
+
+    var threshold = util.defaults(spec.thresh, spec.threshold, -24);
+    var knee = util.defaults(spec.knee, 30);
+    var ratio = util.defaults(spec.ratio, 12);
+    var attack = context.toSeconds(util.defaults(spec.a, spec.attack, 0.003));
+    var release = context.toSeconds(util.defaults(spec.r, spec.release, 0.250));
+
+    context.connect(threshold, comp.threshold);
+    context.connect(knee, comp.knee);
+    context.connect(ratio, comp.ratio);
+    context.connect(attack, comp.attack);
+    context.connect(release, comp.release);
 
     context.createNeuSum(inputs).connect(comp);
 
