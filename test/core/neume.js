@@ -13,12 +13,26 @@ describe("neume", function() {
       audioContext = new global.AudioContext();
     });
 
-    it("return Neume", function() {
+    it("return Neume", sinon.test(function() {
       var Neume = neume(audioContext);
+
       assert(typeof Neume === "function");
       assert(Neume.audioContext === audioContext);
       assert(Neume.destination === audioContext.destination);
-    });
+
+      var stub = this.stub(neume, "SynthDef", function() {
+        return { result: "ok" };
+      });
+
+      var spec = {};
+
+      var result = new Neume(spec);
+
+      assert.deepEqual(result, { result: "ok" });
+      assert(stub.calledOnce);
+      assert(stub.calledWithNew);
+      assert(stub.calledWith(Neume.context, spec));
+    }));
     it("custom destination", function() {
       var lpf = audioContext.createBiquadFilter();
       var Neume = neume(lpf);
@@ -44,6 +58,13 @@ describe("neume", function() {
     describe(".PROCESS_BUF_SIZE", function() {
       it("has", function() {
         assert(typeof neume.PROCESS_BUF_SIZE === "number");
+      });
+    });
+    describe("invalid argument", function() {
+      it("throw error", function() {
+        assert.throws(function() {
+          neume("INVALID");
+        });
       });
     });
   });
