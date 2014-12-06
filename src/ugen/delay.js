@@ -5,24 +5,33 @@ module.exports = function(neume, util) {
 
   /**
    * $("delay", {
-   *   delay: [number|UGen] = 0
+   *   delayTime: [number|UGen] = 0
+   *   feedback: [number|UGen] = 0
    *   maxDelay: [number] = delay
    * } ... inputs)
    *
    * +--------+
    * | inputs |
-   * +--------+
-   *   ||||||
-   * +------------------------+
-   * | DelayNode              |
-   * | - delayTime: delayTime |
-   * +------------------------+
+   * +--------+             +-----+
+   *   ||||||               |     |
+   * +------------------------+   |
+   * | DelayNode              |   |
+   * | - delayTime: delayTime |   |
+   * +------------------------+   |
+   *   |      |                   |
+   *   |    +------------------+  |
+   *   |    | GainNode         |  |
+   *   |    | - gain: feedback |  |
+   *   |    +------------------+  |
+   *   |      |                   |
+   *   |      +-------------------+
    *   |
    */
   neume.register("delay", function(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var delayTime = context.toSeconds(util.defaults(spec.delay, spec.delayTime, 0));
+    var feedback = util.defaults(spec.fb, spec.feedback, 0);
     var maxDelayTime;
 
     if (typeof delayTime === "number") {
@@ -33,15 +42,26 @@ module.exports = function(neume, util) {
     }
     maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
 
-    var delay = context.createDelay(maxDelayTime);
+    var delayNode = context.createDelay(maxDelayTime);
 
-    delay.delayTime.value = 0;
-    context.connect(delayTime, delay.delayTime);
+    delayNode.delayTime.value = 0;
+    context.connect(delayTime, delayNode.delayTime);
 
-    context.createNeuSum(inputs).connect(delay);
+    if (feedback !== 0) {
+      var feedbackNode = context.createGain();
+
+      feedbackNode.gain.value = 0;
+
+      context.connect(delayNode, feedbackNode);
+      context.connect(feedback, feedbackNode.gain);
+
+      inputs = inputs.concat(feedbackNode);
+    }
+
+    context.createNeuSum(inputs).connect(delayNode);
 
     return new neume.Unit({
-      outlet: delay
+      outlet: delayNode
     });
   });
 

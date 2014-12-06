@@ -11,21 +11,10 @@ describe("ugen/delay", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(delay delay:0.5 $(delay))", function() {
-    /*
-     * +----------+
-     * | $(delay) |
-     * +----------+
-     *   |
-     * +------------------+
-     * | DelayNode        |
-     * | - delayTime: 0.5 |
-     * +------------------+
-     *   |
-     */
-    it("return a DelayNode that is connected with $(delay)", function() {
+  describe("$(delay delay:0.5 $(sin))", function() {
+    it("return a DelayNode that is connected with $(sin)", function() {
       var synth = new Neume.Synth(function($) {
-        return $("delay", { delay: 0.5 }, $("delay"));
+        return $("delay", { delay: 0.5 }, $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -43,12 +32,17 @@ describe("ugen/delay", function() {
             },
             inputs: [
               {
-                name: "DelayNode",
-                delayTime: {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
                   value: 0,
                   inputs: []
                 },
-                inputs: [ DC(0) ]
+                inputs: []
               }
             ]
           }
@@ -58,10 +52,63 @@ describe("ugen/delay", function() {
       assert(synth.toAudioNode().$inputs[0].$maxDelayTime === 0.5);
     });
   });
-  describe("$(delay delay:$(delay) $(delay))", function() {
-    it("return a DelayNode that is connected with $(delay)", function() {
+
+  describe("$(delay delay:0.5, feedback:0.2 $(sin))", function() {
+    it("return a DelayNode that is connected with $(sin)", function() {
       var synth = new Neume.Synth(function($) {
-        return $("delay", { delay: $("delay") }, $("delay"));
+        return $("delay", { delay: 0.5, feedback: 0.2 }, $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "DelayNode",
+            delayTime: {
+              value: 0.5,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              },
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0.2,
+                  inputs: []
+                },
+                inputs: [
+                  "<circular:DelayNode>"
+                ]
+              }
+            ]
+          }
+        ]
+      });
+
+      assert(synth.toAudioNode().$inputs[0].$maxDelayTime === 0.5);
+    });
+  });
+
+  describe("$(delay delay:$(delay) $(sin))", function() {
+    it("return a DelayNode that is connected with $(sin)", function() {
+      var synth = new Neume.Synth(function($) {
+        return $("delay", { delay: $("delay") }, $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -88,12 +135,17 @@ describe("ugen/delay", function() {
             },
             inputs: [
               {
-                name: "DelayNode",
-                delayTime: {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
                   value: 0,
                   inputs: []
                 },
-                inputs: [ DC(0) ]
+                inputs: []
               }
             ]
           }
