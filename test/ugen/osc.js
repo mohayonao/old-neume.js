@@ -72,10 +72,10 @@ describe("ugen/osc", function() {
     });
   });
 
-  describe("$(sin $(saw))", function() {
+  describe("$(sin $(sin))", function() {
     /*
      * +--------+
-     * | $(saw) |
+     * | $(sin) |
      * +--------+     +------------------+
      *   |            | OscillatorNode   |
      * +-----------+  | - type: sawtooth |
@@ -86,7 +86,7 @@ describe("ugen/osc", function() {
      */
     it("returns a GainNode that is connected with a OscillatorNode", function() {
       var synth = new Neume.Synth(function($) {
-        return $("sin", $("saw"));
+        return $("sin", $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -119,7 +119,7 @@ describe("ugen/osc", function() {
             inputs: [
               {
                 name: "OscillatorNode",
-                type: "sawtooth",
+                type: "sine",
                 frequency: {
                   value: 440,
                   inputs: []
@@ -154,19 +154,19 @@ describe("ugen/osc", function() {
       var synth = new Neume.Synth(function($) {
         return $("osc", { type: "square" });
       });
-      assert(synth.toAudioNode().$inputs[0].type === "square");
+      assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
     it("saw -> sawtooth", function() {
       var synth = new Neume.Synth(function($) {
         return $("osc", { type: "saw" });
       });
-      assert(synth.toAudioNode().$inputs[0].type === "sawtooth");
+      assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
     it("tri -> triangle", function() {
       var synth = new Neume.Synth(function($) {
         return $("osc", { type: "tri" });
       });
-      assert(synth.toAudioNode().$inputs[0].type === "triangle");
+      assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
     it("pulse -> custom", function() {
       var synth = new Neume.Synth(function($) {
@@ -196,19 +196,19 @@ describe("ugen/osc", function() {
       var synth = new Neume.Synth(function($) {
         return $("square");
       });
-      assert(synth.toAudioNode().$inputs[0].type === "square");
+      assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
     it("saw -> sawtooth", function() {
       var synth = new Neume.Synth(function($) {
         return $("saw");
       });
-      assert(synth.toAudioNode().$inputs[0].type === "sawtooth");
+      assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
     it("tri -> triangle", function() {
       var synth = new Neume.Synth(function($) {
         return $("tri");
       });
-      assert(synth.toAudioNode().$inputs[0].type === "triangle");
+      assert(synth.toAudioNode().$inputs[0].type === "custom");
     });
     it("pulse -> custom", function() {
       var synth = new Neume.Synth(function($) {

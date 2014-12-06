@@ -1,8 +1,6 @@
 module.exports = function(neume, util) {
   "use strict";
 
-  var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
-
   /**
    * $("osc", {
    *   type: [string|PeriodicWave]="sin",
@@ -49,13 +47,14 @@ module.exports = function(neume, util) {
   };
 
   neume.register("osc", function(ugen, spec, inputs) {
+    var context = ugen.$context;
     var type = spec.type;
 
     if (!isWave(type)) {
       if (type === "pulse") {
-        type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
+        type = makePeriodicWave(context, util.finite(util.defaults(spec.width, 0.5)));
       } else {
-        type = WAVE_TYPES[type] || "sine";
+        type = makePeriodicWave(context, WAVE_TYPES[type] || "sine");
       }
     }
 
@@ -66,7 +65,7 @@ module.exports = function(neume, util) {
     var type = spec.value;
 
     if (!isWave(type)) {
-      type = "sine";
+      type = makePeriodicWave(ugen.$context, "sine");
     }
 
     return make(setup(type, ugen, spec, inputs));
@@ -75,12 +74,12 @@ module.exports = function(neume, util) {
   Object.keys(WAVE_TYPES).forEach(function(name) {
     var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(type, ugen, spec, inputs));
+      return make(setup(makePeriodicWave(ugen.$context, type), ugen, spec, inputs));
     });
   });
 
   neume.register("pulse", function(ugen, spec, inputs) {
-    var type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
+    var type = makePeriodicWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
     return make(setup(type, ugen, spec, inputs));
   });
 
@@ -149,29 +148,84 @@ module.exports = function(neume, util) {
     return { outlet: gain, ctrl: osc };
   }
 
-  var _wave = new Array(256);
+  var _waves = {};
 
-  function makePulseWave(context, width) {
-    width = util.int(util.clip(width, 0, 1) * 256);
-
-    if (_wave[width]) {
-      return _wave[width];
+  function makePeriodicWave(context, type) {
+    if (type === "sine") {
+      return "sine";
     }
 
-    var wave = new Float32Array(WS_CURVE_SIZE);
-    var width2 = width * (WS_CURVE_SIZE / 256);
-
-    for (var i = 0; i < WS_CURVE_SIZE; i++) {
-      wave[i] = i < width2 ? -1 : +1;
+    if (typeof type === "number") {
+      type = util.int(util.clip(type, 0, 1) * 256);
     }
 
-    var fft = neume.FFT.forward(wave);
+    if (_waves[type]) {
+      return _waves[type];
+    }
 
-    var periodicWave = context.createPeriodicWave(fft.real, fft.imag);
+    var real = new Float32Array(2048);
+    var imag = new Float32Array(2048);
 
-    _wave[width] = periodicWave;
+    switch (type) {
+    case "square":
+      makePeriodicWaveSquare(real, imag);
+      break;
+    case "sawtooth":
+      makePeriodicWaveSawtooth(real, imag);
+      break;
+    case "triangle":
+      makePeriodicWaveTriangle(real, imag);
+      break;
+    default:
+      makePeriodicWavePulse(real, imag, type);
+      break;
+    }
 
-    return periodicWave;
+    var wave = context.createPeriodicWave(real, imag);
+
+    _waves[type] = wave;
+
+    return wave;
+  }
+
+  function makePeriodicWaveSquare(real, imag) {
+    for (var i = 1, imax = real.length; i < imax; i++) {
+      var omega = 2 * Math.PI * i;
+      var invOmega = 1 / omega;
+
+      imag[i] = invOmega * ((i & 1) ? 2 : 0);
+    }
+  }
+
+  function makePeriodicWaveSawtooth(real, imag) {
+    for (var i = 1, imax = real.length; i < imax; i++) {
+      var omega = 2 * Math.PI * i;
+      var invOmega = 1 / omega;
+
+      imag[i] = -invOmega * Math.cos(0.5 * omega);
+    }
+  }
+
+  function makePeriodicWaveTriangle(real /*, imag*/) {
+    for (var i = 1, imax = real.length; i < imax; i++) {
+      var omega = 2 * Math.PI * i;
+
+      real[i] = (4 - 4 * Math.cos(0.5 * omega)) / (i * i * Math.PI * Math.PI);
+    }
+  }
+
+  function makePeriodicWavePulse(real, imag, width) {
+    var buffer = new Float32Array(2048);
+    var width2 = width * (2048 / 256);
+
+    for (var i = 0; i < 2048; i++) {
+      buffer[i] = i < width2 ? -1 : +1;
+    }
+
+    var fft = neume.FFT.forward(buffer);
+
+    real.set(fft.real);
+    imag.set(fft.imag);
   }
 
 };

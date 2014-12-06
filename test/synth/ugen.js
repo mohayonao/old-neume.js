@@ -345,7 +345,7 @@ describe("NeuUGen", function() {
     it("return a * b", function() {
       var node = context.createGain();
 
-      var b = NeuUGen.build(synth, "saw", {}, []);
+      var b = NeuUGen.build(synth, "sin", {}, []);
       var a = NeuUGen.build(synth, "sin", { mul: b }, []);
 
       a.connect(node);
@@ -364,7 +364,7 @@ describe("NeuUGen", function() {
               inputs: [
                 {
                   name: "OscillatorNode",
-                  type: "sawtooth",
+                  type: "sine",
                   frequency: {
                     value: 440,
                     inputs: []
