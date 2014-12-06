@@ -53,14 +53,21 @@ describe("NeuUGen", function() {
 
   describe(".build(synth, key, spec, inputs)", function() {
     it("returns an instance of NeuUGen", function() {
-      var unit = NeuUGen.build(synth, "sin", {}, []);
+      var ugen = NeuUGen.build(synth, "sin", {}, []);
 
-      assert(unit instanceof NeuUGen);
+      assert(ugen instanceof NeuUGen);
+    });
+    it("converts to a string-key if given a primitive", function() {
+      var ugen = NeuUGen.build(synth, 100, {}, []);
+
+      assert(ugen instanceof NeuUGen);
+      assert(ugen.$key === "number");
     });
     it("converts to a string-key if given a non-string key", function() {
-      var unit = NeuUGen.build(synth, 100, {}, []);
+      var ugen = NeuUGen.build(synth, new Date(), {}, []);
 
-      assert(unit instanceof NeuUGen);
+      assert(ugen instanceof NeuUGen);
+      assert(ugen.$key === "object");
     });
     it("throws an error if given an unknown key", function() {
       assert.throws(function() {
