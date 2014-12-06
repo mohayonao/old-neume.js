@@ -80,6 +80,7 @@ NeuContext.$name = "NeuContext";
 Object.keys(global.AudioContext.prototype).forEach(function(key) {
   var desc = Object.getOwnPropertyDescriptor(global.AudioContext.prototype, key);
 
+  /* istanbul ignore next */
   if (typeof desc.value !== "function") {
     return;
   }

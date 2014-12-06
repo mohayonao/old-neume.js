@@ -312,7 +312,7 @@ describe("NeuContext", function() {
     });
   });
 
-  describe.skip("#createNeuDryWet(dryIn, wetIn, mixIn)", function() {
+  describe("#createNeuDryWet(dryIn, wetIn, mixIn)", function() {
     it("returns a NeuDryWet", function() {
       assert(context.createNeuDryWet(0, 0, 0) instanceof neume.DryWet);
     });
