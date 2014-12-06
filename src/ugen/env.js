@@ -271,6 +271,7 @@ module.exports = function(neume, util) {
     return new neume.Unit({
       outlet: outlet,
       start: function(t0) {
+        param.setAt(param.value, 0);
         context.sched(t0, resume);
       },
       stop: stop,

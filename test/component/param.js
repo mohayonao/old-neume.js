@@ -22,9 +22,43 @@ describe("NeuParam", function() {
     });
   });
 
+  describe("#events", function() {
+    it("get events", function() {
+      param.setAt(0, 0);
+      param.setAt(1, 0);
+      param.setAt(2, 2);
+      param.setAt(3, 1);
+
+      assert.deepEqual(param.events, [
+        {
+          type: "SetValue",
+          value: 1,
+          time: 0
+        },
+        {
+          type: "SetValue",
+          value: 3,
+          time: 1
+        },
+        {
+          type: "SetValue",
+          value: 2,
+          time: 2
+        }
+      ]);
+    });
+  });
+
   describe("#value", function() {
     it("sets the value immediately", function() {
       param.value = 880;
+      assert(param.value === 880, "00:00.000");
+    });
+    it("sets the value immediately when connected", function() {
+      param.connect(context.destination);
+
+      param.value = 880;
+
       assert(param.value === 880, "00:00.000");
     });
   });
@@ -146,6 +180,7 @@ describe("NeuParam", function() {
     it("works", function() {
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.targetAt(880, 0.250, 0.25);
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
@@ -253,6 +288,7 @@ describe("NeuParam", function() {
       param = new NeuParam(context, 440);
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.update(660, 440, 0.2);
       param.update(220, 660, 0.4);
 
@@ -277,6 +313,7 @@ describe("NeuParam", function() {
       param = new NeuParam(context, 440, { timeConstant: 0.1 });
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.update(660, 440, 0.2);
       param.update(220, 660, 0.4);
 
@@ -301,6 +338,7 @@ describe("NeuParam", function() {
       param = new NeuParam(context, 440, { timeConstant: "32n" });
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.update(660, 440, 0.2);
       context.bpm = 240;
       param.update(220, 660, 0.4);
@@ -326,6 +364,7 @@ describe("NeuParam", function() {
       param = new NeuParam(context, 440, { tC: "32n" });
       param.connect(context.destination);
 
+      param.setAt(440, 0.000);
       param.update(660, 440, 0.2);
       context.bpm = 240;
       param.update(220, 660, 0.4);

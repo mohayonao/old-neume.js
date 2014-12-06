@@ -11,36 +11,36 @@ function NeuParam(context, value, spec) {
 
   var timeConstant = util.defaults(spec.tC, spec.timeConstant, 0);
 
-  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(timeConstant)) {
-    this._relative = true;
-    this._timeConstant = timeConstant;
-  } else {
-    this._relative = false;
-    this._timeConstant = Math.max(0, util.finite(timeConstant));
-  }
-
+  this._timeConstant = timeConstant;
   this._events = [];
 }
 util.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
-Object.defineProperty(NeuParam.prototype, "value", {
-  set: function(value) {
-    value = util.finite(value);
-
-    var params = this._params;
-
-    this._value = value;
-
-    for (var i = 0, imax = params.length; i < imax; i++) {
-      params[i].value = value;
-    }
-
-    return this;
+Object.defineProperties(NeuParam.prototype, {
+  events: {
+    get: function() {
+      return this._events.slice();
+    },
+    enumerable: true
   },
-  get: function() {
-    return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
+  value: {
+    set: function(value) {
+      value = util.finite(value);
+
+      var params = this._params;
+
+      this._value = value;
+
+      for (var i = 0, imax = params.length; i < imax; i++) {
+        params[i].value = value;
+      }
+    },
+    get: function() {
+      return this._params.length ? this._params[0].value : this._value;
+    },
+    enumerable: true
   }
 });
 
@@ -216,19 +216,19 @@ NeuParam.prototype.cancel = function(startTime) {
 NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
 NeuParam.prototype.update = function(v1, v0, t0) {
-  t0 = util.finite(this.$context.toSeconds(t0));
+  var context = this.$context;
+
+  t0 = util.finite(context.toSeconds(t0));
   v1 = util.finite(v1);
   v0 = util.finite(util.defaults(v0, v1));
 
-  if (this._timeConstant === 0 || v0 === v1) {
+  var timeConstant = util.finite(context.toSeconds(this._timeConstant));
+
+  timeConstant = Math.max(0, timeConstant);
+
+  if (timeConstant === 0 || v0 === v1) {
     this.setAt(v1, t0);
   } else {
-    var timeConstant;
-    if (this._relative) {
-      timeConstant = this.$context.toSeconds(this._timeConstant);
-    } else {
-      timeConstant = this._timeConstant;
-    }
     this.targetAt(v1, t0, timeConstant);
   }
 
@@ -239,7 +239,6 @@ NeuParam.prototype.toAudioNode = function() {
   if (this.$outlet == null) {
     this.$outlet = this.$context.createGain();
     this.$outlet.gain.value = this._value;
-    this.$outlet.gain.setValueAtTime(this._value, 0);
     this._params.push(this.$outlet.gain);
     this.$context.connect(this.$context.createNeuDC(1), this.$outlet);
   }
