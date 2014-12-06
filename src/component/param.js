@@ -25,9 +25,24 @@ util.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
-NeuParam.prototype.valueOf = function() {
-  return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
-};
+Object.defineProperty(NeuParam.prototype, "value", {
+  set: function(value) {
+    value = util.finite(value);
+
+    var params = this._params;
+
+    this._value = value;
+
+    for (var i = 0, imax = params.length; i < imax; i++) {
+      params[i].value = value;
+    }
+
+    return this;
+  },
+  get: function() {
+    return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
+  }
+});
 
 NeuParam.prototype.valueAtTime = function(t) {
   t = util.finite(this.$context.toSeconds(t));
@@ -67,20 +82,6 @@ NeuParam.prototype.valueAtTime = function(t) {
   }
 
   return value;
-};
-
-NeuParam.prototype.set = function(value) {
-  value = util.finite(value);
-
-  var params = this._params;
-
-  this._value = value;
-
-  for (var i = 0, imax = params.length; i < imax; i++) {
-    params[i].value = value;
-  }
-
-  return this;
 };
 
 NeuParam.prototype.setAt = function(value, startTime) {

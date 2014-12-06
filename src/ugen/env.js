@@ -218,7 +218,7 @@ module.exports = function(neume, util) {
     }
 
     function stop(t0) {
-      param.setAt(param.valueOf(), t0);
+      param.setAt(param.value, t0);
       context.unsched(schedId);
       context.unsched(releaseSchedId);
       schedId = 0;
@@ -237,7 +237,7 @@ module.exports = function(neume, util) {
 
       var dur = util.finite(context.toSeconds(params[1]));
       var t1 = t0 + dur;
-      var v0 = param.valueOf();
+      var v0 = param.value;
       var v1 = util.finite(params[0]);
       var cur = util.clip(util.finite(params[2]), 1e-6, 1 - 1e-6);
 

@@ -52,9 +52,9 @@ describe("NeuSynthDollar", function() {
           assert(params.amp === synth.amp );
           assert(params.amp === params.amp2);
 
-          synth.freq = 880;
+          synth.freq.value = 880;
 
-          assert(params.freq.valueOf() === 880);
+          assert(params.freq.value === 880);
         });
         it("throw an error if given an invalid name", function() {
           var func = function($) {

@@ -48,12 +48,8 @@ function $param(synth, params) {
     var param = new NeuParam(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
-      set: function(value) {
-        param.set(value);
-      },
-      get: function() {
-        return param;
-      }
+      value: param,
+      enumerable: true
     });
 
     params[name] = param;
