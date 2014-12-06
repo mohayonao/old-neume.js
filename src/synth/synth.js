@@ -15,6 +15,9 @@ function NeuSynth(context, func, args) {
   this.$localBuses = [];
 
   var $ = new NeuSynthDollar(this);
+
+  this.$builder = $.builder;
+
   var result = func.apply(null, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.$isOutput) {

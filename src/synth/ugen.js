@@ -20,6 +20,8 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$id = parsed.id;
   this.$outlet = null;
 
+  this.$builder = synth.$builder;
+
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   this._node = unit.$outlet;
@@ -69,6 +71,14 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   }
 
   return new NeuUGen(synth, key, spec, inputs);
+};
+
+NeuUGen.prototype.mul = function(value) {
+  return this.$builder("*", this, util.defaults(value, 1));
+};
+
+NeuUGen.prototype.add = function(value) {
+  return this.$builder("+", this, util.defaults(value, 0));
 };
 
 NeuUGen.prototype.toAudioNode = function() {

@@ -100,6 +100,40 @@ describe("NeuUGen", function() {
     });
   });
 
+  describe("#mul(value)", function() {
+    it("works", function() {
+      var node = context.createGain();
+      var spy = sinon.spy();
+
+      var a = NeuUGen.build({
+        $context: context,
+        $builder: spy
+      }, "sin", { add: 880 }, []);
+
+      a.mul(1000);
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("*", a, 1000));
+    });
+  });
+
+  describe("#add(value)", function() {
+    it("works", function() {
+      var node = context.createGain();
+      var spy = sinon.spy();
+
+      var a = NeuUGen.build({
+        $context: context,
+        $builder: spy
+      }, "sin", { add: 880 }, []);
+
+      a.add(1000);
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("+", a, 1000));
+    });
+  });
+
   describe("#toAudioNode()", function() {
     it("returns an AudioNode", function() {
       assert(ugen0.toAudioNode() instanceof global.AudioNode);
