@@ -71,7 +71,6 @@ module.exports = function(neume, util) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
-        // TODO: test!!
         ugen.emit("end", {
           playbackTime: context.currentTime
         }, ugen.$synth);
