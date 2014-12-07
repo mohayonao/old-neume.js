@@ -145,23 +145,5 @@ describe("neume.SynthDollar", function() {
       });
     });
   });
-  describe(".sec", function() {
-    it("(value: number|string): number", function() {
-      var passed = 0;
-      var synth = new neume.Synth(context, function($) {
-        passed = $.sec("4n");
-      }, []);
-      assert(passed === 0.5);
-    });
-  });
-  describe(".freq", function() {
-    it("(value: number|string): number", function() {
-      var passed = 0;
-      var synth = new neume.Synth(context, function($) {
-        passed = $.freq("4n");
-      }, []);
-      assert(passed === 2);
-    });
-  });
 
 });
