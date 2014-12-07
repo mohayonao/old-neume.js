@@ -1,5 +1,9 @@
 "use strict";
 
+if (typeof Promise === "undefined") {
+  global.Promise = require("es6-promise").Promise;
+}
+
 global.XMLHttpRequest = (function() {
   function XMLHttpRequest() {
   }

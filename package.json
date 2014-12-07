@@ -7,12 +7,15 @@
   "scripts": {
     "lint": "gulp lint",
     "jscs": "gulp jscs",
+    "code": "gulp code",
     "test": "gulp test",
     "cover": "gulp cover",
     "build": "gulp build",
     "travis": "gulp travis"
   },
-  "dependencies": {},
+  "dependencies": {
+    "es6-promise": "^2.0.0"
+  },
   "devDependencies": {
     "browserify": "^7.0.0",
     "coveralls": "^2.11.2",

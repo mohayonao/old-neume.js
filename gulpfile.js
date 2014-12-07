@@ -25,6 +25,7 @@ gulp.task("jscs", function() {
 });
 
 gulp.task("test", function() {
+  require("./test/bootstrap/bootstrap.js");
   require("espower-loader")({
     cwd: process.cwd(),
     pattern: "test/**/*.js"
@@ -34,6 +35,7 @@ gulp.task("test", function() {
 });
 
 gulp.task("cover", function(cb) {
+  require("./test/bootstrap/bootstrap.js");
   gulp.src("src/**/*.js")
     .pipe(istanbul())
     .pipe(istanbul.hookRequire())
@@ -62,5 +64,6 @@ gulp.task("build", function() {
     .pipe(gulp.dest("build"));
 });
 
-gulp.task("travis", [ "lint", "jscs", "cover" ]);
-gulp.task("default", [ "lint", "jscs", "cover", "build" ]);
+gulp.task("code", [ "lint", "jscs" ]);
+gulp.task("travis", [ "code", "cover" ]);
+gulp.task("default", [ "code", "cover", "build" ]);
