@@ -2,144 +2,139 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-var NeuSched = neume.Sched;
 var NOP = function() {};
 
-describe("NeuSched", function() {
-  var audioContext = null;
+describe("neume.Sched", function() {
   var context = null;
 
   beforeEach(function() {
-    audioContext = new global.AudioContext();
-    context = new NeuContext(audioContext.destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
-  describe("(context, interval, callback)", function() {
-    it("returns an instance of NeuSched", function() {
-      assert(new NeuSched(context, 1, NOP) instanceof NeuSched);
+  describe("constructor", function() {
+    it("(context: neume.Context, interval: number, callback: function)", function() {
+      assert(new neume.Sched(context, 1, NOP) instanceof neume.Sched);
     });
-    it("works", function() {
-      var passed = null;
+  });
 
-      var sched = new NeuSched(context, 0, function(e) {
-        passed = e;
+  describe("#start", function() {
+    it("(t: number): neume.Sched", function() {
+      var sched = new neume.Sched(context, 0, NOP);
 
-        switch (e.count) {
+      assert(sched.start() === sched);
+    });
+  });
+
+  describe("#stop", function() {
+    it("(t: number): neume.Sched", function() {
+      var sched = new neume.Sched(context, 0, NOP);
+
+      assert(sched.stop() === sched);
+    });
+  });
+
+  it("works", function() {
+    var passed = null;
+
+    var sched = new neume.Sched(context, 0, function(e) {
+      passed = e;
+
+      switch (e.count) {
         case 0:
           return { next: e.playbackTime + 0.025 };
         case 1:
           return { next: e.playbackTime + 0.050 };
         case 2:
           return { next: e.playbackTime + 0.100, callback: nextFunction };
-        }
-      });
-
-      var nextFunction = function(e) {
-        passed = "nextFunction";
-
-        return {};
-      };
-
-      audioContext.$reset();
-      context.reset();
-      context.start();
-
-      assert(sched.state === "UNSCHEDULED", "00:00.000");
-      assert(passed === null);
-
-      sched.stop(0.100);
-      sched.start(0.200);
-      sched.start(0.100);
-      sched.stop(0.400);
-
-      audioContext.$processTo("00:00.050");
-      assert(sched.state === "SCHEDULED", "00:00.050");
-      assert(passed === null, "00:00.050");
-
-      audioContext.$processTo("00:00.100");
-      assert(sched.state === "SCHEDULED", "00:00.100");
-      assert(passed === null, "00:00.100");
-
-      audioContext.$processTo("00:00.150");
-      assert(sched.state === "SCHEDULED", "00:00.150");
-      assert(passed === null, "00:00.150");
-
-      audioContext.$processTo("00:00.200");
-      assert(sched.state === "PLAYING", "00:00.200");
-      assert.deepEqual(passed, { playbackTime: 0.200, count: 0 }, "00:00.200");
-
-      audioContext.$processTo("00:00.250");
-      assert(sched.state === "PLAYING", "00:00.250");
-      assert.deepEqual(passed, { playbackTime: 0.225, count: 1 }, "00:00.250");
-
-      audioContext.$processTo("00:00.300");
-      assert(sched.state === "PLAYING", "00:00.300");
-      assert.deepEqual(passed, { playbackTime: 0.275, count: 2 }, "00:00.300");
-
-      audioContext.$processTo("00:00.350");
-      assert(sched.state === "PLAYING", "00:00.350");
-      assert.deepEqual(passed, { playbackTime: 0.275, count: 2 }, "00:00.350");
-
-      audioContext.$processTo("00:00.400");
-      assert(sched.state === "FINISHED", "00:00.400");
-      assert.deepEqual(passed, "nextFunction", "00:00.400");
-
-      audioContext.$processTo("00:00.450");
-      assert(sched.state === "FINISHED", "00:00.450");
-      assert.deepEqual(passed, "nextFunction", "00:00.450");
+      }
     });
-    it("works not reached", function() {
-      var sched = new NeuSched(context, 0, function() {
-        assert(!"not reached");
-      });
 
-      audioContext.$reset();
-      sched.$context.reset();
+    var nextFunction = function(e) {
+      passed = "nextFunction";
 
-      assert(sched.state === "UNSCHEDULED", "00:00.000");
+      return {};
+    };
 
-      sched.start(0.020);
-      sched.stop(0.010);
+    context.start();
 
-      audioContext.$processTo("00:00.010");
-      assert(sched.state === "FINISHED", "00:00.010");
+    assert(sched.state === "UNSCHEDULED", "00:00.000");
+    assert(passed === null);
 
-      audioContext.$processTo("00:00.020");
-      assert(sched.state === "FINISHED", "00:00.020");
-    });
-    describe("invalid case", function() {
-      it("callback is not a function", function() {
-        var sched = new NeuSched(context, 0, "INVALID");
+    sched.stop(0.100);
+    sched.start(0.200);
+    sched.start(0.100);
+    sched.stop(0.400);
 
-        audioContext.$reset();
-        sched.$context.reset();
+    var audioContext = context.audioContext;
 
-        assert(sched.state === "UNSCHEDULED", "00:00.000");
+    audioContext.$processTo("00:00.050");
+    assert(sched.state === "SCHEDULED", "00:00.050");
+    assert(passed === null, "00:00.050");
 
-        sched.start(0.000);
+    audioContext.$processTo("00:00.100");
+    assert(sched.state === "SCHEDULED", "00:00.100");
+    assert(passed === null, "00:00.100");
 
-        audioContext.$processTo("00:00.010");
-        assert(sched.state === "FINISHED", "00:00.010");
+    audioContext.$processTo("00:00.150");
+    assert(sched.state === "SCHEDULED", "00:00.150");
+    assert(passed === null, "00:00.150");
 
-        audioContext.$processTo("00:00.020");
-        assert(sched.state === "FINISHED", "00:00.020");
-      });
-    });
+    audioContext.$processTo("00:00.200");
+    assert(sched.state === "PLAYING", "00:00.200");
+    assert.deepEqual(passed, { playbackTime: 0.200, count: 0 }, "00:00.200");
+
+    audioContext.$processTo("00:00.250");
+    assert(sched.state === "PLAYING", "00:00.250");
+    assert.deepEqual(passed, { playbackTime: 0.225, count: 1 }, "00:00.250");
+
+    audioContext.$processTo("00:00.300");
+    assert(sched.state === "PLAYING", "00:00.300");
+    assert.deepEqual(passed, { playbackTime: 0.275, count: 2 }, "00:00.300");
+
+    audioContext.$processTo("00:00.350");
+    assert(sched.state === "PLAYING", "00:00.350");
+    assert.deepEqual(passed, { playbackTime: 0.275, count: 2 }, "00:00.350");
+
+    audioContext.$processTo("00:00.400");
+    assert(sched.state === "FINISHED", "00:00.400");
+    assert.deepEqual(passed, "nextFunction", "00:00.400");
+
+    audioContext.$processTo("00:00.450");
+    assert(sched.state === "FINISHED", "00:00.450");
+    assert.deepEqual(passed, "nextFunction", "00:00.450");
   });
-
-  describe("#start(t)", function() {
-    it("returns self", function() {
-      var sched = new NeuSched(context, 0, NOP);
-      assert(sched.start() === sched);
+  it("works: not reached", function() {
+    var sched = new neume.Sched(context, 0, function() {
+      assert(!"not reached");
     });
+
+    assert(sched.state === "UNSCHEDULED", "00:00.000");
+
+    sched.start(0.020);
+    sched.stop(0.010);
+
+    var audioContext = context.audioContext;
+
+    audioContext.$processTo("00:00.010");
+    assert(sched.state === "FINISHED", "00:00.010");
+
+    audioContext.$processTo("00:00.020");
+    assert(sched.state === "FINISHED", "00:00.020");
   });
+  it("works: invalid case", function() {
+    var sched = new neume.Sched(context, 0, "INVALID");
 
-  describe("#stop(t)", function() {
-    it("returns self", function() {
-      var sched = new NeuSched(context, 0, NOP);
-      assert(sched.stop() === sched);
-    });
+    assert(sched.state === "UNSCHEDULED", "00:00.000");
+
+    sched.start(0.000);
+
+    var audioContext = context.audioContext;
+
+    audioContext.$processTo("00:00.010");
+    assert(sched.state === "FINISHED", "00:00.010");
+
+    audioContext.$processTo("00:00.020");
+    assert(sched.state === "FINISHED", "00:00.020");
   });
 
 });

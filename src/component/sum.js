@@ -12,16 +12,15 @@ function NeuSum(context, inputs) {
   var nodes = [];
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
-    if (typeof inputs[i] === "number") {
-      number += util.finite(inputs[i]);
+    var x = inputs[i].valueOf();
+
+    if (typeof x === "number") {
+      number += util.finite(x);
       hasNumber = true;
-    } else if (inputs[i] instanceof util.NeuDC) {
-      number += inputs[i].valueOf();
-      hasNumber = true;
-    } else if (!param && inputs[i] instanceof util.NeuParam) {
-      param = inputs[i];
+    } else if (!param && x instanceof util.NeuParam) {
+      param = x;
     } else {
-      nodes.push(inputs[i]);
+      nodes.push(x);
     }
   }
 

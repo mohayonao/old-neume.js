@@ -8,7 +8,7 @@ neume.use(require("../../src/ugen/conv"));
 describe("ugen/conv", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
@@ -26,10 +26,9 @@ describe("ugen/conv", function() {
      *   |
      */
     it("return a ConvolverNode that is connected with $(sin)", function() {
-      var context = new neume.Context(new global.AudioContext().destination);
-      var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
+      var buffer = neume.Buffer.from(Neume.context, [ 1, 2, 3, 4 ]);
 
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("conv", { buf: buffer, normalize: false }, $("sin"));
       });
 
@@ -80,7 +79,7 @@ describe("ugen/conv", function() {
     });
 
     it("full name", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("conv", { buffer: buffer, normalize: false });
       }).toAudioNode().toJSON().inputs[0];
 
@@ -88,7 +87,7 @@ describe("ugen/conv", function() {
       assert(json.normalize === false);
     });
     it("alias", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("conv", { buf: buffer, normalize: false });
       }).toAudioNode().toJSON().inputs[0];
 

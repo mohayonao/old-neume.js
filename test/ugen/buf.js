@@ -24,7 +24,7 @@ describe("ugen/buf", function() {
     });
 
     it("returns a BufferSourceNode", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("buf", { buf: buffer });
       });
 
@@ -58,7 +58,7 @@ describe("ugen/buf", function() {
     });
 
     it("works", function(done) {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("buf", { buf: buffer }).on("end", function() {
           done();
         });
@@ -79,7 +79,7 @@ describe("ugen/buf", function() {
     });
 
     it("works without duration", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("buf", { buf: buffer, offset: 5 });
       });
 
@@ -95,7 +95,7 @@ describe("ugen/buf", function() {
     });
 
     it("works duration", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("buf", { buf: buffer, offset: 5, dur: 10 });
       });
 
@@ -114,7 +114,7 @@ describe("ugen/buf", function() {
   describe("$(AudioBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var audioBuffer = Neume.context.createBuffer(1, 128, 44100);
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(audioBuffer);
       });
 
@@ -151,7 +151,7 @@ describe("ugen/buf", function() {
   describe("$(NeuBuffer)", function() {
     it("returns a BufferSourceNode", function() {
       var buffer = neume.Buffer.from(Neume.context, [ 1, 2, 3, 4 ]);
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(buffer);
       });
 
@@ -193,7 +193,7 @@ describe("ugen/buf", function() {
     });
 
     it("full name", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("buf", { buffer: buffer, loop: true, loopStart: 1, loopEnd: 2 });
       }).toAudioNode().toJSON().inputs[0];
 
@@ -203,7 +203,7 @@ describe("ugen/buf", function() {
       assert(json.loopEnd === 2);
     });
     it("alias", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("buf", { buf: buffer, loop: true, start: 1, end: 2 });
       }).toAudioNode().toJSON().inputs[0];
 

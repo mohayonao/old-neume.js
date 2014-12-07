@@ -2,70 +2,72 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-
-describe("NeuContext", function() {
+describe("neume.Context", function() {
   var audioContext = null;
   var context = null;
 
   beforeEach(function() {
     audioContext = new global.AudioContext();
-    context = new NeuContext(audioContext.destination);
+    context = new neume.Context(audioContext.destination);
   });
 
-  describe("(audioContext)", function() {
-    it("returns an instance of NeuContext", function() {
-      assert(context instanceof NeuContext);
+  describe("constructor", function() {
+    it("(audioContext: AudioContext)", function() {
+      assert(context instanceof neume.Context);
     });
   });
 
   describe("#context", function() {
-    it("points to this", function() {
+    it("\\getter: self", function() {
       assert(context.context === context);
     });
   });
 
   describe("#audioContext", function() {
-    it("points to AudioContext", function() {
-      assert(context.audioContext === audioContext);
+    it("\\getter: AudioContext", function() {
+      assert(audioContext === audioContext);
     });
   });
 
   describe("#sampleRate", function() {
-    it("points to AudioContext#sampleRate", function() {
+    it("\\getter: number", function() {
       assert(context.sampleRate === audioContext.sampleRate);
     });
   });
 
   describe("#currentTime", function() {
-    it("points to AudioContext#currentTime", function() {
+    it("\\getter: number", function() {
       assert(typeof context.currentTime === "number");
     });
   });
 
   describe("#bpm", function() {
-    it("points to NeuTransport#bpm", function() {
+    it("\\getter: number", function() {
       assert(typeof context.bpm === "number");
-
+    });
+    it("\\setter: number", function() {
       context.bpm = 200;
       assert(context.bpm === 200);
+
+      context.bpm = 300;
+      assert(context.bpm === 300);
     });
   });
 
   describe("#destination", function() {
-    it("points to AudioContext#destination", function() {
+    it("\\getter: AudioDestinationNode", function() {
       assert(context.destination === audioContext.destination);
     });
   });
 
   describe("#listener", function() {
-    it("points to AudioContext#listener", function() {
+    it("\\getter: AudioListenerNode", function() {
       assert(context.listener === audioContext.listener);
     });
   });
 
-  describe("#cureateBuffer()", function() {
-    it("call AudioContext#createBuffer()", function() {
+  describe("#cureateBuffer", function() {
+    it("(...arguments): AudioBuffer", function() {
       var spy = sinon.spy(context, "createBuffer");
 
       context.createBuffer(1, 2, 3);
@@ -75,8 +77,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createBufferSource()", function() {
-    it("call AudioContext#createBufferSource()", function() {
+  describe("#createBufferSource", function() {
+    it("(...arguments): AudioBufferSourceNode", function() {
       var spy = sinon.spy(context, "createBufferSource");
 
       context.createBufferSource(1, 2, 3);
@@ -86,8 +88,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createMediaElementSource()", function() {
-    it("call AudioContext#createMediaElementSource()", function() {
+  describe("#createMediaElementSource", function() {
+    it("(...arguments): MediaElementSourceNode", function() {
       var spy = sinon.spy(context, "createMediaElementSource");
 
       context.createMediaElementSource(1, 2, 3);
@@ -97,8 +99,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createMediaStreamSource()", function() {
-    it("call AudioContext#createMediaStreamSource()", function() {
+  describe("#createMediaStreamSource", function() {
+    it("(...arguments): MediaStreamSourceNode", function() {
       var spy = sinon.spy(context, "createMediaStreamSource");
 
       context.createMediaStreamSource(1, 2, 3);
@@ -108,8 +110,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createMediaStreamDestination()", function() {
-    it("call AudioContext#createMediaStreamDestination()", function() {
+  describe("#createMediaStreamDestination", function() {
+    it("(...arguments): MediaStreamDestinationNode", function() {
       var spy = sinon.spy(context, "createMediaStreamDestination");
 
       context.createMediaStreamDestination(1, 2, 3);
@@ -119,8 +121,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createScriptProcessor()", function() {
-    it("call AudioContext#createScriptProcessor()", function() {
+  describe("#createScriptProcessor", function() {
+    it("(...arguments): ScriptProcessorNode", function() {
       var spy = sinon.spy(context, "createScriptProcessor");
 
       context.createScriptProcessor(1024, 0, 1);
@@ -130,8 +132,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createAnalyser()", function() {
-    it("call AudioContext#createAnalyser()", function() {
+  describe("#createAnalyser", function() {
+    it("(...arguments): AnalyserNode", function() {
       var spy = sinon.spy(context, "createAnalyser");
 
       context.createAnalyser(1, 2, 3);
@@ -141,8 +143,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createGain()", function() {
-    it("call AudioContext#createGain()", function() {
+  describe("#createGain", function() {
+    it("(...arguments): GainNode", function() {
       var spy = sinon.spy(context, "createGain");
 
       context.createGain(1, 2, 3);
@@ -152,8 +154,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createDelay()", function() {
-    it("call AudioContext#createDelay()", function() {
+  describe("#createDelay", function() {
+    it("(...arguments): DelayNode", function() {
       var spy = sinon.spy(context, "createDelay");
 
       context.createDelay(1, 2, 3);
@@ -163,8 +165,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createBiquadFilter()", function() {
-    it("call AudioContext#createBiquadFilter()", function() {
+  describe("#createBiquadFilter", function() {
+    it("(...arguments): BiquadFilterNode", function() {
       var spy = sinon.spy(context, "createBiquadFilter");
 
       context.createBiquadFilter(1, 2, 3);
@@ -174,8 +176,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createWaveShaper()", function() {
-    it("call AudioContext#createWaveShaper()", function() {
+  describe("#createWaveShaper", function() {
+    it("(...arguments): WaveShaperNode", function() {
       var spy = sinon.spy(context, "createWaveShaper");
 
       context.createWaveShaper(1, 2, 3);
@@ -185,8 +187,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createPanner()", function() {
-    it("call AudioContext#createPanner()", function() {
+  describe("#createPanner", function() {
+    it("(...arguments): PannerNode", function() {
       var spy = sinon.spy(context, "createPanner");
 
       context.createPanner(1, 2, 3);
@@ -196,8 +198,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createConvolver()", function() {
-    it("call AudioContext#createConvolver()", function() {
+  describe("#createConvolver", function() {
+    it("(...arguments): ConvolverNode", function() {
       var spy = sinon.spy(context, "createConvolver");
 
       context.createConvolver(1, 2, 3);
@@ -207,8 +209,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createChannelSplitter()", function() {
-    it("call AudioContext#createChannelSplitter()", function() {
+  describe("#createChannelSplitter", function() {
+    it("(...arguments): ChannelSplitterNode", function() {
       var spy = sinon.spy(context, "createChannelSplitter");
 
       context.createChannelSplitter(1, 2, 3);
@@ -218,8 +220,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createChannelMerger()", function() {
-    it("call AudioContext#createChannelMerger()", function() {
+  describe("#createChannelMerger", function() {
+    it("(...arguments): ChannelMergerNode", function() {
       var spy = sinon.spy(context, "createChannelMerger");
 
       context.createChannelMerger(1, 2, 3);
@@ -229,8 +231,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createDynamicsCompressor()", function() {
-    it("call AudioContext#createDynamicsCompressor()", function() {
+  describe("#createDynamicsCompressor", function() {
+    it("(...arguments): DynamicsCompressorNode", function() {
       var spy = sinon.spy(context, "createDynamicsCompressor");
 
       context.createDynamicsCompressor(1, 2, 3);
@@ -240,8 +242,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createOscillator()", function() {
-    it("call AudioContext#createOscillator()", function() {
+  describe("#createOscillator", function() {
+    it("(...arguments): OscillatorNode", function() {
       var spy = sinon.spy(context, "createOscillator");
 
       context.createOscillator(1, 2, 3);
@@ -251,19 +253,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createPeriodicWave()", function() {
-    it("call AudioContext#createPeriodicWave()", function() {
-      var spy = sinon.stub(context, "createPeriodicWave");
-
-      context.createPeriodicWave(1, 2, 3);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
-    });
-  });
-
-  describe("#decodeAudioData()", function() {
-    it("call AudioContext#decodeAudioData()", function() {
+  describe("#decodeAudioData", function() {
+    it("(...arguments): void", function() {
       var spy = sinon.stub(context, "decodeAudioData");
 
       context.decodeAudioData(1, 2, 3);
@@ -273,8 +264,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createPeriodicWave()", function() {
-    it("call AudioContext#createPeriodicWave()", function() {
+  describe("#createPeriodicWave", function() {
+    it("(...arguments)", function() {
       var spy = sinon.spy(context, "createPeriodicWave");
       var imag = new Float32Array([ 1, 2, 3, 4 ]);
       var real = new Float32Array([ 5, 6, 7, 8 ]);
@@ -286,72 +277,85 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#createNeuComponent(node)", function() {
-    it("returns a NeuComponent", function() {
+  describe("#createNeuComponent", function() {
+    it("(node: any): neume.Component", function() {
       assert(context.createNeuComponent({}) instanceof neume.Component);
     });
   });
 
-  describe("#createNeuDC(value)", function() {
-    it("returns a NeuDC", function() {
+  describe("#createNeuDC", function() {
+    it("(value: any): neume.DC", function() {
       assert(context.createNeuDC(0) instanceof neume.DC);
     });
   });
 
-  describe("#createNeuSum(inputs)", function() {
-    it("returns a NeuSum", function() {
+  describe("#createNeuMul", function() {
+    it("(a: any, b: any): neume.Mul", function() {
+      var a = context.createOscillator();
+      var b = context.createOscillator();
+
+      assert(context.createNeuMul(a, b) instanceof neume.Mul);
+    });
+  });
+
+  describe("#createNeuSum", function() {
+    it("(inputs: Array<any>): neume.Sum", function() {
       assert(context.createNeuSum([
         context.createOscillator(), context.createOscillator()
       ]) instanceof neume.Sum);
     });
   });
 
-  describe("#createNeuParam(value, spec)", function() {
-    it("returns a NeuParam", function() {
+  describe("#createNeuParam", function() {
+    it("(value: number, spec: object): neume.Param", function() {
       assert(context.createNeuParam(0) instanceof neume.Param);
     });
   });
 
-  describe("#createNeuDryWet(dryIn, wetIn, mixIn)", function() {
-    it("returns a NeuDryWet", function() {
-      assert(context.createNeuDryWet(0, 0, 0) instanceof neume.DryWet);
+  describe("#createNeuDryWet", function() {
+    it("(dryIn: any, wetIn: any, mixIn: any): neume.DryWet", function() {
+      var a = context.createGain();
+      var b = context.createGain();
+      var c = context.createGain();
+
+      assert(context.createNeuDryWet(a, b, c) instanceof neume.DryWet);
     });
   });
 
-  describe("#getAudioBus(index)", function() {
-    it("returns a NeuAudioBus", function() {
+  describe("#getAudioBus", function() {
+    it("(index: number): neume.AudioBus", function() {
       assert(context.getAudioBus(0) instanceof neume.AudioBus);
       assert(context.getAudioBus(0) !== context.getAudioBus(1));
       assert(context.getAudioBus(1) === context.getAudioBus(1));
     });
   });
 
-  describe("#reset()", function() {
-    it("returns self", function() {
+  describe("#reset", function() {
+    it("(): self", function() {
       assert(context.reset() === context);
       assert(context.reset() === context);
     });
   });
 
-  describe("#start()", function() {
-    it("returns self", function() {
+  describe("#start", function() {
+    it("(): self", function() {
       assert(context.start() === context);
       assert(context.start() === context);
     });
   });
 
-  describe("#stop()", function() {
-    it("returns self", function() {
+  describe("#stop", function() {
+    it("(): self", function() {
       assert(context.stop() === context);
       assert(context.stop() === context);
     });
   });
 
-  describe("#sched(time, callback, ctx)", function() {
-    it("do nothing if given an invalid callback", function() {
+  describe("#sched", function() {
+    it("(time: number, callback: !function, context: any): 0", function() {
       assert(context.sched(10, "INVALID") === 0);
     });
-    it("append the callback and order by specified time", function() {
+    it("(time: number, callback: function, context: any): number // works", function() {
       var passed = 0;
 
       var pass = function(i) {
@@ -407,11 +411,11 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#unsched(id)", function() {
-    it("do nothing if given an invalid id", function() {
+  describe("#unsched", function() {
+    it("(id: !number): 0", function() {
       assert(context.unsched("INVALID") === 0);
     });
-    it("append the callback and order by specified time", function() {
+    it("(id: number): number", function() {
       var passed = 0;
       var schedIds = [];
 
@@ -449,11 +453,11 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#nextTick(callback, ctx)", function() {
-    it("append the callback that executed next tick", function() {
+  describe("#nextTick", function() {
+    it("(callback: function, context: any): self", function() {
       var passed = 0;
 
-      context.start();
+      context.context.start();
 
       context.nextTick(function() {
         passed = 1;
@@ -466,8 +470,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("calls toAudioNode() if exists", function() {
+  describe("#toAudioNode", function() {
+    it("(): AudioNode", function() {
       var gain = context.createGain();
       var node = {
         toAudioNode: function() {
@@ -478,6 +482,7 @@ describe("NeuContext", function() {
     });
     it("returns a given AudioNode when given an AudioNode", function() {
       var gain = context.createGain();
+
       assert(context.toAudioNode(gain) === gain);
     });
     it("returns a DC when given a number", function() {
@@ -498,8 +503,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#toAudioBuffer()", function() {
-    it("calls toAudioBuffer() if exists", function() {
+  describe("#toAudioBuffer", function() {
+    it("(): AudioBuffer", function() {
       var buf = context.createBuffer(1, 128, 44100);
       var node = {
         toAudioBuffer: function() {
@@ -518,8 +523,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#connect(from, to)", function() {
-    it("apply from.connect(to)", function() {
+  describe("#connect", function() {
+    it("(from: any, to: any)", function() {
       var osc = new neume.Component(context);
       var amp = context.createGain();
 
@@ -694,8 +699,8 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#disconnect(from)", function() {
-    it("disconnect nodes", function() {
+  describe("#disconnect", function() {
+    it("(from: any): self", function() {
       var osc = context.createOscillator();
       var amp = context.createGain();
 
@@ -733,35 +738,35 @@ describe("NeuContext", function() {
     });
   });
 
-  describe("#getBpm()", function() {
-    it("works", function() {
+  describe("#getBpm", function() {
+    it("(): number", function() {
       assert(context.getBpm() === 120);
     });
   });
 
-  describe("#setBpm(value, rampTime)", function() {
-    it("works", function() {
+  describe("#setBpm", function() {
+    it("(value: number, rampTime: number): self", function() {
       assert(context.setBpm(200, 0) === context);
       assert(context.getBpm() === 200);
     });
   });
 
-  describe("#toSeconds()", function() {
-    it("works", function() {
+  describe("#toSeconds", function() {
+    it("(): number", function() {
       assert(context.toSeconds("2hz") === 0.5);
     });
   });
 
-  describe("#toFrequency()", function() {
-    it("works", function() {
+  describe("#toFrequency", function() {
+    it("(): number", function() {
       assert(context.toFrequency("500ms") === 2);
     });
   });
 
-  describe("offline-rendering", function() {
+  describe("offline rendering", function() {
     it("works", function() {
       var audioContext = new global.OfflineAudioContext(2, 44100 * 0.5, 44100);
-      var context = new NeuContext(audioContext.destination, 2);
+      var context = new neume.Context(audioContext.destination, 2);
       var passed = [ ];
 
       var pass = function(i) {

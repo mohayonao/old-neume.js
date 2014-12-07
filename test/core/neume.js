@@ -11,8 +11,8 @@ describe("neume", function() {
     audioContext = new global.AudioContext();
   });
 
-  describe("(destination)", function() {
-    it("return Neume", sinon.test(function() {
+  describe("constructor", function() {
+    it("(destination: AudioContext)", sinon.test(function() {
       var Neume = neume(audioContext);
 
       assert(typeof Neume === "function");
@@ -24,7 +24,6 @@ describe("neume", function() {
       });
 
       var spec = {};
-
       var result = new Neume(spec);
 
       assert.deepEqual(result, { result: "ok" });
@@ -32,51 +31,45 @@ describe("neume", function() {
       assert(stub.calledWithNew);
       assert(stub.calledWith(Neume.context, spec));
     }));
-    it("custom destination", function() {
+    it("(destination: AudioNode)", function() {
       var lpf = audioContext.createBiquadFilter();
       var Neume = neume(lpf);
+
       assert(typeof Neume === "function");
       assert(Neume.audioContext === audioContext);
       assert(Neume.destination === lpf);
     });
     it("failed", function() {
       assert.throws(function() {
-        neume.exports("NotAudioContext");
-      }, TypeError);
-    });
-    describe(".use(fn)", function() {
-      it("is a function", function() {
-        assert(typeof neume.use === "function");
+        neume("INVALID");
       });
     });
-    describe(".version", function() {
-      it("points to version that defined in package.json", function() {
-        assert(neume.version === pkg.version);
-      });
+  });
+  describe(".use", function() {
+    it("(fn: function): neume", function() {
+      assert(typeof neume.use === "function");
     });
-    describe(".PROCESS_BUF_SIZE", function() {
-      it("has", function() {
-        assert(typeof neume.PROCESS_BUF_SIZE === "number");
-      });
+  });
+  describe(".version", function() {
+    it("\\getter: number", function() {
+      assert(neume.version === pkg.version);
     });
-    describe("invalid argument", function() {
-      it("throw error", function() {
-        assert.throws(function() {
-          neume("INVALID");
-        });
-      });
+  });
+  describe(".PROCESS_BUF_SIZE", function() {
+    it("\\getter: number", function() {
+      assert(typeof neume.PROCESS_BUF_SIZE === "number");
     });
   });
 
   describe("Neume", function() {
     var Neume = null;
 
-    before(function() {
+    beforeEach(function() {
       Neume = neume(new global.AudioContext());
     });
 
-    describe(".render(duration, func)", function() {
-      it("points to neume.render(context, duration, func)", sinon.test(function(done) {
+    describe(".render", function() {
+      it("(duration: number, func: function): Promise", sinon.test(function(done) {
         var OfflineAudioContext = global.OfflineAudioContext;
         var offlineContext = null;
 
@@ -97,27 +90,27 @@ describe("neume", function() {
       }));
     });
     describe(".analyser", function() {
-      it("points to AnalyserNode", function() {
+      it("\\getter: AnalyserNode", function() {
         assert(Neume.analyser instanceof global.AnalyserNode);
       });
     });
     describe(".audioContext", function() {
-      it("points to AudioContext", function() {
+      it("\\getter: AudioContext", function() {
         assert(Neume.audioContext instanceof global.AudioContext);
       });
     });
     describe(".context", function() {
-      it("points to neume.Context", function() {
+      it("\\getter: neume.Context", function() {
         assert(Neume.context instanceof neume.Context);
       });
     });
     describe(".destination", function() {
-      it("points to AudioNode", function() {
+      it("\\getter: AudioNode", function() {
         assert(Neume.destination instanceof global.AudioNode);
       });
     });
     describe(".currentTime", function() {
-      it("points to audioContext.currentTime", function() {
+      it("\\getter: number", function() {
         assert(Neume.currentTime === Neume.context.currentTime);
       });
     });
@@ -129,18 +122,21 @@ describe("neume", function() {
       after(function() {
         Neume.bpm = savedBPM;
       });
-      it("points to context.bpm", function() {
+      it("\\getter", function() {
         Neume.bpm = 240;
+        assert(Neume.bpm === Neume.context.bpm);
+
+        Neume.bpm = 120;
         assert(Neume.bpm === Neume.context.bpm);
       });
     });
-    describe(".Synth(func ...)", function() {
-      it("return neume.Synth", function() {
+    describe(".Synth", function() {
+      it("(func: function ...arguments): neume.Synth", function() {
         assert(Neume.Synth(function() {}) instanceof neume.Synth);
       });
     });
-    describe(".Buffer(channels, length, sampleRate)", function() {
-      it("return neume.Buffer", sinon.test(function() {
+    describe(".Buffer", function() {
+      it("(channels: number, length: number, sampleRate: number): neume.Buffer", sinon.test(function() {
         this.spy(neume.Buffer, "create");
 
         assert(Neume.Buffer(2, 4096, 8192) instanceof neume.Buffer);
@@ -149,51 +145,51 @@ describe("neume", function() {
           2, 4096, 8192
         ]);
       }));
-    });
-    describe(".Buffer.from(data)", function() {
-      it("return neume.Buffer", sinon.test(function() {
-        this.spy(neume.Buffer, "from");
+      describe(".from", function() {
+        it("(data: Array<number>|Float32Array): neume.Buffer", sinon.test(function() {
+          this.spy(neume.Buffer, "from");
 
-        assert(Neume.Buffer.from([ 1, 2, 3, 4 ]) instanceof neume.Buffer);
-        assert(neume.Buffer.from.calledOnce);
-        assert.deepEqual(neume.Buffer.from.firstCall.args.slice(1), [
+          assert(Neume.Buffer.from([ 1, 2, 3, 4 ]) instanceof neume.Buffer);
+          assert(neume.Buffer.from.calledOnce);
+          assert.deepEqual(neume.Buffer.from.firstCall.args.slice(1), [
           [ 1, 2, 3, 4 ]
-        ]);
-      }));
-    });
-    describe(".Buffer.load(url)", function() {
-      it("return Promise", sinon.test(function() {
-        this.spy(neume.Buffer, "load");
+          ]);
+        }));
+      });
+      describe(".load", function() {
+        it("(url: string): Promise", sinon.test(function() {
+          this.spy(neume.Buffer, "load");
 
-        assert(Neume.Buffer.load("url") instanceof Promise);
-        assert(neume.Buffer.load.calledOnce);
-        assert.deepEqual(neume.Buffer.load.firstCall.args.slice(1), [
+          assert(Neume.Buffer.load("url") instanceof Promise);
+          assert(neume.Buffer.load.calledOnce);
+          assert.deepEqual(neume.Buffer.load.firstCall.args.slice(1), [
           "url"
-        ]);
-      }));
+          ]);
+        }));
+      });
     });
-    describe(".Sched(callback)", function() {
-      it("return neume.Sched", function() {
+    describe(".Sched", function() {
+      it("(callback: function): neume.Sched", function() {
         assert(Neume.Sched(0) instanceof neume.Sched);
       });
     });
-    describe(".Interval(interval, callback)", function() {
-      it("return neume.Interval", function() {
+    describe(".Interval", function() {
+      it("(interval: number, callback: function): neume.Interval", function() {
         assert(Neume.Interval(0, NOP) instanceof neume.Interval);
       });
     });
-    describe(".Timeout(interval, callback)", function() {
-      it("return neume.Timeout", function() {
+    describe(".Timeout", function() {
+      it("(interval: number, callback: function): neume.Timeout", function() {
         assert(Neume.Timeout(0, NOP) instanceof neume.Timeout);
       });
     });
-    describe(".toSeconds(value)", function() {
-      it("works", function() {
+    describe(".toSeconds", function() {
+      it("(value: number|string): number", function() {
         assert(Neume.toSeconds("4n") === 0.5);
       });
     });
-    describe(".toFrequency(value)", function() {
-      it("works", function() {
+    describe(".toFrequency", function() {
+      it("(value: number|string): number", function() {
         assert(Neume.toFrequency("4n") === 2);
       });
     });

@@ -4,15 +4,13 @@ var util = require("../util");
 var NeuComponent = require("./component");
 
 function NeuMul(context, a, b) {
-  if (a instanceof util.NeuDC) {
-    a = a.valueOf();
-  }
-  if (b instanceof util.NeuDC) {
-    b = b.valueOf();
-  }
+  a = a.valueOf();
+  b = b.valueOf();
+
   if (typeof a === "number" && typeof b === "number") {
     return context.createNeuDC(a * b);
   }
+
   NeuComponent.call(this, context);
 
   if (typeof a === "number") {
@@ -31,12 +29,12 @@ util.inherits(NeuMul, NeuComponent);
 NeuMul.$name = "NeuMul";
 
 NeuMul.prototype.mul = function(value) {
-  if (value instanceof util.NeuDC) {
-    value = value.valueOf();
-  }
+  value = value.valueOf();
+
   if (typeof this._b === "number" && typeof value === "number") {
     return this.$context.createNeuMul(this._a, util.finite(this._b * value));
   }
+
   return this.$context.createNeuMul(this.toAudioNode(), value);
 };
 

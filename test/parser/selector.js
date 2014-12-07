@@ -2,9 +2,9 @@
 
 var selectorParser = require("../../src/parser/selector");
 
-describe("key-parser", function() {
-  describe(".isValidUGenName(name)", function() {
-    it("checks if value is a valid ugen name", function() {
+describe("selectorParser", function() {
+  describe(".isValidUGenName", function() {
+    it("(name: string): boolean", function() {
       assert(selectorParser.isValidUGenName("sin"));
       assert(selectorParser.isValidUGenName("fb-sin"));
       assert(selectorParser.isValidUGenName("s-i-n-e"));
@@ -32,8 +32,8 @@ describe("key-parser", function() {
       assert(!selectorParser.isValidUGenName("\t"));
     });
   });
-  describe(".parse(selector)", function() {
-    it("returns object { key: id: class: }", function() {
+  describe(".parse", function() {
+    it("(selector:string): { key: string, id: string?, class: Array<string> }", function() {
       assert.deepEqual(selectorParser.parse(""), {
         key: "",
         id: null,

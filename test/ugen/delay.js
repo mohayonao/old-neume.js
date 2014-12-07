@@ -7,13 +7,13 @@ neume.use(require("../../src/ugen/delay"));
 describe("ugen/delay", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(delay delay:0.5 $(sin))", function() {
     it("return a DelayNode that is connected with $(sin)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("delay", { delay: 0.5 }, $("sin"));
       });
 
@@ -55,7 +55,7 @@ describe("ugen/delay", function() {
 
   describe("$(delay delay:0.5, feedback:0.2 $(sin))", function() {
     it("return a DelayNode that is connected with $(sin)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("delay", { delay: 0.5, feedback: 0.2 }, $("sin"));
       });
 
@@ -107,7 +107,7 @@ describe("ugen/delay", function() {
 
   describe("$(delay delay:$(delay) $(sin))", function() {
     it("return a DelayNode that is connected with $(sin)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("delay", { delay: $("delay") }, $("sin"));
       });
 
@@ -156,14 +156,14 @@ describe("ugen/delay", function() {
 
   describe("parameter check", function() {
     it("full name", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("delay", { delayTime: 1 });
       }).toAudioNode().toJSON().inputs[0];
 
       assert(json.delayTime.value === 1);
     });
     it("alias", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("delay", { delay: 1 });
       }).toAudioNode().toJSON().inputs[0];
 

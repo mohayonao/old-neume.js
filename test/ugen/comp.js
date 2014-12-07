@@ -8,7 +8,7 @@ neume.use(require("../../src/ugen/comp"));
 describe("ugen/comp", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
@@ -29,7 +29,7 @@ describe("ugen/comp", function() {
      *   |
      */
     it("return a DynamicsCompressorNode that is connected with $(sin)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("comp", {
           thresh: -20, knee: 25, ratio: 10, a: 0.05, r: 0.1
         }, $("sin"));
@@ -91,7 +91,7 @@ describe("ugen/comp", function() {
 
   describe("parameter check", function() {
     it("full name", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("comp", { threshold: 1, knee: 2, ratio: 3, attack: 4, release: 5 });
       }).toAudioNode().toJSON().inputs[0];
 
@@ -102,7 +102,7 @@ describe("ugen/comp", function() {
       assert(json.release.value === 5);
     });
     it("alias", function() {
-      var json = new Neume.Synth(function($) {
+      var json = Neume.Synth(function($) {
         return $("comp", { thresh: 1, knee: 2, ratio: 3, a: 4, r: 5 });
       }).toAudioNode().toJSON().inputs[0];
 

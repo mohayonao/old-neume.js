@@ -2,99 +2,85 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-var NeuComponent = neume.Component;
-
-describe("NeuComponent", function() {
+describe("neume.Component", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new global.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
-  describe("(context, node)", function() {
-    it("returns a NeuComponent", function() {
-      var component = new NeuComponent(
-        context, context.createOscillator()
-      );
-      assert(component instanceof NeuComponent);
+  describe("constructor", function() {
+    it("(context: neume.Context, [ node: any ]): neume.Component", function() {
+      var node = context.createOscillator();
+      var a = new neume.Component(context, node);
+
+      assert(a instanceof neume.Component);
     });
   });
 
-  describe("#mul(value)", function() {
-    it("works", function() {
-      var a = new NeuComponent(context, context.createNeuDC(2));
+  describe("#mul", function() {
+    it("(value: any): neume.Component", function() {
+      var node = new neume.DC(context, 2);
+      var a = new neume.Component(context, node);
+      var b = a.mul(10);
 
-      var result = a.mul(10);
-
-      assert(result instanceof NeuComponent);
-      assert(result.valueOf() === 20);
+      assert(a !== b);
+      assert(b instanceof neume.Component);
+      assert(b.valueOf() === 20);
     });
   });
 
-  describe("#add(value)", function() {
-    it("works", function() {
-      var a = new NeuComponent(context, context.createNeuDC(2));
+  describe("#add", function() {
+    it("(value: any): neume.Component", function() {
+      var node = new neume.DC(context, 2);
+      var a = new neume.Component(context, node);
+      var b = a.add(10);
 
-      var result = a.add(10);
-
-      assert(result instanceof NeuComponent);
-      assert(result.valueOf() === 12);
+      assert(a !== b);
+      assert(b instanceof neume.Component);
+      assert(b.valueOf() === 12);
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("return an AudioNode", function() {
-      var component = new NeuComponent(
-        context, context.createOscillator()
-      );
-      assert(component.toAudioNode() instanceof global.AudioNode);
-      assert(component.toAudioNode() === component.toAudioNode());
+  describe("#toAudioNode", function() {
+    it("(): AudioNode", function() {
+      var node = context.createOscillator();
+      var a = new neume.Component(context, node);
+
+      assert(a.toAudioNode() instanceof global.AudioNode);
+      assert(a.toAudioNode() === a.toAudioNode());
+      assert(a.toAudioNode() === node);
     });
   });
 
-  describe("#connect(to)", function() {
-    it("connect to node", function() {
-      var to = context.createGain();
+  describe("#connect", function() {
+    it("(to: any): self", function() {
+      var node = context.createOscillator();
+      var toNode = context.createGain();
+      var a = new neume.Component(context, node);
 
-      new NeuComponent(
-        context, context.createOscillator()
-      ).connect(to);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(a.connect(toNode) === a);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ a.toAudioNode().toJSON() ]
       });
     });
   });
 
-  describe("#disconnect(to)", function() {
-    it("disconnect from node", function() {
-      var to = context.createGain();
+  describe("#disconnect", function() {
+    it("(to: any): self", function() {
+      var node = context.createOscillator();
+      var toNode = context.createGain();
+      var a = new neume.Component(context, node);
 
-      new NeuComponent(
-        context, context.createOscillator()
-      ).connect(to).disconnect();
+      a.connect(toNode);
 
-      assert.deepEqual(to.toJSON(), {
+      assert(a.disconnect() === a);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,

@@ -7,13 +7,13 @@ neume.use(require("../../src/ugen/boolean"));
 describe("ugen/boolean", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(false)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(false);
       });
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -35,15 +35,12 @@ describe("ugen/boolean", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(false);
       });
 
       var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
-
-      audioContext.$reset();
-      synth.$context.reset();
 
       synth.start(0);
 
@@ -69,7 +66,7 @@ describe("ugen/boolean", function() {
 
   describe("$(false, $(true))", function() {
     it("returns a GainNode that is connected with inputs", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(false, $(true));
       });
 

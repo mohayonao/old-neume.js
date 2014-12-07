@@ -2,20 +2,15 @@
 
 var neume = require("../../src");
 
-var util = neume.util;
-var NeuContext = neume.Context;
-var NeuUGen = neume.UGen;
-var NeuUnit = neume.Unit;
-var Emitter = neume.Emitter;
-
 require("../../src/ugen/osc");
 require("../../src/ugen/add");
 require("../../src/ugen/mul");
 require("../../src/ugen/env");
 
+var util = neume.util;
 var NOP = function() {};
 
-describe("NeuUGen", function() {
+describe("neume.UGen", function() {
   var context = null;
   var synth = null;
   var ugen0 = null;
@@ -23,96 +18,86 @@ describe("NeuUGen", function() {
 
   beforeEach(function() {
     var audioContext = new global.AudioContext();
-    context = new NeuContext(audioContext.destination);
+    context = new neume.Context(audioContext.destination);
     synth = {
       $context: context
     };
-    ugen0 = NeuUGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
+    ugen0 = neume.UGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
     ugen0.toAudioNode().$id = "ugen0";
   });
 
-  describe("(synth, key, spec, inputs)", function() {
-    it("returns an instance of NeuUGen", function() {
-      assert(ugen0 instanceof NeuUGen);
-    });
-    it("has been inherited from Emitter", function() {
-      assert(ugen0 instanceof Emitter);
-    });
-    it("should set id from the key", function() {
+  describe("constructor", function() {
+    it("(synth: neume.Synth, key: string, spec: object, inputs: Array<any>)", function() {
+      assert(ugen0 instanceof neume.UGen);
+      assert(ugen0 instanceof neume.Emitter);
       assert(ugen0.$id === "ugen0");
-    });
-    it("should set classes from the key", function() {
       assert.deepEqual(ugen0.$class, [ "kr", "lfo" ]);
     });
     it("throw an error if given invalid key", function() {
       assert.throws(function() {
-        NeuUGen.build(synth, "#id", {}, []);
+        neume.UGen.build(synth, "#id", {}, []);
       }, Error);
     });
   });
 
-  describe(".build(synth, key, spec, inputs)", function() {
-    it("returns an instance of NeuUGen", function() {
-      var ugen = NeuUGen.build(synth, "sin", {}, []);
+  describe(".build", function() {
+    it("(synth: neume.Synth, key: string, spec: object, inputs: Array<any>): neume.UGen", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      assert(ugen instanceof NeuUGen);
+      assert(ugen instanceof neume.UGen);
     });
-    it("converts to a string-key if given a primitive", function() {
-      var ugen = NeuUGen.build(synth, 100, {}, []);
+    it("(synth: neume.Synth, key: number, spec: object, inputs: Array<any>): neume.UGen", function() {
+      var ugen = neume.UGen.build(synth, 100, {}, []);
 
-      assert(ugen instanceof NeuUGen);
+      assert(ugen instanceof neume.UGen);
       assert(ugen.$key === "number");
     });
-    it("converts to a string-key if given a non-string key", function() {
-      var ugen = NeuUGen.build(synth, new Date(), {}, []);
+    it("(synth: neume.Synth, key: object, spec: object, inputs: Array<any>): neume.UGen", function() {
+      var ugen = neume.UGen.build(synth, new Date(), {}, []);
 
-      assert(ugen instanceof NeuUGen);
+      assert(ugen instanceof neume.UGen);
       assert(ugen.$key === "object");
     });
-    it("throws an error if given an unknown key", function() {
+    it("(synth: neume.Synth, unknownKey: string, spec: object, inputs: Array<any>): throws an error", function() {
       assert.throws(function() {
-        NeuUGen.build(synth, "unknown", {}, []);
-      }, Error);
-    });
-    it("throws an error if given an invalid key", function() {
-      assert.throws(function() {
-        NeuUGen.build(synth, "invalid", {}, []);
+        neume.UGen.build(synth, "unknown", {}, []);
       }, Error);
     });
   });
 
-  describe(".register(name, func)", function() {
-    it("throw an error if given invalid name", function() {
+  describe(".register", function() {
+    it("(name: string, func: function): void", function() {
       [
         "fb-sin", "DX7", "OD-1", "<@-@>"
       ].forEach(function(ok) {
         assert.doesNotThrow(function() {
-          NeuUGen.register(ok, NOP);
+          neume.UGen.register(ok, NOP);
         });
       });
-
+    });
+    it("(invalidName: string, func: function): throw an error", function() {
       [
         "0", "sin.kr", "sin#lfo",
         "-fb", "fb-", "fb--sin", "<@-@>b"
       ].forEach(function(ng) {
         assert.throws(function() {
-          NeuUGen.register(ng, NOP);
+          neume.UGen.register(ng, NOP);
         }, Error);
       });
     });
-    it("throw an error if given not a function", function() {
+    it("(name: string, func: !function): throw an error", function() {
       assert.throws(function() {
-        NeuUGen.register("not-a-function", { call: NOP, apply: NOP });
+        neume.UGen.register("not-a-function", { call: NOP, apply: NOP });
       }, TypeError);
     });
   });
 
-  describe("#mul(value)", function() {
-    it("works", function() {
+  describe("#mul", function() {
+    it("(value: any): neume.UGen", function() {
       var node = context.createGain();
       var spy = sinon.spy();
 
-      var a = NeuUGen.build({
+      var a = neume.UGen.build({
         $context: context,
         $builder: spy
       }, "sin", { add: 880 }, []);
@@ -124,12 +109,12 @@ describe("NeuUGen", function() {
     });
   });
 
-  describe("#add(value)", function() {
-    it("works", function() {
+  describe("#add", function() {
+    it("(value: any): neume.UGen", function() {
       var node = context.createGain();
       var spy = sinon.spy();
 
-      var a = NeuUGen.build({
+      var a = neume.UGen.build({
         $context: context,
         $builder: spy
       }, "sin", { add: 880 }, []);
@@ -141,17 +126,17 @@ describe("NeuUGen", function() {
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("returns an AudioNode", function() {
+  describe("#toAudioNode", function() {
+    it("(): AudioNode", function() {
       assert(ugen0.toAudioNode() instanceof global.AudioNode);
     });
   });
 
-  describe("#connect(to)", function() {
-    it("connect to an AudioNode without offset", function() {
+  describe("#connect", function() {
+    it("(to: AudioNode): self", function() {
       var node = context.createGain();
 
-      NeuUGen.build(synth, "sin#ugen0", {}, []).connect(node);
+      neume.UGen.build(synth, "sin#ugen0", {}, []).connect(node);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -176,10 +161,10 @@ describe("NeuUGen", function() {
         ]
       });
     });
-    it("connect to an AudioNode with offset", function() {
+    it("(to: AudioNode): self // when with offset", function() {
       var node = context.createGain();
 
-      NeuUGen.build(synth, "sin#ugen0", { add: 880 }, []).connect(node);
+      neume.UGen.build(synth, "sin#ugen0", { add: 880 }, []).connect(node);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -213,12 +198,12 @@ describe("NeuUGen", function() {
       });
       assert(node.$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
-    it("connect to an AudioParam without offset", function() {
+    it("(to: AudioParam): self", function() {
       var node = context.createGain();
 
       node.gain.value = 0;
 
-      NeuUGen.build(synth, "sin#ugen0", {}, []).connect(node.gain);
+      neume.UGen.build(synth, "sin#ugen0", {}, []).connect(node.gain);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -243,12 +228,12 @@ describe("NeuUGen", function() {
         inputs: []
       });
     });
-    it("connect to an AudioParam with offset", function() {
+    it("(to: AudioParam): self // when with offset", function() {
       var node = context.createGain();
 
       node.gain.value = 0;
 
-      NeuUGen.build(synth, "sin#ugen0", { add: 880 }, []).connect(node.gain);
+      neume.UGen.build(synth, "sin#ugen0", { add: 880 }, []).connect(node.gain);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -275,11 +260,11 @@ describe("NeuUGen", function() {
     });
   });
 
-  describe("#disconnect()", function() {
-    it("works", function() {
+  describe("#disconnect", function() {
+    it("(): self", function() {
       var node = context.createGain();
 
-      NeuUGen.build(synth, "sin#ugen0", {}, []).connect(node).disconnect();
+      neume.UGen.build(synth, "sin#ugen0", {}, []).connect(node).disconnect();
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -294,7 +279,7 @@ describe("NeuUGen", function() {
 
   describe("method bindings", function() {
     it("works", function() {
-      var ugen1 = NeuUGen.build(synth, "adsr", {}, []);
+      var ugen1 = neume.UGen.build(synth, "adsr", {}, []);
 
       assert(ugen1.release() === ugen1);
     });
@@ -305,7 +290,7 @@ describe("NeuUGen", function() {
       var node = context.createGain();
 
       var b = 1;
-      var a = NeuUGen.build(synth, "sin", { mul: b }, []);
+      var a = neume.UGen.build(synth, "sin", { mul: b }, []);
 
       a.connect(node);
 
@@ -336,7 +321,7 @@ describe("NeuUGen", function() {
       var node = context.createGain();
 
       var b = 0;
-      var a = NeuUGen.build(synth, "sin", { mul: b }, []);
+      var a = neume.UGen.build(synth, "sin", { mul: b }, []);
 
       a.connect(node);
 
@@ -352,8 +337,8 @@ describe("NeuUGen", function() {
     it("return a * b", function() {
       var node = context.createGain();
 
-      var b = NeuUGen.build(synth, "sin", {}, []);
-      var a = NeuUGen.build(synth, "sin", { mul: b }, []);
+      var b = neume.UGen.build(synth, "sin", {}, []);
+      var a = neume.UGen.build(synth, "sin", { mul: b }, []);
 
       a.connect(node);
 

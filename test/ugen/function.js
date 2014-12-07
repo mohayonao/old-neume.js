@@ -9,13 +9,13 @@ var NOP = function() {};
 describe("ugen/function", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(func)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(NOP);
       });
 
@@ -38,20 +38,15 @@ describe("ugen/function", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(function(t, count) {
           return count;
         });
       });
 
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-
-      audioContext.$reset();
-      synth.$context.reset();
-
       synth.start(0);
 
+      var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.value === 0, "00:00.000");
 
       synth.evaluate(0.100);
@@ -61,7 +56,8 @@ describe("ugen/function", function() {
         return count * 2;
       });
 
-      audioContext.$processTo("00:00.500");
+      Neume.audioContext.$processTo("00:00.500");
+
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
       assert(outlet.gain.$valueAtTime(0.150) === 1);
@@ -77,7 +73,7 @@ describe("ugen/function", function() {
 
   describe("$(func, $(func))", function() {
     it("returns a GainNode that is connected with inputs", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $(NOP, $(NOP));
       });
 

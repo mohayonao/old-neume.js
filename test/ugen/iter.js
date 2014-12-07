@@ -7,13 +7,13 @@ neume.use(require("../../src/ugen/iter"));
 describe("ugen/iter", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(iter)", function() {
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("iter");
       });
 
@@ -55,7 +55,7 @@ describe("ugen/iter", function() {
       };
     });
     it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("iter", { init: 3, iter: iter });
       });
 
@@ -78,16 +78,11 @@ describe("ugen/iter", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("iter", { iter: iter });
       });
 
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
 
       synth.start(0).on("end", function(e) {
         ended = e.playbackTime;
@@ -100,7 +95,9 @@ describe("ugen/iter", function() {
       synth.next(0.500);
       synth.next(0.600);
 
-      audioContext.$processTo("00:00.600");
+      Neume.audioContext.$processTo("00:00.600");
+
+      var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 3);
       assert(outlet.gain.$valueAtTime(0.050) === 3);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
@@ -118,16 +115,11 @@ describe("ugen/iter", function() {
     });
 
     it("works with null", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("iter");
       });
 
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
 
       synth.start(0).on("end", function(e) {
         ended = e.playbackTime;
@@ -136,7 +128,9 @@ describe("ugen/iter", function() {
       synth.next(0.100);
       synth.next(0.200);
 
-      audioContext.$processTo("00:00.600");
+      Neume.audioContext.$processTo("00:00.600");
+
+      var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
       assert(outlet.gain.$valueAtTime(0.050) === 0);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
@@ -148,15 +142,9 @@ describe("ugen/iter", function() {
     });
 
     it("works with setValue", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("iter", { iter: iter });
       });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-
-      audioContext.$reset();
-      synth.$context.reset();
 
       synth.start(0);
 
@@ -173,7 +161,9 @@ describe("ugen/iter", function() {
       synth.next(0.500);
       synth.next(0.600);
 
-      audioContext.$processTo("00:00.500");
+      Neume.audioContext.$processTo("00:00.500");
+
+      var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.050) === 3);
       assert(outlet.gain.$valueAtTime(0.100) === 0);
       assert(outlet.gain.$valueAtTime(0.150) === 0);
@@ -189,7 +179,7 @@ describe("ugen/iter", function() {
 
   describe("$(iter, $(iter), $(iter))", function() {
     it("returns a GainNode that is connected with $(iter) x2", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("iter", $("iter"), $("iter"));
       });
 

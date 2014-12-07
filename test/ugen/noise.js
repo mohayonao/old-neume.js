@@ -7,13 +7,13 @@ neume.use(require("../../src/ugen/noise"));
 describe("ugen/noise", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(white)", function() {
     it("returns a OscillatorNode", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("white");
       });
 
@@ -46,20 +46,16 @@ describe("ugen/noise", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("white");
       });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-
-      audioContext.$reset();
-      synth.$context.reset();
 
       synth.start(0.100);
       synth.stop(0.200);
 
-      audioContext.$processTo("00:00.300");
+      Neume.audioContext.$processTo("00:00.300");
+
+      var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -70,7 +66,7 @@ describe("ugen/noise", function() {
   });
   describe("$(pink)", function() {
     it("returns a OscillatorNode", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("pink");
       });
 
@@ -103,20 +99,16 @@ describe("ugen/noise", function() {
       });
     });
     it("works", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("pink");
       });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-
-      audioContext.$reset();
-      synth.$context.reset();
 
       synth.start(0.100);
       synth.stop(0.200);
 
-      audioContext.$processTo("00:00.300");
+      Neume.audioContext.$processTo("00:00.300");
+
+      var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");

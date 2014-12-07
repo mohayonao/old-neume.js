@@ -8,14 +8,14 @@ neume.use(require("../../src/ugen/osc"));
 describe("ugen/mono", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(mono, $(sin))", function() {
     it("graph", function() {
       var audioContext = Neume.context;
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("mono", $("sin"));
       });
 

@@ -8,7 +8,7 @@ neume.use(require("../../src/ugen/mul"));
 describe("ugen/mul", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
@@ -20,7 +20,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("*");
       });
 
@@ -44,7 +44,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a DC(0)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("*", $("sin"), 0);
       });
 
@@ -68,7 +68,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns $(sin)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("*", $("sin"), 1);
       });
 
@@ -110,7 +110,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns a GainNode(0.5) that is connected with $(sin)", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("*", $("sin"), 0.5);
       });
 
@@ -166,7 +166,7 @@ describe("ugen/mul", function() {
     *   |
     */
     it("returns chain of GainNodes", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
       });
 
@@ -264,7 +264,7 @@ describe("ugen/mul", function() {
      *   |
      */
     it("returns chain of GainNodes", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), 2, $("sin", { freq: 2 }), 3, $("sin", { freq: 3 }));
       });
 

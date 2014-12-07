@@ -8,13 +8,13 @@ neume.use(require("../../src/ugen/osc"));
 describe("ugen/audio-node", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   it("$(gain, $(sin))", function() {
     var audioContext = Neume.context;
-    var synth = new Neume.Synth(function($) {
+    var synth = Neume.Synth(function($) {
       var gain = audioContext.createGain();
 
       gain.$id = "gain";
@@ -56,7 +56,7 @@ describe("ugen/audio-node", function() {
   });
   it("$(osc, $(sin))", function() {
     var audioContext = Neume.context;
-    var synth = new Neume.Synth(function($) {
+    var synth = Neume.Synth(function($) {
       var osc = audioContext.createOscillator();
 
       osc.$id = "osc";

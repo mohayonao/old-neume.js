@@ -2,275 +2,159 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-var NeuComponent = neume.Component;
-var NeuDC = neume.DC;
-var NeuMul = neume.Mul;
-
-describe("NeuMul", function() {
+describe("neume.Mul", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new global.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
-  describe("(context, a, b)", function() {
-    it("returns a NeuMul", function() {
-      var mul = new NeuMul(
-        context, context.createOscillator(), context.createGain()
-      );
-      assert(mul instanceof NeuMul);
-      assert(mul instanceof NeuComponent);
+  describe("constructor", function() {
+    it("(context: neume.Context, a: any, b: any)", function() {
+      var a = context.createOscillator();
+      var b = context.createGain();
+      var mul = new neume.Mul(context, a, b);
+
+      assert(mul instanceof neume.Mul);
+      assert(mul instanceof neume.Component);
     });
-    it("returns a NeuDC when number * number", function() {
-      var mul = new NeuMul(context, 5, 2);
-      assert(mul instanceof NeuDC);
-      assert(mul.valueOf() === 10);
+    it("constructor: neume.DC // when number * number", function() {
+      var a = Math.floor(Math.random() * 65536);
+      var b = Math.floor(Math.random() * 65536);
+      var mul = new neume.Mul(context, a, b);
+
+      assert(mul instanceof neume.DC);
+      assert(mul.valueOf() === a.valueOf() * b.valueOf());
     });
-    it("returns a NeuDC when NeuDC * NeuDC", function() {
-      var mul = new NeuMul(context, new NeuDC(context, 5), new NeuDC(context, 2));
-      assert(mul instanceof NeuDC);
-      assert(mul.valueOf() === 10);
+    it("constructor: neume.DC // when neume.DC * neume.DC", function() {
+      var a = new neume.DC(context, Math.floor(Math.random() * 65536));
+      var b = new neume.DC(context, Math.floor(Math.random() * 65536));
+      var mul = new neume.Mul(context, a, b);
+
+      assert(mul instanceof neume.DC);
+      assert(mul.valueOf() === a.valueOf() * b.valueOf());
     });
-    it("returns a NeuDC when node * 0", function() {
-      var node = context.createGain();
-      var mul = new NeuMul(context, node, 0);
-      assert(mul instanceof NeuDC);
+    it("constructor: neume.DC // when node * 0", function() {
+      var a = context.createGain();
+      var b = 0;
+      var mul = new neume.Mul(context, a, b);
+
+      assert(mul instanceof neume.DC);
       assert(mul.valueOf() === 0);
     });
-    it("returns a NeuDC when 0 * node", function() {
-      var node = context.createGain();
-      var mul = new NeuMul(context, node, 0);
-      assert(mul instanceof NeuDC);
+    it("constructor: neume.DC // when 0 * node", function() {
+      var a = 0;
+      var b = context.createGain();
+      var mul = new neume.Mul(context, a, b);
+
+      assert(mul instanceof neume.DC);
       assert(mul.valueOf() === 0);
     });
-    it("returns a node when node * 1", function() {
-      var node = context.createGain();
-      var mul = new NeuMul(context, node, 1);
-      assert(mul instanceof NeuComponent);
-      assert(mul.toAudioNode() === node);
-    });
-    it("returns a node when 1 * node", function() {
-      var node = context.createGain();
-      var mul = new NeuMul(context, 1, node);
-      assert(mul instanceof NeuComponent);
-      assert(mul.toAudioNode() === node);
-    });
-  });
+    it("constructor: neume.Component // when node * 1", function() {
+      var a = context.createGain();
+      var b = 1;
+      var mul = new neume.Mul(context, a, b);
 
-  describe("#add(value)", function() {
-    it("works", function() {
-      var add = new NeuMul(
-        context, context.createOscillator(), context.createGain()
-      ).add(context.createDelay()).toAudioNode();
+      assert(mul instanceof neume.Component);
+      assert(mul.toAudioNode() === a);
+    });
+    it("constructor: neume.Component // when 1 * node", function() {
+      var a = 1;
+      var b = context.createGain();
+      var mul = new neume.Mul(context, a, b);
 
-      assert.deepEqual(add.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-        {
-          name: "GainNode",
-          gain: {
-            value: 0,
-            inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 1,
-                inputs: []
-              },
-              inputs: []
-            }
-            ]
-          },
-          inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-          ]
-        },
-        {
-          name: "DelayNode",
-          delayTime: {
-            value: 0,
-            inputs: []
-          },
-          inputs: []
-        }
-        ]
-      });
+      assert(mul instanceof neume.Component);
+      assert(mul.toAudioNode() === b);
     });
   });
 
-  describe("#mul(value)", function() {
-    it("works", function() {
-      var mul = new NeuMul(
-        context, context.createOscillator(), context.createGain()
-      ).mul(context.createDelay()).toAudioNode();
+  describe("#mul", function() {
+    it("(value: AudioNode): neume.Mul", function() {
+      var a = context.createOscillator();
+      var b = context.createBufferSource();
+      var c = context.createDelay();
+      var mul = new neume.Mul(context, a, b);
+      var mul2 = mul.mul(c);
 
-      assert.deepEqual(mul.toJSON(), {
+      assert(mul2 instanceof neume.Mul);
+      assert.deepEqual(mul2.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 0,
-          inputs: [
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-          ]
+          inputs: [ c.toJSON() ]
         },
         inputs: [
-        {
-          name: "GainNode",
-          gain: {
-            value: 0,
-            inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 1,
-                inputs: []
-              },
-              inputs: []
-            }
-            ]
-          },
-          inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
+            name: "GainNode",
+            gain: {
               value: 0,
-              inputs: []
+              inputs: [ b.toJSON() ]
             },
-            inputs: []
+            inputs: [ a.toJSON() ]
           }
-          ]
-        }
         ]
       });
     });
-    it("works with number", function() {
-      var mul = new NeuMul(
-        context, context.createOscillator(), 5
-      ).mul(new NeuDC(context, 2)).toAudioNode();
+    it("(value: number): neume.Mul", function() {
+      var a = context.createOscillator();
+      var b = 5;
+      var c = new neume.DC(context, 2);
+      var mul = new neume.Mul(context, a, b);
+      var mul2 = mul.mul(c);
 
-      assert.deepEqual(mul.toJSON(), {
+      assert(mul2 instanceof neume.Mul);
+      assert.deepEqual(mul2.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 10,
+          value: b.valueOf() * c.valueOf(),
           inputs: []
         },
-        inputs: [
-        {
-          name: "OscillatorNode",
-          type: "sine",
-          frequency: {
-            value: 440,
-            inputs: []
-          },
-          detune: {
-            value: 0,
-            inputs: []
-          },
-          inputs: []
-        }
-        ]
+        inputs: [ a.toJSON() ]
       });
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("return an AudioNode", function() {
-      var mul = new NeuMul(
-        context, context.createOscillator(), context.createGain()
-      );
+  describe("#toAudioNode", function() {
+    it("(): AudioNode", function() {
+      var a = context.createOscillator();
+      var b = context.createBufferSource();
+      var mul = new neume.Mul(context, a, b);
+
       assert(mul.toAudioNode() instanceof global.AudioNode);
       assert(mul.toAudioNode() === mul.toAudioNode());
     });
   });
 
-  describe("#connect(to)", function() {
-    it("connect to node", function() {
-      var to = context.createDelay();
+  describe("#connect", function() {
+    it("(to: any): self", function() {
+      var toNode = context.createDelay();
+      var a = context.createOscillator();
+      var b = context.createBufferSource();
+      var mul = new neume.Mul(context, a, b);
 
-      new NeuMul(
-        context, context.createOscillator(), context.createGain()
-      ).connect(to);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(mul.connect(toNode), mul);
+      assert.deepEqual(toNode.toJSON(), {
         name: "DelayNode",
         delayTime: {
           value: 0,
           inputs: []
         },
-        inputs: [
-        {
-          name: "GainNode",
-          gain: {
-            value: 0,
-            inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 1,
-                inputs: []
-              },
-              inputs: []
-            }
-            ]
-          },
-          inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-          ]
-        }
-        ]
+        inputs: [ mul.toAudioNode().toJSON() ]
       });
     });
   });
 
-  describe("#disconnect(to)", function() {
-    it("works", function() {
-      var to = context.createDelay();
+  describe("#disconnect", function() {
+    it("(): self", function() {
+      var toNode = context.createDelay();
+      var a = context.createOscillator();
+      var b = context.createBufferSource();
+      var mul = new neume.Mul(context, a, b);
 
-      new NeuMul(
-        context, context.createOscillator(), context.createGain()
-      ).connect(to).disconnect();
+      mul = mul.connect(toNode);
 
-      assert.deepEqual(to.toJSON(), {
+      assert(mul.disconnect(), mul);
+      assert.deepEqual(toNode.toJSON(), {
         name: "DelayNode",
         delayTime: {
           value: 0,
