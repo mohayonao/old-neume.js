@@ -215,13 +215,13 @@ NeuParam.prototype.cancel = function(startTime) {
 
 NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
-NeuParam.prototype.update = function(v1, v0, t0) {
+NeuParam.prototype.update = function(spec) {
+  spec = spec || {};
+
   var context = this.$context;
-
-  t0 = util.finite(context.toSeconds(t0));
-  v1 = util.finite(v1);
-  v0 = util.finite(util.defaults(v0, v1));
-
+  var t0 = util.finite(context.toSeconds(spec.startTime));
+  var v1 = util.finite(spec.endValue);
+  var v0 = util.finite(util.defaults(spec.startValue, v1));
   var timeConstant = util.finite(context.toSeconds(this._timeConstant));
 
   timeConstant = Math.max(0, timeConstant);
