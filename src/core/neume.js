@@ -3,6 +3,7 @@
 require("./shim");
 
 var util = require("../util");
+var neume = require("../namespace");
 
 var VERSION = "0.2.0";
 
@@ -101,12 +102,12 @@ function Neume(context) {
   return fn;
 }
 
-var neume = function(destination, spec) {
+neume.impl = function(destination, spec) {
   if (destination instanceof global.AudioContext) {
     destination = destination.destination;
   }
   if (!(destination instanceof global.AudioNode)) {
-    throw new TypeError("neume(): illegal argument");
+    throw new TypeError("neume(): Illegal arguments");
   }
 
   var context = new neume.Context(destination, Infinity, spec);
