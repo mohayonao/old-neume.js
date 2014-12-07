@@ -95,7 +95,7 @@
     var ffDelay = util.defaults(context.toSeconds(spec.ffDelay), 0.001);
     var fbDelay = util.defaults(context.toSeconds(spec.fbDelay), 0.001);
 
-    var sum = context.createNeuSum(inputs);
+    var sum = new neume.Sum(context, inputs);
 
     if (gain !== 0) {
       outlet = util.defaults(outlet, context.createGain());

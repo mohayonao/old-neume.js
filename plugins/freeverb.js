@@ -26,12 +26,12 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var room = context.createNeuComponent(util.defaults(spec.room, 0.5)).mul(0.28).add(0.7);
-    var damp = context.createNeuComponent(util.defaults(spec.damp, 0.20)).mul(0.5);
+    var room = new neume.Component(context, util.defaults(spec.room, 0.5)).mul(0.28).add(0.7);
+    var damp = new neume.Component(context, util.defaults(spec.damp, 0.20)).mul(0.5);
     var mix = util.defaults(spec.mix, 0.33);
     var inlet = context.createGain();
 
-    var dryNode = context.createNeuSum(inputs);
+    var dryNode = new neume.Sum(context, inputs);
     var wetNode;
 
     dryNode.connect(inlet);
@@ -65,7 +65,7 @@
 
     wetNode = ap[3].outlet;
 
-    outlet = context.createNeuDryWet(dryNode, wetNode, mix);
+    outlet = new neume.DryWet(context, dryNode, wetNode, mix);
 
     return new neume.Unit({
       outlet: outlet

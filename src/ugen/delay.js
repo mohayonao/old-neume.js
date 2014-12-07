@@ -58,7 +58,7 @@ module.exports = function(neume, util) {
       inputs = inputs.concat(feedbackNode);
     }
 
-    context.createNeuSum(inputs).connect(delayNode);
+    new neume.Sum(context, inputs).connect(delayNode);
 
     return new neume.Unit({
       outlet: delayNode

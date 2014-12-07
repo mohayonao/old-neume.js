@@ -78,11 +78,11 @@ module.exports = function(neume, util) {
     var outlet = null;
 
     var schedId = 0;
-    var param = context.createNeuParam(list[0]);
+    var param = new neume.Param(context, list[0]);
 
     if (inputs.length) {
       outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
+      new neume.Sum(context, inputs).connect(outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;

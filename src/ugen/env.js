@@ -207,11 +207,11 @@ module.exports = function(neume, util) {
     var index = 0;
     var schedId = 0;
     var releaseSchedId = 0;
-    var param = context.createNeuParam(init);
+    var param = new neume.Param(context, init);
 
     if (inputs.length) {
       outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
+      new neume.Sum(context, inputs).connect(outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;

@@ -70,4 +70,4 @@ function createDCNode(context, value) {
   return node;
 }
 
-module.exports = util.NeuDC = NeuDC;
+module.exports = NeuDC;

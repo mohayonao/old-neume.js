@@ -39,11 +39,11 @@ module.exports = function(neume, util) {
     }
 
     var prevVal = util.finite(valueOf());
-    var param = context.createNeuParam(prevVal, spec);
+    var param = new neume.Param(context, prevVal, spec);
 
     if (inputs.length) {
       outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
+      new neume.Sum(context, inputs).connect(outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;

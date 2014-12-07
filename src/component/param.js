@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuParam(context, value, spec) {
@@ -240,7 +241,7 @@ NeuParam.prototype.toAudioNode = function() {
     this.$outlet = this.$context.createGain();
     this.$outlet.gain.value = this._value;
     this._params.push(this.$outlet.gain);
-    this.$context.connect(this.$context.createNeuDC(1), this.$outlet);
+    this.$context.connect(new neume.DC(this.$context, 1), this.$outlet);
   }
   return this.$outlet;
 };
@@ -308,4 +309,4 @@ function setCurveValue(v, t, t0, t1, curve) {
   return util.defaults(curve[(curve.length * dt)|0], v);
 }
 
-module.exports = util.NeuParam = NeuParam;
+module.exports = NeuParam;

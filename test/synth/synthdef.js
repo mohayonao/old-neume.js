@@ -2,7 +2,6 @@
 
 var neume = require("../../src");
 
-var util = neume.util;
 var NOP = function() {};
 
 describe("neume.SynthDef", function() {
@@ -31,18 +30,16 @@ describe("neume.SynthDef", function() {
 
     describe("function", function() {
       it("(...arguments: Array<any>): neume.Synth", sinon.test(function() {
-        this.stub(util, "NeuSynth");
-
+        var stub = this.stub(neume, "Synth");
         var synthDef = new neume.SynthDef(context, NOP);
 
         synthDef("a", "b", "c");
 
-        assert(util.NeuSynth.calledWithNew() === true);
-        assert.deepEqual(util.NeuSynth.args[0], [ context, NOP, [ "a", "b", "c" ] ]);
+        assert(stub.calledWithNew() === true);
+        assert.deepEqual(stub.args[0], [ context, NOP, [ "a", "b", "c" ] ]);
       }));
       it("(context, ...arguments: Array<any>): neume.Synth", sinon.test(function() {
-        this.stub(util, "NeuSynth");
-
+        var stub = this.stub(neume, "Synth");
         var synthDef = new neume.SynthDef(context, NOP);
         var newContext = new global.AudioContext();
 
@@ -50,8 +47,8 @@ describe("neume.SynthDef", function() {
 
         synthDef(newContext, "d", "e", "f");
 
-        assert(util.NeuSynth.calledWithNew() === true);
-        assert.deepEqual(util.NeuSynth.args[0], [ newContext, NOP, [ "d", "e", "f" ] ]);
+        assert(stub.calledWithNew() === true);
+        assert.deepEqual(stub.args[0], [ newContext, NOP, [ "d", "e", "f" ] ]);
       }));
     });
   });

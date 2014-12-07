@@ -32,7 +32,7 @@ module.exports = function(neume, util) {
     }
     outlet.normalize = !!util.defaults(spec.normalize, true);
 
-    context.createNeuSum(inputs).connect(outlet);
+    new neume.Sum(context, inputs).connect(outlet);
 
     return new neume.Unit({
       outlet: outlet

@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var Emitter = require("../event/emitter");
 
 function NeuComponent(context, node) {
@@ -14,11 +15,11 @@ util.inherits(NeuComponent, Emitter);
 NeuComponent.$name = "NeuComponent";
 
 NeuComponent.prototype.mul = function(value) {
-  return this.$context.createNeuMul(util.defaults(this._node, this), util.defaults(value, 1));
+  return new neume.Mul(this.$context, util.defaults(this._node, this), util.defaults(value, 1));
 };
 
 NeuComponent.prototype.add = function(value) {
-  return this.$context.createNeuSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
+  return new neume.Sum(this.$context, [ util.defaults(this._node, this), util.defaults(value, 0) ]);
 };
 
 NeuComponent.prototype.toAudioNode = function() {
@@ -38,4 +39,4 @@ NeuComponent.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = util.NeuComponent = NeuComponent;
+module.exports = NeuComponent;

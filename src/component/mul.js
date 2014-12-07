@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuMul(context, a, b) {
@@ -8,7 +9,7 @@ function NeuMul(context, a, b) {
   b = b.valueOf();
 
   if (typeof a === "number" && typeof b === "number") {
-    return context.createNeuDC(a * b);
+    return new neume.DC(context, a * b);
   }
 
   NeuComponent.call(this, context);
@@ -17,9 +18,9 @@ function NeuMul(context, a, b) {
     var t = a; a = b; b = t;
   }
   if (b === 0) {
-    return context.createNeuDC(0);
+    return new neume.DC(context, 0);
   } else if (b === 1) {
-    return context.createNeuComponent(a);
+    return new neume.Component(context, a);
   }
   this._a = a;
   this._b = b;
@@ -32,10 +33,10 @@ NeuMul.prototype.mul = function(value) {
   value = value.valueOf();
 
   if (typeof this._b === "number" && typeof value === "number") {
-    return this.$context.createNeuMul(this._a, util.finite(this._b * value));
+    return new neume.Mul(this.$context, this._a, util.finite(this._b * value));
   }
 
-  return this.$context.createNeuMul(this.toAudioNode(), value);
+  return new neume.Mul(this.$context, this.toAudioNode(), value);
 };
 
 NeuMul.prototype.toAudioNode = function() {
@@ -58,4 +59,4 @@ NeuMul.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = util.NeuMul = NeuMul;
+module.exports = NeuMul;

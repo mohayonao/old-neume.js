@@ -77,7 +77,7 @@ module.exports = function(neume, util) {
     gainL.connect(merger, 0, 0);
     gainR.connect(merger, 0, 1);
 
-    context.createNeuSum(inputs).connect(gainL).connect(gainR);
+    new neume.Sum(context, inputs).connect(gainL).connect(gainR);
 
     return new neume.Unit({
       outlet: merger

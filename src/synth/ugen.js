@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var Emitter = require("../event/emitter");
 var SelectorParser = require("../parser/selector");
 
@@ -103,7 +104,7 @@ function mul(context, a, b) {
     return a;
   }
   if (b === 0) {
-    return context.createNeuDC(0);
+    return new neume.DC(context, 0);
   }
 
   var mulNode = context.createGain();
@@ -117,7 +118,7 @@ function mul(context, a, b) {
 }
 
 function add(context, a, b) {
-  return context.createNeuSum([ a, b ]);
+  return new neume.Sum(context, [ a, b ]);
 }
 
 module.exports = NeuUGen;

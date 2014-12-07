@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuSum(context, inputs) {
@@ -17,7 +18,7 @@ function NeuSum(context, inputs) {
     if (typeof x === "number") {
       number += util.finite(x);
       hasNumber = true;
-    } else if (!param && x instanceof util.NeuParam) {
+    } else if (!param && x instanceof neume.Param) {
       param = x;
     } else {
       nodes.push(x);
@@ -28,11 +29,11 @@ function NeuSum(context, inputs) {
     if (param) {
       return param;
     }
-    return context.createNeuDC(number);
+    return new neume.DC(context, number);
   }
 
   if (number === 0 && param === null && nodes.length === 1) {
-    return context.createNeuComponent(nodes[0]);
+    return new neume.Component(context, nodes[0]);
   }
 
   this._hasNumber = hasNumber;
@@ -46,7 +47,7 @@ util.inherits(NeuSum, NeuComponent);
 NeuSum.$name = "NeuSum";
 
 NeuSum.prototype.add = function(value) {
-  return this.$context.createNeuSum(this._inputs.concat(value));
+  return new neume.Sum(this.$context, this._inputs.concat(value));
 };
 
 NeuSum.prototype.toAudioNode = function() {
@@ -85,7 +86,7 @@ NeuSum.prototype.connect = function(to) {
   if (param) {
     context.connect(param, to);
     if (number !== 0) {
-      context.connect(context.createNeuDC(number).toAudioNode(), to);
+      context.connect(new neume.DC(context, number).toAudioNode(), to);
     }
   } else if (number !== 0) {
     context.connect(number, to);
@@ -105,4 +106,4 @@ NeuSum.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = util.NeuSum = NeuSum;
+module.exports = NeuSum;

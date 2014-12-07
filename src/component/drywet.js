@@ -2,6 +2,7 @@
 
 var C = require("../const");
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
@@ -26,10 +27,10 @@ function NeuDryWet(context, dryIn, wetIn, mixIn) {
 
   if (typeof mixIn === "number") {
     if (mixIn === 0) {
-      return context.createNeuComponent(dryIn);
+      return new neume.Component(context, dryIn);
     }
     if (mixIn === 1) {
-      return context.createNeuComponent(wetIn);
+      return new neume.Component(context, wetIn);
     }
   }
 

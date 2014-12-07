@@ -24,7 +24,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, b).add(a);
@@ -39,7 +39,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, b).add(a).add(b);
@@ -54,7 +54,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).mul(b);
@@ -69,7 +69,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).mul(b).add(
@@ -86,7 +86,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).add(
@@ -103,7 +103,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, a).add(
@@ -120,7 +120,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, context.createMul(b, -1));
@@ -136,7 +136,7 @@
     var context = ugen.$context;
     var outlet = null;
 
-    var a = context.createNeuSum(inputs);
+    var a = new neume.Sum(context, inputs);
     var b = util.defaults(spec.mod, 0);
 
     outlet = context.createMul(a, b);

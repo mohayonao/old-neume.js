@@ -46,7 +46,7 @@ module.exports = function(neume, util) {
     }
     shaper.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
 
-    context.createNeuSum(inputs).connect(shaper);
+    new neume.Sum(context, inputs).connect(shaper);
 
     return shaper;
   }

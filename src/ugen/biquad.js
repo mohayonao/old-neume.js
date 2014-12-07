@@ -76,7 +76,7 @@ module.exports = function(neume, util) {
     context.connect(q, biquad.Q);
     context.connect(gain, biquad.gain);
 
-    context.createNeuSum(inputs).connect(biquad);
+    new neume.Sum(context, inputs).connect(biquad);
 
     return biquad;
   }
