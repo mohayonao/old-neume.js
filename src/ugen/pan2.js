@@ -36,6 +36,10 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("pan2", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gainL = context.createGain();
@@ -82,5 +86,6 @@ module.exports = function(neume, util) {
     return new neume.Unit({
       outlet: merger
     });
-  });
+  }
+
 };

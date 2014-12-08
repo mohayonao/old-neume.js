@@ -19,12 +19,14 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("conv", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
+    var outlet = context.createConvolver();
 
     var buffer = context.toAudioBuffer(spec.buf || spec.buffer);
-
-    outlet = context.createConvolver();
 
     /* istanbul ignore else */
     if (buffer != null) {
@@ -37,6 +39,6 @@ module.exports = function(neume, util) {
     return new neume.Unit({
       outlet: outlet
     });
-  });
+  }
 
 };

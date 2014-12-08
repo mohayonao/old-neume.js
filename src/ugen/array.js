@@ -24,6 +24,10 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("array", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var index = 0;
@@ -42,6 +46,32 @@ module.exports = function(neume, util) {
     var param = new neume.Param(context, prevValue, spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
+    function setValue(t, value) {
+      if (Array.isArray(value)) {
+        context.sched(util.finite(context.toSeconds(t)), function() {
+          data = value;
+        });
+      }
+    }
+
+    function at(t, index) {
+      context.sched(util.finite(context.toSeconds(t)), function(t) {
+        update(t, util.int(index));
+      });
+    }
+
+    function next(t) {
+      context.sched(util.finite(context.toSeconds(t)), function(t) {
+        update(t, index + 1);
+      });
+    }
+
+    function prev(t) {
+      context.sched(util.finite(context.toSeconds(t)), function(t) {
+        update(t, index - 1);
+      });
+    }
+
     function update(t0, nextIndex) {
       var v0 = prevValue;
       var v1 = mode(data, nextIndex);
@@ -55,30 +85,12 @@ module.exports = function(neume, util) {
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (Array.isArray(value)) {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              data = value;
-            });
-          }
-        },
-        at: function(t, index) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t, util.int(index));
-          });
-        },
-        next: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t, index + 1);
-          });
-        },
-        prev: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t, index - 1);
-          });
-        }
+        setValue: setValue,
+        at: at,
+        next: next,
+        prev: prev
       }
     });
-  });
+  }
 
 };

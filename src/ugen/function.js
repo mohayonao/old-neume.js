@@ -24,6 +24,10 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("function", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
@@ -31,6 +35,20 @@ module.exports = function(neume, util) {
     var prevValue = util.finite(data(0, count++));
     var param = new neume.Param(context, prevValue, spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
+
+    function setValue(t, value) {
+      if (typeof value === "function") {
+        context.sched(util.finite(context.toSeconds(t)), function() {
+          data = value;
+        });
+      }
+    }
+
+    function evaluate(t) {
+      context.sched(util.finite(context.toSeconds(t)), function(t) {
+        update(t);
+      });
+    }
 
     function update(t0) {
       var v0 = prevValue;
@@ -44,20 +62,10 @@ module.exports = function(neume, util) {
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (typeof value === "function") {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              data = value;
-            });
-          }
-        },
-        evaluate: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t);
-          });
-        }
+        setValue: setValue,
+        evaluate: evaluate
       }
     });
-  });
+  }
 
 };

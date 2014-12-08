@@ -17,20 +17,20 @@ module.exports = function(neume) {
     "OscillatorNode",
   ].forEach(function(name) {
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(ugen.$context, spec.value, inputs));
+      return make(ugen, spec, inputs);
     });
   });
 
-  function setup(context, audioNode, inputs) {
-    if (audioNode.numberOfInputs) {
-      context.connect(inputs, audioNode);
-    }
-    return audioNode;
-  }
+  function make(ugen, spec, inputs) {
+    var context = ugen.$context;
+    var outlet = spec.value;
 
-  function make(audioNode) {
+    if (outlet.numberOfInputs) {
+      context.connect(inputs, outlet);
+    }
+
     return new neume.Unit({
-      outlet: audioNode
+      outlet: outlet
     });
   }
 

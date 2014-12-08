@@ -17,6 +17,10 @@ module.exports = function(neume) {
    *   |
    */
   neume.register("mono", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet = context.createGain();
 
@@ -29,5 +33,6 @@ module.exports = function(neume) {
     return new neume.Unit({
       outlet: outlet
     });
-  });
+  }
+
 };

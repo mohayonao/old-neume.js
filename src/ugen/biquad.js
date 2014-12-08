@@ -46,41 +46,37 @@ module.exports = function(neume, util) {
 
   neume.register("biquad", function(ugen, spec, inputs) {
     var type = FILTER_TYPES[spec.type] || "lowpass";
-    return make(setup(type, ugen, spec, inputs));
+    return make(type, ugen, spec, inputs);
   });
 
   Object.keys(FILTER_TYPES).forEach(function(name) {
     var type = FILTER_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(type, ugen, spec, inputs));
+      return make(type, ugen, spec, inputs);
     });
   });
 
-  function setup(type, ugen, spec, inputs) {
+  function make(type, ugen, spec, inputs) {
     var context = ugen.$context;
-    var biquadNode = context.createBiquadFilter();
+    var outlet = context.createBiquadFilter();
 
-    biquadNode.type = type;
-    biquadNode.frequency.value = 0;
-    biquadNode.detune.value = 0;
-    biquadNode.Q.value = 0;
-    biquadNode.gain.value = 0;
+    outlet.type = type;
+    outlet.frequency.value = 0;
+    outlet.detune.value = 0;
+    outlet.Q.value = 0;
+    outlet.gain.value = 0;
 
     var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, 350));
     var detune = util.defaults(spec.dt, spec.detune, 0);
     var q = util.defaults(spec.Q, 1);
     var gain = util.defaults(spec.gain, 0);
 
-    context.connect(frequency, biquadNode.frequency);
-    context.connect(detune, biquadNode.detune);
-    context.connect(q, biquadNode.Q);
-    context.connect(gain, biquadNode.gain);
-    context.connect(inputs, biquadNode);
+    context.connect(frequency, outlet.frequency);
+    context.connect(detune, outlet.detune);
+    context.connect(q, outlet.Q);
+    context.connect(gain, outlet.gain);
+    context.connect(inputs, outlet);
 
-    return biquadNode;
-  }
-
-  function make(outlet) {
     return new neume.Unit({
       outlet: outlet
     });

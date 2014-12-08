@@ -74,6 +74,12 @@ module.exports = function(neume, util) {
     return mulNode;
   }
 
+  function make(outlet) {
+    return new neume.Unit({
+      outlet: outlet
+    });
+  }
+
   function createMulNode(context, mul) {
     var mulNode = context.createGain();
 
@@ -85,12 +91,6 @@ module.exports = function(neume, util) {
     }
 
     return mulNode;
-  }
-
-  function make(outlet) {
-    return new neume.Unit({
-      outlet: outlet
-    });
   }
 
 };
