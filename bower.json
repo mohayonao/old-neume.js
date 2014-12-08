@@ -1,18 +1,14 @@
 {
   "name": "neume.js",
-  "main": "build/neume.js",
+  "description": "Web Audio API library for developing interactive music",
   "version": "0.2.0",
-  "homepage": "https://github.com/mohayonao/neume.js",
   "authors": [
     "Nao Yonamine <mohayonao@gmail.com>"
   ],
-  "keywords": [
-    "music",
-    "sound",
-    "compose",
-    "web audio api"
-  ],
-  "license": "MIT",
+  "dependencies": {
+    "es6-promise": "2.0.0"
+  },
+  "homepage": "https://github.com/mohayonao/neume.js",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -24,7 +20,12 @@
     "gulpfile.js",
     "index.js"
   ],
-  "dependencies": {
-    "es6-promise": "2.0.0"
-  }
+  "keywords": [
+    "interactive",
+    "music",
+    "sound",
+    "web audio"
+  ],
+  "license": "MIT",
+  "main": "build/neume.js"
 }
