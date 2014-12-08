@@ -23,7 +23,7 @@ module.exports = function(neume) {
 
   function setup(context, audioNode, inputs) {
     if (audioNode.numberOfInputs) {
-      new neume.Sum(context, inputs).connect(audioNode);
+      context.connect(inputs, audioNode);
     }
     return audioNode;
   }

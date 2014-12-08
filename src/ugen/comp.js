@@ -26,13 +26,13 @@ module.exports = function(neume, util) {
    */
   neume.register("comp", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var comp = context.createDynamicsCompressor();
+    var compNode = context.createDynamicsCompressor();
 
-    comp.threshold.value = 0;
-    comp.knee.value = 0;
-    comp.ratio.value = 0;
-    comp.attack.value = 0;
-    comp.release.value = 0;
+    compNode.threshold.value = 0;
+    compNode.knee.value = 0;
+    compNode.ratio.value = 0;
+    compNode.attack.value = 0;
+    compNode.release.value = 0;
 
     var threshold = util.defaults(spec.thresh, spec.threshold, -24);
     var knee = util.defaults(spec.knee, 30);
@@ -40,16 +40,15 @@ module.exports = function(neume, util) {
     var attack = context.toSeconds(util.defaults(spec.a, spec.attack, 0.003));
     var release = context.toSeconds(util.defaults(spec.r, spec.release, 0.250));
 
-    context.connect(threshold, comp.threshold);
-    context.connect(knee, comp.knee);
-    context.connect(ratio, comp.ratio);
-    context.connect(attack, comp.attack);
-    context.connect(release, comp.release);
-
-    new neume.Sum(context, inputs).connect(comp);
+    context.connect(threshold, compNode.threshold);
+    context.connect(knee, compNode.knee);
+    context.connect(ratio, compNode.ratio);
+    context.connect(attack, compNode.attack);
+    context.connect(release, compNode.release);
+    context.connect(inputs, compNode);
 
     return new neume.Unit({
-      outlet: comp
+      outlet: compNode
     });
   });
 

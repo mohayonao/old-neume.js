@@ -142,8 +142,7 @@ module.exports = function(neume, util) {
 
     gain.gain.value = 0;
     context.connect(osc, gain.gain);
-
-    new neume.Sum(context, inputs).connect(gain);
+    context.connect(inputs, gain);
 
     return { outlet: gain, ctrl: osc };
   }

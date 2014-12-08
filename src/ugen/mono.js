@@ -24,7 +24,7 @@ module.exports = function(neume) {
     outlet.channelCountMode = "explicit";
     outlet.channelInterpretation = "speakers";
 
-    new neume.Sum(context, inputs).connect(outlet);
+    context.connect(inputs, outlet);
 
     return new neume.Unit({
       outlet: outlet

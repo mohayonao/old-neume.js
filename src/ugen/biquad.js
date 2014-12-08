@@ -58,32 +58,31 @@ module.exports = function(neume, util) {
 
   function setup(type, ugen, spec, inputs) {
     var context = ugen.$context;
-    var biquad = context.createBiquadFilter();
+    var biquadNode = context.createBiquadFilter();
 
-    biquad.type = type;
-    biquad.frequency.value = 0;
-    biquad.detune.value = 0;
-    biquad.Q.value = 0;
-    biquad.gain.value = 0;
+    biquadNode.type = type;
+    biquadNode.frequency.value = 0;
+    biquadNode.detune.value = 0;
+    biquadNode.Q.value = 0;
+    biquadNode.gain.value = 0;
 
     var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, 350));
     var detune = util.defaults(spec.dt, spec.detune, 0);
     var q = util.defaults(spec.Q, 1);
     var gain = util.defaults(spec.gain, 0);
 
-    context.connect(frequency, biquad.frequency);
-    context.connect(detune, biquad.detune);
-    context.connect(q, biquad.Q);
-    context.connect(gain, biquad.gain);
+    context.connect(frequency, biquadNode.frequency);
+    context.connect(detune, biquadNode.detune);
+    context.connect(q, biquadNode.Q);
+    context.connect(gain, biquadNode.gain);
+    context.connect(inputs, biquadNode);
 
-    new neume.Sum(context, inputs).connect(biquad);
-
-    return biquad;
+    return biquadNode;
   }
 
-  function make(biquad) {
+  function make(outlet) {
     return new neume.Unit({
-      outlet: biquad
+      outlet: outlet
     });
   }
 

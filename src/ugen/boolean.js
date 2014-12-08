@@ -33,7 +33,7 @@ module.exports = function(neume, util) {
 
     if (inputs.length) {
       outlet = context.createGain();
-      new neume.Sum(context, inputs).connect(outlet);
+      context.connect(inputs, outlet);
       context.connect(param, outlet.gain);
     } else {
       outlet = param;
