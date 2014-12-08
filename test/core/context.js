@@ -643,6 +643,22 @@ describe("neume.Context", function() {
         ]
       });
     });
+    it("Array<AudioNode> -> AudioNode", function() {
+      var node1 = context.createOscillator();
+      var node2 = context.createBufferSource();
+      var toNode = context.createGain();
+
+      context.connect([ node1, node2 ], toNode);
+
+      assert.deepEqual(toNode.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [],
+        },
+        inputs: [ node1.toJSON(), node2.toJSON() ]
+      });
+    });
     it("invalid -> AudioNode", function() {
       var node = context.createDelay();
 
