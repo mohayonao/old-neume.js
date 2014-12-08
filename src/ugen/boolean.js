@@ -38,23 +38,19 @@ module.exports = function(neume, util) {
     function setValue(t, value) {
       if (typeof value === "boolean") {
         context.sched(util.finite(context.toSeconds(t)), function(t) {
-          var v0 = data  ? trueVal : falseVal;
-          var v1 = value ? trueVal : falseVal;
-          update(t, v0, v1, value);
+          update(t, value ? trueVal : falseVal, value);
         });
       }
     }
 
     function toggle(t) {
       context.sched(util.finite(context.toSeconds(t)), function(t) {
-        var v0 = data ? trueVal : falseVal;
-        var v1 = data ? falseVal : trueVal;
-        update(t, v0, v1, !data);
+        update(t, data ? falseVal : trueVal, !data);
       });
     }
 
-    function update(t0, v0, v1, nextData) {
-      param.update({ startValue: v0, endValue: v1, startTime: t0 });
+    function update(startTime, value, nextData) {
+      param.update(value, startTime);
       data = nextData;
     }
 

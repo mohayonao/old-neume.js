@@ -32,8 +32,7 @@ module.exports = function(neume, util) {
 
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;
-    var prevValue = util.finite(data(0, count++));
-    var param = new neume.Param(context, prevValue, spec);
+    var param = new neume.Param(context, util.finite(data(0, count++)), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function setValue(t, value) {
@@ -50,13 +49,10 @@ module.exports = function(neume, util) {
       });
     }
 
-    function update(t0) {
-      var v0 = prevValue;
-      var v1 = data(t0, count++);
+    function update(startTime) {
+      var value = data(startTime, count++);
 
-      param.update({ startValue: v0, endValue: v1, startTime: t0 });
-
-      prevValue = v1;
+      param.update(value, startTime);
     }
 
     return new neume.Unit({

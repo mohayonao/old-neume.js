@@ -33,8 +33,7 @@ module.exports = function(neume, util) {
 
     var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
-    var prevValue = 0;
-    var param = new neume.Param(context, prevValue, spec);
+    var param = new neume.Param(context, 0, spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function start(t) {
@@ -44,8 +43,7 @@ module.exports = function(neume, util) {
         state = FINISHED;
         ugen.emit("end", { playbackTime: t }, ugen.$synth);
       } else {
-        prevValue = util.finite(items.value);
-        param.setAt(prevValue, t);
+        param.setValueAtTime(util.finite(items.value), t);
       }
     }
 
@@ -67,9 +65,7 @@ module.exports = function(neume, util) {
           } else {
             value = util.finite(items.value);
 
-            param.update({ startValue: prevValue, endValue: value, startTime: t });
-
-            prevValue = value;
+            param.update(value, t);
           }
         }
       });

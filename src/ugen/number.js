@@ -33,13 +33,13 @@ module.exports = function(neume, util) {
     function setValue(t, value) {
       if (util.isFinite(value)) {
         context.sched(util.finite(context.toSeconds(t)), function() {
-          update(t, data, value, value);
+          update(t, value, value);
         });
       }
     }
 
-    function update(t0, v0, v1, nextData) {
-      param.update({ startValue: v0, endValue: v1, startTime: t0 });
+    function update(t0, v1, nextData) {
+      param.update(v1, t0);
       data = nextData;
     }
 

@@ -30,12 +30,6 @@ module.exports = function(neume, util) {
     }
 
     var minInterval = 1 / context.sampleRate;
-    var relativeInterval = true;
-
-    if (!/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
-      relativeInterval = false;
-      interval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
-    }
 
     var prevVal = util.finite(valueOf());
     var param = new neume.Param(context, prevVal, spec);
@@ -45,15 +39,13 @@ module.exports = function(neume, util) {
       var value = util.finite(valueOf());
 
       if (value !== prevVal) {
-        param.update({ startValue: prevVal, endValue: value, startTime: t0 });
+        param.update(value, t0);
         prevVal = value;
       }
 
-      var nextTime = relativeInterval ?
-        t0 + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
-        t0 + interval;
+      var nextInterval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
 
-      schedId = context.sched(nextTime, update);
+      schedId = context.sched(t0 + nextInterval, update);
     }
 
     return new neume.Unit({

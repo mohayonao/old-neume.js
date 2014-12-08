@@ -9,11 +9,10 @@ function NeuParam(context, value, spec) {
   NeuComponent.call(this, context);
   this._value = util.finite(value);
   this._params = [];
-
-  var timeConstant = util.defaults(spec.tC, spec.timeConstant, 0);
-
-  this._timeConstant = timeConstant;
   this._events = [];
+  this._curve = spec.curve;
+  this._lag = util.defaults(spec.lag, 0);
+  this._scheduled = null;
 }
 util.inherits(NeuParam, NeuComponent);
 
@@ -62,9 +61,9 @@ NeuParam.prototype.valueAtTime = function(t) {
     t0 = Math.min(t, e1 ? e1.time : t);
 
     if (e1 && e1.type === "LinearRampToValue") {
-      value = linTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+      value = calcLinearRampToValue(value, e0.value, e1.value, t0, e0.time, e1.time);
     } else if (e1 && e1.type === "ExponentialRampToValue") {
-      value = expTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+      value = calcExponentialRampToValue(value, e0.value, e1.value, t0, e0.time, e1.time);
     } else {
       switch (e0.type) {
       case "SetValue":
@@ -73,10 +72,10 @@ NeuParam.prototype.valueAtTime = function(t) {
         value = e0.value;
         break;
       case "SetTarget":
-        value = setTarget(value, e0.value, t0, e0.time, e0.timeConstant);
+        value = calcTarget(value, e0.value, t0, e0.time, e0.timeConstant);
         break;
       case "SetValueCurve":
-        value = setCurveValue(value, t0, e0.time, e0.time + e0.duration, e0.curve);
+        value = calcValueCurve(value, t0, e0.time, e0.time + e0.duration, e0.curve);
         break;
       }
     }
@@ -216,25 +215,53 @@ NeuParam.prototype.cancel = function(startTime) {
 
 NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
-NeuParam.prototype.update = function(spec) {
-  spec = spec || {};
-
+NeuParam.prototype.update = function(value, startTime) {
   var context = this.$context;
-  var t0 = util.finite(context.toSeconds(spec.startTime));
-  var v1 = util.finite(spec.endValue);
-  var v0 = util.finite(util.defaults(spec.startValue, v1));
-  var timeConstant = util.finite(context.toSeconds(this._timeConstant));
+  var endTime = startTime + util.finite(context.toSeconds(this._lag));
+  var startValue = this.valueAtTime(startTime);
+  var curve = this._curve;
+  var scheduled = null;
 
-  timeConstant = Math.max(0, timeConstant);
+  terminateAudioParamScheduling(this, startValue, startTime);
 
-  if (timeConstant === 0 || v0 === v1) {
-    this.setAt(v1, t0);
-  } else {
-    this.targetAt(v1, t0, timeConstant);
+  if (endTime <= startTime) {
+    curve = "step";
   }
+
+  switch (curve) {
+  case "exp":
+  case "exponential":
+    this.setValueAtTime(Math.max(1e-6, startValue), startTime);
+    this.exponentialRampToValueAtTime(Math.max(1e-6, value), endTime);
+    scheduled = { method: "exponentialRampToValueAtTime", time: endTime };
+    break;
+  case "lin":
+  case "linear":
+    this.setValueAtTime(startValue, startTime);
+    this.linearRampToValueAtTime(value, endTime);
+    scheduled = { method: "linearRampToValueAtTime", time: endTime };
+    break;
+  // case "step":
+  default:
+    this.setValueAtTime(value, startTime);
+    break;
+  }
+
+  this._scheduled = scheduled;
 
   return this;
 };
+
+function terminateAudioParamScheduling(_this, startValue, startTime) {
+  var scheduled = _this._scheduled;
+
+  if (scheduled == null || scheduled.time <= startTime) {
+    return;
+  }
+
+  _this.cancelScheduledValues(scheduled.time);
+  _this[scheduled.method](startValue, startTime);
+}
 
 NeuParam.prototype.toAudioNode = function(input) {
   var context = this.$context;
@@ -288,21 +315,21 @@ function insertEvent(_this, event) {
   events.splice(i, replace, event);
 }
 
-function linTo(v, v0, v1, t, t0, t1) {
+function calcLinearRampToValue(v, v0, v1, t, t0, t1) {
   var dt = (t - t0) / (t1 - t0);
   return (1 - dt) * v0 + dt * v1;
 }
 
-function expTo(v, v0, v1, t, t0, t1) {
+function calcExponentialRampToValue(v, v0, v1, t, t0, t1) {
   var dt = (t - t0) / (t1 - t0);
   return 0 < v0 && 0 < v1 ? v0 * Math.pow(v1 / v0, dt) : /* istanbul ignore next */ v;
 }
 
-function setTarget(v0, v1, t, t0, timeConstant) {
+function calcTarget(v0, v1, t, t0, timeConstant) {
   return v1 + (v0 - v1) * Math.exp((t0 - t) / timeConstant);
 }
 
-function setCurveValue(v, t, t0, t1, curve) {
+function calcValueCurve(v, t, t0, t1, curve) {
   var dt = (t - t0) / (t1 - t0);
 
   if (dt <= 0) {
