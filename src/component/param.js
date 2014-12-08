@@ -236,13 +236,20 @@ NeuParam.prototype.update = function(spec) {
   return this;
 };
 
-NeuParam.prototype.toAudioNode = function() {
+NeuParam.prototype.toAudioNode = function(input) {
+  var context = this.$context;
+
   if (this.$outlet == null) {
-    this.$outlet = this.$context.createGain();
+    this.$outlet = context.createGain();
     this.$outlet.gain.value = this._value;
     this._params.push(this.$outlet.gain);
-    this.$context.connect(new neume.DC(this.$context, 1), this.$outlet);
+    if (input) {
+      context.connect(input, this.$outlet);
+    } else {
+      context.connect(new neume.DC(context, 1), this.$outlet);
+    }
   }
+
   return this.$outlet;
 };
 

@@ -368,10 +368,35 @@ describe("neume.Param", function() {
 
   describe("#toAudioNode", function() {
     it("(): AudioNode", function() {
-      var param = new neume.Param(context, 440);
+      var param = new neume.Param(context, 2);
+      var node = param.toAudioNode();
 
-      assert(param.toAudioNode() instanceof global.AudioNode);
       assert(param.toAudioNode() === param.toAudioNode());
+      assert(node instanceof global.AudioNode);
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: param.value,
+          inputs: []
+        },
+        inputs: [ DC(1) ]
+      });
+    });
+    it("(input): AudioNode", function() {
+      var input = context.createOscillator();
+      var param = new neume.Param(context, 2);
+      var node = param.toAudioNode(input);
+
+      assert(param.toAudioNode() === param.toAudioNode());
+      assert(node instanceof global.AudioNode);
+      assert.deepEqual(node.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: param.value,
+          inputs: []
+        },
+        inputs: [ input.toJSON() ]
+      });
     });
   });
 
