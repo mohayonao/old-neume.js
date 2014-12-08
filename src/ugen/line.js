@@ -40,18 +40,10 @@ module.exports = function(neume, util) {
 
   function make(curve, ugen, startValue, endValue, duration, inputs) {
     var context = ugen.$context;
-    var outlet  = null;
 
     var schedId = 0;
     var param = new neume.Param(context, startValue);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.connect(inputs, outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function start(t) {
       var t0 = t;

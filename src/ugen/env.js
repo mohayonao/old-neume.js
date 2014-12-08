@@ -114,20 +114,6 @@ module.exports = function(neume, util) {
     return env;
   }
 
-  function makeOutlet(context, param, inputs) {
-    var outlet;
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.connect(inputs, outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
-
-    return outlet;
-  }
-
   function setCurve(context, outlet, curve) {
     var ws, wsCurve = null;
 
@@ -209,7 +195,6 @@ module.exports = function(neume, util) {
 
   function make(src, ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var env = toEnv(src);
     var curve = util.defaults(spec.curve, "lin");
@@ -217,8 +202,8 @@ module.exports = function(neume, util) {
 
     var schedId, releaseSchedId, scheduled;
     var isReleased = false, isStopped = false;
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    outlet = makeOutlet(context, param, inputs);
     outlet = setCurve(context, outlet, curve);
 
     function start(t0) {

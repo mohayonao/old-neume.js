@@ -25,7 +25,6 @@ module.exports = function(neume, util) {
    */
   neume.register("array", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var index = 0;
     var data = spec.value;
@@ -41,14 +40,7 @@ module.exports = function(neume, util) {
 
     var prevValue = util.finite(data[0]);
     var param = new neume.Param(context, prevValue, spec);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.connect(inputs, outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function update(t0, nextIndex) {
       var v0 = prevValue;

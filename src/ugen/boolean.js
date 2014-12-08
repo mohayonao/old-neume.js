@@ -24,20 +24,12 @@ module.exports = function(neume, util) {
    */
   neume.register("boolean", function(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = !!spec.value;
     var trueVal = util.finite(util.defaults(spec.true, 1));
     var falseVal = util.finite(util.defaults(spec.false, 0));
     var param = new neume.Param(context, data ? trueVal : falseVal, spec);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.connect(inputs, outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function update(t0, v0, v1, nextData) {
       param.update({ startValue: v0, endValue: v1, startTime: t0 });
