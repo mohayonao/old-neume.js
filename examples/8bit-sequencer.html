@@ -7,33 +7,14 @@
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
     .pattern {
-      font-family: 'Courier New', monospace;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      margin-top: 10px;
+      font-family:"Courier New",monospace;margin-top:10px;
+      user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;
     }
-    .pattern li:nth-child(4n+2) {
-      margin-left: 6px;
-    }
-    .pattern li:nth-child(16n+2) {
-      margin-left: 10px;
-    }
-    #start {
-      margin: 10px 0;
-    }
-    #canvas {
-      width: 100%;
-      height: 240px;
-      background: black;
-    }
-    #code {
-      padding: 0;
-      margin: 0;
-      background: white;
-      border: none;
-    }
+    .pattern li:nth-child(4n+2) { margin-left: 6px }
+    .pattern li:nth-child(16n+2) { margin-left: 10px }
+    #start { margin: 10px 0 }
+    #canvas { width:100%;height:240px;background:black }
+    #code { padding:0;margin:0;background:white;border:none }
   </style>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
@@ -139,8 +120,8 @@
       $("clip", { mul: 0.4 }, $("tri", { freq: 80, mul: 2 })),
       $("pink", { mul: 0.05 }),
     ];
-    out = $("lowshelf", { freq: 120, gain: 10 }, out);
-    out = $("xline", { start: 0.8, dur: 0.100 }, out).on("end", function(e) {
+    out = $("lpf", { freq: 180, Q: 4 }, out);
+    out = $("xline", { start: 0.4, dur: 0.100 }, out).on("end", function(e) {
       this.stop(e.playbackTime);
     });
 
