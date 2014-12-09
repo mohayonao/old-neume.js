@@ -36,7 +36,7 @@ module.exports = function(neume, util) {
       clip: util.clipAt,
       wrap: util.wrapAt,
       fold: util.foldAt,
-    }[spec.mode] || /* istanbul ignore next*/ util.clipAt;
+    }[spec.clip || spec.mode] || /* istanbul ignore next*/ util.clipAt;
 
     if (!Array.isArray(data) || data.length === 0)  {
       data = [ 0 ];
