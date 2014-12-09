@@ -29,29 +29,25 @@ module.exports = function(neume, util) {
     } else {
       curve = spec.curve;
     }
-    return make(setup(curve, ugen, spec, inputs));
+    return make(curve, ugen, spec, inputs);
   });
 
   neume.register("clip", function(ugen, spec, inputs) {
     var curve = createCurve(0);
-    return make(setup(curve, ugen, spec, inputs));
+    return make(curve, ugen, spec, inputs);
   });
 
-  function setup(curve, ugen, spec, inputs) {
+  function make(curve, ugen, spec, inputs) {
     var context = ugen.$context;
-    var shaper = context.createWaveShaper();
+    var outlet = context.createWaveShaper();
 
     if (curve instanceof Float32Array) {
-      shaper.curve = curve;
+      outlet.curve = curve;
     }
-    shaper.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
+    outlet.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
 
-    context.createNeuSum(inputs).connect(shaper);
+    context.connect(inputs, outlet);
 
-    return shaper;
-  }
-
-  function make(outlet) {
     return new neume.Unit({
       outlet: outlet
     });

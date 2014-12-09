@@ -2,6 +2,7 @@
 
 var C = require("../const");
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
@@ -21,6 +22,18 @@ var curveDry = new Float32Array(WS_CURVE_SIZE);
 
 function NeuDryWet(context, dryIn, wetIn, mixIn) {
   NeuComponent.call(this, context);
+
+  mixIn = mixIn.valueOf();
+
+  if (typeof mixIn === "number") {
+    if (mixIn === 0) {
+      return new neume.Component(context, dryIn);
+    }
+    if (mixIn === 1) {
+      return new neume.Component(context, wetIn);
+    }
+  }
+
   this._dryIn = dryIn;
   this._wetIn = wetIn;
   this._mixIn = mixIn;
@@ -55,13 +68,6 @@ NeuDryWet.prototype.connect = function(to) {
 
 function createMixNodeWithNumber(context, dryIn, wetIn, mix) {
   mix = util.clip(util.finite(mix), 0, 1);
-
-  if (mix === 1) {
-    return wetIn;
-  }
-  if (mix === 0) {
-    return dryIn;
-  }
 
   var wetNode = context.createGain();
   var dryNode = context.createGain();

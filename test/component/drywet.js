@@ -2,48 +2,53 @@
 
 var neume = require("../../src");
 
-var NeuComponent = neume.Component;
-var NeuDryWet = neume.DryWet;
-
-describe("NeuDryWet", function() {
-  var context;
+describe("neume.DryWet", function() {
+  var context = null;
 
   beforeEach(function() {
     context = new neume.Context(new global.AudioContext().destination);
   });
 
-  describe("(context, dryIn, wetIn, mixIn)", function() {
-    it("returns an instance of NeuDryWet", function() {
-      var instance = new NeuDryWet(context, 0, 0, 0);
+  describe("constructor", function() {
+    it("(context: neume.Context, dryIn: any, wetIn: any, mixIn: any)", function() {
+      var dryIn = context.createOscillator();
+      var wetIn = context.createDelay();
+      var mixIn = context.createGain();
+      var instance = new neume.DryWet(context, dryIn, wetIn, mixIn);
 
-      assert(instance instanceof NeuDryWet);
-      assert(instance instanceof NeuComponent);
+      assert(instance instanceof neume.DryWet);
+      assert(instance instanceof neume.Component);
+    });
+    it("constructor: (dryIn) // when mixIn is 0", function() {
+      var dryIn = context.createOscillator();
+      var wetIn = context.createDelay();
+      var mixIn = 0;
+      var instance = new neume.DryWet(context, dryIn, wetIn, mixIn);
+
+      assert(instance instanceof neume.Component);
+      assert.deepEqual(dryIn.toJSON(), instance.toAudioNode().toJSON());
+    });
+    it("constructor: (wetIn) // when mixIn is 1", function() {
+      var dryIn = context.createOscillator();
+      var wetIn = context.createDelay();
+      var mixIn = 1;
+      var instance = new neume.DryWet(context, dryIn, wetIn, mixIn);
+
+      assert(instance instanceof neume.Component);
+      assert.deepEqual(wetIn.toJSON(), instance.toAudioNode().toJSON());
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("works", function() {
-      var mixNode = new NeuDryWet(context, context.createGain(), context.createGain(), context.createGain());
+  describe("#toAudioNode", function() {
+    it("(): AudioNode // when dryIn, wetIn, number", function() {
+      var dryIn = context.createOscillator();
+      var wetIn = context.createDelay();
+      var mixIn = Math.random();
+      var a = new neume.DryWet(context, dryIn, wetIn, mixIn);
 
-      assert(mixNode.toAudioNode() instanceof global.AudioNode);
-      assert(mixNode.toAudioNode() === mixNode.toAudioNode());
-    });
-    it("graph (dryIn, wetIn, 0)", function() {
-      var mixNode = new NeuDryWet(context, context.createGain(), context.createOscillator(), 0);
-
-      assert.deepEqual(mixNode.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: []
-      });
-    });
-    it("graph (dryIn, wetIn, 0.2)", function() {
-      var mixNode = new NeuDryWet(context, context.createGain(), context.createOscillator(), 0.2);
-
-      assert.deepEqual(mixNode.toAudioNode().toJSON(), {
+      assert(a.toAudioNode() instanceof global.AudioNode);
+      assert(a.toAudioNode() === a.toAudioNode());
+      assert.deepEqual(a.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -53,66 +58,31 @@ describe("NeuDryWet", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.2,
+              value: mixIn,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ wetIn.toJSON() ]
           },
           {
             name: "GainNode",
             gain: {
-              value: 0.8,
+              value: 1 - mixIn,
               inputs: []
             },
-            inputs: [
-              {
-                name: "GainNode",
-                gain: {
-                  value: 1,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ dryIn.toJSON() ]
           }
         ]
       });
     });
-    it("graph (dryIn, wetIn, 1)", function() {
-      var mixNode = new NeuDryWet(context, context.createGain(), context.createOscillator(), 1);
+    it("(): AudioNode // when dryIn, wetIn, node", function() {
+      var dryIn = context.createOscillator();
+      var wetIn = context.createDelay();
+      var mixIn = context.createBufferSource();
+      var a = new neume.DryWet(context, dryIn, wetIn, mixIn);
 
-      assert.deepEqual(mixNode.toAudioNode().toJSON(), {
-        name: "OscillatorNode",
-        type: "sine",
-        frequency: {
-          value: 440,
-          inputs: []
-        },
-        detune: {
-          value: 0,
-          inputs: []
-        },
-        inputs: []
-      });
-    });
-    it("graph (dryIn, wetIn, mixIn)", function() {
-      var mixNode = new NeuDryWet(context, context.createGain(), context.createOscillator(), context.createDelay());
-
-      assert(mixNode.toAudioNode().toJSON(), {
+      assert(a.toAudioNode() instanceof global.AudioNode);
+      assert(a.toAudioNode() === a.toAudioNode());
+      assert.deepEqual(a.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -127,34 +97,11 @@ describe("NeuDryWet", function() {
                 {
                   name: "WaveShaperNode",
                   oversample: "none",
-                  inputs: [
-                    {
-                      name: "DelayNode",
-                      delayTime: {
-                        value: 0,
-                        inputs: []
-                      },
-                      inputs: []
-                    }
-                  ]
+                  inputs: [ mixIn.toJSON() ]
                 }
               ]
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ wetIn.toJSON() ]
           },
           {
             name: "GainNode",
@@ -164,98 +111,33 @@ describe("NeuDryWet", function() {
                 {
                   name: "WaveShaperNode",
                   oversample: "none",
-                  inputs: [
-                    {
-                      name: "DelayNode",
-                      delayTime: {
-                        value: 0,
-                        inputs: []
-                      },
-                      inputs: []
-                    }
-                  ]
+                  inputs: [ mixIn.toJSON() ]
                 }
               ]
             },
-            inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 1,
-                inputs: []
-              },
-              inputs: []
-            }
-            ]
+            inputs: [ dryIn.toJSON() ]
           }
         ]
       });
     });
   });
 
-  describe("#connect(to)", function() {
-    it("works", function() {
-      var gain = context.createGain();
-      var mixNode = new NeuDryWet(context, context.createGain(), context.createOscillator(), 0.2);
+  describe("#connect", function() {
+    it("(to: any): self", function() {
+      var toNode = context.createGain();
+      var dryIn = context.createOscillator();
+      var wetIn = context.createDelay();
+      var mixIn = context.createBufferSource();
+      var a = new neume.DryWet(context, dryIn, wetIn, mixIn);
 
-      mixNode.connect(gain);
-
-      assert.deepEqual(gain.toJSON(), {
+      assert(a.connect(toNode) === a);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 1,
-              inputs: []
-            },
-            inputs: [
-              {
-                name: "GainNode",
-                gain: {
-                  value: 0.2,
-                  inputs: []
-                },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 440,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
-              },
-              {
-                name: "GainNode",
-                gain: {
-                  value: 0.8,
-                  inputs: []
-                },
-                inputs: [
-                  {
-                    name: "GainNode",
-                    gain: {
-                      value: 1,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        inputs: [ a.toAudioNode().toJSON() ]
       });
     });
   });

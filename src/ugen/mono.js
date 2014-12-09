@@ -17,6 +17,10 @@ module.exports = function(neume) {
    *   |
    */
   neume.register("mono", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet = context.createGain();
 
@@ -24,10 +28,11 @@ module.exports = function(neume) {
     outlet.channelCountMode = "explicit";
     outlet.channelInterpretation = "speakers";
 
-    context.createNeuSum(inputs).connect(outlet);
+    context.connect(inputs, outlet);
 
     return new neume.Unit({
       outlet: outlet
     });
-  });
+  }
+
 };

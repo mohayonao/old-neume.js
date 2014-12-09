@@ -8,13 +8,13 @@ neume.use(require("../../src/ugen/osc"));
 describe("ugen/inout", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
   describe("$(in)", function() {
     it("graph", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("in", 1);
       });
 
@@ -41,7 +41,7 @@ describe("ugen/inout", function() {
 
   describe("$(out)", function() {
     it("graph", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("out", { bus: 1 }, $("osc"));
       });
 
@@ -83,7 +83,7 @@ describe("ugen/inout", function() {
 
   describe("$(local-in)", function() {
     it("graph", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("local-in", 1);
       });
 
@@ -109,7 +109,7 @@ describe("ugen/inout", function() {
 
   describe("$(local-out)", function() {
     it("graph", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("local-out", { bus: 1 }, $("osc"));
       });
 
@@ -140,7 +140,7 @@ describe("ugen/inout", function() {
 
   describe("$(local-out { bus: 0 } $(osc mul:$(local-in 0)))", function() {
     it("graph", function() {
-      var synth = new Neume.Synth(function($) {
+      var synth = Neume.Synth(function($) {
         return $("local-out", { bus: 0 }, $("osc", { mul: $("local-in", 0) }));
       });
 

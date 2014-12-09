@@ -1,9 +1,7 @@
 "use strict";
 
 var util = require("../util");
-
-// TODO: FIX ME
-util.NeuSynth = require("./synth");
+var neume = require("../namespace");
 
 function NeuSynthDef(defaultContext, func) {
   if (!util.isFunction(func)) {
@@ -18,7 +16,7 @@ function NeuSynthDef(defaultContext, func) {
       context = args.shift();
     }
 
-    return new util.NeuSynth(context, func, args);
+    return new neume.Synth(context, func, args);
   }
 
   Object.defineProperties(SynthDef, {

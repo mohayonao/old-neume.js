@@ -2,97 +2,81 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-var NeuDC = neume.DC;
-
-describe("NeuDC", function() {
+describe("neume.DC", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new global.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
-  describe("(context, value)", function() {
-    it("returns an instance of NeuDC", function() {
-      assert(new NeuDC(context, 220) instanceof NeuDC);
+  describe("constructor", function() {
+    it("(context: neume.Context, value: number)", function() {
+      var a = new neume.DC(context, 220);
+
+      assert(a instanceof neume.DC);
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("returns an AudioNode", function() {
-      var dc = new NeuDC(context, 0);
-      assert(dc.toAudioNode() instanceof global.AudioNode);
-      assert(dc.toAudioNode() === dc.toAudioNode());
+  describe("#toAudioNode", function() {
+    it("(): AudioNode // when 0", function() {
+      var a = new neume.DC(context, 0);
+
+      assert(a.toAudioNode() instanceof global.AudioNode);
+      assert(a.toAudioNode() === a.toAudioNode());
+      assert.deepEqual(a.toAudioNode().toJSON(), DC(0));
+      assert(a.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
-  });
+    it("(): AudioNode // when 1", function() {
+      var a = new neume.DC(context, 1);
 
-  describe("#connect(to)", function() {
-    it("0 -> AudioNode", function() {
-      var gain = context.createGain();
+      assert(a.toAudioNode() instanceof global.AudioNode);
+      assert(a.toAudioNode() === a.toAudioNode());
+      assert.deepEqual(a.toAudioNode().toJSON(), DC(1));
+      assert(a.toAudioNode().buffer.getChannelData(0)[0] === 1);
+    });
+    it("(): AudioNode // else", function() {
+      var n = Math.floor(Math.random() * 65536);
+      var a = new neume.DC(context, n);
 
-      new NeuDC(context, 0).connect(gain);
-
-      assert.deepEqual(gain.toJSON(), {
+      assert(a.toAudioNode() instanceof global.AudioNode);
+      assert(a.toAudioNode() === a.toAudioNode());
+      assert.deepEqual(a.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [ DC(0) ]
-      });
-
-      assert(gain.$inputs[0].buffer.getChannelData(0)[0] === 0);
-    });
-    it("1 -> AudioNode", function() {
-      var gain = context.createGain();
-
-      new NeuDC(context, 1).connect(gain);
-
-      assert.deepEqual(gain.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
+          value: n,
           inputs: []
         },
         inputs: [ DC(1) ]
       });
-
-      assert(gain.$inputs[0].buffer.getChannelData(0)[0] === 1);
+      assert(a.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
-    it("2 -> AudioNode", function() {
-      var gain = context.createGain();
+  });
 
-      new NeuDC(context, 2).connect(gain);
+  describe("#connect", function() {
+    it("(to: AudioNode): self", function() {
+      var toNode = context.createGain();
+      var a = new neume.DC(context, 0);
 
-      assert.deepEqual(gain.toJSON(), {
+      assert(a.connect(toNode) === a);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 2,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
-          }
-        ]
+        inputs: [ a.toAudioNode().toJSON() ]
       });
-
-      assert(gain.$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
-    it("3 -> AudioParam", function() {
-      var gain = context.createGain();
+    it("(to: AudioParam): self", function() {
+      var toNode = context.createGain();
+      var n = Math.floor(Math.random() * 65536);
+      var a = new neume.DC(context, n);
 
-      new NeuDC(context, 3).connect(gain.gain);
-
-      assert.deepEqual(gain.toJSON(), {
+      assert(a.connect(toNode.gain) === a);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 3,
+          value: n,
           inputs: []
         },
         inputs: []
@@ -100,13 +84,15 @@ describe("NeuDC", function() {
     });
   });
 
-  describe("#disconnect()", function() {
-    it("works", function() {
-      var gain = context.createGain();
+  describe("#disconnect", function() {
+    it("(): self", function() {
+      var toNode = context.createGain();
+      var a = new neume.DC(context, 0);
 
-      new NeuDC(context, 0).connect(gain).disconnect();
+      a.connect(toNode);
 
-      assert.deepEqual(gain.toJSON(), {
+      assert(a.disconnect() === a);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
@@ -117,11 +103,11 @@ describe("NeuDC", function() {
     });
   });
 
-  describe("#valueOf()", function() {
-    it("returns the value", function() {
-      assert(new NeuDC(context, 0).valueOf() === 0);
-      assert(new NeuDC(context, 1).valueOf() === 1);
-      assert(new NeuDC(context, 2).valueOf() === 2);
+  describe("#valueOf", function() {
+    it("(): number", function() {
+      assert(new neume.DC(context, 0).valueOf() === 0);
+      assert(new neume.DC(context, 1).valueOf() === 1);
+      assert(new neume.DC(context, 2).valueOf() === 2);
     });
   });
 

@@ -2,18 +2,19 @@
 
 var neume = require("../../src");
 
+neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/env"));
 
 describe("ugen/env", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(env)", function() {
-    it("return a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
+  describe("graph", function() {
+    it("$('env')", function() {
+      var synth = Neume.Synth(function($) {
         return $("env");
       });
 
@@ -35,324 +36,11 @@ describe("ugen/env", function() {
         ]
       });
     });
-  });
-
-  describe("$(env, init:0, table:[], release:3)", function() {
-    it("works", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("env", {
-          init: 0,
-          table: [
-            [ 90, 0.100, 1e-3 ],
-            [ 80, 0.100, 1e-3 ],
-            [ 60, 0.000, 1e-3 ],
-            [ 50, 0.100, 1e-3 ],
-            [ 50, 0.100, 1e-3 ],
-            ///// release /////
-            [ 20, 0.100, 1e-3 ],
-            [  0, 0.200, 1e-3 ],
-          ],
-          release: 5
-        });
+    it("$('env', $('sin'))", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", $("sin"));
       });
 
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-      var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      // 0.000
-      // 0.100 :  0 <- start
-      // 0.200 : 90
-      // 0.300 : 80
-      // 0.300 : 60
-      // 0.400 : 50
-      // 0.500 : 50
-      // -----------
-      // 0.600 : 50 <- release
-      // 0.700 : 20
-      // 0.900 :  0 -> end
-
-      synth.start(0.100).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.600);
-
-      audioContext.$processTo("00:01.500");
-
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.301), 59.332, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 50.316, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50.010, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 50.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 50.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.948, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.029, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750),  3.561, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800),  0.633, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850),  0.112, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900),  0.020, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950),  0.003, 1e-2));
-
-      assert(closeTo(ended, 1.186, 1e-2));
-    });
-    it("works with stop", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("env", {
-          init: 0,
-          table: [
-            [ 90, 0.100, 1e-3 ],
-            [ 80, 0.100, 1e-3 ],
-            [ 60, 0.000, 1e-3 ],
-            [ 50, 0.100, 1e+3 ],
-            [ 50, 0.100, 1e+3 ],
-            ///// release /////
-            [ 20, 0.100, 1e-3 ],
-            [  0, 0.200, 1e-3 ],
-          ],
-          release: 5
-        });
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-      var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      // 0.000
-      // 0.100 :  0 <- start
-      // 0.200 : 90
-      //            <- stop
-      // 0.300 : 80
-      // 0.300 : 60
-      // 0.400 : 50
-      // 0.500 : 50
-      // -----------
-      // 0.600 : 50 <- release
-      // 0.700 : 20
-      // 0.900 :  0 -> end
-
-      synth.start(0.100).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.600).stop(0.225);
-
-      audioContext.$processTo("00:01.500");
-
-      assert(closeTo(outlet.gain.$valueAtTime(0.000),  0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.050),  0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.100),  0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.225), 86.512, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 86.512, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 86.512, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 86.512, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 86.512, 1e-2));
-
-      assert(ended === 0);
-    });
-
-    it("works with loop", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("env", {
-          init: 0,
-          table: [
-            [ 90, 0.100, 1e-3 ],
-            [ 80, 0.100, 1e-3 ],
-            ////// loop ///////
-            [ 60, 0.050, 1e-3 ],
-            [ 50, 0.050, 1e-3 ],
-            ///// release /////
-            [ 20, 0.100, 1e-3 ],
-            [  0, 0.200, 1e-3 ],
-          ],
-          release: 4, loop: 2
-        });
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-      var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      // 0.000
-      // 0.100 :  0 <- start
-      // 0.200 : 90
-      // 0.300 : 80
-      // 0.350 : 60 ..
-      // 0.400 : 50 ..
-      // 0.450 : 60 -- loop
-      // 0.500 : 50
-      // 0.550 : 60 -- loop
-      // -----------
-      // 0.600 : 50 <- release
-      // 0.700 : 20
-      // 0.900 :  0 -> end
-
-      synth.start(0.100).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.600);
-
-      audioContext.$processTo("00:01.500");
-
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60.020, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50.010, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 59.990, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 59.990, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.948, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.030, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750),  3.561, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800),  0.633, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850),  0.112, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900),  0.020, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950),  0.003, 1e-2));
-
-      assert(closeTo(ended, 1.186, 1e-2));
-    });
-
-    it("works without releaseNode", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("env", {
-          init: 0,
-          table: [
-            [ 90, 0.100, 1e-3 ],
-            [ 80, 0.100, 1e-3 ],
-            [ 60, 0.100, 1e-3 ],
-            [ 50, 0.100, 1e-3 ],
-            [ 20, 0.100, 1e-3 ],
-            [  0, 0.200, 1e-3 ],
-          ],
-        });
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-      var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      // 0.000
-      // 0.100 :  0 <- start
-      // 0.200 : 90
-      // 0.300 : 80
-      // 0.400 : 60
-      // 0.500 : 50
-      // 0.600 : 20
-      // 0.700 :  0 <- end
-
-      synth.start(0.100).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.600);
-
-      audioContext.$processTo("00:01.500");
-
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60.632, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 60.020, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 50.316, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.010, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 20.949, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 20.030, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 3.5618, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.6334, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.1126, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.0200, 1e-2));
-
-      assert(closeTo(ended, 1.086, 1e-2));
-    });
-    it("_ style", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("env", { _: [
-          0, 90, 0.100, 80, 0.100, "L", 60, 0.050, 50, 0.050, "R", 20, 0.100, 0, 0.200, "X"
-        ], curve: 1e-3 });
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-      var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      // 0.000
-      // 0.100 :  0 <- start
-      // 0.200 : 90
-      // 0.300 : 80
-      // 0.350 : 60 ..
-      // 0.400 : 50 ..
-      // 0.450 : 60 -- loop
-      // 0.500 : 50
-      // 0.550 : 60 -- loop
-      // -----------
-      // 0.600 : 50 <- release
-      // 0.700 : 20
-      // 0.900 :  0 -> end
-
-      synth.start(0.100).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.600);
-
-      audioContext.$processTo("00:01.500");
-
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 87.153, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 89.910, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 80.313, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 80.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 60.020, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 50.010, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 59.990, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 50.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 59.990, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 50.009, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 20.948, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 20.030, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750),  3.561, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800),  0.633, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850),  0.112, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900),  0.020, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950),  0.003, 1e-2));
-
-      assert(closeTo(ended, 1.186, 1e-2));
-    });
-  });
-
-  describe("$(env, $(env), $(env))", function() {
-    it("returns a GainNode that is connected with $(env) x2", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("env", $("env"), $("env"));
-      });
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -368,13 +56,39 @@ describe("ugen/env", function() {
             },
             inputs: [
               {
-                name: "GainNode",
-                gain: {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
                   value: 0,
                   inputs: []
                 },
-                inputs: [ DC(1) ]
-              },
+                inputs: []
+              }
+            ]
+          }
+        ]
+      });
+    });
+    it("$('env', { curve: 'sine' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "sine" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
               {
                 name: "GainNode",
                 gain: {
@@ -387,14 +101,168 @@ describe("ugen/env", function() {
           }
         ]
       });
-    });
-  });
 
-  describe("$(adsr)", function() {
-    it("return a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("adsr");
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "sine" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: 'welch' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "welch" });
       });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "welch" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: 'squared' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "squared" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "squared" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: 'cubic' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "cubic" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "cubic" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: -4 })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: -4 });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: -4 });
+      }).toAudioNode().$inputs[0].curve;
+      var curve2 = Neume.Synth(function($) {
+        return $("env", { curve: +4 });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+      assert(curve2 instanceof Float32Array);
+      assert(curve !== curve2);
+    });
+    it("$('env', { curve: 0 })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: 0 });
+      });
+
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -413,242 +281,532 @@ describe("ugen/env", function() {
         ]
       });
     });
-    it("works", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("adsr", { a: 0.1, d: 0.2, s: 0.3, r: 0.5, curve: 0.01 });
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-      var ended = 0;
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0.100).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.600);
-
-      audioContext.$processTo("00:01.000");
-
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.899, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.990, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.518, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.369, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.321, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.306, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.302, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.300, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.300, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.300, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.189, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.119, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.075, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.047, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.030, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.018, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.011, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.007, 1e-2));
-    });
   });
 
-  describe("$(dadsr)", function() {
-    it("return a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("dadsr");
+  describe("works", function() {
+    it("loopNode", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, "<", 1, 0.1, 0, 0.1
+        ] });
       });
 
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 0,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
-          }
-        ]
-      });
-    });
-    it("works", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("dadsr", { delay: 0.1, a: 0.1, d: 0.2, s: 0.3, r: 0.5, curve: 0.01 });
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
       var ended = 0;
 
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0.100).on("end", function(e) {
+      synth.start(0).on("end", function(e) {
         ended = e.playbackTime;
-      }).release(0.600);
-
-      audioContext.$processTo("00:01.000");
-
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(outlet.gain.$valueAtTime(0.150) === 0);
-      assert(outlet.gain.$valueAtTime(0.200) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.899, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.990, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.518, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.369, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.321, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.306, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.302, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.300, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.189, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.119, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.075, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.047, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.030, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.018, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.011, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.007, 1e-2));
-    });
-  });
-
-  describe("$(asr)", function() {
-    it("return a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("asr");
       });
 
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 0,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
-          }
-        ]
-      });
-    });
-    it("works", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("asr", { a: 0.1, s: 0.3, r: 0.5, curve: 0.01 });
-      });
+      Neume.audioContext.$processTo("00:01.000");
 
-      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(ended === 0);
+    });
+    it("loopNode & releaseNode", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, "<", 1, 0.1, 0, 0.1, ">", 0, 0.5
+        ] });
+      });
+
       var ended = 0;
 
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0.100).on("end", function(e) {
+      synth.start(0).on("end", function(e) {
         ended = e.playbackTime;
-      }).release(0.600);
+      }).release(0.500);
 
-      audioContext.$processTo("00:01.000");
+      Neume.audioContext.$processTo("00:01.000");
 
-      assert(outlet.gain.$valueAtTime(0.000) === 0);
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.269, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.297, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.299, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.189, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.119, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.075, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.047, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.029, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.018, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.011, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.007, 1e-2));
-    });
-  });
-
-  describe("$(cutoff)", function() {
-    it("return a GainNode that is connected with DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("cutoff");
-      });
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "GainNode",
-            gain: {
-              value: 1,
-              inputs: []
-            },
-            inputs: [ DC(1) ]
-          }
-        ]
-      });
-    });
-    it("works", function() {
-      var synth = new Neume.Synth(function($) {
-        return $("cutoff", { r: 0.5, level: 0.8, curve: 0.01 });
-      });
-
-      var audioContext = Neume.audioContext;
       var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.900, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.800, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.700, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.600, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.400, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+    it("release in the phase", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 10, ">", 0, 0.5
+        ] });
+      });
+
       var ended = 0;
 
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0.100).on("end", function(e) {
+      synth.start(0).on("end", function(e) {
         ended = e.playbackTime;
-      }).release(0.600);
+      }).release(0.500);
 
-      audioContext.$processTo("00:01.000");
+      Neume.audioContext.$processTo("00:01.000");
 
-      assert(outlet.gain.$valueAtTime(0.000) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.050) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.100) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.150) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.200) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.250) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.300) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.350) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.400) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.450) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.500) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.550) === 0.8);
-      assert(outlet.gain.$valueAtTime(0.600) === 0.8);
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.504, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.318, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.200, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.126, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.080, 1e-2));
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.005, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 0.015, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.025, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.035, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.040, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.045, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.050, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.045, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.040, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.035, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.030, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.025, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.015, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.005, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+    it("stop", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 1
+        ] });
+      });
+
+      var ended = 0;
+
+      synth.start(0).on("end", function(e) {
+        ended = e.playbackTime;
+      }).stop(0.500);
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.050, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 0.150, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.350, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.400, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.450, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.500, 1e-2));
+
+      assert(ended === 0);
+    });
+    it("release after stop", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 10, ">", 0, 0.5
+        ] });
+      });
+
+      var ended = 0;
+
+      synth.start(0).on("end", function(e) {
+        ended = e.playbackTime;
+      }).stop(0.100).release(0.500).release(0.250);
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.005, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.010, 1e-2));
+
+      assert(ended === 0);
+    });
+    it("curve:step", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
+        ], curve: "step" });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      });
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+    it("curve:hold", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
+        ], curve: "hold" });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      });
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.151), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.351), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+    it("curve:lin", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
+        ], curve: "lin" });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      });
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.812, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.625, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.437, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.225, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.175, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.150, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.075, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.031, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+    it("curve:exp", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { table: [
+          0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
+        ], curve: "exp" });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      });
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.001, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.707, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.353, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.072, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.020, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.006, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.001, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+  });
+
+  describe("$('adsr')", function() {
+    it("works", function() {
+      var synth = Neume.Synth(function($) {
+        return $("adsr", { a: 0.1, d: 0.2, s: 0.25, r: 0.5 });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.500);
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.812, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.625, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.437, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.225, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.175, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.150, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.075, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+  });
+
+  describe("$('dadsr')", function() {
+    it("works", function() {
+      var synth = Neume.Synth(function($) {
+        return $("dadsr", { delay: 0.05, a: 0.1, d: 0.2, s: 0.25, r: 0.5 });
+      });
+
+      var ended = 0;
+
+      synth.start(0.000).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.500);
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.812, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.625, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.437, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.225, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.175, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.150, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.075, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+  });
+
+  describe("$('asr')", function() {
+    it("works", function() {
+      var synth = Neume.Synth(function($) {
+        return $("asr", { a: 0.3, s: 0.25, r: 0.5 });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.500);
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.041, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 0.083, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.166, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.208, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.225, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.175, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.150, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.075, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
+    });
+  });
+
+  describe("$('cutoff')", function() {
+    it("works", function() {
+      var synth = Neume.Synth(function($) {
+        return $("cutoff", { r: 0.5 });
+      });
+
+      var ended = 0;
+
+      synth.start(0.050).on("end", function(e) {
+        ended = e.playbackTime;
+      }).release(0.500);
+
+      Neume.audioContext.$processTo("00:01.000");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(closeTo(outlet.gain.$valueAtTime(0.000), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.050), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.200), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.250), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.300), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.350), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.400), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.450), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.500), 1.000, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.900, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.800, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.700, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.600, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.400, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.300, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.200, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.100, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
+
+      assert(closeTo(ended, 1.000, 1e-2));
     });
   });
 

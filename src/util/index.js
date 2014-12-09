@@ -182,8 +182,8 @@ util.typeOf = function(value) {
   return name;
 };
 
-util.defaults = function(value, defaultValue) {
-  return value == null ? defaultValue : value;
+util.defaults = function(value1, value2, defaultValue) {
+  return value1 != null ? value1 : value2 != null ? value2 : defaultValue;
 };
 
 util.inherits = function(ctor, superCtor) {

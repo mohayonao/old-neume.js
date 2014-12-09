@@ -6,7 +6,6 @@ module.exports = function(neume, util) {
 
   function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = util.defaults(spec.value, 0);
     var key = util.defaults(spec.key, "");
@@ -31,37 +30,22 @@ module.exports = function(neume, util) {
     }
 
     var minInterval = 1 / context.sampleRate;
-    var relativeInterval = true;
-
-    if (!/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
-      relativeInterval = false;
-      interval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
-    }
 
     var prevVal = util.finite(valueOf());
-    var param = context.createNeuParam(prevVal, spec);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
+    var param = new neume.Param(context, prevVal, spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function update(t0) {
       var value = util.finite(valueOf());
 
       if (value !== prevVal) {
-        param.update(t0, value, prevVal);
+        param.update(value, t0);
         prevVal = value;
       }
 
-      var nextTime = relativeInterval ?
-        t0 + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
-        t0 + interval;
+      var nextInterval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
 
-      schedId = context.sched(nextTime, update);
+      schedId = context.sched(t0 + nextInterval, update);
     }
 
     return new neume.Unit({

@@ -2,26 +2,20 @@
 
 var neume = require("../../src");
 
-var NeuSynthDB = neume.SynthDB;
+describe("neume.SynthDB", function() {
+  describe("constructor", function() {
+    it("()", function() {
+      var db = new neume.SynthDB();
 
-describe("NeuSynthDB", function() {
-  var db = null;
-
-  beforeEach(function() {
-    db = new NeuSynthDB();
-  });
-
-  describe("()", function() {
-    it("returns an instance of NeuSynthDB", function() {
-      assert(db instanceof NeuSynthDB);
+      assert(db instanceof neume.SynthDB);
     });
   });
 
-  describe("#append(obj)", function() {
-    it("returns self", function() {
+  describe("#append", function() {
+    it("(obj: any): self", function() {
+      var db = new neume.SynthDB();
+
       assert(db.append() === db);
-    });
-    it("appends the obj if it is an object", function() {
       db.append({ a: 0 });
       db.append({ b: 1 });
       db.append("string");
@@ -30,8 +24,10 @@ describe("NeuSynthDB", function() {
     });
   });
 
-  describe("#all()", function() {
-    it("returns all stored objects", function() {
+  describe("#all", function() {
+    it("(): Array<any>", function() {
+      var db = new neume.SynthDB();
+
       db.append({ a: 0 });
       db.append({ b: 1 });
       db.append({ c: 2 });
@@ -40,8 +36,10 @@ describe("NeuSynthDB", function() {
     });
   });
 
-  describe("#find(selector)", function() {
-    it("returns an array of all values that matched the selector", function() {
+  describe("#find", function() {
+    it("(selector: string): Array<any>", function() {
+      var db = new neume.SynthDB();
+
       db.append({ $key: "line", $id: "id1", $class: [ "amp" ] });
       db.append({ $key: "line", $id: "id2", $class: [ "amp" ] });
       db.append({ $key: "line", $id: "id3", $class: [ "mod" ] });

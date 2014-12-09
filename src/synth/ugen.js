@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var Emitter = require("../event/emitter");
 var SelectorParser = require("../parser/selector");
 
@@ -20,6 +21,8 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$id = parsed.id;
   this.$outlet = null;
 
+  this.$builder = synth.$builder;
+
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   this._node = unit.$outlet;
@@ -33,8 +36,14 @@ function NeuUGen(synth, key, spec, inputs) {
   Object.keys(unit.$methods).forEach(function(name) {
     var method = unit.$methods[name];
     util.definePropertyIfNotExists(this, name, {
-      value: function() {
-        method.apply(this, arguments);
+      value: function(t, v) {
+        var e;
+        if (t != null && typeof t !== "object") {
+          e = { playbackTime: t, value: v };
+        } else {
+          e = t || {};
+        }
+        method.call(this, e);
         return this;
       }
     });
@@ -71,6 +80,14 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.mul = function(value) {
+  return this.$builder("*", this, util.defaults(value, 1));
+};
+
+NeuUGen.prototype.add = function(value) {
+  return this.$builder("+", this, util.defaults(value, 0));
+};
+
 NeuUGen.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
     this.$outlet = this.$context.toAudioNode(this._node);
@@ -93,7 +110,7 @@ function mul(context, a, b) {
     return a;
   }
   if (b === 0) {
-    return context.createNeuDC(0);
+    return new neume.DC(context, 0);
   }
 
   var mulNode = context.createGain();
@@ -107,7 +124,7 @@ function mul(context, a, b) {
 }
 
 function add(context, a, b) {
-  return context.createNeuSum([ a, b ]);
+  return new neume.Sum(context, [ a, b ]);
 }
 
 module.exports = NeuUGen;

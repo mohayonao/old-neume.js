@@ -5,44 +5,68 @@ module.exports = function(neume, util) {
 
   /**
    * $("delay", {
-   *   delay: [number|UGen] = 0
-   *   maxDelayTime: [number] = delay
+   *   delayTime: [number|UGen] = 0
+   *   feedback: [number|UGen] = 0
+   *   maxDelay: [number] = delay
    * } ... inputs)
    *
    * +--------+
    * | inputs |
-   * +--------+
-   *   ||||||
-   * +------------------------+
-   * | DelayNode              |
-   * | - delayTime: delayTime |
-   * +------------------------+
+   * +--------+             +-----+
+   *   ||||||               |     |
+   * +------------------------+   |
+   * | DelayNode              |   |
+   * | - delayTime: delayTime |   |
+   * +------------------------+   |
+   *   |      |                   |
+   *   |    +------------------+  |
+   *   |    | GainNode         |  |
+   *   |    | - gain: feedback |  |
+   *   |    +------------------+  |
+   *   |      |                   |
+   *   |      +-------------------+
    *   |
    */
   neume.register("delay", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var delayTime = util.defaults(context.toSeconds(spec.delay), 0);
+    var delayTime = context.toSeconds(util.defaults(spec.delay, spec.delayTime, 0));
+    var feedback = util.defaults(spec.fb, spec.feedback, 0);
     var maxDelayTime;
 
     if (typeof delayTime === "number") {
-      delayTime = util.clip(util.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
+      delayTime = util.clip(util.finite(delayTime), 0, WEB_AUDIO_MAX_DELAY_TIME);
       maxDelayTime = delayTime;
     } else {
-      maxDelayTime = util.finite(util.defaults(context.toSeconds(spec.maxDelayTime), 1));
+      maxDelayTime = util.finite(context.toSeconds(util.defaults(spec.maxDelay, spec.maxDelayTime, 1)));
     }
     maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
 
-    var delay = context.createDelay(maxDelayTime);
+    var outlet = context.createDelay(maxDelayTime);
 
-    delay.delayTime.value = 0;
-    context.connect(delayTime, delay.delayTime);
+    outlet.delayTime.value = 0;
+    context.connect(delayTime, outlet.delayTime);
 
-    context.createNeuSum(inputs).connect(delay);
+    if (feedback !== 0) {
+      var feedbackNode = context.createGain();
+
+      feedbackNode.gain.value = 0;
+
+      context.connect(outlet, feedbackNode);
+      context.connect(feedback, feedbackNode.gain);
+
+      inputs = inputs.concat(feedbackNode);
+    }
+
+    context.connect(inputs, outlet);
 
     return new neume.Unit({
-      outlet: delay
+      outlet: outlet
     });
-  });
+  }
 
 };

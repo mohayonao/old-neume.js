@@ -2,105 +2,98 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-var NeuComponent = neume.Component;
-var NeuDC = neume.DC;
-var NeuParam = neume.Param;
-var NeuSum = neume.Sum;
-
-describe("NeuSum", function() {
+describe("neume.Sum", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new NeuContext(new global.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination);
   });
 
-  describe("(context, inputs)", function() {
-    it("returns an instanceof NeuSum when given [ node, node ]", function() {
-      var sum = new NeuSum(context, [ context.createOscillator(), context.createOscillator() ]);
-      assert(sum instanceof NeuSum);
-      assert(sum instanceof NeuComponent);
+  describe("constructor", function() {
+    it("(context: neume.Context, inputs: Array<any>)", function() {
+      var a = context.createOscillator();
+      var b = context.createOscillator();
+      var sum = new neume.Sum(context, [ a, b ]);
+
+      assert(sum instanceof neume.Sum);
+      assert(sum instanceof neume.Component);
     });
-    it("returns an instanceof NeuComponent when given [ node ]", function() {
-      var sum = new NeuSum(context, [ context.createOscillator() ]);
-      assert(sum instanceof NeuComponent);
+    it("(context: neume.Context, inputs: [ node ]): neume.Component", function() {
+      var a = context.createOscillator();
+      var sum = new neume.Sum(context, [ a ]);
+
+      assert(sum instanceof neume.Component);
     });
-    it("returns an instanceof NeuDC when given [ number, number ]", function() {
-      var sum = new NeuSum(context, [ 1, context.createNeuDC(2) ]);
-      assert(sum instanceof NeuDC);
+    it("(context: neume.Context, inputs: Array<number>): neume.DC", function() {
+      var a = 1;
+      var b = context.createNeuDC(2);
+      var sum = new neume.Sum(context, [ a, b ]);
+
+      assert(sum instanceof neume.DC);
     });
-    it("returns an instanceof NeuParam when given [ param ]", function() {
-      var sum = new NeuSum(context, [ context.createNeuParam(0) ]);
-      assert(sum instanceof NeuParam);
+    it("(context: neume.Context, inputs: [ neume.Param ]): neume.Param", function() {
+      var a = context.createNeuParam(0);
+      var sum = new neume.Sum(context, [ a ]);
+
+      assert(sum instanceof neume.Param);
     });
   });
 
-  describe("#add(value)", function() {
-    it("works", function() {
+  describe("#add", function() {
+    it("(value: any): neume.Sum", function() {
       var a = context.createGain();
       var b = context.createGain();
       var c = context.createGain();
-
-      var sum = new NeuSum(context, [ a, b ]);
+      var sum = new neume.Sum(context, [ a, b ]);
 
       var result = sum.add(c);
 
-      assert(result instanceof NeuSum);
+      assert(result instanceof neume.Sum);
       assert(result !== sum);
       assert.deepEqual(result._inputs, [ a, b, c ]);
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("return an AudioNode []", function() {
-      var sum = new NeuSum(context, []);
+  describe("#toAudioNode", function() {
+    it("(): AudioNode // when []", function() {
+      var sum = new neume.Sum(context, []);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
-      assert.deepEqual(sum.toAudioNode().toJSON(),DC(0));
+      assert.deepEqual(sum.toAudioNode().toJSON(), DC(0));
       assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
-    it("return an AudioNode [ 1 ]", function() {
-      var sum = new NeuSum(context, [ 1 ]);
+    it("(): AudioNode // when [ 1 ]", function() {
+      var sum = new neume.Sum(context, [ 1 ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
-      assert.deepEqual(sum.toAudioNode().toJSON(),DC(1));
+      assert.deepEqual(sum.toAudioNode().toJSON(), DC(1));
       assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 1);
     });
-    it("return an AudioNode [ node ]", function() {
-      var sum = new NeuSum(context, [ context.createDelay() ]);
+    it("(): AudioNode // when [ node ]", function() {
+      var a = context.createDelay();
+      var sum = new neume.Sum(context, [ a ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
-      assert.deepEqual(sum.toAudioNode().toJSON(), {
-        name: "DelayNode",
-        delayTime: {
-          value: 0,
-          inputs: []
-        },
-        inputs: []
-      });
+      assert.deepEqual(sum.toAudioNode().toJSON(), a.toJSON());
     });
-    it("return an AudioNode [ node, 0 ]", function() {
-      var sum = new NeuSum(context, [ context.createDelay() ]);
+    it("(): AudioNode // when [ node, 0 ]", function() {
+      var a = context.createDelay();
+      var sum = new neume.Sum(context, [ a, 0 ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
-      assert.deepEqual(sum.toAudioNode().toJSON(), {
-        name: "DelayNode",
-        delayTime: {
-          value: 0,
-          inputs: []
-        },
-        inputs: []
-      });
+      assert.deepEqual(sum.toAudioNode().toJSON(), a.toJSON());
     });
-    it("return an AudioNode [ node, param ]", function() {
-      var sum = new NeuSum(context, [ context.createDelay(), new NeuParam(context, 440) ]);
+    it("(): AudioNode // when [ node, param ]", function() {
+      var a = context.createDelay();
+      var b = new neume.Param(context, 220);
+      var sum = new neume.Sum(context, [ a, b ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
       assert.deepEqual(sum.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -108,18 +101,11 @@ describe("NeuSum", function() {
           inputs: []
         },
         inputs: [
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
+          a.toJSON(),
           {
             name: "GainNode",
             gain: {
-              value: 440,
+              value: b.value,
               inputs: []
             },
             inputs: [ DC(1) ]
@@ -127,62 +113,47 @@ describe("NeuSum", function() {
         ]
       });
     });
-    it("return an AudioNode [ node, node ]", function() {
-      var sum = new NeuSum(context, [ context.createOscillator(), context.createDelay() ]);
+    it("(): AudioNode // when [ node, node ]", function() {
+      var a = context.createOscillator();
+      var b = context.createDelay();
+      var sum = new neume.Sum(context, [ a, b ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
       assert.deepEqual(sum.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ a.toJSON(), b.toJSON() ]
       });
     });
-    it("return an AudioNode [ number, number, dc ]", function() {
-      var sum = new NeuSum(context, [ 1, 2, new NeuDC(context, 3) ]);
+    it("(): AudioNode // when [ number, number, dc ]", function() {
+      var a = 1;
+      var b = 2;
+      var c = new neume.DC(context, 3);
+      var sum = new neume.Sum(context, [ a, b, c ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
       assert.deepEqual(sum.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
-          value: 6,
+          value: a.valueOf() + b.valueOf() + c.valueOf(),
           inputs: []
         },
         inputs: [ DC(1) ]
       });
       assert(sum.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
-    it("return an AudioNode [ number, node ]", function() {
-      var sum = new NeuSum(context, [ 880, context.createOscillator() ]);
+    it("(): AudioNode // when [ number, node ]", function() {
+      var a = 880;
+      var b = context.createOscillator();
+      var sum = new neume.Sum(context, [ a, b ]);
+
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-
       assert.deepEqual(sum.toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {
@@ -190,23 +161,11 @@ describe("NeuSum", function() {
           inputs: []
         },
         inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
+          b.toJSON(),
           {
             name: "GainNode",
             gain: {
-              value: 880,
+              value: a.valueOf(),
               inputs: []
             },
             inputs: [ DC(1) ]
@@ -216,38 +175,59 @@ describe("NeuSum", function() {
     });
   });
 
-  describe("#connect(to)", function() {
-    it("connect to node", function() {
-      var to = context.createGain();
+  describe("#connect", function() {
+    it("(to: AudioNode): self // when []", function() {
+      var toNode = context.createGain();
+      var sum = new neume.Sum(context, []);
 
-      new NeuSum(context, [
-        context.createOscillator(), new NeuParam(context, 440), 110, new NeuDC(context, 110)
-      ]).connect(to);
+      assert(sum.connect(toNode), sum);
+      assert.deepEqual(toNode.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(0) ]
+      });
+    });
+    it("(to: AudioNode): self // when [ 0 ]", function() {
+      var toNode = context.createGain();
+      var a = 0;
+      var sum = new neume.Sum(context, [ a ]);
 
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.connect(toNode), sum);
+      assert.deepEqual(toNode.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ DC(0) ]
+      });
+      assert(toNode.$inputs[0].buffer.getChannelData(0)[0] === 0);
+    });
+
+    it("(to: AudioNode): self // when [ node, param, number, dc ]", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = new neume.Param(context, 330);
+      var c = 220;
+      var d = new neume.DC(context, 110);
+      var sum = new neume.Sum(context, [ a, b, c, d ]);
+
+      assert(sum.connect(toNode) === sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,
           inputs: []
         },
         inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
+          a.toJSON(),
           {
             name: "GainNode",
             gain: {
-              value: 440,
+              value: b.value,
               inputs: []
             },
             inputs: [ DC(1) ]
@@ -255,7 +235,7 @@ describe("NeuSum", function() {
           {
             name: "GainNode",
             gain: {
-              value: 220,
+              value: c.valueOf() + d.valueOf(),
               inputs: []
             },
             inputs: [ DC(1) ]
@@ -263,26 +243,12 @@ describe("NeuSum", function() {
         ]
       });
     });
-    it("[] connect to node", function() {
-      var to = context.createGain();
+    it("(to: AudioParam): self // when []", function() {
+      var toNode = context.createGain();
+      var sum = new neume.Sum(context, []);
 
-      new NeuSum(context, []).connect(to);
-
-      assert.deepEqual(to.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [ DC(0) ]
-      });
-    });
-    it("[] connect to param", function() {
-      var to = context.createGain();
-
-      new NeuSum(context, []).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.connect(toNode.gain) === sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 0,
@@ -291,63 +257,76 @@ describe("NeuSum", function() {
         inputs: []
       });
     });
-    it("[ 0 ] connect to node", function() {
-      var to = context.createGain();
+    it("(to: AudioParam): self // when [ 0 ]", function() {
+      var toNode = context.createGain();
+      var a = Math.floor(Math.random() * 65536);
+      var sum = new neume.Sum(context, [ a ]);
 
-      new NeuSum(context, [ 0 ]).connect(to);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.connect(toNode.gain) === sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [ DC(0) ]
-      });
-    });
-    it("[ 0 ] connect to param", function() {
-      var to = context.createGain();
-
-      new NeuSum(context, [ 0 ]).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 0,
+          value: a,
           inputs: []
         },
         inputs: []
       });
     });
-    it("[ node, param, number ] connect to param", function() {
-      var to = context.createGain();
+    it("(to: AudioParam): self // when [ node, node, number ]", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = context.createDelay();
+      var c = 110;
+      var d = new neume.DC(context, 220);
+      var sum = new neume.Sum(context, [ a, b, c, d ]);
 
-      new NeuSum(context, [
-        context.createOscillator(), new NeuParam(context, 440), 110, new NeuDC(context, 110)
-      ]).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.connect(toNode.gain), sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 440,
+          value: c.valueOf() + d.valueOf(),
+          inputs: [ a.toJSON(), b.toJSON() ]
+        },
+        inputs: []
+      });
+    });
+    it("(to: AudioParam): self // when [ node, node, +/-0 ]", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = context.createDelay();
+      var c = 10;
+      var d = new neume.DC(context, -10);
+      var sum = new neume.Sum(context, [ a, b, c, d ]);
+
+      assert(sum.connect(toNode.gain), sum);
+      assert.deepEqual(toNode.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [ a.toJSON(), b.toJSON() ]
+        },
+        inputs: []
+      });
+    });
+    it("(to: AudioParam): self // [ node, param, number ]", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = new neume.Param(context, 330);
+      var c = 220;
+      var d = new neume.DC(context, 110);
+      var sum = new neume.Sum(context, [ a, b, c, d ]);
+
+      assert(sum.connect(toNode.gain) === sum);
+      assert.deepEqual(toNode.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: b.value,
           inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            },
+            a.toJSON(),
             {
               name: "GainNode",
               gain: {
-                value: 220,
+                value: c.valueOf() + d.valueOf(),
                 inputs: []
               },
               inputs: [ DC(1) ]
@@ -357,144 +336,45 @@ describe("NeuSum", function() {
         inputs: []
       });
     });
-    it("[ node, param, 0 ] connect to param", function() {
-      var to = context.createGain();
+    it("(to: AudioParam): self // when [ node, param, +/-0 ]", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = new neume.Param(context, 220);
+      var c = 10;
+      var d = new neume.DC(context, -10);
+      var sum = new neume.Sum(context, [ a, b, c, d ]);
 
-      new NeuSum(context, [
-        context.createOscillator(), new NeuParam(context, 440), 10, new NeuDC(context, -10)
-      ]).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.connect(toNode.gain), sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 440,
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+          value: b.value,
+          inputs: [ a.toJSON() ]
         },
         inputs: []
       });
     });
-    it("[ node, param, param ] connect to param", function() {
-      var to = context.createGain();
+    it("(to: AudioParam): self // when [ node, param, param ]", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = new neume.Param(context, 440);
+      var c = new neume.Param(context, 220);
+      var sum = new neume.Sum(context, [ a, b, c ]);
 
-      new NeuSum(context, [
-        context.createOscillator(), new NeuParam(context, 440), new NeuParam(context, 220)
-      ]).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.connect(toNode.gain), sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 440,
+          value: b.value,
           inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            },
+            a.toJSON(),
             {
               name: "GainNode",
               gain: {
-                value: 220,
+                value: c.value,
                 inputs: []
               },
               inputs: [ DC(1) ]
-            }
-          ]
-        },
-        inputs: []
-      });
-    });
-    it("[ node, node, number ] connect to param", function() {
-      var to = context.createGain();
-
-      new NeuSum(context, [
-        context.createOscillator(), context.createDelay(), 110, new NeuDC(context, 110)
-      ]).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 220,
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            },
-            {
-              name: "DelayNode",
-              delayTime: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
-        },
-        inputs: []
-      });
-    });
-    it("[ node, node, 0 ] connect to param", function() {
-      var to = context.createGain();
-
-      new NeuSum(context, [
-        context.createOscillator(), context.createDelay(), 10, new NeuDC(context, -10)
-      ]).connect(to.gain);
-
-      assert.deepEqual(to.toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            },
-            {
-              name: "DelayNode",
-              delayTime: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
             }
           ]
         },
@@ -503,15 +383,19 @@ describe("NeuSum", function() {
     });
   });
 
-  describe("#disconnect()", function() {
-    it("works", function() {
-      var to = context.createGain();
+  describe("#disconnect", function() {
+    it("(): self", function() {
+      var toNode = context.createGain();
+      var a = context.createOscillator();
+      var b = context.createDelay();
+      var c = 10;
+      var d = new neume.DC(context, -10);
+      var sum = new neume.Sum(context, [ a, b, c, d ]);
 
-      new NeuSum(context, [
-        context.createOscillator(), context.createDelay(), 10, new NeuDC(context, -10)
-      ]).connect(to).disconnect();
+      sum = sum.connect(toNode);
 
-      assert.deepEqual(to.toJSON(), {
+      assert(sum.disconnect(), sum);
+      assert.deepEqual(toNode.toJSON(), {
         name: "GainNode",
         gain: {
           value: 1,

@@ -8,29 +8,14 @@ neume.use(require("../../src/ugen/conv"));
 describe("ugen/conv", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(conv $(sin))", function() {
-    /*
-     * +--------+
-     * | $(sin) |
-     * +--------+
-     *   |
-     * +-------------------+
-     * | ConvolverNode     |
-     * | - buffer: null    |
-     * | - normalize: true |
-     * +-------------------+
-     *   |
-     */
-    it("return a ConvolverNode that is connected with $(sin)", function() {
-      var context = new neume.Context(new global.AudioContext().destination);
-      var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4 ]);
-
-      var synth = new Neume.Synth(function($) {
-        return $("conv", { buf: buffer, normalize: false }, $("sin"));
+  describe("graph", function() {
+    it("$('conv')", function() {
+      var synth = Neume.Synth(function($) {
+        return $("conv");
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -42,33 +27,36 @@ describe("ugen/conv", function() {
         inputs: [
           {
             name: "ConvolverNode",
-            normalize: false,
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            normalize: true,
+            inputs: []
           }
         ]
       });
+    });
+  });
 
-      assert.deepEqual(synth.toAudioNode().$inputs[0].buffer.toJSON(), {
-        name: "AudioBuffer",
-        sampleRate: 44100,
-        length: 4,
-        duration: 0.00009070294784580499,
-        numberOfChannels: 1
+  describe("parameters", function() {
+    it("full name", function() {
+      var buffer = Neume.context.createBuffer(1, 16, 44100);
+      var synth = Neume.Synth(function($) {
+        return $("conv", { buffer: buffer, normalize: false });
       });
+
+      var json = synth.toAudioNode().toJSON().inputs[0];
+
+      assert(synth.toAudioNode().$inputs[0].buffer === buffer);
+      assert(json.normalize === false);
+    });
+    it("short name", function() {
+      var buffer = Neume.context.createBuffer(1, 16, 44100);
+      var synth = Neume.Synth(function($) {
+        return $("conv", { buf: buffer, normalize: false });
+      });
+
+      var json = synth.toAudioNode().toJSON().inputs[0];
+
+      assert(synth.toAudioNode().$inputs[0].buffer === buffer);
+      assert(json.normalize === false);
     });
   });
 

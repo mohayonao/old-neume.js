@@ -3,7 +3,7 @@ module.exports = function(neume, util) {
 
   /**
    * $(number, {
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -20,37 +20,35 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("number", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
-    var data = util.finite(spec.value);
-    var param = context.createNeuParam(data, spec);
+    var param = new neume.Param(context, util.finite(spec.value), spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = util.defaults(e.value, e.count, 0);
+      if (util.isFinite(value)) {
+        context.sched(t0, function(startTime) {
+          update(value, startTime);
+        });
+      }
     }
 
-    function update(t0, v0, v1, nextData) {
-      param.update(t0, v1, v0);
-      data = nextData;
+    function update(value, startTime) {
+      param.update(value, startTime);
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (util.isFinite(value)) {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              update(t, data, value, value);
-            });
-          }
-        }
+        setValue: setValue
       }
     });
-  });
+  }
 
 };

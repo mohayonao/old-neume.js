@@ -2,23 +2,21 @@
 
 var neume = require("../../src");
 
-var Emitter = neume.Emitter;
-
-describe("Emitter", function() {
+describe("neume.Emitter", function() {
   var emitter = null;
 
   beforeEach(function() {
-    emitter = new Emitter();
+    emitter = new neume.Emitter();
   });
 
-  describe("()", function() {
-    it("returns an instance of Emitter", function() {
-      assert(emitter instanceof Emitter);
+  describe("constructor", function() {
+    it("()", function() {
+      assert(emitter instanceof neume.Emitter);
     });
   });
 
-  describe("#hasListeners(event)", function() {
-    it("checks if it has listeners", function() {
+  describe("#hasListeners", function() {
+    it("(event: string): boolean", function() {
       emitter.on("bang", it);
 
       assert(emitter.hasListeners("bang") === true);
@@ -26,8 +24,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#listeners(event)", function() {
-    it("returns an array of listeners", function() {
+  describe("#listeners", function() {
+    it("(event: string): Array<function>", function() {
       emitter.on("bang", it);
 
       assert.deepEqual(emitter.listeners("bang"), [ it ]);
@@ -35,8 +33,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#on(event, listener)", function() {
-    it("it adds the listener to event listeners", function() {
+  describe("#on", function() {
+    it("(event: string, listener: function): self", function() {
       var passed = [];
 
       emitter.on("bang", function(val) {
@@ -55,8 +53,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#once(event, listener)", function() {
-    it("adds the single-shot listener to event listeners", function() {
+  describe("#once", function() {
+    it("(event: string, listener: function): self", function() {
       var passed = [];
 
       emitter.once("bang", function(val) {
@@ -75,8 +73,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#off(event, listener)", function() {
-    it("removes the listener from event listeners", function() {
+  describe("#off", function() {
+    it("(event: string, listener: function): self", function() {
       var passed = [];
 
       function bang(val) {
@@ -98,8 +96,7 @@ describe("Emitter", function() {
 
       assert.deepEqual(passed, [ "?", 1, "?", 3 ]);
     });
-
-    it("works with #once()", function() {
+    it("(event: string, listener: function): self // works with #once()", function() {
       var passed = [];
 
       function bang(val) {
@@ -123,8 +120,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#off(event)", function() {
-    it("removes all listeners from the event", function() {
+  describe("#off", function() {
+    it("(event: string): self", function() {
       var passed = [];
 
       emitter.once("bang", function(val) {
@@ -146,8 +143,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#off()", function() {
-    it("removes all listeners", function() {
+  describe("#off", function() {
+    it("(): self", function() {
       var passed = [];
 
       emitter.once("bang", function(val) {
@@ -168,8 +165,8 @@ describe("Emitter", function() {
     });
   });
 
-  describe("#emit(event, payload, ctx)", function() {
-    it("emits an event with given payload and this-context", function() {
+  describe("#emit", function() {
+    it("(event: string, payload: any, context: any): void", function() {
       var object = {};
       var passed = [];
 

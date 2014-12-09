@@ -1,46 +1,40 @@
 module.exports = function(neume, util) {
   "use strict";
 
-
   /**
    * $("env", {
-   *   init: [number] = 0
-   *   table: [env-table] = []
-   *   release: [number] = Infinity
+   *   table: Array<number|string> = []
+   *   curve: number|string = "lin"
    * })
-   *
-   * env-table:
-   *   [ [ value, duration, curve ], ... ]
    *
    * aliases:
    *   $("adsr", {
-   *     a: [number] = 0.01  attackTime
-   *     d: [number] = 0.30  decayTime
+   *     a: [number|string] = 0.01  attackTime
+   *     d: [number|string] = 0.30  decayTime
    *     s: [number] = 0.50  sustainLevel
-   *     r: [number] = 1.00  releaseTime
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 1.00  releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    *   $("dadsr", {
-   *     delay: [number] = 0.10  delayTime
-   *     a: [number] = 0.01  attackTime
-   *     d: [number] = 0.30  decayTime
+   *     delay: [number|string] = 0.10  delayTime
+   *     a: [number|string] = 0.01  attackTime
+   *     d: [number|string] = 0.30  decayTime
    *     s: [number] = 0.50  sustainLevel
-   *     r: [number] = 1.00  releaseTime
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 1.00  releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    *   $("asr", {
-   *     a: [number] = 0.01  attackTime
+   *     a: [number|string] = 0.01  attackTime
    *     s: [number] = 1.00  sustainLevel
-   *     r: [number] = 1.00  releaseTime
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 1.00  releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    *   $("cutoff", {
-   *     r: [number] = 0.1   releaseTime
-   *     level: [number] = 1.00  peakLevel
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 0.1   releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    * +--------+      +-------+
@@ -54,237 +48,275 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("env", function(ugen, spec, inputs) {
-    var table = makeEnvTable(ugen.$context, spec);
-
-    return make(table, ugen, spec, inputs);
+    return make(util.toArray(spec.table), ugen, spec, inputs);
   });
 
   neume.register("adsr", function(ugen, spec, inputs) {
-    var a = util.defaults(spec.a, 0.01);
-    var d = util.defaults(spec.d, 0.30);
-    var s = util.defaults(spec.s, 0.50);
-    var r = util.defaults(spec.r, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var d = util.defaults(spec.d, spec.decayTime, 0.30);
+    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
-    var init = 0;
-    var list = [
-      [ 1, a, curve ], // a
-      [ s, d, curve ], // d
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 2;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 0, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = util.defaults(spec.delay, 0.1);
-    var a = util.defaults(spec.a, 0.01);
-    var d = util.defaults(spec.d, 0.30);
-    var s = util.defaults(spec.s, 0.50);
-    var r = util.defaults(spec.r, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var delay = util.defaults(spec.delay, spec.delayTime, 0.1);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var d = util.defaults(spec.d, spec.decayTime, 0.30);
+    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
-    var init = 0;
-    var list = [
-      [ 0, delay, curve ], // d
-      [ 1, a, curve ], // a
-      [ s, d, curve ], // d
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 3;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 0, 0, delay, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
-    var a = util.defaults(spec.a, 0.01);
-    var s = util.defaults(spec.s, 1.00);
-    var r = util.defaults(spec.r, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var s = util.defaults(spec.s, spec.sustainLevel, 1.00);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
-    var init = 0;
-    var list = [
-      [ s, a, curve ], // a
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 1;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 0, s, a, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
-    var r = util.defaults(spec.r, 0.1);
-    var level = util.defaults(spec.level, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var r = util.defaults(spec.r, spec.releaseTime, 0.1);
 
-    var init = level;
-    var list = [
-      [ level, 0, 0 ],
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 1;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 1, ">", 0, r ], ugen, spec, inputs);
   });
 
-  function makeEnvTable(context, spec) {
-    var table = {};
-    var curve = util.defaults(spec.curve, 0.05);
-
-    if (spec.hasOwnProperty("table")) {
-      table = makeEnvTableFromArrayList(context, spec, curve);
-    } else {
-      table = makeEnvTableFromNumList(context, util.toArray(spec._), curve);
-    }
-
-    return table;
-  }
-
-  function makeEnvTableFromArrayList(context, spec, curve) {
-    var table = {
-      init: util.finite(spec.init),
-      list: [],
-      releaseNode: util.int(util.defaults(spec.release, -1)),
-      loopNode: util.int(util.defaults(spec.loop, -1)),
-    }, list = util.toArray(spec.table);
-
-    for (var i = 0, imax = list.length; i < imax; i++) {
-      /* istanbul ignore else */
-      if (Array.isArray(list[i])) {
-        table.list.push([
-          util.finite(list[i][0]), util.finite(context.toSeconds(list[i][1])), util.finite(util.defaults(list[i][2], curve))
-        ]);
-      }
-    }
-
-    return table;
-  }
-
-  function makeEnvTableFromNumList(context, list, curve) {
-    var table = {
-      init: util.finite(list.shift()),
-      list: [],
+  function toEnv(src) {
+    var list = [], env = {
+      init: util.finite(src.shift()),
+      list: list,
       releaseNode: -1,
       loopNode: -1,
+      index: 0,
+      length: 0
     };
 
-    for (var i = 0, imax = list.length; i < imax; ) {
-      var value = list[i++];
+    for (var i = 0, imax = src.length; i < imax; ) {
+      var value = src[i++];
 
-      if (typeof value === "string") {
-        if (/^r(elease)?$/i.test(value)) {
-          table.releaseNode = table.list.length;
-        } else if (/^l(oop)?$/i.test(value)) {
-          table.loopNode = table.list.length;
-        }
+      if (typeof value === "number") {
+        list.push([ util.clip(util.finite(value), 0, 1), src[i++] ]);
       } else {
-        table.list.push([
-          util.finite(value), util.finite(context.toSeconds(list[i++])), curve
-        ]);
+        if (/^(>|r(elease)?)$/i.test(value)) {
+          env.releaseNode = list.length;
+        }
+        if (/^(<|l(oop)?)$/i.test(value)) {
+          env.loopNode = list.length;
+        }
       }
     }
 
-    return table;
+    env.length = list.length;
+
+    return env;
   }
 
-  function make(table, ugen, spec, inputs) {
-    var context = ugen.$context;
-    var outlet = null;
+  function setCurve(context, outlet, curve) {
+    var ws, wsCurve = null;
 
-    var init = table.init;
-    var list = table.list;
-    var releaseNode = table.releaseNode;
-    var loopNode = table.loopNode;
-    var index = 0;
-    var schedId = 0;
-    var releaseSchedId = 0;
-    var param = context.createNeuParam(init);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
+    if (typeof curve === "number") {
+      curve = util.finite(curve);
+      if (0.001 <= Math.abs(curve)) {
+        wsCurve = makeCurveFromNumber(curve);
+      }
     } else {
-      outlet = param;
+      wsCurve = makeCurveFromType(curve);
+    }
+
+    if (wsCurve != null) {
+      ws = context.createWaveShaper();
+      ws.curve = wsCurve;
+      context.connect(outlet, ws);
+      outlet = ws;
+    }
+
+    return outlet;
+  }
+
+  function makeCurveFromNumber(type) {
+    if (makeCurveFromNumber[type]) {
+      return makeCurveFromNumber[type];
+    }
+
+    var curve = new Float32Array(4096);
+    var a1 = 1 / (1.0 - Math.exp(type));
+    var grow = Math.exp(type / 2048);
+
+    for (var i = 0; i < 2048; i++) {
+      curve[i + 2048] = a1 - a1 * Math.pow(grow, i);
+    }
+
+    makeCurveFromNumber[type] = curve;
+
+    return curve;
+  }
+
+  function makeCurveFromType(type) {
+    if (makeCurveFromType[type]) {
+      return makeCurveFromType[type];
+    }
+    var func = shapeFunc[type];
+    if (!func) {
+      return;
+    }
+
+    var curve = new Float32Array(4096);
+
+    for (var i = 0; i < 2048; i++) {
+      curve[i + 2048] = func(i / 2048);
+    }
+
+    makeCurveFromType[type] = curve;
+
+    return curve;
+  }
+
+  var shapeFunc = {};
+
+  shapeFunc.sine = function(x) {
+    // TODO: FIX
+    return x - Math.sin(x * 2 * Math.PI) * 0.10355338794738156;
+  };
+
+  shapeFunc.welch = function(x) {
+    return Math.sin(x * Math.PI * 0.5);
+  };
+
+  shapeFunc.squared = function(x) {
+    return x * x;
+  };
+
+  shapeFunc.cubic = function(x) {
+    return x * x * x;
+  };
+
+  function make(src, ugen, spec, inputs) {
+    var context = ugen.$context;
+
+    var env = toEnv(src);
+    var curve = util.defaults(spec.curve, "lin");
+    var param = new neume.Param(context, env.init);
+
+    var schedId, releaseSchedId, scheduled;
+    var isReleased = false, isStopped = false;
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
+
+    outlet = setCurve(context, outlet, curve);
+
+    function start(t0) {
+      env.index = 0;
+      param.setValueAtTime(env.init, t0);
+      if (env.releaseNode !== 0) {
+        schedId = context.sched(t0, resume);
+      }
     }
 
     function stop(t0) {
-      param.setAt(param.valueOf(), t0);
+      terminateAudioParamScheduling(t0);
+      param.setValueAtTime(param.valueAtTime(t0), t0);
+
       context.unsched(schedId);
       context.unsched(releaseSchedId);
+
       schedId = 0;
-      index = list.length;
+      env.index = env.length;
+      isStopped = true;
+    }
+
+    function release(e) {
+      if (isStopped || releaseSchedId || env.releaseNode === -1) {
+        return;
+      }
+
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+
+      releaseSchedId = context.sched(t0, function(t0) {
+        context.unsched(schedId);
+
+        schedId = 0;
+        env.index = env.releaseNode;
+        isReleased = true;
+
+        terminateAudioParamScheduling(t0);
+        resume(t0);
+      });
     }
 
     function resume(t0) {
-      var params = list[index];
+      var params = env.list[env.index];
 
       /* istanbul ignore next */
       if (params == null) {
         return;
       }
 
-      index += 1;
+      env.index += 1;
 
       var dur = util.finite(context.toSeconds(params[1]));
       var t1 = t0 + dur;
-      var v0 = param.valueOf();
+      var v0 = param.valueAtTime(t0);
       var v1 = util.finite(params[0]);
-      var cur = util.clip(util.finite(params[2]), 1e-6, 1 - 1e-6);
 
-      if (v0 === v1 || dur <= 0) {
-        param.setAt(v1, t1);
-      } else {
-        var vT = v0 + (v1 - v0) * (1 - cur);
-        var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
+      switch (curve) {
+      case "step":
+        param.setValueAtTime(v1, t0);
+        break;
+      case "hold":
+        param.setValueAtTime(v0, t0);
+        param.setValueAtTime(v1, t1);
+        break;
+      case "exp":
+      case "exponential":
+        param.setValueAtTime(Math.max(1e-6, v0), t0);
+        param.exponentialRampToValueAtTime(Math.max(1e-6, v1), t1);
+        scheduled = { method: "exponentialRampToValueAtTime", time: t1 };
+        break;
+      // case "lin":
+      // case "linear":
+      default:
+        param.setValueAtTime(v0, t0);
+        param.linearRampToValueAtTime(v1, t1);
+        scheduled = { method: "linearRampToValueAtTime", time: t1 };
+        break;
+      }
 
-        if (index === list.length) {
-          t1 = t0 + tC * Math.abs(Math.log(Math.max(1e-6, Math.abs(v1)) / Math.max(1e-6, Math.abs(v0))));
+      if (!isReleased && env.loopNode !== -1) {
+        if (env.index === env.releaseNode || env.index === env.length) {
+          env.index = env.loopNode;
         }
-
-        param.targetAt(v1, t0, tC);
       }
 
-      if (loopNode >= 0 && index === releaseNode && loopNode < releaseNode) {
-        index = loopNode;
-      }
+      schedId = 0;
 
-      if (index === list.length) {
+      if (env.index === env.length) {
         schedId = context.sched(t1, function(t) {
           schedId = 0;
           ugen.emit("end", { playbackTime: t }, ugen.$synth);
         });
-      } else if (index !== releaseNode) {
+      } else if (env.index !== env.releaseNode) {
         schedId = context.sched(t1, resume);
       }
     }
 
+    function terminateAudioParamScheduling(t0) {
+      if (scheduled == null || scheduled.time <= t0) {
+        return;
+      }
+      var endValue = param.valueAtTime(t0);
+
+      param.cancelScheduledValues(scheduled.time);
+      param[scheduled.method](endValue, t0);
+    }
+
     return new neume.Unit({
       outlet: outlet,
-      start: function(t0) {
-        context.sched(t0, resume);
-      },
+      start: start,
       stop: stop,
       methods: {
-        release: function(t0) {
-          if (releaseNode > 0 && releaseSchedId === 0) {
-            releaseSchedId = context.sched(util.finite(context.toSeconds(t0)), function(t0) {
-              context.unsched(schedId);
-              schedId = 0;
-              index = releaseNode;
-              resume(t0);
-            });
-          }
-        }
+        release: release
       }
     });
   }

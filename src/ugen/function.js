@@ -6,7 +6,7 @@ module.exports = function(neume, util) {
 
   /**
    * $(function, {
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -24,49 +24,50 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("function", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;
+    var param = new neume.Param(context, util.finite(data(0, count++)), spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    var prevValue = util.finite(data(0, count++));
-    var param = context.createNeuParam(prevValue, spec);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (typeof value === "function") {
+        context.sched(t0, function() {
+          data = value;
+        });
+      }
     }
 
-    function update(t0) {
-      var v0 = prevValue;
-      var v1 = data(t0, count++);
+    function evaluate(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(startTime);
+      });
+    }
 
-      param.update(t0, v1, v0);
+    function update(startTime) {
+      var value = data({
+        playbackTime: startTime,
+        count: count++
+      });
 
-      prevValue = v1;
+      param.update(value, startTime);
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (typeof value === "function") {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              data = value;
-            });
-          }
-        },
-        evaluate: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t);
-          });
-        }
+        setValue: setValue,
+        evaluate: evaluate
       }
     });
-  });
+  }
 
 };

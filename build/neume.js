@@ -11,59 +11,11 @@ if (typeof window !== "undefined") {
 
 module.exports = neume;
 
-},{"./src/":20,"./src/ugen/":39}],2:[function(require,module,exports){
-(function (global){
-(function(global) {
-  "use strict";
-
-  var SCRandom = function(seed) {
-    if (typeof seed !== "number" || !isFinite(seed)) {
-      seed = Date.now();
-    }
-
-    seed += ~(seed <<  15);
-    seed ^=   seed >>> 10;
-    seed +=   seed <<  3;
-    seed ^=   seed >>> 6;
-    seed += ~(seed <<  11);
-    seed ^=   seed >>> 16;
-
-    var s1 = (1243598713 ^ seed) >>> 0;
-    var s2 = (3093459404 ^ seed) >>> 0;
-    var s3 = (1821928721 ^ seed) >>> 0;
-
-    if (s1 <  2) {
-      s1 = 1243598713;
-    }
-    if (s2 <  8) {
-      s2 = 3093459404;
-    }
-    if (s3 < 16) {
-      s3 = 1821928721;
-    }
-
-    return {
-      random: function() {
-        s1 = ((s1 & 4294967294) << 12) ^ (((s1 << 13) ^  s1) >>> 19);
-        s2 = ((s2 & 4294967288) <<  4) ^ (((s2 <<  2) ^  s2) >>> 25);
-        s3 = ((s3 & 4294967280) << 17) ^ (((s3 <<  3) ^  s3) >>> 11);
-        return ((s1 ^ s2 ^ s3) >>> 0) / 4294967296;
-      }
-    };
-  };
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = SCRandom;
-  } else {
-    global.SCRandom = SCRandom;
-  }
-})(this.self || global);
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
+},{"./src/":20,"./src/ugen/":40}],2:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var Emitter = require("../event/emitter");
 
 function NeuComponent(context, node) {
@@ -77,11 +29,11 @@ util.inherits(NeuComponent, Emitter);
 NeuComponent.$name = "NeuComponent";
 
 NeuComponent.prototype.mul = function(value) {
-  return this.$context.createNeuMul(util.defaults(this._node, this), util.defaults(value, 1));
+  return new neume.Mul(this.$context, util.defaults(this._node, this), util.defaults(value, 1));
 };
 
 NeuComponent.prototype.add = function(value) {
-  return this.$context.createNeuSum([ util.defaults(this._node, this), util.defaults(value, 0) ]);
+  return new neume.Sum(this.$context, [ util.defaults(this._node, this), util.defaults(value, 0) ]);
 };
 
 NeuComponent.prototype.toAudioNode = function() {
@@ -101,9 +53,9 @@ NeuComponent.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = util.NeuComponent = NeuComponent;
+module.exports = NeuComponent;
 
-},{"../event/emitter":19,"../util":51}],4:[function(require,module,exports){
+},{"../event/emitter":19,"../namespace":21,"../util":52}],3:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -177,14 +129,15 @@ function createDCNode(context, value) {
   return node;
 }
 
-module.exports = util.NeuDC = NeuDC;
+module.exports = NeuDC;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../const":9,"../util":51,"./component":3}],5:[function(require,module,exports){
+},{"../const":8,"../util":52,"./component":2}],4:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
@@ -204,6 +157,18 @@ var curveDry = new Float32Array(WS_CURVE_SIZE);
 
 function NeuDryWet(context, dryIn, wetIn, mixIn) {
   NeuComponent.call(this, context);
+
+  mixIn = mixIn.valueOf();
+
+  if (typeof mixIn === "number") {
+    if (mixIn === 0) {
+      return new neume.Component(context, dryIn);
+    }
+    if (mixIn === 1) {
+      return new neume.Component(context, wetIn);
+    }
+  }
+
   this._dryIn = dryIn;
   this._wetIn = wetIn;
   this._mixIn = mixIn;
@@ -238,13 +203,6 @@ NeuDryWet.prototype.connect = function(to) {
 
 function createMixNodeWithNumber(context, dryIn, wetIn, mix) {
   mix = util.clip(util.finite(mix), 0, 1);
-
-  if (mix === 1) {
-    return wetIn;
-  }
-  if (mix === 0) {
-    return dryIn;
-  }
 
   var wetNode = context.createGain();
   var dryNode = context.createGain();
@@ -290,31 +248,30 @@ function createMixNodeWithNode(context, dryIn, wetIn, mixIn) {
 
 module.exports = NeuDryWet;
 
-},{"../const":9,"../util":51,"./component":3}],6:[function(require,module,exports){
+},{"../const":8,"../namespace":21,"../util":52,"./component":2}],5:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuMul(context, a, b) {
-  if (a instanceof util.NeuDC) {
-    a = a.valueOf();
-  }
-  if (b instanceof util.NeuDC) {
-    b = b.valueOf();
-  }
+  a = a.valueOf();
+  b = b.valueOf();
+
   if (typeof a === "number" && typeof b === "number") {
-    return context.createNeuDC(a * b);
+    return new neume.DC(context, a * b);
   }
+
   NeuComponent.call(this, context);
 
   if (typeof a === "number") {
     var t = a; a = b; b = t;
   }
   if (b === 0) {
-    return context.createNeuDC(0);
+    return new neume.DC(context, 0);
   } else if (b === 1) {
-    return context.createNeuComponent(a);
+    return new neume.Component(context, a);
   }
   this._a = a;
   this._b = b;
@@ -324,13 +281,13 @@ util.inherits(NeuMul, NeuComponent);
 NeuMul.$name = "NeuMul";
 
 NeuMul.prototype.mul = function(value) {
-  if (value instanceof util.NeuDC) {
-    value = value.valueOf();
-  }
+  value = value.valueOf();
+
   if (typeof this._b === "number" && typeof value === "number") {
-    return this.$context.createNeuMul(this._a, util.finite(this._b * value));
+    return new neume.Mul(this.$context, this._a, util.finite(this._b * value));
   }
-  return this.$context.createNeuMul(this.toAudioNode(), value);
+
+  return new neume.Mul(this.$context, this.toAudioNode(), value);
 };
 
 NeuMul.prototype.toAudioNode = function() {
@@ -353,13 +310,14 @@ NeuMul.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = util.NeuMul = NeuMul;
+module.exports = NeuMul;
 
-},{"../util":51,"./component":3}],7:[function(require,module,exports){
+},{"../namespace":21,"../util":52,"./component":2}],6:[function(require,module,exports){
 (function (global){
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuParam(context, value, spec) {
@@ -367,30 +325,40 @@ function NeuParam(context, value, spec) {
   NeuComponent.call(this, context);
   this._value = util.finite(value);
   this._params = [];
-
-  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(spec.timeConstant)) {
-    this._relative = true;
-    this._timeConstant = spec.timeConstant;
-  } else {
-    this._relative = false;
-    this._timeConstant = Math.max(0, util.finite(spec.timeConstant));
-  }
-
-  this._events = [
-    {
-      type: "SetValue",
-      value: this._value,
-      time: context.currentTime,
-    }
-  ];
+  this._events = [];
+  this._curve = spec.curve;
+  this._lag = util.defaults(spec.lag, 0);
+  this._scheduled = null;
 }
 util.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
-NeuParam.prototype.valueOf = function() {
-  return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
-};
+Object.defineProperties(NeuParam.prototype, {
+  events: {
+    get: function() {
+      return this._events.slice();
+    },
+    enumerable: true
+  },
+  value: {
+    set: function(value) {
+      value = util.finite(value);
+
+      var params = this._params;
+
+      this._value = value;
+
+      for (var i = 0, imax = params.length; i < imax; i++) {
+        params[i].value = value;
+      }
+    },
+    get: function() {
+      return this._params.length ? this._params[0].value : this._value;
+    },
+    enumerable: true
+  }
+});
 
 NeuParam.prototype.valueAtTime = function(t) {
   t = util.finite(this.$context.toSeconds(t));
@@ -409,9 +377,9 @@ NeuParam.prototype.valueAtTime = function(t) {
     t0 = Math.min(t, e1 ? e1.time : t);
 
     if (e1 && e1.type === "LinearRampToValue") {
-      value = linTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+      value = calcLinearRampToValue(value, e0.value, e1.value, t0, e0.time, e1.time);
     } else if (e1 && e1.type === "ExponentialRampToValue") {
-      value = expTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+      value = calcExponentialRampToValue(value, e0.value, e1.value, t0, e0.time, e1.time);
     } else {
       switch (e0.type) {
       case "SetValue":
@@ -420,38 +388,16 @@ NeuParam.prototype.valueAtTime = function(t) {
         value = e0.value;
         break;
       case "SetTarget":
-        value = setTarget(value, e0.value, t0, e0.time, e0.timeConstant);
+        value = calcTarget(value, e0.value, t0, e0.time, e0.timeConstant);
         break;
       case "SetValueCurve":
-        value = setCurveValue(value, t0, e0.time, e0.time + e0.duration, e0.curve);
+        value = calcValueCurve(value, t0, e0.time, e0.time + e0.duration, e0.curve);
         break;
       }
     }
   }
 
   return value;
-};
-
-NeuParam.prototype.set = function(value) {
-  value = util.finite(value);
-
-  var startTime = this.$context.currentTime;
-  var params = this._params;
-
-  this._value = value;
-
-  for (var i = 0, imax = params.length; i < imax; i++) {
-    params[i].value = value;
-    params[i].setValueAtTime(value, startTime);
-  }
-
-  insertEvent(this, {
-    type: "SetValue",
-    value: value,
-    time: startTime,
-  });
-
-  return this;
 };
 
 NeuParam.prototype.setAt = function(value, startTime) {
@@ -473,6 +419,8 @@ NeuParam.prototype.setAt = function(value, startTime) {
   return this;
 };
 
+NeuParam.prototype.setValueAtTime = NeuParam.prototype.setAt;
+
 NeuParam.prototype.linTo = function(value, endTime) {
   value = util.finite(value);
   endTime = util.finite(this.$context.toSeconds(endTime));
@@ -492,6 +440,8 @@ NeuParam.prototype.linTo = function(value, endTime) {
   return this;
 };
 
+NeuParam.prototype.linearRampToValueAtTime = NeuParam.prototype.linTo;
+
 NeuParam.prototype.expTo = function(value, endTime) {
   value = util.finite(value);
   endTime = util.finite(this.$context.toSeconds(endTime));
@@ -510,6 +460,8 @@ NeuParam.prototype.expTo = function(value, endTime) {
 
   return this;
 };
+
+NeuParam.prototype.exponentialRampToValueAtTime = NeuParam.prototype.expTo;
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   target = util.finite(target);
@@ -532,6 +484,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   return this;
 };
 
+NeuParam.prototype.setTargetAtTime = NeuParam.prototype.targetAt;
+
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
   startTime = util.finite(this.$context.toSeconds(startTime));
   duration = util.finite(this.$context.toSeconds(duration));
@@ -551,6 +505,8 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 
   return this;
 };
+
+NeuParam.prototype.setValueCurveAtTime = NeuParam.prototype.curveAt;
 
 NeuParam.prototype.cancel = function(startTime) {
   startTime = util.finite(this.$context.toSeconds(startTime));
@@ -573,41 +529,76 @@ NeuParam.prototype.cancel = function(startTime) {
   return this;
 };
 
-NeuParam.prototype.update = function(t0, v1, v0) {
-  t0 = util.finite(this.$context.toSeconds(t0));
-  v1 = util.finite(v1);
-  v0 = util.finite(util.defaults(v0, v1));
+NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
-  if (this._timeConstant === 0 || v0 === v1) {
-    this.setAt(v1, t0);
-  } else {
-    var timeConstant;
-    if (this._relative) {
-      timeConstant = this.$context.toSeconds(this._timeConstant);
-    } else {
-      timeConstant = this._timeConstant;
-    }
-    this.targetAt(v1, t0, timeConstant);
+NeuParam.prototype.update = function(value, startTime) {
+  var context = this.$context;
+  var endTime = startTime + util.finite(context.toSeconds(this._lag));
+  var startValue = this.valueAtTime(startTime);
+  var curve = this._curve;
+  var scheduled = null;
+
+  terminateAudioParamScheduling(this, startValue, startTime);
+
+  if (endTime <= startTime) {
+    curve = "step";
   }
+
+  switch (curve) {
+  case "exp":
+  case "exponential":
+    this.setValueAtTime(Math.max(1e-6, startValue), startTime);
+    this.exponentialRampToValueAtTime(Math.max(1e-6, value), endTime);
+    scheduled = { method: "exponentialRampToValueAtTime", time: endTime };
+    break;
+  case "lin":
+  case "linear":
+    this.setValueAtTime(startValue, startTime);
+    this.linearRampToValueAtTime(value, endTime);
+    scheduled = { method: "linearRampToValueAtTime", time: endTime };
+    break;
+  // case "step":
+  default:
+    this.setValueAtTime(value, startTime);
+    break;
+  }
+
+  this._scheduled = scheduled;
 
   return this;
 };
 
-NeuParam.prototype.toAudioNode = function() {
-  if (this.$outlet == null) {
-    this.$outlet = this.$context.createGain();
-    this.$outlet.gain.value = this._value;
-    this.$outlet.gain.setValueAtTime(this._value, 0);
-    this._params.push(this.$outlet.gain);
-    this.$context.connect(this.$context.createNeuDC(1), this.$outlet);
+function terminateAudioParamScheduling(_this, startValue, startTime) {
+  var scheduled = _this._scheduled;
+
+  if (scheduled == null || scheduled.time <= startTime) {
+    return;
   }
+
+  _this.cancelScheduledValues(scheduled.time);
+  _this[scheduled.method](startValue, startTime);
+}
+
+NeuParam.prototype.toAudioNode = function(input) {
+  var context = this.$context;
+
+  if (this.$outlet == null) {
+    this.$outlet = context.createGain();
+    this.$outlet.gain.value = this._value;
+    this._params.push(this.$outlet.gain);
+    if (input) {
+      context.connect(input, this.$outlet);
+    } else {
+      context.connect(new neume.DC(context, 1), this.$outlet);
+    }
+  }
+
   return this.$outlet;
 };
 
 NeuParam.prototype.connect = function(to) {
   if (to instanceof global.AudioParam) {
     to.value = this._value;
-    to.setValueAtTime(this._value, 0);
     this._params.push(to);
   } else {
     this.$context.connect(this.toAudioNode(), to);
@@ -640,21 +631,21 @@ function insertEvent(_this, event) {
   events.splice(i, replace, event);
 }
 
-function linTo(v, v0, v1, t, t0, t1) {
+function calcLinearRampToValue(v, v0, v1, t, t0, t1) {
   var dt = (t - t0) / (t1 - t0);
   return (1 - dt) * v0 + dt * v1;
 }
 
-function expTo(v, v0, v1, t, t0, t1) {
+function calcExponentialRampToValue(v, v0, v1, t, t0, t1) {
   var dt = (t - t0) / (t1 - t0);
   return 0 < v0 && 0 < v1 ? v0 * Math.pow(v1 / v0, dt) : /* istanbul ignore next */ v;
 }
 
-function setTarget(v0, v1, t, t0, timeConstant) {
+function calcTarget(v0, v1, t, t0, timeConstant) {
   return v1 + (v0 - v1) * Math.exp((t0 - t) / timeConstant);
 }
 
-function setCurveValue(v, t, t0, t1, curve) {
+function calcValueCurve(v, t, t0, t1, curve) {
   var dt = (t - t0) / (t1 - t0);
 
   if (dt <= 0) {
@@ -668,13 +659,14 @@ function setCurveValue(v, t, t0, t1, curve) {
   return util.defaults(curve[(curve.length * dt)|0], v);
 }
 
-module.exports = util.NeuParam = NeuParam;
+module.exports = NeuParam;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../util":51,"./component":3}],8:[function(require,module,exports){
+},{"../namespace":21,"../util":52,"./component":2}],7:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuSum(context, inputs) {
@@ -686,16 +678,15 @@ function NeuSum(context, inputs) {
   var nodes = [];
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
-    if (typeof inputs[i] === "number") {
-      number += util.finite(inputs[i]);
+    var x = inputs[i].valueOf();
+
+    if (typeof x === "number") {
+      number += util.finite(x);
       hasNumber = true;
-    } else if (inputs[i] instanceof util.NeuDC) {
-      number += inputs[i].valueOf();
-      hasNumber = true;
-    } else if (!param && inputs[i] instanceof util.NeuParam) {
-      param = inputs[i];
+    } else if (!param && x instanceof neume.Param) {
+      param = x;
     } else {
-      nodes.push(inputs[i]);
+      nodes.push(x);
     }
   }
 
@@ -703,11 +694,11 @@ function NeuSum(context, inputs) {
     if (param) {
       return param;
     }
-    return context.createNeuDC(number);
+    return new neume.DC(context, number);
   }
 
   if (number === 0 && param === null && nodes.length === 1) {
-    return context.createNeuComponent(nodes[0]);
+    return new neume.Component(context, nodes[0]);
   }
 
   this._hasNumber = hasNumber;
@@ -721,7 +712,7 @@ util.inherits(NeuSum, NeuComponent);
 NeuSum.$name = "NeuSum";
 
 NeuSum.prototype.add = function(value) {
-  return this.$context.createNeuSum(this._inputs.concat(value));
+  return new neume.Sum(this.$context, this._inputs.concat(value));
 };
 
 NeuSum.prototype.toAudioNode = function() {
@@ -760,7 +751,7 @@ NeuSum.prototype.connect = function(to) {
   if (param) {
     context.connect(param, to);
     if (number !== 0) {
-      context.connect(context.createNeuDC(number).toAudioNode(), to);
+      context.connect(new neume.DC(context, number).toAudioNode(), to);
     }
   } else if (number !== 0) {
     context.connect(number, to);
@@ -780,9 +771,9 @@ NeuSum.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = util.NeuSum = NeuSum;
+module.exports = NeuSum;
 
-},{"../util":51,"./component":3}],9:[function(require,module,exports){
+},{"../namespace":21,"../util":52,"./component":2}],8:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -795,7 +786,7 @@ module.exports = {
   DEFAULT_MAX_NODES_OF_BUS: 64,
 };
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
@@ -892,7 +883,7 @@ NeuAudioBus.prototype.ondisconnected = function(from) {
 
 module.exports = NeuAudioBus;
 
-},{"../const":9,"../util":51}],11:[function(require,module,exports){
+},{"../const":8,"../util":52}],10:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1195,120 +1186,55 @@ function resample1(data, size) {
 module.exports = NeuBuffer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../dsp/fft":18,"../util":51}],12:[function(require,module,exports){
+},{"../dsp/fft":18,"../util":52}],11:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
 
-var INIT = 0;
-var START = 1;
-var STOP = 2;
+var NeuSched = require("./sched");
 
-function NeuInterval(context, interval, callback) {
-  this.$context = context;
-
-  this._minInterval = 1 / context.sampleRate;
-
-  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
-    this._relative = true;
-    this._interval = interval;
-  } else {
-    this._relative = false;
-    this._interval = Math.max(this._minInterval, util.finite(context.toSeconds(interval)));
-  }
-  this._callback = callback;
-  this._oninterval = oninterval.bind(this);
-  this._state = INIT;
-  this._stateString = "UNSCHEDULED";
-  this._startTime = 0;
-  this._stopTime = Infinity;
-  this._count = 0;
-
-  Object.defineProperties(this, {
-    context: {
-      value: this.$context,
-      enumerable: true
-    },
-    outlet: {
-      value: null,
-      enumerable: true
-    },
-    state: {
-      get: function() {
-        return this._stateString;
-      },
-      enumerable: true
-    },
-  });
+function NeuInterval(context, schedTime, callback) {
+  NeuSched.call(this, context, schedTime, callback);
 }
+util.inherits(NeuInterval, NeuSched);
+
 NeuInterval.$name = "NeuInterval";
 
-NeuInterval.prototype.start = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-
-  if (this._state === INIT) {
-    this._state = START;
-    this._stateString = "SCHEDULED";
-    this._startTime = t;
-
-    if (util.isFunction(this._callback)) {
-      this.$context.sched(this._startTime, function(t) {
-        this._stateString = "PLAYING";
-        this._oninterval(t);
-      }, this);
-    }
-
-    this.$context.start(); // auto start(?)
+NeuInterval.prototype._onsched = function(t0) {
+  if (this._stopTime <= t0) {
+    this._state = NeuSched.STATE_STOP;
+    this._stateString = "FINISHED";
+    return;
   }
 
-  return this;
+  this._stateString = "PLAYING";
+  this._callback({
+    playbackTime: t0,
+    count: this._count++
+  });
+
+  var context = this.$context;
+  var schedTime = util.finite(context.toSeconds(this._schedTime));
+
+  schedTime = Math.max(1 / context.sampleRate, schedTime);
+
+  context.sched(t0 + schedTime, this._onsched, this);
 };
-
-NeuInterval.prototype.stop = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-
-  if (this._state === START) {
-    this._state = STOP;
-    this._stopTime = t;
-    this.$context.sched(this._stopTime, function() {
-      this._stateString = "FINISHED";
-    }, this);
-  }
-
-  return this;
-};
-
-function oninterval(t) {
-  if (t < this._stopTime) {
-    this._callback({ playbackTime: t, count: this._count++ });
-
-    var nextTime = this._relative ?
-      t + Math.max(this._minInterval, util.finite(this.$context.toSeconds(this._interval))) :
-      this._startTime + this._interval * this._count;
-
-    this.$context.sched(nextTime, this._oninterval);
-  }
-}
 
 module.exports = NeuInterval;
 
-},{"../util":51}],13:[function(require,module,exports){
+},{"../util":52,"./sched":12}],12:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
 
-var INIT = 0;
-var START = 1;
-var STOP = 2;
-
-function NeuTimeout(context, interval, callback) {
-  interval = util.finite(context.toSeconds(interval));
-
+function NeuSched(context, schedTime, callback) {
   this.$context = context;
 
-  this._interval = Math.max(0, interval);
+  this._schedTime = schedTime;
   this._callback = callback;
-  this._state = INIT;
+
+  this._state = NeuSched.STATE_INIT;
   this._stateString = "UNSCHEDULED";
   this._startTime = 0;
   this._stopTime = Infinity;
@@ -1319,10 +1245,6 @@ function NeuTimeout(context, interval, callback) {
       value: this.$context,
       enumerable: true
     },
-    outlet: {
-      value: null,
-      enumerable: true
-    },
     state: {
       get: function() {
         return this._stateString;
@@ -1331,66 +1253,132 @@ function NeuTimeout(context, interval, callback) {
     },
   });
 }
-NeuTimeout.$name = "NeuTimeout";
+NeuSched.$name = "NeuSched";
 
-NeuTimeout.prototype.start = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+NeuSched.STATE_INIT = 0;
+NeuSched.STATE_START = 1;
+NeuSched.STATE_STOP = 2;
 
-  if (this._state === INIT) {
-    this._state = START;
-    this._stateString = "SCHEDULED";
-    this._startTime = t + this._interval;
+NeuSched.prototype.start = function(t0) {
+  var context = this.$context;
 
+  t0 = util.finite(util.defaults(context.toSeconds(t0), context.currentTime));
+
+  if (this._state === NeuSched.STATE_INIT) {
     if (util.isFunction(this._callback)) {
-      this.$context.sched(this._startTime, function(t) {
-        if (t < this._stopTime) {
-          this._stateString = "PLAYING";
-          this._callback({ playbackTime: t, count: 0 });
-        }
-        this._state = STOP;
-        this._stopTime = t;
-        this._stateString = "FINISHED";
-      }, this);
+      this._state = NeuSched.STATE_START;
+      this._stateString = "SCHEDULED";
+      this._startTime = t0;
+
+      context.sched(t0, this._onsched, this);
+    } else {
+      this._state = NeuSched.STATE_STOP;
+      this._stateString = "FINISHED";
     }
 
-    this.$context.start(); // auto start(?)
+    context.start(); // auto start(?)
   }
 
   return this;
 };
 
-NeuTimeout.prototype.stop = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+NeuSched.prototype.stop = function(t0) {
+  var context = this.$context;
 
-  if (this._state === START) {
-    this._state = STOP;
-    this._stopTime = t;
+  t0 = util.finite(util.defaults(context.toSeconds(t0), context.currentTime));
+
+  if (this._state === NeuSched.STATE_START) {
+    this._state = NeuSched.STATE_STOP;
+    this._stopTime = t0;
     this.$context.sched(this._stopTime, function() {
       this._stateString = "FINISHED";
     }, this);
   }
 
   return this;
+};
+
+NeuSched.prototype._onsched = function(t0) {
+  if (this._stopTime <= t0) {
+    this._state = NeuSched.STATE_STOP;
+    this._stateString = "FINISHED";
+    return;
+  }
+
+  this._stateString = "PLAYING";
+
+  var result = this._callback({
+    playbackTime: t0,
+    count: this._count++
+  });
+
+  var context = this.$context;
+
+  /* istanbul ignore else */
+  if (typeof result === "object") {
+    var schedTime = util.finite(context.toSeconds(result.next));
+
+    if (t0 < schedTime) {
+      if (util.isFunction(result.callback)) {
+        this._callback = result.callback;
+      }
+      this._schedTime = schedTime;
+
+      return context.sched(this._schedTime, this._onsched, this);
+    }
+  }
+
+  this._state = NeuSched.STATE_STOP;
+  this._stopTime = t0;
+  this._stateString = "FINISHED";
+};
+
+module.exports = NeuSched;
+
+},{"../util":52}],13:[function(require,module,exports){
+"use strict";
+
+var util = require("../util");
+
+var NeuSched = require("./sched");
+
+function NeuTimeout(context, schedTime, callback) {
+  NeuSched.call(this, context, schedTime, callback);
+}
+util.inherits(NeuTimeout, NeuSched);
+
+NeuTimeout.$name = "NeuTimeout";
+
+NeuTimeout.prototype._onsched = function(t0) {
+  if (this._count > 1 || this._stopTime <= t0) {
+    this._state = NeuSched.STATE_STOP;
+    this._stateString = "FINISHED";
+    return;
+  }
+
+  this._stateString = "PLAYING";
+  this._callback({
+    playbackTime: t0,
+    count: this._count++
+  });
+
+  var context = this.$context;
+  var schedTime = util.finite(context.toSeconds(this._schedTime));
+
+  schedTime = Math.max(1 / context.sampleRate, schedTime);
+
+  context.sched(t0 + schedTime, this._onsched, this);
 };
 
 module.exports = NeuTimeout;
 
-},{"../util":51}],14:[function(require,module,exports){
+},{"../util":52,"./sched":12}],14:[function(require,module,exports){
 (function (global){
 "use strict";
 
 var C = require("../const");
 var util = require("../util");
-
-var NeuTransport = require("./transport");
-var NeuComponent = require("../component/component");
-var NeuDC = require("../component/dc");
-var NeuMul = require("../component/mul");
-var NeuSum = require("../component/sum");
-var NeuParam = require("../component/param");
-var NeuDryWet = require("../component/drywet");
-var NeuAudioBus = require("../control/audio-bus");
-var NeuUGen = require("../synth/ugen");
+var neume = require("../namespace");
 
 var INIT = 0;
 var START = 1;
@@ -1403,7 +1391,7 @@ function NeuContext(destination, duration, spec) {
   this.$context = destination.context;
   this.$destination = destination;
 
-  this._transport = new NeuTransport(this);
+  this._transport = new neume.Transport(this);
   this.$analyser = this.$context.createAnalyser();
   this.connect(this.$analyser, this.$destination);
   this._scriptProcessor = null;
@@ -1459,6 +1447,7 @@ NeuContext.$name = "NeuContext";
 Object.keys(global.AudioContext.prototype).forEach(function(key) {
   var desc = Object.getOwnPropertyDescriptor(global.AudioContext.prototype, key);
 
+  /* istanbul ignore next */
   if (typeof desc.value !== "function") {
     return;
   }
@@ -1470,34 +1459,52 @@ Object.keys(global.AudioContext.prototype).forEach(function(key) {
   };
 });
 
+/**
+ * @deprecated since version 0.3.0
+ */
 NeuContext.prototype.createNeuComponent = function(node) {
-  return new NeuComponent(this, node);
+  return new neume.Component(this, node);
 };
 
+/**
+* @deprecated since version 0.3.0
+*/
 NeuContext.prototype.createNeuDC = function(value) {
-  return new NeuDC(this, util.finite(value));
+  return new neume.DC(this, util.finite(value));
 };
 
+/**
+* @deprecated since version 0.3.0
+*/
 NeuContext.prototype.createNeuMul = function(a, b) {
-  return new NeuMul(this, a, b);
+  return new neume.Mul(this, a, b);
 };
 
+/**
+* @deprecated since version 0.3.0
+*/
 NeuContext.prototype.createNeuSum = function(inputs) {
-  return new NeuSum(this, inputs);
+  return new neume.Sum(this, inputs);
 };
 
+/**
+* @deprecated since version 0.3.0
+*/
 NeuContext.prototype.createNeuParam = function(value, spec) {
-  return new NeuParam(this, util.finite(value), spec);
+  return new neume.Param(this, util.finite(value), spec);
 };
 
+/**
+* @deprecated since version 0.3.0
+*/
 NeuContext.prototype.createNeuDryWet = function(dryIn, wetIn, mixIn) {
-  return new NeuDryWet(this, dryIn, wetIn, mixIn);
+  return new neume.DryWet(this, dryIn, wetIn, mixIn);
 };
 
 NeuContext.prototype.getAudioBus = function(index) {
   index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
-    this._audioBuses[index] = new NeuAudioBus(this);
+    this._audioBuses[index] = new neume.AudioBus(this);
   }
   return this._audioBuses[index];
 };
@@ -1614,7 +1621,7 @@ NeuContext.prototype.toAudioNode = function(obj) {
   if (obj && obj.toAudioNode) {
     obj = obj.toAudioNode();
   } else if (typeof obj === "number") {
-    obj = this.createNeuDC(obj).toAudioNode();
+    obj = new neume.DC(this, obj).toAudioNode();
   }
   if (!(obj instanceof global.AudioNode)) {
     obj = null;
@@ -1634,7 +1641,11 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
 
 NeuContext.prototype.connect = function(from, to) {
   if (to) {
-    if (from instanceof NeuComponent || from instanceof NeuUGen) {
+    if (Array.isArray(from)) {
+      if (from.length) {
+        new neume.Sum(this, from).connect(to);
+      }
+    } else if (from instanceof neume.Component || from instanceof neume.UGen) {
       from.connect(to);
     } else if (to instanceof global.AudioParam) {
       if (typeof from === "number") {
@@ -1650,7 +1661,7 @@ NeuContext.prototype.connect = function(from, to) {
       if (from) {
         from.connect(to);
       }
-    } else if (to instanceof NeuAudioBus) {
+    } else if (to instanceof neume.AudioBus) {
       this.connect(from, to.toAudioNode());
     }
     if (to.onconnected) {
@@ -1713,15 +1724,14 @@ function onaudioprocess(e) {
 module.exports = NeuContext;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../component/component":3,"../component/dc":4,"../component/drywet":5,"../component/mul":6,"../component/param":7,"../component/sum":8,"../const":9,"../control/audio-bus":10,"../synth/ugen":26,"../util":51,"./transport":17}],15:[function(require,module,exports){
+},{"../const":8,"../namespace":21,"../util":52}],15:[function(require,module,exports){
 (function (global){
 "use strict";
 
 require("./shim");
 
 var util = require("../util");
-
-var VERSION = "0.2.0";
+var neume = require("../namespace");
 
 function Neume(context) {
   function fn(spec) {
@@ -1785,15 +1795,21 @@ function Neume(context) {
       }),
       enumerable: true
     },
+    Sched: {
+      value: function(callback) {
+        return new neume.Sched(context, 0, callback);
+      },
+      enumerable: true
+    },
     Interval: {
-      value: function(interval, callback) {
-        return new neume.Interval(context, interval, callback);
+      value: function(schedTime, callback) {
+        return new neume.Interval(context, schedTime, callback);
       },
       enumerable: true
     },
     Timeout: {
-      value: function(interval, callback) {
-        return new neume.Timeout(context, interval, callback);
+      value: function(schedTime, callback) {
+        return new neume.Timeout(context, schedTime, callback);
       },
       enumerable: true
     },
@@ -1812,12 +1828,12 @@ function Neume(context) {
   return fn;
 }
 
-var neume = function(destination, spec) {
+neume.impl = function(destination, spec) {
   if (destination instanceof global.AudioContext) {
     destination = destination.destination;
   }
   if (!(destination instanceof global.AudioNode)) {
-    throw new TypeError("neume(): illegal argument");
+    throw new TypeError("neume(): Illegal arguments");
   }
 
   var context = new neume.Context(destination, Infinity, spec);
@@ -1858,6 +1874,7 @@ neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
 neume.Buffer = require("../control/buffer");
+neume.Sched = require("../control/sched");
 neume.Interval = require("../control/interval");
 neume.Timeout = require("../control/timeout");
 neume.FFT = require("../dsp/fft");
@@ -1867,7 +1884,6 @@ neume.Synth = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
 neume.UGen = require("../synth/ugen");
 neume.Unit = require("../synth/unit");
-neume.Random = require("sc-random");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {
@@ -1890,12 +1906,10 @@ neume.use = function(fn) {
 };
 neume.use.used = [];
 
-neume.version = VERSION;
-
 module.exports = neume;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../component/component":3,"../component/dc":4,"../component/drywet":5,"../component/mul":6,"../component/param":7,"../component/sum":8,"../const":9,"../control/audio-bus":10,"../control/buffer":11,"../control/interval":12,"../control/timeout":13,"../dsp/fft":18,"../event/emitter":19,"../synth/db":22,"../synth/synth":24,"../synth/synthdef":25,"../synth/ugen":26,"../synth/unit":27,"../util":51,"./context":14,"./shim":16,"./transport":17,"sc-random":2}],16:[function(require,module,exports){
+},{"../component/component":2,"../component/dc":3,"../component/drywet":4,"../component/mul":5,"../component/param":6,"../component/sum":7,"../const":8,"../control/audio-bus":9,"../control/buffer":10,"../control/interval":11,"../control/sched":12,"../control/timeout":13,"../dsp/fft":18,"../event/emitter":19,"../namespace":21,"../synth/db":23,"../synth/synth":25,"../synth/synthdef":26,"../synth/ugen":27,"../synth/unit":28,"../util":52,"./context":14,"./shim":16,"./transport":17}],16:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 (function() {
@@ -2069,7 +2083,7 @@ function note2sec(num, note, bpm) {
 
 module.exports = NeuTransport;
 
-},{"../util":51}],18:[function(require,module,exports){
+},{"../util":52}],18:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2215,7 +2229,7 @@ module.exports = {
   inverse: inverse,
 };
 
-},{"../util":51}],19:[function(require,module,exports){
+},{"../util":52}],19:[function(require,module,exports){
 "use strict";
 
 function Emitter() {
@@ -2286,6 +2300,17 @@ module.exports = require("./core/neume");
 },{"./core/neume":15}],21:[function(require,module,exports){
 "use strict";
 
+function neume() {
+  return neume.impl.apply(null, arguments);
+}
+
+neume.version = "0.3.0";
+
+module.exports = neume;
+
+},{}],22:[function(require,module,exports){
+"use strict";
+
 var reUGenName = /^([a-zA-Z](-?[a-zA-Z0-9]+)*!?\??~?|[-+*\/%<=>!?&|@]+~?)/;
 
 function isValidUGenName(name) {
@@ -2326,7 +2351,7 @@ module.exports = {
   parse: parse
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2379,7 +2404,7 @@ NeuSynthDB.prototype.find = function(selector) {
 
 module.exports = NeuSynthDB;
 
-},{"../parser/selector":21,"../util":51}],23:[function(require,module,exports){
+},{"../parser/selector":22,"../util":52}],24:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2411,8 +2436,7 @@ function NeuSynthDollar(synth) {
   builder.method = $method(synth, this.methods);
   builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
-  builder.sec = $sec(synth);
-  builder.freq = $freq(synth);
+  builder.stop = $stop(synth, this.timers);
 
   this.builder = builder;
 }
@@ -2430,12 +2454,8 @@ function $param(synth, params) {
     var param = new NeuParam(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
-      set: function(value) {
-        param.set(value);
-      },
-      get: function() {
-        return param;
-      }
+      value: param,
+      enumerable: true
     });
 
     params[name] = param;
@@ -2462,10 +2482,13 @@ function $timeout(synth, timers) {
     var callbacks = util.toArray(arguments).slice(1).filter(util.isFunction);
 
     function sched(t) {
-      schedId = context.sched(t, function(t) {
+      schedId = context.sched(t, function(playbackTime) {
         schedId = 0;
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
-          callbacks[i].call(synth, t, 1);
+          callbacks[i].call(synth, {
+            playbackTime: playbackTime,
+            count: 1
+          });
         }
       });
     }
@@ -2502,15 +2525,18 @@ function $interval(synth, timers) {
     var count = 0;
 
     function sched(t) {
-      schedId = context.sched(t, function(t) {
+      schedId = context.sched(t, function(playbackTime) {
         schedId = 0;
-        count  += 1;
+        count += 1;
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
-          callbacks[i].call(synth, t, count);
+          callbacks[i].call(synth, {
+            playbackTime: playbackTime,
+            count: count
+          });
         }
 
         var nextTime = relative ?
-          t + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
+          playbackTime + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
           startTime + interval * (count + 1);
 
         sched(nextTime);
@@ -2535,15 +2561,22 @@ function $interval(synth, timers) {
   };
 }
 
-function $sec(synth) {
-  return function(value) {
-    return synth.$context.toSeconds(value);
-  };
-}
+function $stop(synth, timers) {
+  var context = synth.$context;
 
-function $freq(synth) {
-  return function(value) {
-    return synth.$context.toFrequency(value);
+  return function(stopTime) {
+    var schedId = 0;
+    timers.push({
+      start: function(t) {
+        schedId = context.sched(t, function() {
+          synth.stop(stopTime);
+        });
+      },
+      stop: function() {
+        context.unsched(schedId);
+        schedId = 0;
+      }
+    });
   };
 }
 
@@ -2557,7 +2590,7 @@ function validateParam(name) {
 
 module.exports = NeuSynthDollar;
 
-},{"../component/param":7,"../util":51,"./db":22,"./ugen":26}],24:[function(require,module,exports){
+},{"../component/param":6,"../util":52,"./db":23,"./ugen":27}],25:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2575,6 +2608,9 @@ function NeuSynth(context, func, args) {
   this.$localBuses = [];
 
   var $ = new NeuSynthDollar(this);
+
+  this.$builder = $.builder;
+
   var result = func.apply(null, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.$isOutput) {
@@ -2615,8 +2651,14 @@ function NeuSynth(context, func, args) {
       if (!this.hasOwnProperty(methodName)) {
         methodNames.push(methodName);
         Object.defineProperty(this, methodName, {
-          value: function() {
-            this.apply(methodName, util.toArray(arguments));
+          value: function(t, v) {
+            var e;
+            if (t != null && typeof t !== "object") {
+              e = { playbackTime: t, value: v };
+            } else {
+              e = t || {};
+            }
+            this.call(methodName, e);
             return this;
           }
         });
@@ -2856,14 +2898,12 @@ function parseEvent(event) {
 
 module.exports = NeuSynth;
 
-},{"../util":51,"./db":22,"./dollar":23}],25:[function(require,module,exports){
+},{"../util":52,"./db":23,"./dollar":24}],26:[function(require,module,exports){
 (function (global){
 "use strict";
 
 var util = require("../util");
-
-// TODO: FIX ME
-util.NeuSynth = require("./synth");
+var neume = require("../namespace");
 
 function NeuSynthDef(defaultContext, func) {
   if (!util.isFunction(func)) {
@@ -2878,7 +2918,7 @@ function NeuSynthDef(defaultContext, func) {
       context = args.shift();
     }
 
-    return new util.NeuSynth(context, func, args);
+    return new neume.Synth(context, func, args);
   }
 
   Object.defineProperties(SynthDef, {
@@ -2894,10 +2934,11 @@ function NeuSynthDef(defaultContext, func) {
 module.exports = NeuSynthDef;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../util":51,"./synth":24}],26:[function(require,module,exports){
+},{"../namespace":21,"../util":52}],27:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var Emitter = require("../event/emitter");
 var SelectorParser = require("../parser/selector");
 
@@ -2917,6 +2958,8 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$id = parsed.id;
   this.$outlet = null;
 
+  this.$builder = synth.$builder;
+
   var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
 
   this._node = unit.$outlet;
@@ -2930,8 +2973,14 @@ function NeuUGen(synth, key, spec, inputs) {
   Object.keys(unit.$methods).forEach(function(name) {
     var method = unit.$methods[name];
     util.definePropertyIfNotExists(this, name, {
-      value: function() {
-        method.apply(this, arguments);
+      value: function(t, v) {
+        var e;
+        if (t != null && typeof t !== "object") {
+          e = { playbackTime: t, value: v };
+        } else {
+          e = t || {};
+        }
+        method.call(this, e);
         return this;
       }
     });
@@ -2968,6 +3017,14 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.mul = function(value) {
+  return this.$builder("*", this, util.defaults(value, 1));
+};
+
+NeuUGen.prototype.add = function(value) {
+  return this.$builder("+", this, util.defaults(value, 0));
+};
+
 NeuUGen.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
     this.$outlet = this.$context.toAudioNode(this._node);
@@ -2990,7 +3047,7 @@ function mul(context, a, b) {
     return a;
   }
   if (b === 0) {
-    return context.createNeuDC(0);
+    return new neume.DC(context, 0);
   }
 
   var mulNode = context.createGain();
@@ -3004,12 +3061,12 @@ function mul(context, a, b) {
 }
 
 function add(context, a, b) {
-  return context.createNeuSum([ a, b ]);
+  return new neume.Sum(context, [ a, b ]);
 }
 
 module.exports = NeuUGen;
 
-},{"../event/emitter":19,"../parser/selector":21,"../util":51}],27:[function(require,module,exports){
+},{"../event/emitter":19,"../namespace":21,"../parser/selector":22,"../util":52}],28:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -3053,7 +3110,7 @@ NeuUnit.prototype.toAudioNode = function() {
 
 module.exports = NeuUnit;
 
-},{"../util":51}],28:[function(require,module,exports){
+},{"../util":52}],29:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -3071,21 +3128,25 @@ module.exports = function(neume) {
    *   |
    */
   neume.register("+", function(ugen, spec, inputs) {
-    return new neume.Unit({
-      outlet: ugen.$context.createNeuSum(inputs)
-    });
+    return make(ugen, spec, inputs);
   });
+
+  function make(ugen, spec, inputs) {
+    return new neume.Unit({
+      outlet: new neume.Sum(ugen.$context, inputs)
+    });
+  }
 
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
   /**
    * $([], {
    *   mode: enum[ clip, wrap, fold ] = clip
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -3105,8 +3166,11 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("array", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var index = 0;
     var data = spec.value;
@@ -3114,65 +3178,69 @@ module.exports = function(neume, util) {
       clip: util.clipAt,
       wrap: util.wrapAt,
       fold: util.foldAt,
-    }[spec.mode] || /* istanbul ignore next*/ util.clipAt;
+    }[spec.clip || spec.mode] || /* istanbul ignore next*/ util.clipAt;
 
     if (!Array.isArray(data) || data.length === 0)  {
       data = [ 0 ];
     }
 
-    var prevValue = util.finite(data[0]);
-    var param = context.createNeuParam(prevValue, spec);
+    var param = new neume.Param(context, util.finite(data[0]), spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (Array.isArray(value)) {
+        context.sched(util.finite(t0), function() {
+          data = value;
+        });
+      }
     }
 
-    function update(t0, nextIndex) {
-      var v0 = prevValue;
-      var v1 = mode(data, nextIndex);
+    function at(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var index = util.defaults(e.value, e.index, e.count);
+      context.sched(t0, function(startTime) {
+        update(util.int(index), startTime);
+      });
+    }
 
-      param.update(t0, v1, v0);
+    function next(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(index + 1, startTime);
+      });
+    }
 
-      prevValue = v1;
+    function prev(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(index - 1, startTime);
+      });
+    }
+
+    function update(nextIndex, startTime) {
+      var value = mode(data, nextIndex);
+
+      param.update(value, startTime);
+
       index = nextIndex;
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (Array.isArray(value)) {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              data = value;
-            });
-          }
-        },
-        at: function(t, index) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t, util.int(index));
-          });
-        },
-        next: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t, index + 1);
-          });
-        },
-        prev: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t, index - 1);
-          });
-        }
+        setValue: setValue,
+        at: at,
+        next: next,
+        prev: prev
       }
     });
-  });
+  }
 
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -3192,26 +3260,26 @@ module.exports = function(neume) {
     "OscillatorNode",
   ].forEach(function(name) {
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(ugen.$context, spec.value, inputs));
+      return make(ugen, spec, inputs);
     });
   });
 
-  function setup(context, audioNode, inputs) {
-    if (audioNode.numberOfInputs) {
-      context.createNeuSum(inputs).connect(audioNode);
-    }
-    return audioNode;
-  }
+  function make(ugen, spec, inputs) {
+    var context = ugen.$context;
+    var outlet = spec.value;
 
-  function make(audioNode) {
+    if (outlet.numberOfInputs) {
+      context.connect(inputs, outlet);
+    }
+
     return new neume.Unit({
-      outlet: audioNode
+      outlet: outlet
     });
   }
 
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3219,7 +3287,7 @@ module.exports = function(neume, util) {
    * $("biquad", {
    *   type: enum[ lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass ] = lowpass
    *   freq: [number|UGen] = 350
-   *   detune: [number|UGen] = 0
+   *   dt: [number|UGen] = 0
    *   Q: [number|UGen] = 1
    *   gain: [number|UGen] = 0
    * } ... inputs)
@@ -3236,7 +3304,7 @@ module.exports = function(neume, util) {
    * +-------------------------+
    * | BiquadFilterNode        |
    * | - type: type            |
-   * | - freqquency: freq(350) |
+   * | - frequency: freq(350)  |
    * | - detune: detune(0)     |
    * | - Q: Q(1)               |
    * | - gain: gain(0)         |
@@ -3260,44 +3328,45 @@ module.exports = function(neume, util) {
 
   neume.register("biquad", function(ugen, spec, inputs) {
     var type = FILTER_TYPES[spec.type] || "lowpass";
-    return make(setup(type, ugen, spec, inputs));
+    return make(type, ugen, spec, inputs);
   });
 
   Object.keys(FILTER_TYPES).forEach(function(name) {
     var type = FILTER_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(type, ugen, spec, inputs));
+      return make(type, ugen, spec, inputs);
     });
   });
 
-  function setup(type, ugen, spec, inputs) {
+  function make(type, ugen, spec, inputs) {
     var context = ugen.$context;
-    var biquad = context.createBiquadFilter();
+    var outlet = context.createBiquadFilter();
 
-    biquad.type = type;
-    biquad.frequency.value = 0;
-    biquad.detune.value = 0;
-    biquad.Q.value = 0;
-    biquad.gain.value = 0;
-    context.connect(util.defaults(context.toFrequency(spec.freq), 350), biquad.frequency);
-    context.connect(util.defaults(spec.detune, 0), biquad.detune);
-    context.connect(util.defaults(spec.Q, 1), biquad.Q);
-    context.connect(util.defaults(spec.gain, 0), biquad.gain);
+    outlet.type = type;
+    outlet.frequency.value = 0;
+    outlet.detune.value = 0;
+    outlet.Q.value = 0;
+    outlet.gain.value = 0;
 
-    context.createNeuSum(inputs).connect(biquad);
+    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, 350));
+    var detune = util.defaults(spec.dt, spec.detune, 0);
+    var q = util.defaults(spec.Q, 1);
+    var gain = util.defaults(spec.gain, 0);
 
-    return biquad;
-  }
+    context.connect(frequency, outlet.frequency);
+    context.connect(detune, outlet.detune);
+    context.connect(q, outlet.Q);
+    context.connect(gain, outlet.gain);
+    context.connect(inputs, outlet);
 
-  function make(biquad) {
     return new neume.Unit({
-      outlet: biquad
+      outlet: outlet
     });
   }
 
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3305,7 +3374,7 @@ module.exports = function(neume, util) {
    * $(boolean, {
    *   true: [number] = 1
    *   false: [number] = 0
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -3323,53 +3392,52 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("boolean", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = !!spec.value;
     var trueVal = util.finite(util.defaults(spec.true, 1));
     var falseVal = util.finite(util.defaults(spec.false, 0));
-    var param = context.createNeuParam(data ? trueVal : falseVal, spec);
+    var param = new neume.Param(context, data ? trueVal : falseVal, spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (typeof value === "boolean") {
+        context.sched(t0, function(startTime) {
+          update(value ? trueVal : falseVal, startTime, value);
+        });
+      }
     }
 
-    function update(t0, v0, v1, nextData) {
-      param.update(t0, v1, v0);
+    function toggle(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(data ? falseVal : trueVal, startTime, !data);
+      });
+    }
+
+    function update(value, startTime, nextData) {
+      param.update(value, startTime);
       data = nextData;
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (typeof value === "boolean") {
-            context.sched(util.finite(context.toSeconds(t)), function(t) {
-              var v0 = data  ? trueVal : falseVal;
-              var v1 = value ? trueVal : falseVal;
-              update(t, v0, v1, value);
-            });
-          }
-        },
-        toggle: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            var v0 = data ? trueVal : falseVal;
-            var v1 = data ? falseVal : trueVal;
-            update(t, v0, v1, !data);
-          });
-        }
+        setValue: setValue,
+        toggle: toggle
       }
     });
-  });
+  }
 
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3402,7 +3470,7 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("buf", function(ugen, spec) {
-    return make(spec.buf, ugen, spec);
+    return make(spec.buf || spec.buffer, ugen, spec);
   });
 
   neume.register("AudioBuffer", function(ugen, spec) {
@@ -3424,14 +3492,14 @@ module.exports = function(neume, util) {
       bufSrc.buffer = buffer;
     }
     bufSrc.loop = !!util.defaults(spec.loop, false);
-    bufSrc.loopStart = util.finite(util.defaults(spec.start, 0));
-    bufSrc.loopEnd = util.finite(util.defaults(spec.end, 0));
+    bufSrc.loopStart = util.finite(util.defaults(spec.start, spec.loopStart, 0));
+    bufSrc.loopEnd = util.finite(util.defaults(spec.end, spec.loopEnd, 0));
 
     bufSrc.playbackRate.value = 0;
-    context.connect(util.defaults(spec.rate, 1), bufSrc.playbackRate);
+    context.connect(util.defaults(spec.rate, spec.playbackRate, 1), bufSrc.playbackRate);
 
     var offset = util.finite(util.defaults(spec.offset, 0));
-    var duration = util.defaults(context.toSeconds(spec.dur), null);
+    var duration = context.toSeconds(util.defaults(spec.dur, spec.duration, null));
     if (duration != null) {
       duration = util.finite(duration);
     }
@@ -3443,7 +3511,6 @@ module.exports = function(neume, util) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
-        // TODO: test!!
         ugen.emit("end", {
           playbackTime: context.currentTime
         }, ugen.$synth);
@@ -3463,7 +3530,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3491,30 +3558,40 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("comp", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var comp = context.createDynamicsCompressor();
+    var outlet = context.createDynamicsCompressor();
 
-    comp.threshold.value = 0;
-    comp.knee.value = 0;
-    comp.ratio.value = 0;
-    comp.attack.value = 0;
-    comp.release.value = 0;
-    context.connect(util.defaults(spec.thresh, -24), comp.threshold);
-    context.connect(util.defaults(spec.knee, 30), comp.knee);
-    context.connect(util.defaults(spec.ratio, 12), comp.ratio);
-    context.connect(util.defaults(context.toSeconds(spec.a), 0.003), comp.attack);
-    context.connect(util.defaults(context.toSeconds(spec.r), 0.250), comp.release);
+    outlet.threshold.value = 0;
+    outlet.knee.value = 0;
+    outlet.ratio.value = 0;
+    outlet.attack.value = 0;
+    outlet.release.value = 0;
 
-    context.createNeuSum(inputs).connect(comp);
+    var threshold = util.defaults(spec.thresh, spec.threshold, -24);
+    var knee = util.defaults(spec.knee, 30);
+    var ratio = util.defaults(spec.ratio, 12);
+    var attack = context.toSeconds(util.defaults(spec.a, spec.attack, 0.003));
+    var release = context.toSeconds(util.defaults(spec.r, spec.release, 0.250));
+
+    context.connect(threshold, outlet.threshold);
+    context.connect(knee, outlet.knee);
+    context.connect(ratio, outlet.ratio);
+    context.connect(attack, outlet.attack);
+    context.connect(release, outlet.release);
+    context.connect(inputs, outlet);
 
     return new neume.Unit({
-      outlet: comp
+      outlet: outlet
     });
-  });
+  }
 
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3536,75 +3613,26 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("conv", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
+    var outlet = context.createConvolver();
 
-    var buffer = context.toAudioBuffer(spec.buf);
+    var buffer = context.toAudioBuffer(spec.buf || spec.buffer);
 
-    outlet = context.createConvolver();
-
-    /* istanbul ignore else */
     if (buffer != null) {
       outlet.buffer = buffer;
     }
     outlet.normalize = !!util.defaults(spec.normalize, true);
 
-    context.createNeuSum(inputs).connect(outlet);
+    context.connect(inputs, outlet);
 
     return new neume.Unit({
       outlet: outlet
     });
-  });
-
-};
-
-},{}],36:[function(require,module,exports){
-module.exports = function(neume, util) {
-  "use strict";
-
-  var WEB_AUDIO_MAX_DELAY_TIME = neume.MAX_DELAY_SEC;
-
-  /**
-   * $("delay", {
-   *   delay: [number|UGen] = 0
-   *   maxDelayTime: [number] = delay
-   * } ... inputs)
-   *
-   * +--------+
-   * | inputs |
-   * +--------+
-   *   ||||||
-   * +------------------------+
-   * | DelayNode              |
-   * | - delayTime: delayTime |
-   * +------------------------+
-   *   |
-   */
-  neume.register("delay", function(ugen, spec, inputs) {
-    var context = ugen.$context;
-
-    var delayTime = util.defaults(context.toSeconds(spec.delay), 0);
-    var maxDelayTime;
-
-    if (typeof delayTime === "number") {
-      delayTime = util.clip(util.finite(context.toSeconds(delayTime)), 0, WEB_AUDIO_MAX_DELAY_TIME);
-      maxDelayTime = delayTime;
-    } else {
-      maxDelayTime = util.finite(util.defaults(context.toSeconds(spec.maxDelayTime), 1));
-    }
-    maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
-
-    var delay = context.createDelay(maxDelayTime);
-
-    delay.delayTime.value = 0;
-    context.connect(delayTime, delay.delayTime);
-
-    context.createNeuSum(inputs).connect(delay);
-
-    return new neume.Unit({
-      outlet: delay
-    });
-  });
+  }
 
 };
 
@@ -3612,46 +3640,114 @@ module.exports = function(neume, util) {
 module.exports = function(neume, util) {
   "use strict";
 
+  var WEB_AUDIO_MAX_DELAY_TIME = neume.MAX_DELAY_SEC;
+
+  /**
+   * $("delay", {
+   *   delayTime: [number|UGen] = 0
+   *   feedback: [number|UGen] = 0
+   *   maxDelay: [number] = delay
+   * } ... inputs)
+   *
+   * +--------+
+   * | inputs |
+   * +--------+             +-----+
+   *   ||||||               |     |
+   * +------------------------+   |
+   * | DelayNode              |   |
+   * | - delayTime: delayTime |   |
+   * +------------------------+   |
+   *   |      |                   |
+   *   |    +------------------+  |
+   *   |    | GainNode         |  |
+   *   |    | - gain: feedback |  |
+   *   |    +------------------+  |
+   *   |      |                   |
+   *   |      +-------------------+
+   *   |
+   */
+  neume.register("delay", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
+    var context = ugen.$context;
+
+    var delayTime = context.toSeconds(util.defaults(spec.delay, spec.delayTime, 0));
+    var feedback = util.defaults(spec.fb, spec.feedback, 0);
+    var maxDelayTime;
+
+    if (typeof delayTime === "number") {
+      delayTime = util.clip(util.finite(delayTime), 0, WEB_AUDIO_MAX_DELAY_TIME);
+      maxDelayTime = delayTime;
+    } else {
+      maxDelayTime = util.finite(context.toSeconds(util.defaults(spec.maxDelay, spec.maxDelayTime, 1)));
+    }
+    maxDelayTime = util.clip(maxDelayTime, 1 / context.sampleRate, WEB_AUDIO_MAX_DELAY_TIME);
+
+    var outlet = context.createDelay(maxDelayTime);
+
+    outlet.delayTime.value = 0;
+    context.connect(delayTime, outlet.delayTime);
+
+    if (feedback !== 0) {
+      var feedbackNode = context.createGain();
+
+      feedbackNode.gain.value = 0;
+
+      context.connect(outlet, feedbackNode);
+      context.connect(feedback, feedbackNode.gain);
+
+      inputs = inputs.concat(feedbackNode);
+    }
+
+    context.connect(inputs, outlet);
+
+    return new neume.Unit({
+      outlet: outlet
+    });
+  }
+
+};
+
+},{}],38:[function(require,module,exports){
+module.exports = function(neume, util) {
+  "use strict";
 
   /**
    * $("env", {
-   *   init: [number] = 0
-   *   table: [env-table] = []
-   *   release: [number] = Infinity
+   *   table: Array<number|string> = []
+   *   curve: number|string = "lin"
    * })
-   *
-   * env-table:
-   *   [ [ value, duration, curve ], ... ]
    *
    * aliases:
    *   $("adsr", {
-   *     a: [number] = 0.01  attackTime
-   *     d: [number] = 0.30  decayTime
+   *     a: [number|string] = 0.01  attackTime
+   *     d: [number|string] = 0.30  decayTime
    *     s: [number] = 0.50  sustainLevel
-   *     r: [number] = 1.00  releaseTime
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 1.00  releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    *   $("dadsr", {
-   *     delay: [number] = 0.10  delayTime
-   *     a: [number] = 0.01  attackTime
-   *     d: [number] = 0.30  decayTime
+   *     delay: [number|string] = 0.10  delayTime
+   *     a: [number|string] = 0.01  attackTime
+   *     d: [number|string] = 0.30  decayTime
    *     s: [number] = 0.50  sustainLevel
-   *     r: [number] = 1.00  releaseTime
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 1.00  releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    *   $("asr", {
-   *     a: [number] = 0.01  attackTime
+   *     a: [number|string] = 0.01  attackTime
    *     s: [number] = 1.00  sustainLevel
-   *     r: [number] = 1.00  releaseTime
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 1.00  releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    *   $("cutoff", {
-   *     r: [number] = 0.1   releaseTime
-   *     level: [number] = 1.00  peakLevel
-   *     curve: [number] = 0.01  curve
+   *     r: [number|string] = 0.1   releaseTime
+   *     curve: [number|string] = "lin"  curve
    *   })
    *
    * +--------+      +-------+
@@ -3665,244 +3761,282 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("env", function(ugen, spec, inputs) {
-    var table = makeEnvTable(ugen.$context, spec);
-
-    return make(table, ugen, spec, inputs);
+    return make(util.toArray(spec.table), ugen, spec, inputs);
   });
 
   neume.register("adsr", function(ugen, spec, inputs) {
-    var a = util.defaults(spec.a, 0.01);
-    var d = util.defaults(spec.d, 0.30);
-    var s = util.defaults(spec.s, 0.50);
-    var r = util.defaults(spec.r, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var d = util.defaults(spec.d, spec.decayTime, 0.30);
+    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
-    var init = 0;
-    var list = [
-      [ 1, a, curve ], // a
-      [ s, d, curve ], // d
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 2;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 0, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = util.defaults(spec.delay, 0.1);
-    var a = util.defaults(spec.a, 0.01);
-    var d = util.defaults(spec.d, 0.30);
-    var s = util.defaults(spec.s, 0.50);
-    var r = util.defaults(spec.r, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var delay = util.defaults(spec.delay, spec.delayTime, 0.1);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var d = util.defaults(spec.d, spec.decayTime, 0.30);
+    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
-    var init = 0;
-    var list = [
-      [ 0, delay, curve ], // d
-      [ 1, a, curve ], // a
-      [ s, d, curve ], // d
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 3;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 0, 0, delay, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
-    var a = util.defaults(spec.a, 0.01);
-    var s = util.defaults(spec.s, 1.00);
-    var r = util.defaults(spec.r, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var a = util.defaults(spec.a, spec.attackTime, 0.01);
+    var s = util.defaults(spec.s, spec.sustainLevel, 1.00);
+    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
-    var init = 0;
-    var list = [
-      [ s, a, curve ], // a
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 1;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 0, s, a, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("cutoff", function(ugen, spec, inputs) {
-    var r = util.defaults(spec.r, 0.1);
-    var level = util.defaults(spec.level, 1.00);
-    var curve = util.defaults(spec.curve, 0.05);
+    var r = util.defaults(spec.r, spec.releaseTime, 0.1);
 
-    var init = level;
-    var list = [
-      [ level, 0, 0 ],
-      [ 0, r, curve ], // r
-    ];
-    var releaseNode = 1;
-
-    return make({
-      init: init, list: list, releaseNode: releaseNode, loopNode: -1
-    }, ugen, spec, inputs);
+    return make([ 1, ">", 0, r ], ugen, spec, inputs);
   });
 
-  function makeEnvTable(context, spec) {
-    var table = {};
-    var curve = util.defaults(spec.curve, 0.05);
-
-    if (spec.hasOwnProperty("table")) {
-      table = makeEnvTableFromArrayList(context, spec, curve);
-    } else {
-      table = makeEnvTableFromNumList(context, util.toArray(spec._), curve);
-    }
-
-    return table;
-  }
-
-  function makeEnvTableFromArrayList(context, spec, curve) {
-    var table = {
-      init: util.finite(spec.init),
-      list: [],
-      releaseNode: util.int(util.defaults(spec.release, -1)),
-      loopNode: util.int(util.defaults(spec.loop, -1)),
-    }, list = util.toArray(spec.table);
-
-    for (var i = 0, imax = list.length; i < imax; i++) {
-      /* istanbul ignore else */
-      if (Array.isArray(list[i])) {
-        table.list.push([
-          util.finite(list[i][0]), util.finite(context.toSeconds(list[i][1])), util.finite(util.defaults(list[i][2], curve))
-        ]);
-      }
-    }
-
-    return table;
-  }
-
-  function makeEnvTableFromNumList(context, list, curve) {
-    var table = {
-      init: util.finite(list.shift()),
-      list: [],
+  function toEnv(src) {
+    var list = [], env = {
+      init: util.finite(src.shift()),
+      list: list,
       releaseNode: -1,
       loopNode: -1,
+      index: 0,
+      length: 0
     };
 
-    for (var i = 0, imax = list.length; i < imax; ) {
-      var value = list[i++];
+    for (var i = 0, imax = src.length; i < imax; ) {
+      var value = src[i++];
 
-      if (typeof value === "string") {
-        if (/^r(elease)?$/i.test(value)) {
-          table.releaseNode = table.list.length;
-        } else if (/^l(oop)?$/i.test(value)) {
-          table.loopNode = table.list.length;
-        }
+      if (typeof value === "number") {
+        list.push([ util.clip(util.finite(value), 0, 1), src[i++] ]);
       } else {
-        table.list.push([
-          util.finite(value), util.finite(context.toSeconds(list[i++])), curve
-        ]);
+        if (/^(>|r(elease)?)$/i.test(value)) {
+          env.releaseNode = list.length;
+        }
+        if (/^(<|l(oop)?)$/i.test(value)) {
+          env.loopNode = list.length;
+        }
       }
     }
 
-    return table;
+    env.length = list.length;
+
+    return env;
   }
 
-  function make(table, ugen, spec, inputs) {
-    var context = ugen.$context;
-    var outlet = null;
+  function setCurve(context, outlet, curve) {
+    var ws, wsCurve = null;
 
-    var init = table.init;
-    var list = table.list;
-    var releaseNode = table.releaseNode;
-    var loopNode = table.loopNode;
-    var index = 0;
-    var schedId = 0;
-    var releaseSchedId = 0;
-    var param = context.createNeuParam(init);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
+    if (typeof curve === "number") {
+      curve = util.finite(curve);
+      if (0.001 <= Math.abs(curve)) {
+        wsCurve = makeCurveFromNumber(curve);
+      }
     } else {
-      outlet = param;
+      wsCurve = makeCurveFromType(curve);
+    }
+
+    if (wsCurve != null) {
+      ws = context.createWaveShaper();
+      ws.curve = wsCurve;
+      context.connect(outlet, ws);
+      outlet = ws;
+    }
+
+    return outlet;
+  }
+
+  function makeCurveFromNumber(type) {
+    if (makeCurveFromNumber[type]) {
+      return makeCurveFromNumber[type];
+    }
+
+    var curve = new Float32Array(4096);
+    var a1 = 1 / (1.0 - Math.exp(type));
+    var grow = Math.exp(type / 2048);
+
+    for (var i = 0; i < 2048; i++) {
+      curve[i + 2048] = a1 - a1 * Math.pow(grow, i);
+    }
+
+    makeCurveFromNumber[type] = curve;
+
+    return curve;
+  }
+
+  function makeCurveFromType(type) {
+    if (makeCurveFromType[type]) {
+      return makeCurveFromType[type];
+    }
+    var func = shapeFunc[type];
+    if (!func) {
+      return;
+    }
+
+    var curve = new Float32Array(4096);
+
+    for (var i = 0; i < 2048; i++) {
+      curve[i + 2048] = func(i / 2048);
+    }
+
+    makeCurveFromType[type] = curve;
+
+    return curve;
+  }
+
+  var shapeFunc = {};
+
+  shapeFunc.sine = function(x) {
+    // TODO: FIX
+    return x - Math.sin(x * 2 * Math.PI) * 0.10355338794738156;
+  };
+
+  shapeFunc.welch = function(x) {
+    return Math.sin(x * Math.PI * 0.5);
+  };
+
+  shapeFunc.squared = function(x) {
+    return x * x;
+  };
+
+  shapeFunc.cubic = function(x) {
+    return x * x * x;
+  };
+
+  function make(src, ugen, spec, inputs) {
+    var context = ugen.$context;
+
+    var env = toEnv(src);
+    var curve = util.defaults(spec.curve, "lin");
+    var param = new neume.Param(context, env.init);
+
+    var schedId, releaseSchedId, scheduled;
+    var isReleased = false, isStopped = false;
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
+
+    outlet = setCurve(context, outlet, curve);
+
+    function start(t0) {
+      env.index = 0;
+      param.setValueAtTime(env.init, t0);
+      if (env.releaseNode !== 0) {
+        schedId = context.sched(t0, resume);
+      }
     }
 
     function stop(t0) {
-      param.setAt(param.valueOf(), t0);
+      terminateAudioParamScheduling(t0);
+      param.setValueAtTime(param.valueAtTime(t0), t0);
+
       context.unsched(schedId);
       context.unsched(releaseSchedId);
+
       schedId = 0;
-      index = list.length;
+      env.index = env.length;
+      isStopped = true;
+    }
+
+    function release(e) {
+      if (isStopped || releaseSchedId || env.releaseNode === -1) {
+        return;
+      }
+
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+
+      releaseSchedId = context.sched(t0, function(t0) {
+        context.unsched(schedId);
+
+        schedId = 0;
+        env.index = env.releaseNode;
+        isReleased = true;
+
+        terminateAudioParamScheduling(t0);
+        resume(t0);
+      });
     }
 
     function resume(t0) {
-      var params = list[index];
+      var params = env.list[env.index];
 
       /* istanbul ignore next */
       if (params == null) {
         return;
       }
 
-      index += 1;
+      env.index += 1;
 
       var dur = util.finite(context.toSeconds(params[1]));
       var t1 = t0 + dur;
-      var v0 = param.valueOf();
+      var v0 = param.valueAtTime(t0);
       var v1 = util.finite(params[0]);
-      var cur = util.clip(util.finite(params[2]), 1e-6, 1 - 1e-6);
 
-      if (v0 === v1 || dur <= 0) {
-        param.setAt(v1, t1);
-      } else {
-        var vT = v0 + (v1 - v0) * (1 - cur);
-        var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
+      switch (curve) {
+      case "step":
+        param.setValueAtTime(v1, t0);
+        break;
+      case "hold":
+        param.setValueAtTime(v0, t0);
+        param.setValueAtTime(v1, t1);
+        break;
+      case "exp":
+      case "exponential":
+        param.setValueAtTime(Math.max(1e-6, v0), t0);
+        param.exponentialRampToValueAtTime(Math.max(1e-6, v1), t1);
+        scheduled = { method: "exponentialRampToValueAtTime", time: t1 };
+        break;
+      // case "lin":
+      // case "linear":
+      default:
+        param.setValueAtTime(v0, t0);
+        param.linearRampToValueAtTime(v1, t1);
+        scheduled = { method: "linearRampToValueAtTime", time: t1 };
+        break;
+      }
 
-        if (index === list.length) {
-          t1 = t0 + tC * Math.abs(Math.log(Math.max(1e-6, Math.abs(v1)) / Math.max(1e-6, Math.abs(v0))));
+      if (!isReleased && env.loopNode !== -1) {
+        if (env.index === env.releaseNode || env.index === env.length) {
+          env.index = env.loopNode;
         }
-
-        param.targetAt(v1, t0, tC);
       }
 
-      if (loopNode >= 0 && index === releaseNode && loopNode < releaseNode) {
-        index = loopNode;
-      }
+      schedId = 0;
 
-      if (index === list.length) {
+      if (env.index === env.length) {
         schedId = context.sched(t1, function(t) {
           schedId = 0;
           ugen.emit("end", { playbackTime: t }, ugen.$synth);
         });
-      } else if (index !== releaseNode) {
+      } else if (env.index !== env.releaseNode) {
         schedId = context.sched(t1, resume);
       }
     }
 
+    function terminateAudioParamScheduling(t0) {
+      if (scheduled == null || scheduled.time <= t0) {
+        return;
+      }
+      var endValue = param.valueAtTime(t0);
+
+      param.cancelScheduledValues(scheduled.time);
+      param[scheduled.method](endValue, t0);
+    }
+
     return new neume.Unit({
       outlet: outlet,
-      start: function(t0) {
-        context.sched(t0, resume);
-      },
+      start: start,
       stop: stop,
       methods: {
-        release: function(t0) {
-          if (releaseNode > 0 && releaseSchedId === 0) {
-            releaseSchedId = context.sched(util.finite(context.toSeconds(t0)), function(t0) {
-              context.unsched(schedId);
-              schedId = 0;
-              index = releaseNode;
-              resume(t0);
-            });
-          }
-        }
+        release: release
       }
     });
   }
 
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3911,7 +4045,7 @@ module.exports = function(neume, util) {
 
   /**
    * $(function, {
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -3929,54 +4063,55 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("function", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;
+    var param = new neume.Param(context, util.finite(data(0, count++)), spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    var prevValue = util.finite(data(0, count++));
-    var param = context.createNeuParam(prevValue, spec);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (typeof value === "function") {
+        context.sched(t0, function() {
+          data = value;
+        });
+      }
     }
 
-    function update(t0) {
-      var v0 = prevValue;
-      var v1 = data(t0, count++);
+    function evaluate(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(startTime);
+      });
+    }
 
-      param.update(t0, v1, v0);
+    function update(startTime) {
+      var value = data({
+        playbackTime: startTime,
+        count: count++
+      });
 
-      prevValue = v1;
+      param.update(value, startTime);
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (typeof value === "function") {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              data = value;
-            });
-          }
-        },
-        evaluate: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            update(t);
-          });
-        }
+        setValue: setValue,
+        evaluate: evaluate
       }
     });
-  });
+  }
 
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -4005,7 +4140,7 @@ module.exports = function(neume) {
 
 };
 
-},{"./add":28,"./array":29,"./audio-node":30,"./biquad":31,"./boolean":32,"./buf":33,"./comp":34,"./conv":35,"./delay":36,"./env":37,"./function":38,"./inout":40,"./iter":41,"./line":42,"./mono":43,"./mul":44,"./noise":45,"./number":46,"./object":47,"./osc":48,"./pan2":49,"./shaper":50}],40:[function(require,module,exports){
+},{"./add":29,"./array":30,"./audio-node":31,"./biquad":32,"./boolean":33,"./buf":34,"./comp":35,"./conv":36,"./delay":37,"./env":38,"./function":39,"./inout":41,"./iter":42,"./line":43,"./mono":44,"./mul":45,"./noise":46,"./number":47,"./object":48,"./osc":49,"./pan2":50,"./shaper":51}],41:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4019,7 +4154,7 @@ module.exports = function(neume, util) {
       return getAudioBus(context, index);
     });
 
-    outlet = context.createNeuSum(inputs);
+    outlet = new neume.Sum(context, inputs);
 
     return new neume.Unit({
       outlet: outlet
@@ -4029,7 +4164,7 @@ module.exports = function(neume, util) {
   neume.register("out", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var synth = ugen.$synth;
-    var outlet = context.createNeuSum(inputs);
+    var outlet = new neume.Sum(context, inputs);
 
     var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
 
@@ -4050,7 +4185,7 @@ module.exports = function(neume, util) {
       return getLocalBus(context, synth, index);
     });
 
-    outlet = context.createNeuSum(inputs);
+    outlet = new neume.Sum(context, inputs);
 
     return new neume.Unit({
       outlet: outlet
@@ -4065,7 +4200,7 @@ module.exports = function(neume, util) {
     var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
     var bus = getLocalBus(context, synth, index);
 
-    outlet = context.createNeuSum(inputs).connect(bus);
+    outlet = new neume.Sum(context, inputs).connect(bus);
 
     return new neume.Unit({
       outlet: outlet
@@ -4089,7 +4224,7 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4099,7 +4234,7 @@ module.exports = function(neume, util) {
   /**
    * $("iter", {
    *   iter: [iterator] = null
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -4117,20 +4252,52 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("iter", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
-    var prevValue = 0;
-    var param = context.createNeuParam(prevValue, spec);
+    var param = new neume.Param(context, 0, spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function start(t) {
+      var items = iterNext();
+
+      if (items.done) {
+        state = FINISHED;
+        ugen.emit("end", { playbackTime: t }, ugen.$synth);
+      } else {
+        param.setValueAtTime(util.finite(items.value), t);
+      }
+    }
+
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (typeof value === "object" && typeof value.next === "function") {
+        context.sched(t0, function() {
+          iter = value;
+        });
+      }
+    }
+
+    function next(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        if (state === ITERATE) {
+          var items = iterNext();
+
+          if (items.done) {
+            state = FINISHED;
+            ugen.emit("end", { playbackTime: startTime }, ugen.$synth);
+          } else {
+            param.update(util.finite(items.value), startTime);
+          }
+        }
+      });
     }
 
     function iterNext() {
@@ -4151,47 +4318,17 @@ module.exports = function(neume, util) {
 
     return new neume.Unit({
       outlet: outlet,
-      start: function(t) {
-        var items = iterNext();
-
-        if (items.done) {
-          state = FINISHED;
-          ugen.emit("end", { playbackTime: t }, ugen.$synth);
-        } else {
-          prevValue = util.finite(items.value);
-          param.setAt(prevValue, t);
-        }
-      },
+      start: start,
       methods: {
-        setValue: function(t, value) {
-          context.sched(util.finite(context.toSeconds(t)), function() {
-            iter = util.defaults(value, {});
-          });
-        },
-        next: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            if (state === ITERATE) {
-              var items = iterNext();
-              var value;
-
-              if (items.done) {
-                state = FINISHED;
-                ugen.emit("end", { playbackTime: t }, ugen.$synth);
-              } else {
-                value = util.finite(items.value);
-                param.update(t, value, prevValue);
-                prevValue = value;
-              }
-            }
-          });
-        }
+        setValue: setValue,
+        next: next
       }
     });
-  });
+  }
 
 };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4219,79 +4356,32 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("line", function(ugen, spec, inputs) {
-    var list = spec.hasOwnProperty("_") ? makeListFromNumArray(ugen.$context, util.toArray(spec._)) : [
-      util.finite(util.defaults(spec.start, 1)),
-      [
-        util.finite(util.defaults(spec.end, 0)),
-        util.finite(util.defaults(ugen.$context.toSeconds(spec.dur), 1))
-      ]
-    ];
-    return make("linTo", ugen, list, inputs);
+    var startValue = util.finite(util.defaults(spec.start, spec.startValue, 1));
+    var endValue = util.finite(util.defaults(spec.end, spec.endValue, 0));
+    var duration = util.finite(util.defaults(ugen.$context.toSeconds(spec.dur, spec.duration), 1));
+    return make("linTo", ugen, startValue, endValue, duration, inputs);
   });
 
   neume.register("xline", function(ugen, spec, inputs) {
-    var list = spec.hasOwnProperty("_") ? makeListFromNumArray(ugen.$context, util.toArray(spec._)) : [
-      util.finite(util.defaults(spec.start, 1)),
-      [
-        util.finite(util.defaults(spec.end, 0)),
-        util.finite(util.defaults(ugen.$context.toSeconds(spec.dur), 1))
-      ]
-    ];
-
-    if (list[0] === 0) {
-      list[0] = 1e-6;
-    }
-
-    for (var i = 1, imax = list.length; i < imax; i++) {
-      if (list[i][0] === 0) {
-        list[i][0] = 1e-6;
-      }
-    }
-
-    return make("expTo", ugen, list, inputs);
+    var startValue = Math.max(1e-6, util.finite(util.defaults(spec.start, spec.startValue, 1)));
+    var endValue = Math.max(1e-6, util.finite(util.defaults(spec.end, spec.endValue, 0)));
+    var duration = util.finite(util.defaults(ugen.$context.toSeconds(spec.dur, spec.duration), 1));
+    return make("expTo", ugen, startValue, endValue, duration, inputs);
   });
 
-
-  function makeListFromNumArray(context, list) {
-    var result = [
-      util.finite(list[0])
-    ];
-
-    for (var i = 1, imax = list.length; i < imax; i += 2) {
-      result.push([
-        util.finite(list[i]),
-        util.finite(context.toSeconds(list[i + 1]))
-      ]);
-    }
-
-    return result;
-  }
-
-  function make(curve, ugen, list, inputs) {
+  function make(curve, ugen, startValue, endValue, duration, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var schedId = 0;
-    var param = context.createNeuParam(list[0]);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
+    var param = new neume.Param(context, startValue);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function start(t) {
       var t0 = t;
-      var t1 = t0;
+      var t1 = t0 + duration;
 
-      param.setAt(list[0], t0);
-
-      for (var i = 1, imax = list.length; i < imax; i++) {
-        t1 += list[i][1];
-        param[curve](list[i][0], t1);
-      }
+      param.setAt(startValue, t0);
+      param[curve](endValue, t1);
 
       schedId = context.sched(t1, function(t) {
         schedId = 0;
@@ -4312,7 +4402,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -4332,6 +4422,10 @@ module.exports = function(neume) {
    *   |
    */
   neume.register("mono", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet = context.createGain();
 
@@ -4339,15 +4433,16 @@ module.exports = function(neume) {
     outlet.channelCountMode = "explicit";
     outlet.channelInterpretation = "speakers";
 
-    context.createNeuSum(inputs).connect(outlet);
+    context.connect(inputs, outlet);
 
     return new neume.Unit({
       outlet: outlet
     });
-  });
+  }
+
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4397,10 +4492,10 @@ module.exports = function(neume, util) {
     var context = ugen.$context;
 
     if (multiple === 0) {
-      return context.createNeuDC(0);
+      return new neume.DC(context, 0);
     }
     if (nodes.length === 0) {
-      return context.createNeuDC(multiple);
+      return new neume.DC(context, multiple);
     }
     if (nodes.length === 1 && multiple === 1) {
       return nodes[0];
@@ -4424,6 +4519,12 @@ module.exports = function(neume, util) {
     return mulNode;
   }
 
+  function make(outlet) {
+    return new neume.Unit({
+      outlet: outlet
+    });
+  }
+
   function createMulNode(context, mul) {
     var mulNode = context.createGain();
 
@@ -4437,15 +4538,9 @@ module.exports = function(neume, util) {
     return mulNode;
   }
 
-  function make(outlet) {
-    return new neume.Unit({
-      outlet: outlet
-    });
-  }
-
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -4537,13 +4632,13 @@ module.exports = function(neume) {
   }
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
   /**
    * $(number, {
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -4560,42 +4655,40 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("number", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
-    var data = util.finite(spec.value);
-    var param = context.createNeuParam(data, spec);
+    var param = new neume.Param(context, util.finite(spec.value), spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = util.defaults(e.value, e.count, 0);
+      if (util.isFinite(value)) {
+        context.sched(t0, function(startTime) {
+          update(value, startTime);
+        });
+      }
     }
 
-    function update(t0, v0, v1, nextData) {
-      param.update(t0, v1, v0);
-      data = nextData;
+    function update(value, startTime) {
+      param.update(value, startTime);
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (util.isFinite(value)) {
-            context.sched(util.finite(context.toSeconds(t)), function() {
-              update(t, data, value, value);
-            });
-          }
-        }
+        setValue: setValue
       }
     });
-  });
+  }
 
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4604,7 +4697,6 @@ module.exports = function(neume, util) {
 
   function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = util.defaults(spec.value, 0);
     var key = util.defaults(spec.key, "");
@@ -4629,37 +4721,22 @@ module.exports = function(neume, util) {
     }
 
     var minInterval = 1 / context.sampleRate;
-    var relativeInterval = true;
-
-    if (!/\d+(ticks|n)|\d+\.\d+\.\d+/.test(interval)) {
-      relativeInterval = false;
-      interval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
-    }
 
     var prevVal = util.finite(valueOf());
-    var param = context.createNeuParam(prevVal, spec);
-
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
-    }
+    var param = new neume.Param(context, prevVal, spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function update(t0) {
       var value = util.finite(valueOf());
 
       if (value !== prevVal) {
-        param.update(t0, value, prevVal);
+        param.update(value, t0);
         prevVal = value;
       }
 
-      var nextTime = relativeInterval ?
-        t0 + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
-        t0 + interval;
+      var nextInterval = Math.max(minInterval, util.finite(context.toSeconds(interval)));
 
-      schedId = context.sched(nextTime, update);
+      schedId = context.sched(t0 + nextInterval, update);
     }
 
     return new neume.Unit({
@@ -4675,18 +4752,16 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 (function (global){
 module.exports = function(neume, util) {
   "use strict";
-
-  var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
 
   /**
    * $("osc", {
    *   type: [string|PeriodicWave]="sin",
    *   freq: [number|UGen]=440,
-   *   detune: [number|UGen]=0
+   *   dt: [number|UGen]=0
    * } ... inputs)
    *
    * aliases:
@@ -4728,13 +4803,14 @@ module.exports = function(neume, util) {
   };
 
   neume.register("osc", function(ugen, spec, inputs) {
+    var context = ugen.$context;
     var type = spec.type;
 
     if (!isWave(type)) {
       if (type === "pulse") {
-        type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
+        type = makePeriodicWave(context, util.finite(util.defaults(spec.width, 0.5)));
       } else {
-        type = WAVE_TYPES[type] || "sine";
+        type = makePeriodicWave(context, WAVE_TYPES[type] || "sine");
       }
     }
 
@@ -4745,7 +4821,7 @@ module.exports = function(neume, util) {
     var type = spec.value;
 
     if (!isWave(type)) {
-      type = "sine";
+      type = makePeriodicWave(ugen.$context, "sine");
     }
 
     return make(setup(type, ugen, spec, inputs));
@@ -4754,12 +4830,12 @@ module.exports = function(neume, util) {
   Object.keys(WAVE_TYPES).forEach(function(name) {
     var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(type, ugen, spec, inputs));
+      return make(setup(makePeriodicWave(ugen.$context, type), ugen, spec, inputs));
     });
   });
 
   neume.register("pulse", function(ugen, spec, inputs) {
-    var type = makePulseWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
+    var type = makePeriodicWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
     return make(setup(type, ugen, spec, inputs));
   });
 
@@ -4799,8 +4875,12 @@ module.exports = function(neume, util) {
     }
     osc.frequency.value = 0;
     osc.detune.value = 0;
-    context.connect(util.defaults(context.toFrequency(spec.freq), defaultFreq), osc.frequency);
-    context.connect(util.defaults(spec.detune, 0), osc.detune);
+
+    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, defaultFreq));
+    var detune = util.defaults(spec.dt, spec.detune, 0);
+
+    context.connect(frequency, osc.frequency);
+    context.connect(detune, osc.detune);
 
     return osc;
   }
@@ -4818,41 +4898,95 @@ module.exports = function(neume, util) {
 
     gain.gain.value = 0;
     context.connect(osc, gain.gain);
-
-    context.createNeuSum(inputs).connect(gain);
+    context.connect(inputs, gain);
 
     return { outlet: gain, ctrl: osc };
   }
 
-  var _wave = new Array(256);
+  var _waves = {};
 
-  function makePulseWave(context, width) {
-    width = util.int(util.clip(width, 0, 1) * 256);
-
-    if (_wave[width]) {
-      return _wave[width];
+  function makePeriodicWave(context, type) {
+    if (type === "sine") {
+      return "sine";
     }
 
-    var wave = new Float32Array(WS_CURVE_SIZE);
-    var width2 = width * (WS_CURVE_SIZE / 256);
-
-    for (var i = 0; i < WS_CURVE_SIZE; i++) {
-      wave[i] = i < width2 ? -1 : +1;
+    if (typeof type === "number") {
+      type = util.int(util.clip(type, 0, 1) * 256);
     }
 
-    var fft = neume.FFT.forward(wave);
+    if (_waves[type]) {
+      return _waves[type];
+    }
 
-    var periodicWave = context.createPeriodicWave(fft.real, fft.imag);
+    var real = new Float32Array(2048);
+    var imag = new Float32Array(2048);
 
-    _wave[width] = periodicWave;
+    switch (type) {
+    case "square":
+      makePeriodicWaveSquare(real, imag);
+      break;
+    case "sawtooth":
+      makePeriodicWaveSawtooth(real, imag);
+      break;
+    case "triangle":
+      makePeriodicWaveTriangle(real, imag);
+      break;
+    default:
+      makePeriodicWavePulse(real, imag, type);
+      break;
+    }
 
-    return periodicWave;
+    var wave = context.createPeriodicWave(real, imag);
+
+    _waves[type] = wave;
+
+    return wave;
+  }
+
+  function makePeriodicWaveSquare(real, imag) {
+    for (var i = 1, imax = real.length; i < imax; i++) {
+      var omega = 2 * Math.PI * i;
+      var invOmega = 1 / omega;
+
+      imag[i] = invOmega * ((i & 1) ? 2 : 0);
+    }
+  }
+
+  function makePeriodicWaveSawtooth(real, imag) {
+    for (var i = 1, imax = real.length; i < imax; i++) {
+      var omega = 2 * Math.PI * i;
+      var invOmega = 1 / omega;
+
+      imag[i] = -invOmega * Math.cos(0.5 * omega);
+    }
+  }
+
+  function makePeriodicWaveTriangle(real /*, imag*/) {
+    for (var i = 1, imax = real.length; i < imax; i++) {
+      var omega = 2 * Math.PI * i;
+
+      real[i] = (4 - 4 * Math.cos(0.5 * omega)) / (i * i * Math.PI * Math.PI);
+    }
+  }
+
+  function makePeriodicWavePulse(real, imag, width) {
+    var buffer = new Float32Array(2048);
+    var width2 = width * (2048 / 256);
+
+    for (var i = 0; i < 2048; i++) {
+      buffer[i] = i < width2 ? -1 : +1;
+    }
+
+    var fft = neume.FFT.forward(buffer);
+
+    real.set(fft.real);
+    imag.set(fft.imag);
   }
 
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4891,6 +5025,10 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("pan2", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gainL = context.createGain();
@@ -4904,7 +5042,7 @@ module.exports = function(neume, util) {
     gainR.channelCountMode = "explicit";
     gainR.channelInterpretation = "speakers";
 
-    var pos = util.defaults(spec.pos, 0);
+    var pos = util.defaults(spec.pos, spec.pan, 0);
 
     if (typeof pos === "number") {
       pos = util.clip(pos, -1, +1) * 0.5 + 0.5;
@@ -4931,16 +5069,17 @@ module.exports = function(neume, util) {
 
     gainL.connect(merger, 0, 0);
     gainR.connect(merger, 0, 1);
-
-    context.createNeuSum(inputs).connect(gainL).connect(gainR);
+    context.connect(inputs, gainL);
+    context.connect(inputs, gainR);
 
     return new neume.Unit({
       outlet: merger
     });
-  });
+  }
+
 };
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4972,29 +5111,25 @@ module.exports = function(neume, util) {
     } else {
       curve = spec.curve;
     }
-    return make(setup(curve, ugen, spec, inputs));
+    return make(curve, ugen, spec, inputs);
   });
 
   neume.register("clip", function(ugen, spec, inputs) {
     var curve = createCurve(0);
-    return make(setup(curve, ugen, spec, inputs));
+    return make(curve, ugen, spec, inputs);
   });
 
-  function setup(curve, ugen, spec, inputs) {
+  function make(curve, ugen, spec, inputs) {
     var context = ugen.$context;
-    var shaper = context.createWaveShaper();
+    var outlet = context.createWaveShaper();
 
     if (curve instanceof Float32Array) {
-      shaper.curve = curve;
+      outlet.curve = curve;
     }
-    shaper.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
+    outlet.oversample = { "2x":"2x", "4x":"4x" }[spec.oversample] || "none";
 
-    context.createNeuSum(inputs).connect(shaper);
+    context.connect(inputs, outlet);
 
-    return shaper;
-  }
-
-  function make(outlet) {
     return new neume.Unit({
       outlet: outlet
     });
@@ -5038,7 +5173,7 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 
 var util = {};
@@ -5223,8 +5358,8 @@ util.typeOf = function(value) {
   return name;
 };
 
-util.defaults = function(value, defaultValue) {
-  return value == null ? defaultValue : value;
+util.defaults = function(value1, value2, defaultValue) {
+  return value1 != null ? value1 : value2 != null ? value2 : defaultValue;
 };
 
 util.inherits = function(ctor, superCtor) {

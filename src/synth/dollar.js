@@ -29,8 +29,7 @@ function NeuSynthDollar(synth) {
   builder.method = $method(synth, this.methods);
   builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
-  builder.sec = $sec(synth);
-  builder.freq = $freq(synth);
+  builder.stop = $stop(synth, this.timers);
 
   this.builder = builder;
 }
@@ -48,12 +47,8 @@ function $param(synth, params) {
     var param = new NeuParam(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
-      set: function(value) {
-        param.set(value);
-      },
-      get: function() {
-        return param;
-      }
+      value: param,
+      enumerable: true
     });
 
     params[name] = param;
@@ -80,10 +75,13 @@ function $timeout(synth, timers) {
     var callbacks = util.toArray(arguments).slice(1).filter(util.isFunction);
 
     function sched(t) {
-      schedId = context.sched(t, function(t) {
+      schedId = context.sched(t, function(playbackTime) {
         schedId = 0;
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
-          callbacks[i].call(synth, t, 1);
+          callbacks[i].call(synth, {
+            playbackTime: playbackTime,
+            count: 1
+          });
         }
       });
     }
@@ -120,15 +118,18 @@ function $interval(synth, timers) {
     var count = 0;
 
     function sched(t) {
-      schedId = context.sched(t, function(t) {
+      schedId = context.sched(t, function(playbackTime) {
         schedId = 0;
-        count  += 1;
+        count += 1;
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
-          callbacks[i].call(synth, t, count);
+          callbacks[i].call(synth, {
+            playbackTime: playbackTime,
+            count: count
+          });
         }
 
         var nextTime = relative ?
-          t + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
+          playbackTime + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
           startTime + interval * (count + 1);
 
         sched(nextTime);
@@ -153,15 +154,22 @@ function $interval(synth, timers) {
   };
 }
 
-function $sec(synth) {
-  return function(value) {
-    return synth.$context.toSeconds(value);
-  };
-}
+function $stop(synth, timers) {
+  var context = synth.$context;
 
-function $freq(synth) {
-  return function(value) {
-    return synth.$context.toFrequency(value);
+  return function(stopTime) {
+    var schedId = 0;
+    timers.push({
+      start: function(t) {
+        schedId = context.sched(t, function() {
+          synth.stop(stopTime);
+        });
+      },
+      stop: function() {
+        context.unsched(schedId);
+        schedId = 0;
+      }
+    });
   };
 }
 

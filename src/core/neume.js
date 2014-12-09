@@ -3,8 +3,7 @@
 require("./shim");
 
 var util = require("../util");
-
-var VERSION = "0.2.0";
+var neume = require("../namespace");
 
 function Neume(context) {
   function fn(spec) {
@@ -68,15 +67,21 @@ function Neume(context) {
       }),
       enumerable: true
     },
+    Sched: {
+      value: function(callback) {
+        return new neume.Sched(context, 0, callback);
+      },
+      enumerable: true
+    },
     Interval: {
-      value: function(interval, callback) {
-        return new neume.Interval(context, interval, callback);
+      value: function(schedTime, callback) {
+        return new neume.Interval(context, schedTime, callback);
       },
       enumerable: true
     },
     Timeout: {
-      value: function(interval, callback) {
-        return new neume.Timeout(context, interval, callback);
+      value: function(schedTime, callback) {
+        return new neume.Timeout(context, schedTime, callback);
       },
       enumerable: true
     },
@@ -95,12 +100,12 @@ function Neume(context) {
   return fn;
 }
 
-var neume = function(destination, spec) {
+neume.impl = function(destination, spec) {
   if (destination instanceof global.AudioContext) {
     destination = destination.destination;
   }
   if (!(destination instanceof global.AudioNode)) {
-    throw new TypeError("neume(): illegal argument");
+    throw new TypeError("neume(): Illegal arguments");
   }
 
   var context = new neume.Context(destination, Infinity, spec);
@@ -141,6 +146,7 @@ neume.Sum = require("../component/sum");
 neume.Param = require("../component/param");
 neume.AudioBus = require("../control/audio-bus");
 neume.Buffer = require("../control/buffer");
+neume.Sched = require("../control/sched");
 neume.Interval = require("../control/interval");
 neume.Timeout = require("../control/timeout");
 neume.FFT = require("../dsp/fft");
@@ -150,7 +156,6 @@ neume.Synth = require("../synth/synth");
 neume.SynthDef = require("../synth/synthdef");
 neume.UGen = require("../synth/ugen");
 neume.Unit = require("../synth/unit");
-neume.Random = require("sc-random");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {
@@ -172,7 +177,5 @@ neume.use = function(fn) {
   return neume;
 };
 neume.use.used = [];
-
-neume.version = VERSION;
 
 module.exports = neume;

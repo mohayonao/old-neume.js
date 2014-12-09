@@ -2,19 +2,21 @@
 
 var neume = require("../../src");
 
+neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/number"));
 
 describe("ugen/number", function() {
   var Neume = null;
 
-  before(function() {
+  beforeEach(function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(440)", function() {
-    it("returns a GainNode that is connected with a DC(1)", function() {
-      var synth = new Neume.Synth(function($) {
-        return $(0);
+  describe("graph", function() {
+    it("$(number)", function() {
+      var n = Math.floor(Math.random() * 65536);
+      var synth = Neume.Synth(function($) {
+        return $(n);
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -27,7 +29,7 @@ describe("ugen/number", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0,
+              value: n,
               inputs: []
             },
             inputs: [ DC(1) ]
@@ -35,42 +37,10 @@ describe("ugen/number", function() {
         ]
       });
     });
-    it("works", function() {
-      var synth = new Neume.Synth(function($) {
-        return $(0);
-      });
-
-      var audioContext = Neume.audioContext;
-      var outlet = synth.toAudioNode().$inputs[0];
-
-      audioContext.$reset();
-      synth.$context.reset();
-
-      synth.start(0);
-
-      assert(outlet.gain.value === 0, "00:00.000");
-
-      synth.setValue(0.100, "1");
-      synth.setValue(0.200, 2);
-
-      audioContext.$processTo("00:00.500");
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 0);
-      assert(outlet.gain.$valueAtTime(0.150) === 0);
-      assert(outlet.gain.$valueAtTime(0.200) === 2);
-      assert(outlet.gain.$valueAtTime(0.250) === 2);
-      assert(outlet.gain.$valueAtTime(0.300) === 2);
-      assert(outlet.gain.$valueAtTime(0.350) === 2);
-      assert(outlet.gain.$valueAtTime(0.400) === 2);
-      assert(outlet.gain.$valueAtTime(0.450) === 2);
-      assert(outlet.gain.$valueAtTime(0.500) === 2);
-    });
-  });
-
-  describe("$(1, $(2), $(3))", function() {
-    it("returns a GainNode that is connected with inputs", function() {
-      var synth = new Neume.Synth(function($) {
-        return $(1, $(2), $(3));
+    it("$(number, $('sin'))", function() {
+      var n = Math.floor(Math.random() * 65536);
+      var synth = Neume.Synth(function($) {
+        return $(n, $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -83,25 +53,22 @@ describe("ugen/number", function() {
           {
             name: "GainNode",
             gain: {
-              value: 1,
+              value: n,
               inputs: []
             },
             inputs: [
               {
-                name: "GainNode",
-                gain: {
-                  value: 2,
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
                   inputs: []
                 },
-                inputs: [ DC(1) ]
-              },
-              {
-                name: "GainNode",
-                gain: {
-                  value: 3,
+                detune: {
+                  value: 0,
                   inputs: []
                 },
-                inputs: [ DC(1) ]
+                inputs: []
               }
             ]
           }
@@ -109,4 +76,35 @@ describe("ugen/number", function() {
       });
     });
   });
+
+  describe("works", function() {
+    it("setValue", function() {
+      var synth = Neume.Synth(function($) {
+        return $(0);
+      });
+
+      synth.start(0);
+
+      synth.setValue(0.100, 1);
+      synth.setValue(0.200, 2);
+      synth.setValue(0.300, NaN);
+      synth.setValue(0.400, 4);
+
+      Neume.audioContext.$processTo("00:00.500");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 1);
+      assert(outlet.gain.$valueAtTime(0.150) === 1);
+      assert(outlet.gain.$valueAtTime(0.200) === 2);
+      assert(outlet.gain.$valueAtTime(0.250) === 2);
+      assert(outlet.gain.$valueAtTime(0.300) === 2);
+      assert(outlet.gain.$valueAtTime(0.350) === 2);
+      assert(outlet.gain.$valueAtTime(0.400) === 4);
+      assert(outlet.gain.$valueAtTime(0.450) === 4);
+      assert(outlet.gain.$valueAtTime(0.500) === 4);
+    });
+  });
+
 });

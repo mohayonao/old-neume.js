@@ -30,7 +30,7 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("buf", function(ugen, spec) {
-    return make(spec.buf, ugen, spec);
+    return make(spec.buf || spec.buffer, ugen, spec);
   });
 
   neume.register("AudioBuffer", function(ugen, spec) {
@@ -52,14 +52,14 @@ module.exports = function(neume, util) {
       bufSrc.buffer = buffer;
     }
     bufSrc.loop = !!util.defaults(spec.loop, false);
-    bufSrc.loopStart = util.finite(util.defaults(spec.start, 0));
-    bufSrc.loopEnd = util.finite(util.defaults(spec.end, 0));
+    bufSrc.loopStart = util.finite(util.defaults(spec.start, spec.loopStart, 0));
+    bufSrc.loopEnd = util.finite(util.defaults(spec.end, spec.loopEnd, 0));
 
     bufSrc.playbackRate.value = 0;
-    context.connect(util.defaults(spec.rate, 1), bufSrc.playbackRate);
+    context.connect(util.defaults(spec.rate, spec.playbackRate, 1), bufSrc.playbackRate);
 
     var offset = util.finite(util.defaults(spec.offset, 0));
-    var duration = util.defaults(context.toSeconds(spec.dur), null);
+    var duration = context.toSeconds(util.defaults(spec.dur, spec.duration, null));
     if (duration != null) {
       duration = util.finite(duration);
     }
@@ -71,7 +71,6 @@ module.exports = function(neume, util) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
-        // TODO: test!!
         ugen.emit("end", {
           playbackTime: context.currentTime
         }, ugen.$synth);

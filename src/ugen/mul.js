@@ -47,10 +47,10 @@ module.exports = function(neume, util) {
     var context = ugen.$context;
 
     if (multiple === 0) {
-      return context.createNeuDC(0);
+      return new neume.DC(context, 0);
     }
     if (nodes.length === 0) {
-      return context.createNeuDC(multiple);
+      return new neume.DC(context, multiple);
     }
     if (nodes.length === 1 && multiple === 1) {
       return nodes[0];
@@ -74,6 +74,12 @@ module.exports = function(neume, util) {
     return mulNode;
   }
 
+  function make(outlet) {
+    return new neume.Unit({
+      outlet: outlet
+    });
+  }
+
   function createMulNode(context, mul) {
     var mulNode = context.createGain();
 
@@ -85,12 +91,6 @@ module.exports = function(neume, util) {
     }
 
     return mulNode;
-  }
-
-  function make(outlet) {
-    return new neume.Unit({
-      outlet: outlet
-    });
   }
 
 };

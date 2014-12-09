@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuComponent = require("./component");
 
 function NeuParam(context, value, spec) {
@@ -8,30 +9,40 @@ function NeuParam(context, value, spec) {
   NeuComponent.call(this, context);
   this._value = util.finite(value);
   this._params = [];
-
-  if (/\d+(ticks|n)|\d+\.\d+\.\d+/.test(spec.timeConstant)) {
-    this._relative = true;
-    this._timeConstant = spec.timeConstant;
-  } else {
-    this._relative = false;
-    this._timeConstant = Math.max(0, util.finite(spec.timeConstant));
-  }
-
-  this._events = [
-    {
-      type: "SetValue",
-      value: this._value,
-      time: context.currentTime,
-    }
-  ];
+  this._events = [];
+  this._curve = spec.curve;
+  this._lag = util.defaults(spec.lag, 0);
+  this._scheduled = null;
 }
 util.inherits(NeuParam, NeuComponent);
 
 NeuParam.$name = "NeuParam";
 
-NeuParam.prototype.valueOf = function() {
-  return this._params.length ? this._params[0].value : /* istanbul ignore next */ this._value;
-};
+Object.defineProperties(NeuParam.prototype, {
+  events: {
+    get: function() {
+      return this._events.slice();
+    },
+    enumerable: true
+  },
+  value: {
+    set: function(value) {
+      value = util.finite(value);
+
+      var params = this._params;
+
+      this._value = value;
+
+      for (var i = 0, imax = params.length; i < imax; i++) {
+        params[i].value = value;
+      }
+    },
+    get: function() {
+      return this._params.length ? this._params[0].value : this._value;
+    },
+    enumerable: true
+  }
+});
 
 NeuParam.prototype.valueAtTime = function(t) {
   t = util.finite(this.$context.toSeconds(t));
@@ -50,9 +61,9 @@ NeuParam.prototype.valueAtTime = function(t) {
     t0 = Math.min(t, e1 ? e1.time : t);
 
     if (e1 && e1.type === "LinearRampToValue") {
-      value = linTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+      value = calcLinearRampToValue(value, e0.value, e1.value, t0, e0.time, e1.time);
     } else if (e1 && e1.type === "ExponentialRampToValue") {
-      value = expTo(value, e0.value, e1.value, t0, e0.time, e1.time);
+      value = calcExponentialRampToValue(value, e0.value, e1.value, t0, e0.time, e1.time);
     } else {
       switch (e0.type) {
       case "SetValue":
@@ -61,38 +72,16 @@ NeuParam.prototype.valueAtTime = function(t) {
         value = e0.value;
         break;
       case "SetTarget":
-        value = setTarget(value, e0.value, t0, e0.time, e0.timeConstant);
+        value = calcTarget(value, e0.value, t0, e0.time, e0.timeConstant);
         break;
       case "SetValueCurve":
-        value = setCurveValue(value, t0, e0.time, e0.time + e0.duration, e0.curve);
+        value = calcValueCurve(value, t0, e0.time, e0.time + e0.duration, e0.curve);
         break;
       }
     }
   }
 
   return value;
-};
-
-NeuParam.prototype.set = function(value) {
-  value = util.finite(value);
-
-  var startTime = this.$context.currentTime;
-  var params = this._params;
-
-  this._value = value;
-
-  for (var i = 0, imax = params.length; i < imax; i++) {
-    params[i].value = value;
-    params[i].setValueAtTime(value, startTime);
-  }
-
-  insertEvent(this, {
-    type: "SetValue",
-    value: value,
-    time: startTime,
-  });
-
-  return this;
 };
 
 NeuParam.prototype.setAt = function(value, startTime) {
@@ -114,6 +103,8 @@ NeuParam.prototype.setAt = function(value, startTime) {
   return this;
 };
 
+NeuParam.prototype.setValueAtTime = NeuParam.prototype.setAt;
+
 NeuParam.prototype.linTo = function(value, endTime) {
   value = util.finite(value);
   endTime = util.finite(this.$context.toSeconds(endTime));
@@ -133,6 +124,8 @@ NeuParam.prototype.linTo = function(value, endTime) {
   return this;
 };
 
+NeuParam.prototype.linearRampToValueAtTime = NeuParam.prototype.linTo;
+
 NeuParam.prototype.expTo = function(value, endTime) {
   value = util.finite(value);
   endTime = util.finite(this.$context.toSeconds(endTime));
@@ -151,6 +144,8 @@ NeuParam.prototype.expTo = function(value, endTime) {
 
   return this;
 };
+
+NeuParam.prototype.exponentialRampToValueAtTime = NeuParam.prototype.expTo;
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   target = util.finite(target);
@@ -173,6 +168,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   return this;
 };
 
+NeuParam.prototype.setTargetAtTime = NeuParam.prototype.targetAt;
+
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
   startTime = util.finite(this.$context.toSeconds(startTime));
   duration = util.finite(this.$context.toSeconds(duration));
@@ -192,6 +189,8 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 
   return this;
 };
+
+NeuParam.prototype.setValueCurveAtTime = NeuParam.prototype.curveAt;
 
 NeuParam.prototype.cancel = function(startTime) {
   startTime = util.finite(this.$context.toSeconds(startTime));
@@ -214,41 +213,76 @@ NeuParam.prototype.cancel = function(startTime) {
   return this;
 };
 
-NeuParam.prototype.update = function(t0, v1, v0) {
-  t0 = util.finite(this.$context.toSeconds(t0));
-  v1 = util.finite(v1);
-  v0 = util.finite(util.defaults(v0, v1));
+NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
-  if (this._timeConstant === 0 || v0 === v1) {
-    this.setAt(v1, t0);
-  } else {
-    var timeConstant;
-    if (this._relative) {
-      timeConstant = this.$context.toSeconds(this._timeConstant);
-    } else {
-      timeConstant = this._timeConstant;
-    }
-    this.targetAt(v1, t0, timeConstant);
+NeuParam.prototype.update = function(value, startTime) {
+  var context = this.$context;
+  var endTime = startTime + util.finite(context.toSeconds(this._lag));
+  var startValue = this.valueAtTime(startTime);
+  var curve = this._curve;
+  var scheduled = null;
+
+  terminateAudioParamScheduling(this, startValue, startTime);
+
+  if (endTime <= startTime) {
+    curve = "step";
   }
+
+  switch (curve) {
+  case "exp":
+  case "exponential":
+    this.setValueAtTime(Math.max(1e-6, startValue), startTime);
+    this.exponentialRampToValueAtTime(Math.max(1e-6, value), endTime);
+    scheduled = { method: "exponentialRampToValueAtTime", time: endTime };
+    break;
+  case "lin":
+  case "linear":
+    this.setValueAtTime(startValue, startTime);
+    this.linearRampToValueAtTime(value, endTime);
+    scheduled = { method: "linearRampToValueAtTime", time: endTime };
+    break;
+  // case "step":
+  default:
+    this.setValueAtTime(value, startTime);
+    break;
+  }
+
+  this._scheduled = scheduled;
 
   return this;
 };
 
-NeuParam.prototype.toAudioNode = function() {
-  if (this.$outlet == null) {
-    this.$outlet = this.$context.createGain();
-    this.$outlet.gain.value = this._value;
-    this.$outlet.gain.setValueAtTime(this._value, 0);
-    this._params.push(this.$outlet.gain);
-    this.$context.connect(this.$context.createNeuDC(1), this.$outlet);
+function terminateAudioParamScheduling(_this, startValue, startTime) {
+  var scheduled = _this._scheduled;
+
+  if (scheduled == null || scheduled.time <= startTime) {
+    return;
   }
+
+  _this.cancelScheduledValues(scheduled.time);
+  _this[scheduled.method](startValue, startTime);
+}
+
+NeuParam.prototype.toAudioNode = function(input) {
+  var context = this.$context;
+
+  if (this.$outlet == null) {
+    this.$outlet = context.createGain();
+    this.$outlet.gain.value = this._value;
+    this._params.push(this.$outlet.gain);
+    if (input) {
+      context.connect(input, this.$outlet);
+    } else {
+      context.connect(new neume.DC(context, 1), this.$outlet);
+    }
+  }
+
   return this.$outlet;
 };
 
 NeuParam.prototype.connect = function(to) {
   if (to instanceof global.AudioParam) {
     to.value = this._value;
-    to.setValueAtTime(this._value, 0);
     this._params.push(to);
   } else {
     this.$context.connect(this.toAudioNode(), to);
@@ -281,21 +315,21 @@ function insertEvent(_this, event) {
   events.splice(i, replace, event);
 }
 
-function linTo(v, v0, v1, t, t0, t1) {
+function calcLinearRampToValue(v, v0, v1, t, t0, t1) {
   var dt = (t - t0) / (t1 - t0);
   return (1 - dt) * v0 + dt * v1;
 }
 
-function expTo(v, v0, v1, t, t0, t1) {
+function calcExponentialRampToValue(v, v0, v1, t, t0, t1) {
   var dt = (t - t0) / (t1 - t0);
   return 0 < v0 && 0 < v1 ? v0 * Math.pow(v1 / v0, dt) : /* istanbul ignore next */ v;
 }
 
-function setTarget(v0, v1, t, t0, timeConstant) {
+function calcTarget(v0, v1, t, t0, timeConstant) {
   return v1 + (v0 - v1) * Math.exp((t0 - t) / timeConstant);
 }
 
-function setCurveValue(v, t, t0, t1, curve) {
+function calcValueCurve(v, t, t0, t1, curve) {
   var dt = (t - t0) / (t1 - t0);
 
   if (dt <= 0) {
@@ -309,4 +343,4 @@ function setCurveValue(v, t, t0, t1, curve) {
   return util.defaults(curve[(curve.length * dt)|0], v);
 }
 
-module.exports = util.NeuParam = NeuParam;
+module.exports = NeuParam;

@@ -2,33 +2,28 @@
 
 var neume = require("../../src");
 
-var NeuContext = neume.Context;
-var NeuSynth = neume.Synth;
-var NeuUGen = neume.UGen;
-var NeuIn = neume.In;
-var NeuParam = neume.Param;
 var NOP = function() {};
 
-describe("NeuSynth", function() {
+describe("neume.Synth", function() {
   var audioContext = null;
   var context = null;
   var osc = null;
 
   beforeEach(function() {
     audioContext = new global.AudioContext();
-    context = new NeuContext(audioContext.destination);
+    context = new neume.Context(audioContext.destination);
     osc = context.createOscillator();
   });
 
-  describe("(context, func, args)", function() {
-    it("returns an instance of NeuSynth", function() {
-      assert(new NeuSynth(context, NOP, []) instanceof NeuSynth);
+  describe("constructor", function() {
+    it("(context: neume.Context, func: function, args:Array<any>)", function() {
+      assert(new neume.Synth(context, NOP, []) instanceof neume.Synth);
     });
     describe("$", function() {
       it("works", sinon.test(function() {
-        var spy = this.spy(NeuUGen, "build");
+        var spy = this.spy(neume.UGen, "build");
 
-        var synth = new NeuSynth(context, function($) {
+        var synth = new neume.Synth(context, function($) {
           return $("sin", { freq: 880 }, 1, 2, 3);
         }, []);
 
@@ -41,24 +36,24 @@ describe("NeuSynth", function() {
   });
 
   describe("#context", function() {
-    it("is an instance of AudioContext", function() {
-      var synth = new NeuSynth(context, NOP, []);
+    it("\\getter: neume.Context", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.context instanceof neume.Context);
     });
   });
 
   describe("#currentTime", function() {
-    it("points to context.currentTime", function() {
-      var synth = new NeuSynth(context, NOP, []);
+    it("\\getter: number", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.currentTime === context.currentTime);
     });
   });
 
   describe("#methods", function() {
-    it("returns method names", sinon.test(function() {
-      var synth = new NeuSynth(context, function($) {
+    it("\\getter: Array<string>", sinon.test(function() {
+      var synth = new neume.Synth(context, function($) {
         return $("boolean", $("array"));
       }, []);
 
@@ -66,10 +61,10 @@ describe("NeuSynth", function() {
     }));
   });
 
-  describe("#find(selector)", function() {
-    it("return ugens", function() {
+  describe("#find", function() {
+    it("(selector: string): Array<neume.UGen>", function() {
       var a, b, c;
-      var synth = new NeuSynth(context, function($) {
+      var synth = new neume.Synth(context, function($) {
         a = $("sin");
         b = $("tri");
         c = $("sin");
@@ -82,14 +77,14 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("#start(t)", function() {
-    it("returns self", function() {
-      var synth = new NeuSynth(context, NOP, []);
+  describe("#start", function() {
+    it("(t: number|string): self", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.start() === synth);
     });
     it("calls each ugen.$unit.start(t) only once", sinon.test(function() {
-      var synth = new NeuSynth(context, function($) {
+      var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
       }, []);
 
@@ -127,14 +122,14 @@ describe("NeuSynth", function() {
     }));
   });
 
-  describe("#stop(t)", function() {
-    it("returns self", function() {
-      var synth = new NeuSynth(context, NOP, []);
+  describe("#stop", function() {
+    it("(t: number|string): self", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.stop() === synth);
     });
     it("calls each ugen.$unit.stop(t) only once with calling start first", sinon.test(function() {
-      var synth = new NeuSynth(context, function($) {
+      var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
       }, []);
 
@@ -181,14 +176,14 @@ describe("NeuSynth", function() {
     }));
   });
 
-  describe("#fadeIn(t, dur)", function() {
-    it("returns self", function() {
-      var synth = new NeuSynth(context, NOP, []);
+  describe("#fadeIn", function() {
+    it("(t: number|string, dur: number|string): self", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.fadeIn() === synth);
     });
     it("works", function() {
-      var synth = new NeuSynth(context, function($) {
+      var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);
 
@@ -221,14 +216,14 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("#fadeOut(t, dur)", function() {
-    it("returns self", function() {
-      var synth = new NeuSynth(context, NOP, []);
+  describe("#fadeOut", function() {
+    it("(t: number|string, dur: number|string): self", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.fadeIn() === synth);
     });
     it("works", function() {
-      var synth = new NeuSynth(context, function($) {
+      var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);
 
@@ -278,9 +273,9 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("#fade(t, val, dur)", function() {
-    it("works", function() {
-      var synth = new NeuSynth(context, function($) {
+  describe("#fade", function() {
+    it("(t: number|string, val: number, dur: number|string): self", function() {
+      var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);
 
@@ -310,14 +305,14 @@ describe("NeuSynth", function() {
     });
   });
 
-  describe("#call(method, ...args)", function() {
-    it("returns self", function() {
-      var synth = new NeuSynth(context, NOP, []);
+  describe("#call", function() {
+    it("r(method: string, ...args: Array<any>): self", function() {
+      var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.call() === synth);
     });
     it("calls #apply(method, args)", function() {
-      var synth = new NeuSynth(context, NOP, []);
+      var synth = new neume.Synth(context, NOP, []);
       var spy = sinon.spy(synth, "apply");
 
       synth.call("method", 1, 2, 3);
@@ -339,7 +334,7 @@ describe("NeuSynth", function() {
     beforeEach(function() {
       passed = [];
       bang = false;
-      synth = new NeuSynth(context, function($) {
+      synth = new neume.Synth(context, function($) {
         ugen1 = $("line#ugen1.amp");
         ugen2 = $("adsr#ugen2.amp");
         ugen3 = $("line#ugen3.fo");
@@ -353,8 +348,8 @@ describe("NeuSynth", function() {
       }, []);
     });
 
-    describe("#apply(method, args)", function() {
-      it("returns self", function() {
+    describe("#apply", function() {
+      it("(method: string, args: Array<any>): self", function() {
         assert(synth.apply() === synth);
       });
 
@@ -368,8 +363,8 @@ describe("NeuSynth", function() {
       });
     });
 
-    describe("#hasListeners(event)", function() {
-      it("checks if event targets have any listeners", function() {
+    describe("#hasListeners", function() {
+      it("(event: string): boolean", function() {
         synth.on(".amp:end", it);
 
         assert(synth.hasListeners("end") === true);
@@ -390,16 +385,16 @@ describe("NeuSynth", function() {
       });
     });
 
-    describe("#listeners(event)", function() {
-      it("returns listeners of event targets", function() {
+    describe("#listeners", function() {
+      it("(event: string): Array<function>", function() {
         synth.on("end", it);
 
         assert.deepEqual(synth.listeners("end"), [ it ]);
       });
     });
 
-    describe("#on(event, listener)", function() {
-      it("returns self", function() {
+    describe("#on", function() {
+      it("(event: string, listener: function): self", function() {
         assert(synth.on("end", it) === synth);
       });
       it("adds the listener to event targets", function() {
@@ -424,8 +419,8 @@ describe("NeuSynth", function() {
       });
     });
 
-    describe("#once(event, listener)", function() {
-      it("returns self", function() {
+    describe("#once", function() {
+      it("(event: string, listener: function): self", function() {
         assert(synth.once("end", it) === synth);
       });
       it("adds the single-shot listener to event targets", function() {
@@ -450,8 +445,8 @@ describe("NeuSynth", function() {
       });
     });
 
-    describe("#off(event, listener)", function() {
-      it("returns self", function() {
+    describe("#off", function() {
+      it("(event: string, listener: function): self", function() {
         assert(synth.off("end", it) === synth);
       });
       it("removes the listener from event targets", function() {
@@ -480,6 +475,7 @@ describe("NeuSynth", function() {
     describe("method bindings", function() {
       it("works", function() {
         assert(synth.release() === synth);
+        assert(synth.release(0) === synth);
         assert(synth.bang() === synth);
         assert(bang === true);
       });

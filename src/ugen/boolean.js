@@ -5,7 +5,7 @@ module.exports = function(neume, util) {
    * $(boolean, {
    *   true: [number] = 1
    *   false: [number] = 0
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -23,48 +23,47 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("boolean", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var data = !!spec.value;
     var trueVal = util.finite(util.defaults(spec.true, 1));
     var falseVal = util.finite(util.defaults(spec.false, 0));
-    var param = context.createNeuParam(data ? trueVal : falseVal, spec);
+    var param = new neume.Param(context, data ? trueVal : falseVal, spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (typeof value === "boolean") {
+        context.sched(t0, function(startTime) {
+          update(value ? trueVal : falseVal, startTime, value);
+        });
+      }
     }
 
-    function update(t0, v0, v1, nextData) {
-      param.update(t0, v1, v0);
+    function toggle(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(data ? falseVal : trueVal, startTime, !data);
+      });
+    }
+
+    function update(value, startTime, nextData) {
+      param.update(value, startTime);
       data = nextData;
     }
 
     return new neume.Unit({
       outlet: outlet,
       methods: {
-        setValue: function(t, value) {
-          if (typeof value === "boolean") {
-            context.sched(util.finite(context.toSeconds(t)), function(t) {
-              var v0 = data  ? trueVal : falseVal;
-              var v1 = value ? trueVal : falseVal;
-              update(t, v0, v1, value);
-            });
-          }
-        },
-        toggle: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            var v0 = data ? trueVal : falseVal;
-            var v1 = data ? falseVal : trueVal;
-            update(t, v0, v1, !data);
-          });
-        }
+        setValue: setValue,
+        toggle: toggle
       }
     });
-  });
+  }
 
 };

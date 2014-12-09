@@ -8,7 +8,7 @@
 ![](http://upload.wikimedia.org/wikipedia/commons/a/ab/Gregorian_chant.gif)
 
 ## What is?
-**Neume.js** is a library for web music programming that is optimized for Web Audio API.
+**Neume.js** is a Web Audio API library for developing interactive music.
 
 ## Examples
 
@@ -20,6 +20,10 @@
     - toy piano with Music Macro Language
   - [rendering-reich](http://mohayonao.github.io/neume.js/examples/rendering-reich.html)
     - rendering audio and play it
+  - weird demo
+    - [6chars drums](http://the.mohayonao.com/6chars/)
+    - [formant khoomii](http://the.mohayonao.com/khoomii/)
+    - [scalable mario](http://the.mohayonao.com/scalable-mario/)
 
 ## Installation
 
@@ -38,7 +42,7 @@ $ bower install neume.js
 <script src="neume.js"></script>
 ```
 
-neume.js is dependent on `Web Audio API` and `Promise`.
+Neume.js is dependent on `Web Audio API` and `Promise`.
 
   - [es6-promise](https://github.com/jakearchibald/es6-promise)
 
@@ -47,12 +51,15 @@ neume.js is dependent on `Web Audio API` and `Promise`.
 This code generates an audio graph like below.
 
 ```javascript
-var synth = new Neume.Synth(function($) {
-  return $("xline", { start: 0.25, end: 0.001, dur: 1},
-    $("tri", { freq: $("sin", { freq: 2, mul: 20, add: 880 } )})
-  ).on("end", function(e) {
+var synth = Neume.Synth(function($) {
+  var out;
+
+  out = $("sin", { freq: $("sin", { freq: 2, mul: 20, add: 880 } )});
+  out = $("xline", { start: 0.25, end: 0.001, dur: 1 }, out).on("end", function(e) {
     this.stop(e.playbackTime);
   });
+
+  return out;
 });
 ```
 ```
@@ -64,7 +71,7 @@ var synth = new Neume.Synth(function($) {
                            +-------------------+
 +-----------------------+    |
 | OscillatorNode        |  +------------+
-| - type     : triangle |  | GainNode   |
+| - type     : sine     |  | GainNode   |
 | - frequency: 880      |--| - gain: 20 |
 | - detune   : 0        |  +------------+
 +-----------------------+
@@ -82,4 +89,4 @@ var synth = new Neume.Synth(function($) {
 
 ## License
 
-neume.js is available under the The MIT License.
+Neume.js is available under the The MIT License.

@@ -2,9 +2,7 @@
 
 var neume = require("../../src");
 
-var NeuUnit = neume.Unit;
-
-describe("NeuUnit", function() {
+describe("neume.Unit", function() {
   var spec = null;
   var unit = null;
 
@@ -17,11 +15,11 @@ describe("NeuUnit", function() {
         bang: function() {}
       }
     };
-    unit = new NeuUnit(spec);
+    unit = new neume.Unit(spec);
   });
 
-  describe("#start(t)", function() {
-    it("calls spec.start(t) only once", function() {
+  describe("#start", function() {
+    it("(t: number): self", function() {
       var spy = sinon.spy(spec, "start");
 
       unit.start(10);
@@ -33,8 +31,8 @@ describe("NeuUnit", function() {
     });
   });
 
-  describe("#stop(t)", function() {
-    it("calls spec.stop(t) only once with calling start first", function() {
+  describe("#stop", function() {
+    it("(t: number): self", function() {
       var spy = sinon.spy(spec, "stop");
 
       unit.stop(10);
@@ -50,8 +48,8 @@ describe("NeuUnit", function() {
     });
   });
 
-  describe("#apply(method, args)", function() {
-    it("apply spec.method", function() {
+  describe("#apply", function() {
+    it("(method: string, args: Array<any>): self", function() {
       var spy = sinon.spy(spec.methods, "bang");
 
       unit.apply("bang", [ 1, 2, 3 ]);
@@ -62,8 +60,8 @@ describe("NeuUnit", function() {
     });
   });
 
-  describe("#toAudioNode()", function() {
-    it("returns an AudioNode", function() {
+  describe("#toAudioNode", function() {
+    it("(): AudioNode", function() {
       assert(unit.toAudioNode() instanceof global.AudioNode);
     });
   });

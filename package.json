@@ -1,22 +1,13 @@
 {
-  "name": "neume",
-  "version": "0.2.0",
-  "description": "neume.js is a library for Web Audio API Programming",
+  "name": "neume.js",
+  "description": "Web Audio API library for developing interactive music",
+  "version": "0.3.0",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
-  "license": "MIT",
-  "scripts": {
-    "lint": "gulp lint",
-    "jscs": "gulp jscs",
-    "test": "gulp test",
-    "cover": "gulp cover",
-    "build": "gulp build",
-    "travis": "gulp travis"
-  },
   "dependencies": {
-    "sc-random": "^1.0.0"
+    "es6-promise": "^2.0.0"
   },
   "devDependencies": {
-    "browserify": "^6.3.3",
+    "browserify": "^7.0.0",
     "coveralls": "^2.11.2",
     "espower-loader": "^0.10.0",
     "gulp": "^3.8.10",
@@ -32,6 +23,24 @@
     "sinon": "^1.12.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
-    "web-audio-test-api": "^0.1.14"
+    "web-audio-test-api": "^0.1.15"
+  },
+  "keywords": [
+    "audio",
+    "interactive",
+    "music",
+    "sound",
+    "web audio",
+    "web audio api"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "gulp build",
+    "code": "gulp code",
+    "cover": "gulp cover",
+    "jscs": "gulp jscs",
+    "lint": "gulp lint",
+    "test": "gulp test",
+    "travis": "gulp travis"
   }
 }

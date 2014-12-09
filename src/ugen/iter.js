@@ -7,7 +7,7 @@ module.exports = function(neume, util) {
   /**
    * $("iter", {
    *   iter: [iterator] = null
-   *   timeConstant: [number] = 0
+   *   tC: [number] = 0
    * } ... inputs)
    *
    * methods:
@@ -25,20 +25,52 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("iter", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
-    var outlet = null;
 
     var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
-    var prevValue = 0;
-    var param = context.createNeuParam(prevValue, spec);
+    var param = new neume.Param(context, 0, spec);
+    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    if (inputs.length) {
-      outlet = context.createGain();
-      context.createNeuSum(inputs).connect(outlet);
-      context.connect(param, outlet.gain);
-    } else {
-      outlet = param;
+    function start(t) {
+      var items = iterNext();
+
+      if (items.done) {
+        state = FINISHED;
+        ugen.emit("end", { playbackTime: t }, ugen.$synth);
+      } else {
+        param.setValueAtTime(util.finite(items.value), t);
+      }
+    }
+
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
+      if (typeof value === "object" && typeof value.next === "function") {
+        context.sched(t0, function() {
+          iter = value;
+        });
+      }
+    }
+
+    function next(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        if (state === ITERATE) {
+          var items = iterNext();
+
+          if (items.done) {
+            state = FINISHED;
+            ugen.emit("end", { playbackTime: startTime }, ugen.$synth);
+          } else {
+            param.update(util.finite(items.value), startTime);
+          }
+        }
+      });
     }
 
     function iterNext() {
@@ -59,42 +91,12 @@ module.exports = function(neume, util) {
 
     return new neume.Unit({
       outlet: outlet,
-      start: function(t) {
-        var items = iterNext();
-
-        if (items.done) {
-          state = FINISHED;
-          ugen.emit("end", { playbackTime: t }, ugen.$synth);
-        } else {
-          prevValue = util.finite(items.value);
-          param.setAt(prevValue, t);
-        }
-      },
+      start: start,
       methods: {
-        setValue: function(t, value) {
-          context.sched(util.finite(context.toSeconds(t)), function() {
-            iter = util.defaults(value, {});
-          });
-        },
-        next: function(t) {
-          context.sched(util.finite(context.toSeconds(t)), function(t) {
-            if (state === ITERATE) {
-              var items = iterNext();
-              var value;
-
-              if (items.done) {
-                state = FINISHED;
-                ugen.emit("end", { playbackTime: t }, ugen.$synth);
-              } else {
-                value = util.finite(items.value);
-                param.update(t, value, prevValue);
-                prevValue = value;
-              }
-            }
-          });
-        }
+        setValue: setValue,
+        next: next
       }
     });
-  });
+  }
 
 };

@@ -36,6 +36,10 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("pan2", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
     var context = ugen.$context;
 
     var gainL = context.createGain();
@@ -49,7 +53,7 @@ module.exports = function(neume, util) {
     gainR.channelCountMode = "explicit";
     gainR.channelInterpretation = "speakers";
 
-    var pos = util.defaults(spec.pos, 0);
+    var pos = util.defaults(spec.pos, spec.pan, 0);
 
     if (typeof pos === "number") {
       pos = util.clip(pos, -1, +1) * 0.5 + 0.5;
@@ -76,11 +80,12 @@ module.exports = function(neume, util) {
 
     gainL.connect(merger, 0, 0);
     gainR.connect(merger, 0, 1);
-
-    context.createNeuSum(inputs).connect(gainL).connect(gainR);
+    context.connect(inputs, gainL);
+    context.connect(inputs, gainR);
 
     return new neume.Unit({
       outlet: merger
     });
-  });
+  }
+
 };
