@@ -101,7 +101,7 @@ describe("neume.SynthDollar", function() {
       });
     });
     describe(".interval", function() {
-      it("(interval: number, ...callbacks: Array<function>)", function() {
+      it("(interval: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           $.interval(0.030, function(e) {
@@ -143,6 +143,22 @@ describe("neume.SynthDollar", function() {
           [ "fizz", 0.1975, 3 ]
         ]);
       });
+    });
+  });
+  describe(".stop", function() {
+    it("(t: number|string): void", function() {
+      var synth = new neume.Synth(context, function($) {
+        $.stop("+0.100");
+      }, []);
+
+      var spy = sinon.spy(synth, "stop");
+
+      synth.start(0.100);
+
+      audioContext.$processTo("00:00.500");
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("+0.100"));
     });
   });
 
