@@ -5,8 +5,6 @@ require("./shim");
 var util = require("../util");
 var neume = require("../namespace");
 
-var VERSION = "0.2.0";
-
 function Neume(context) {
   function fn(spec) {
     return new neume.SynthDef(context, spec);
@@ -179,7 +177,5 @@ neume.use = function(fn) {
   return neume;
 };
 neume.use.used = [];
-
-neume.version = VERSION;
 
 module.exports = neume;
