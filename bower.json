@@ -1,7 +1,7 @@
 {
   "name": "neume.js",
   "description": "Web Audio API library for developing interactive music",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "authors": [
     "Nao Yonamine <mohayonao@gmail.com>"
   ],
@@ -21,10 +21,12 @@
     "index.js"
   ],
   "keywords": [
+    "audio",
     "interactive",
     "music",
     "sound",
-    "web audio"
+    "web audio",
+    "web audio api"
   ],
   "license": "MIT",
   "main": "build/neume.js"
