@@ -329,7 +329,15 @@ describe("neume.Buffer", function() {
   });
 
   describe("#toPeriodicWave", function() {
-    it("(): PeriodicWave", sinon.test(function() {
+    it("(): PeriodicWave // len < 4096", sinon.test(function() {
+      var spy = this.spy(neume.FFT, "forward");
+      var buffer = neume.Buffer.from(context, new Float32Array(2048));
+      var wave = buffer.toPeriodicWave();
+
+      assert(wave instanceof global.PeriodicWave);
+      assert(spy.firstCall.args[0].length === 2048);
+    }));
+    it("(): PeriodicWave // len > 4096", sinon.test(function() {
       var spy = this.spy(neume.FFT, "forward");
       var buffer = neume.Buffer.from(context, new Float32Array(8192));
       var wave = buffer.toPeriodicWave();

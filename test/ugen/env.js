@@ -2,8 +2,8 @@
 
 var neume = require("../../src");
 
-neume.use(require("../../src/ugen/env"));
 neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/env"));
 
 describe("ugen/env", function() {
   var Neume = null;
@@ -12,277 +12,278 @@ describe("ugen/env", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$('env')", function() {
-    describe("graph", function() {
-      it("when have no inputs", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env");
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 0,
-                inputs: []
-              },
-              inputs: [ DC(1) ]
-            }
-          ]
-        });
+  describe("graph", function() {
+    it("$('env')", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env");
       });
-      it("when have inputs", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", $("sin"));
-        });
 
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 0,
-                inputs: []
-              },
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sine",
-                  frequency: {
-                    value: 440,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
-            }
-          ]
-        });
-      });
-      it("when curve: sine", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", { curve: "sine" });
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "WaveShaperNode",
-              oversample: "none",
-              inputs: [
-                {
-                  name: "GainNode",
-                  gain: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: [ DC(1) ]
-                }
-              ]
-            }
-          ]
-        });
-
-        var curve = Neume.Synth(function($) {
-          return $("env", { curve: "sine" });
-        }).toAudioNode().$inputs[0].curve;
-
-        assert(curve instanceof Float32Array);
-        assert(synth.toAudioNode().$inputs[0].curve === curve);
-      });
-      it("when curve: welch", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", { curve: "welch" });
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "WaveShaperNode",
-              oversample: "none",
-              inputs: [
-                {
-                  name: "GainNode",
-                  gain: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: [ DC(1) ]
-                }
-              ]
-            }
-          ]
-        });
-
-        var curve = Neume.Synth(function($) {
-          return $("env", { curve: "welch" });
-        }).toAudioNode().$inputs[0].curve;
-
-        assert(curve instanceof Float32Array);
-        assert(synth.toAudioNode().$inputs[0].curve === curve);
-      });
-      it("when curve: squared", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", { curve: "squared" });
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "WaveShaperNode",
-              oversample: "none",
-              inputs: [
-                {
-                  name: "GainNode",
-                  gain: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: [ DC(1) ]
-                }
-              ]
-            }
-          ]
-        });
-
-        var curve = Neume.Synth(function($) {
-          return $("env", { curve: "squared" });
-        }).toAudioNode().$inputs[0].curve;
-
-        assert(curve instanceof Float32Array);
-        assert(synth.toAudioNode().$inputs[0].curve === curve);
-      });
-      it("when curve: cubic", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", { curve: "cubic" });
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "WaveShaperNode",
-              oversample: "none",
-              inputs: [
-                {
-                  name: "GainNode",
-                  gain: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: [ DC(1) ]
-                }
-              ]
-            }
-          ]
-        });
-
-        var curve = Neume.Synth(function($) {
-          return $("env", { curve: "cubic" });
-        }).toAudioNode().$inputs[0].curve;
-
-        assert(curve instanceof Float32Array);
-        assert(synth.toAudioNode().$inputs[0].curve === curve);
-      });
-      it("when curve: number", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", { curve: -4 });
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "WaveShaperNode",
-              oversample: "none",
-              inputs: [
-                {
-                  name: "GainNode",
-                  gain: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: [ DC(1) ]
-                }
-              ]
-            }
-          ]
-        });
-
-        var curve = Neume.Synth(function($) {
-          return $("env", { curve: -4 });
-        }).toAudioNode().$inputs[0].curve;
-        var curve2 = Neume.Synth(function($) {
-          return $("env", { curve: +4 });
-        }).toAudioNode().$inputs[0].curve;
-
-        assert(curve instanceof Float32Array);
-        assert(synth.toAudioNode().$inputs[0].curve === curve);
-        assert(curve2 instanceof Float32Array);
-        assert(curve !== curve2);
-      });
-      it("when curve: 0", function() {
-        var synth = Neume.Synth(function($) {
-          return $("env", { curve: 0 });
-        });
-
-        assert.deepEqual(synth.toAudioNode().toJSON(), {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
-            {
-              name: "GainNode",
-              gain: {
-                value: 0,
-                inputs: []
-              },
-              inputs: [ DC(1) ]
-            }
-          ]
-        });
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
       });
     });
+    it("$('env', $('sin'))", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          }
+        ]
+      });
+    });
+    it("$('env', { curve: 'sine' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "sine" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "sine" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: 'welch' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "welch" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "welch" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: 'squared' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "squared" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "squared" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: 'cubic' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: "cubic" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: "cubic" });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+    });
+    it("$('env', { curve: -4 })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: -4 });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "WaveShaperNode",
+            oversample: "none",
+            inputs: [
+              {
+                name: "GainNode",
+                gain: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: [ DC(1) ]
+              }
+            ]
+          }
+        ]
+      });
+
+      var curve = Neume.Synth(function($) {
+        return $("env", { curve: -4 });
+      }).toAudioNode().$inputs[0].curve;
+      var curve2 = Neume.Synth(function($) {
+        return $("env", { curve: +4 });
+      }).toAudioNode().$inputs[0].curve;
+
+      assert(curve instanceof Float32Array);
+      assert(synth.toAudioNode().$inputs[0].curve === curve);
+      assert(curve2 instanceof Float32Array);
+      assert(curve !== curve2);
+    });
+    it("$('env', { curve: 0 })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("env", { curve: 0 });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: []
+            },
+            inputs: [ DC(1) ]
+          }
+        ]
+      });
+    });
+  });
+
+  describe("works", function() {
     it("loopNode", function() {
       var synth = Neume.Synth(function($) {
         return $("env", { table: [

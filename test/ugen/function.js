@@ -2,6 +2,7 @@
 
 var neume = require("../../src");
 
+neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/function"));
 
 var NOP = function() {};
@@ -13,8 +14,8 @@ describe("ugen/function", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(func)", function() {
-    it("returns a GainNode that is connected with a DC(1)", function() {
+  describe("graph", function() {
+    it("$(function)", function() {
       var synth = Neume.Synth(function($) {
         return $(NOP);
       });
@@ -37,44 +38,9 @@ describe("ugen/function", function() {
         ]
       });
     });
-    it("works", function() {
+    it("$(function, $('sin'))", function() {
       var synth = Neume.Synth(function($) {
-        return $(function(t, count) {
-          return count;
-        });
-      });
-
-      synth.start(0);
-
-      var outlet = synth.toAudioNode().$inputs[0];
-      assert(outlet.gain.value === 0, "00:00.000");
-
-      synth.evaluate(0.100);
-      synth.evaluate(0.300);
-      synth.setValue(0.200, 0);
-      synth.setValue(0.200, function(t, count) {
-        return count * 2;
-      });
-
-      Neume.audioContext.$processTo("00:00.500");
-
-      assert(outlet.gain.$valueAtTime(0.050) === 0);
-      assert(outlet.gain.$valueAtTime(0.100) === 1);
-      assert(outlet.gain.$valueAtTime(0.150) === 1);
-      assert(outlet.gain.$valueAtTime(0.200) === 1);
-      assert(outlet.gain.$valueAtTime(0.250) === 1);
-      assert(outlet.gain.$valueAtTime(0.305) === 4);
-      assert(outlet.gain.$valueAtTime(0.350) === 4);
-      assert(outlet.gain.$valueAtTime(0.400) === 4);
-      assert(outlet.gain.$valueAtTime(0.450) === 4);
-      assert(outlet.gain.$valueAtTime(0.500) === 4);
-    });
-  });
-
-  describe("$(func, $(func))", function() {
-    it("returns a GainNode that is connected with inputs", function() {
-      var synth = Neume.Synth(function($) {
-        return $(NOP, $(NOP));
+        return $(NOP, $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -92,12 +58,17 @@ describe("ugen/function", function() {
             },
             inputs: [
               {
-                name: "GainNode",
-                gain: {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 440,
+                  inputs: []
+                },
+                detune: {
                   value: 0,
                   inputs: []
                 },
-                inputs: [ DC(1) ]
+                inputs: []
               }
             ]
           }
@@ -105,4 +76,72 @@ describe("ugen/function", function() {
       });
     });
   });
+
+  describe("works", function() {
+    it("evaluate", function() {
+      var count = 0;
+      var synth = Neume.Synth(function($) {
+        return $(function() {
+          return count++;
+        });
+      });
+
+      synth.start(0);
+
+      synth.evaluate(0.100);
+      synth.evaluate(0.200);
+      synth.evaluate(0.300);
+      synth.evaluate(0.400);
+
+      Neume.audioContext.$processTo("00:00.500");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 1);
+      assert(outlet.gain.$valueAtTime(0.150) === 1);
+      assert(outlet.gain.$valueAtTime(0.200) === 2);
+      assert(outlet.gain.$valueAtTime(0.250) === 2);
+      assert(outlet.gain.$valueAtTime(0.300) === 3);
+      assert(outlet.gain.$valueAtTime(0.350) === 3);
+      assert(outlet.gain.$valueAtTime(0.400) === 4);
+      assert(outlet.gain.$valueAtTime(0.450) === 4);
+      assert(outlet.gain.$valueAtTime(0.500) === 4);
+    });
+    it("setValue", function() {
+      var count = 0;
+      var synth = Neume.Synth(function($) {
+        return $(function() {
+          return count++;
+        });
+      });
+
+      synth.start(0);
+
+      synth.setValue(0.300, function() {
+        return 5;
+      });
+      synth.setValue(0.400, "not function");
+      synth.evaluate(0.100);
+      synth.evaluate(0.200);
+      synth.evaluate(0.300);
+      synth.evaluate(0.400);
+
+      Neume.audioContext.$processTo("00:00.500");
+
+      var outlet = synth.toAudioNode().$inputs[0];
+      assert(outlet.gain.$valueAtTime(0.000) === 0);
+      assert(outlet.gain.$valueAtTime(0.050) === 0);
+      assert(outlet.gain.$valueAtTime(0.100) === 1);
+      assert(outlet.gain.$valueAtTime(0.150) === 1);
+      assert(outlet.gain.$valueAtTime(0.200) === 2);
+      assert(outlet.gain.$valueAtTime(0.250) === 2);
+      assert(outlet.gain.$valueAtTime(0.300) === 5);
+      assert(outlet.gain.$valueAtTime(0.350) === 5);
+      assert(outlet.gain.$valueAtTime(0.400) === 5);
+      assert(outlet.gain.$valueAtTime(0.450) === 5);
+      assert(outlet.gain.$valueAtTime(0.500) === 5);
+    });
+  });
+
 });

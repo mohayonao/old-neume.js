@@ -28,7 +28,6 @@ module.exports = function(neume, util) {
 
     var buffer = context.toAudioBuffer(spec.buf || spec.buffer);
 
-    /* istanbul ignore else */
     if (buffer != null) {
       outlet.buffer = buffer;
     }

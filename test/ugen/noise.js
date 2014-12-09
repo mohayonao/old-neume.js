@@ -11,8 +11,8 @@ describe("ugen/noise", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(white)", function() {
-    it("returns a OscillatorNode", function() {
+  describe("graph", function() {
+    it("$('white')", function() {
       var synth = Neume.Synth(function($) {
         return $("white");
       });
@@ -45,27 +45,7 @@ describe("ugen/noise", function() {
         ]
       });
     });
-    it("works", function() {
-      var synth = Neume.Synth(function($) {
-        return $("white");
-      });
-
-      synth.start(0.100);
-      synth.stop(0.200);
-
-      Neume.audioContext.$processTo("00:00.300");
-
-      var outlet = synth.toAudioNode().$inputs[0];
-      assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
-      assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
-      assert(outlet.$stateAtTime(0.100) === "PLAYING");
-      assert(outlet.$stateAtTime(0.150) === "PLAYING");
-      assert(outlet.$stateAtTime(0.200) === "FINISHED");
-      assert(outlet.$stateAtTime(0.250) === "FINISHED");
-    });
-  });
-  describe("$(pink)", function() {
-    it("returns a OscillatorNode", function() {
+    it("$('pink')", function() {
       var synth = Neume.Synth(function($) {
         return $("pink");
       });
@@ -98,9 +78,11 @@ describe("ugen/noise", function() {
         ]
       });
     });
-    it("works", function() {
+  });
+  describe("works", function() {
+    it("start/stop", function() {
       var synth = Neume.Synth(function($) {
-        return $("pink");
+        return $("white");
       });
 
       synth.start(0.100);
@@ -117,4 +99,5 @@ describe("ugen/noise", function() {
       assert(outlet.$stateAtTime(0.250) === "FINISHED");
     });
   });
+
 });

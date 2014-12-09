@@ -12,27 +12,10 @@ describe("ugen/comp", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(comp thresh:-20 knee:25 ratio:10 a:0.05 r:0.1 $(sin))", function() {
-    /*
-     * +--------+
-     * | $(sin) |
-     * +--------+
-     *   |
-     * +------------------------+
-     * | DynamicsCompressorNode |
-     * | - threshold:-20        |
-     * | - knee: 25             |
-     * | - ratio: 10            |
-     * | - attack: 0.05         |
-     * | - release: 0.1         |
-     * +------------------------+
-     *   |
-     */
-    it("return a DynamicsCompressorNode that is connected with $(sin)", function() {
+  describe("graph", function() {
+    it("$('comp')", function() {
       var synth = Neume.Synth(function($) {
-        return $("comp", {
-          thresh: -20, knee: 25, ratio: 10, a: 0.05, r: 0.1
-        }, $("sin"));
+        return $("comp");
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -45,15 +28,15 @@ describe("ugen/comp", function() {
           {
             name: "DynamicsCompressorNode",
             threshold: {
-              value: -20,
+              value: -24,
               inputs: []
             },
             knee: {
-              value: 25,
+              value: 30,
               inputs: []
             },
             ratio: {
-              value: 10,
+              value: 12,
               inputs: []
             },
             reduction: {
@@ -61,11 +44,54 @@ describe("ugen/comp", function() {
               inputs: []
             },
             attack: {
-              value: 0.05,
+              value: 0.003,
               inputs: []
             },
             release: {
-              value: 0.1,
+              value: 0.250,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+    });
+    it("$('comp', $('sin'))", function() {
+      var synth = Neume.Synth(function($) {
+        return $("comp", $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "DynamicsCompressorNode",
+            threshold: {
+              value: -24,
+              inputs: []
+            },
+            knee: {
+              value: 30,
+              inputs: []
+            },
+            ratio: {
+              value: 12,
+              inputs: []
+            },
+            reduction: {
+              value: 0,
+              inputs: []
+            },
+            attack: {
+              value: 0.003,
+              inputs: []
+            },
+            release: {
+              value: 0.250,
               inputs: []
             },
             inputs: [
@@ -89,7 +115,7 @@ describe("ugen/comp", function() {
     });
   });
 
-  describe("parameter check", function() {
+  describe("parameters", function() {
     it("full name", function() {
       var json = Neume.Synth(function($) {
         return $("comp", { threshold: 1, knee: 2, ratio: 3, attack: 4, release: 5 });
@@ -101,7 +127,7 @@ describe("ugen/comp", function() {
       assert(json.attack.value === 4);
       assert(json.release.value === 5);
     });
-    it("alias", function() {
+    it("short name", function() {
       var json = Neume.Synth(function($) {
         return $("comp", { thresh: 1, knee: 2, ratio: 3, a: 4, r: 5 });
       }).toAudioNode().toJSON().inputs[0];

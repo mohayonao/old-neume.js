@@ -48,9 +48,11 @@ module.exports = function(neume, util) {
     }
 
     function setValue(t, value) {
-      context.sched(util.finite(context.toSeconds(t)), function() {
-        iter = util.defaults(value, {});
-      });
+      if (typeof value === "object" && typeof value.next === "function") {
+        context.sched(util.finite(context.toSeconds(t)), function() {
+          iter = util.defaults(value, {});
+        });
+      }
     }
 
     function next(t) {

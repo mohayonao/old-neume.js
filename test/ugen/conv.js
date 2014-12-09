@@ -12,24 +12,10 @@ describe("ugen/conv", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(conv $(sin))", function() {
-    /*
-     * +--------+
-     * | $(sin) |
-     * +--------+
-     *   |
-     * +-------------------+
-     * | ConvolverNode     |
-     * | - buffer: null    |
-     * | - normalize: true |
-     * +-------------------+
-     *   |
-     */
-    it("return a ConvolverNode that is connected with $(sin)", function() {
-      var buffer = neume.Buffer.from(Neume.context, [ 1, 2, 3, 4 ]);
-
+  describe("graph", function() {
+    it("$('conv')", function() {
       var synth = Neume.Synth(function($) {
-        return $("conv", { buf: buffer, normalize: false }, $("sin"));
+        return $("conv");
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -41,57 +27,35 @@ describe("ugen/conv", function() {
         inputs: [
           {
             name: "ConvolverNode",
-            normalize: false,
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            normalize: true,
+            inputs: []
           }
         ]
-      });
-
-      assert.deepEqual(synth.toAudioNode().$inputs[0].buffer.toJSON(), {
-        name: "AudioBuffer",
-        sampleRate: 44100,
-        length: 4,
-        duration: 0.00009070294784580499,
-        numberOfChannels: 1
       });
     });
   });
 
-  describe("parameter check", function() {
-    var buffer;
-
-    beforeEach(function() {
-      buffer = Neume.Buffer.from([ 1, 2, 3, 4 ]);
-    });
-
+  describe("parameters", function() {
     it("full name", function() {
-      var json = Neume.Synth(function($) {
+      var buffer = Neume.context.createBuffer(1, 16, 44100);
+      var synth = Neume.Synth(function($) {
         return $("conv", { buffer: buffer, normalize: false });
-      }).toAudioNode().toJSON().inputs[0];
+      });
 
-      // assert.deepEqual(json.buffer, buffer.toAudioBuffer().toJSON());
+      var json = synth.toAudioNode().toJSON().inputs[0];
+
+      assert(synth.toAudioNode().$inputs[0].buffer === buffer);
       assert(json.normalize === false);
     });
-    it("alias", function() {
-      var json = Neume.Synth(function($) {
+    it("short name", function() {
+      var buffer = Neume.context.createBuffer(1, 16, 44100);
+      var synth = Neume.Synth(function($) {
         return $("conv", { buf: buffer, normalize: false });
-      }).toAudioNode().toJSON().inputs[0];
+      });
 
-      // assert.deepEqual(json.buffer, buffer.toAudioBuffer().toJSON());
+      var json = synth.toAudioNode().toJSON().inputs[0];
+
+      assert(synth.toAudioNode().$inputs[0].buffer === buffer);
       assert(json.normalize === false);
     });
   });

@@ -12,14 +12,8 @@ describe("ugen/mul", function() {
     Neume = neume(new global.AudioContext());
   });
 
-  describe("$(*)", function() {
-    /*
-     * +-------+
-     * | DC(1) |
-     * +-------+
-     *   |
-     */
-    it("returns a DC(1)", function() {
+  describe("graph", function() {
+    it("$('*'')", function() {
       var synth = Neume.Synth(function($) {
         return $("*");
       });
@@ -34,16 +28,7 @@ describe("ugen/mul", function() {
       });
       assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
-  });
-
-  describe("$(* $(sin) 0)", function() {
-    /*
-     * +-------+
-     * | DC(0) |
-     * +-------+
-     *   |
-     */
-    it("returns a DC(0)", function() {
+    it("$('*', $('sin'), 0)", function() {
       var synth = Neume.Synth(function($) {
         return $("*", $("sin"), 0);
       });
@@ -58,16 +43,7 @@ describe("ugen/mul", function() {
       });
       assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
-  });
-
-  describe("$(* $(sin) 1)", function() {
-    /*
-     * +--------+
-     * | $(sin) |
-     * +--------+
-     *   |
-     */
-    it("returns $(sin)", function() {
+    it("$('*', $('sin'), 1)", function() {
       var synth = Neume.Synth(function($) {
         return $("*", $("sin"), 1);
       });
@@ -95,21 +71,7 @@ describe("ugen/mul", function() {
         ]
       });
     });
-  });
-
-  describe("$(* $(sin) 0.5)", function() {
-    /*
-     * +--------+
-     * | $(sin) |
-     * +--------+
-     *   |
-     * +-------------+
-     * | GainNode    |
-     * | - gain: 0.5 |
-     * +-------------+
-     *   |
-     */
-    it("returns a GainNode(0.5) that is connected with $(sin)", function() {
+    it("$('*', $('sin'), 0.5)", function() {
       var synth = Neume.Synth(function($) {
         return $("*", $("sin"), 0.5);
       });
@@ -146,29 +108,16 @@ describe("ugen/mul", function() {
         ]
       });
     });
-  });
-
-  describe("$(* 1 $(sin freq:1) $(sin freq:2) $(sin freq:3))", function() {
-    /*
-    * +----------------+
-    * | $(sin, freq:1) |
-    * +----------------+
-    *   |
-    * +-----------+
-    * | GainNode  |  +----------------+
-    * | - gain: 0 |--| $(sin, freq:2) |
-    * +-----------+  +----------------+
-    *   |
-    * +-----------+
-    * | GainNode  |  +----------------+
-    * | - gain: 0 |--| $(sin, freq:3) |
-    * +-----------+  +----------------+
-    *   |
-    */
-    it("returns chain of GainNodes", function() {
+    it("$('*', 1, $('sin', {freq:1}), $('sin', {freq:2}), $('sin', {freq:3}))", function() {
       var synth = Neume.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
       });
+
+      function oscillator(freq) {
+        var node = Neume.context.createOscillator();
+        node.frequency.value = freq;
+        return node.toJSON();
+      }
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -181,92 +130,32 @@ describe("ugen/mul", function() {
             name: "GainNode",
             gain: {
               value: 0,
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sine",
-                  frequency: {
-                    value: 3,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
+              inputs: [ oscillator(3) ]
             },
             inputs: [
               {
                 name: "GainNode",
                 gain: {
                   value: 0,
-                  inputs: [
-                    {
-                      name: "OscillatorNode",
-                      type: "sine",
-                      frequency: {
-                        value: 2,
-                        inputs: []
-                      },
-                      detune: {
-                        value: 0,
-                        inputs: []
-                      },
-                      inputs: []
-                    }
-                  ]
+                  inputs: [ oscillator(2) ]
                 },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 1,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ oscillator(1) ]
               }
             ]
           }
         ]
       });
     });
-  });
-
-  describe("$(* 1 $(sin freq:1) 2 $(sin freq:2) 3 $(sin freq:3))", function() {
-    /*
-     * +----------------+
-     * | $(sin, freq:1) |
-     * +----------------+
-     *   |
-     * +-----------+
-     * | GainNode  |  +----------------+
-     * | - gain: 0 |--| $(sin, freq:2) |
-     * +-----------+  +----------------+
-     *   |
-     * +-----------+
-     * | GainNode  |  +----------------+
-     * | - gain: 0 |--| $(sin, freq:3) |
-     * +-----------+  +----------------+
-     *   |
-     * +-----------+
-     * | GainNode  |
-     * | - gain: 6 |
-     * +-----------+
-     *   |
-     */
-    it("returns chain of GainNodes", function() {
+    it("$('*', 1, $('sin', {freq:1}), 2, $('sin', {freq:2}), 3, $('sin', {freq:3}))", function() {
       var synth = Neume.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), 2, $("sin", { freq: 2 }), 3, $("sin", { freq: 3 }));
       });
+
+      function oscillator(freq) {
+        var node = Neume.context.createOscillator();
+        node.frequency.value = freq;
+        return node.toJSON();
+      }
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
         name: "GainNode",
@@ -286,58 +175,16 @@ describe("ugen/mul", function() {
                 name: "GainNode",
                 gain: {
                   value: 0,
-                  inputs: [
-                    {
-                      name: "OscillatorNode",
-                      type: "sine",
-                      frequency: {
-                        value: 3,
-                        inputs: []
-                      },
-                      detune: {
-                        value: 0,
-                        inputs: []
-                      },
-                      inputs: []
-                    }
-                  ]
+                  inputs: [ oscillator(3) ]
                 },
                 inputs: [
                   {
                     name: "GainNode",
                     gain: {
                       value: 0,
-                      inputs: [
-                        {
-                          name: "OscillatorNode",
-                          type: "sine",
-                          frequency: {
-                            value: 2,
-                            inputs: []
-                          },
-                          detune: {
-                            value: 0,
-                            inputs: []
-                          },
-                          inputs: []
-                        }
-                      ]
+                      inputs: [ oscillator(2) ]
                     },
-                    inputs: [
-                      {
-                        name: "OscillatorNode",
-                        type: "sine",
-                        frequency: {
-                          value: 1,
-                          inputs: []
-                        },
-                        detune: {
-                          value: 0,
-                          inputs: []
-                        },
-                        inputs: []
-                      }
-                    ]
+                    inputs: [ oscillator(1) ]
                   }
                 ]
               }
