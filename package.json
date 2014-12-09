@@ -23,7 +23,7 @@
     "sinon": "^1.12.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
-    "web-audio-test-api": "^0.1.14"
+    "web-audio-test-api": "^0.1.15"
   },
   "keywords": [
     "interactive",
