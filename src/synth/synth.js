@@ -58,8 +58,14 @@ function NeuSynth(context, func, args) {
       if (!this.hasOwnProperty(methodName)) {
         methodNames.push(methodName);
         Object.defineProperty(this, methodName, {
-          value: function() {
-            this.apply(methodName, util.toArray(arguments));
+          value: function(t, v) {
+            var e;
+            if (t != null && typeof t !== "object") {
+              e = { playbackTime: t, value: v };
+            } else {
+              e = t || {};
+            }
+            this.call(methodName, e);
             return this;
           }
         });

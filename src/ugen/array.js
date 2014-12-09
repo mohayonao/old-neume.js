@@ -45,36 +45,42 @@ module.exports = function(neume, util) {
     var param = new neume.Param(context, util.finite(data[0]), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    function setValue(t, value) {
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
       if (Array.isArray(value)) {
-        context.sched(util.finite(context.toSeconds(t)), function() {
+        context.sched(util.finite(t0), function() {
           data = value;
         });
       }
     }
 
-    function at(t, index) {
-      context.sched(util.finite(context.toSeconds(t)), function(t) {
-        update(t, util.int(index));
+    function at(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var index = util.defaults(e.value, e.index, e.count);
+      context.sched(t0, function(startTime) {
+        update(util.int(index), startTime);
       });
     }
 
-    function next(t) {
-      context.sched(util.finite(context.toSeconds(t)), function(t) {
-        update(t, index + 1);
+    function next(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(index + 1, startTime);
       });
     }
 
-    function prev(t) {
-      context.sched(util.finite(context.toSeconds(t)), function(t) {
-        update(t, index - 1);
+    function prev(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(index - 1, startTime);
       });
     }
 
-    function update(t0, nextIndex) {
+    function update(nextIndex, startTime) {
       var value = mode(data, nextIndex);
 
-      param.update(value, t0);
+      param.update(value, startTime);
 
       index = nextIndex;
     }

@@ -282,6 +282,7 @@ describe("neume.UGen", function() {
       var ugen1 = neume.UGen.build(synth, "adsr", {}, []);
 
       assert(ugen1.release() === ugen1);
+      assert(ugen1.release(0) === ugen1);
     });
   });
 

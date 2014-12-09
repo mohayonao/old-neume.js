@@ -36,8 +36,14 @@ function NeuUGen(synth, key, spec, inputs) {
   Object.keys(unit.$methods).forEach(function(name) {
     var method = unit.$methods[name];
     util.definePropertyIfNotExists(this, name, {
-      value: function() {
-        method.apply(this, arguments);
+      value: function(t, v) {
+        var e;
+        if (t != null && typeof t !== "object") {
+          e = { playbackTime: t, value: v };
+        } else {
+          e = t || {};
+        }
+        method.call(this, e);
         return this;
       }
     });

@@ -226,12 +226,13 @@ module.exports = function(neume, util) {
       isStopped = true;
     }
 
-    function release(t0) {
+    function release(e) {
       if (isStopped || releaseSchedId || env.releaseNode === -1) {
         return;
       }
 
-      t0 = util.finite(context.toSeconds(t0));
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+
       releaseSchedId = context.sched(t0, function(t0) {
         context.unsched(schedId);
 

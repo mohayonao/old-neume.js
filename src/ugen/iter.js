@@ -47,27 +47,27 @@ module.exports = function(neume, util) {
       }
     }
 
-    function setValue(t, value) {
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
       if (typeof value === "object" && typeof value.next === "function") {
-        context.sched(util.finite(context.toSeconds(t)), function() {
-          iter = util.defaults(value, {});
+        context.sched(t0, function() {
+          iter = value;
         });
       }
     }
 
-    function next(t) {
-      context.sched(util.finite(context.toSeconds(t)), function(t) {
+    function next(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
         if (state === ITERATE) {
           var items = iterNext();
-          var value;
 
           if (items.done) {
             state = FINISHED;
-            ugen.emit("end", { playbackTime: t }, ugen.$synth);
+            ugen.emit("end", { playbackTime: startTime }, ugen.$synth);
           } else {
-            value = util.finite(items.value);
-
-            param.update(value, t);
+            param.update(util.finite(items.value), startTime);
           }
         }
       });

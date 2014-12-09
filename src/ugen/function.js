@@ -35,22 +35,28 @@ module.exports = function(neume, util) {
     var param = new neume.Param(context, util.finite(data(0, count++)), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    function setValue(t, value) {
+    function setValue(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      var value = e.value;
       if (typeof value === "function") {
-        context.sched(util.finite(context.toSeconds(t)), function() {
+        context.sched(t0, function() {
           data = value;
         });
       }
     }
 
-    function evaluate(t) {
-      context.sched(util.finite(context.toSeconds(t)), function(t) {
-        update(t);
+    function evaluate(e) {
+      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      context.sched(t0, function(startTime) {
+        update(startTime);
       });
     }
 
     function update(startTime) {
-      var value = data(startTime, count++);
+      var value = data({
+        playbackTime: startTime,
+        count: count++
+      });
 
       param.update(value, startTime);
     }

@@ -475,6 +475,7 @@ describe("neume.Synth", function() {
     describe("method bindings", function() {
       it("works", function() {
         assert(synth.release() === synth);
+        assert(synth.release(0) === synth);
         assert(synth.bang() === synth);
         assert(bang === true);
       });
