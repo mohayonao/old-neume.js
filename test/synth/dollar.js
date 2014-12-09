@@ -78,14 +78,14 @@ describe("neume.SynthDollar", function() {
       it("(timeout: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
-          $.timeout(0.030, function(t, i) {
-            passed.push([ "fizz", t, i ]);
+          $.timeout(0.030, function(e) {
+            passed.push([ "fizz", e.playbackTime, e.count ]);
           });
-          $.timeout(0.050, function(t, i) {
-            passed.push([ "buzz", t, i ]);
+          $.timeout(0.050, function(e) {
+            passed.push([ "buzz", e.playbackTime, e.count ]);
           });
-          $.timeout(0.150, function(t, i) {
-            passed.push([ "fizzbuzz", t, i ]);
+          $.timeout(0.150, function(e) {
+            passed.push([ "fizzbuzz", e.playbackTime, e.count ]);
           });
         }, []);
 
@@ -104,11 +104,11 @@ describe("neume.SynthDollar", function() {
       it("(interval: number, ...callbacks: Array<function>)", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
-          $.interval(0.030, function(t, i) {
-            passed.push([ "fizz", t, i ]);
+          $.interval(0.030, function(e) {
+            passed.push([ "fizz", e.playbackTime, e.count ]);
           });
-          $.interval(0.050, function(t, i) {
-            passed.push([ "buzz", t, i ]);
+          $.interval(0.050, function(e) {
+            passed.push([ "buzz", e.playbackTime, e.count ]);
           });
         }, []);
 
@@ -127,8 +127,8 @@ describe("neume.SynthDollar", function() {
       it("works", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
-          $.interval("32n", function(t, i) {
-            passed.push([ "fizz", t, i ]);
+          $.interval("32n", function(e) {
+            passed.push([ "fizz", e.playbackTime, e.count ]);
           });
         }, []);
 

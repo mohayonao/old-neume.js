@@ -74,10 +74,13 @@ function $timeout(synth, timers) {
     var callbacks = util.toArray(arguments).slice(1).filter(util.isFunction);
 
     function sched(t) {
-      schedId = context.sched(t, function(t) {
+      schedId = context.sched(t, function(playbackTime) {
         schedId = 0;
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
-          callbacks[i].call(synth, t, 1);
+          callbacks[i].call(synth, {
+            playbackTime: playbackTime,
+            count: 1
+          });
         }
       });
     }
@@ -114,15 +117,18 @@ function $interval(synth, timers) {
     var count = 0;
 
     function sched(t) {
-      schedId = context.sched(t, function(t) {
+      schedId = context.sched(t, function(playbackTime) {
         schedId = 0;
-        count  += 1;
+        count += 1;
         for (var i = 0, imax = callbacks.length; i < imax; i++) {
-          callbacks[i].call(synth, t, count);
+          callbacks[i].call(synth, {
+            playbackTime: playbackTime,
+            count: count
+          });
         }
 
         var nextTime = relative ?
-          t + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
+          playbackTime + Math.max(minInterval, util.finite(context.toSeconds(interval))) :
           startTime + interval * (count + 1);
 
         sched(nextTime);
