@@ -659,6 +659,20 @@ describe("neume.Context", function() {
         inputs: [ node1.toJSON(), node2.toJSON() ]
       });
     });
+    it("[] -> AudioNode", function() {
+      var toNode = context.createGain();
+
+      context.connect([], toNode);
+
+      assert.deepEqual(toNode.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: [],
+        },
+        inputs: []
+      });
+    });
     it("invalid -> AudioNode", function() {
       var node = context.createDelay();
 

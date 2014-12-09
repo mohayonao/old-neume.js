@@ -266,7 +266,9 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
 NeuContext.prototype.connect = function(from, to) {
   if (to) {
     if (Array.isArray(from)) {
-      new neume.Sum(this, from).connect(to);
+      if (from.length) {
+        new neume.Sum(this, from).connect(to);
+      }
     } else if (from instanceof neume.Component || from instanceof neume.UGen) {
       from.connect(to);
     } else if (to instanceof global.AudioParam) {
