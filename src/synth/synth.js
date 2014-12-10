@@ -182,11 +182,17 @@ NeuSynth.prototype.fadeOut = function(t, dur) {
   dur = util.finite(this.$context.toSeconds(dur));
 
   if (this._state === START) {
-    this.$routes.forEach(function(node) {
-      var v0 = node.gain.value;
-      var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
-      node.gain.setTargetAtTime(0, t, tC);
-    });
+    if (this.$routes.length) {
+      this.$context.sched(t, function(t) {
+        var v0 = this.$routes[0].gain.value;
+        if (v0 !== 0) {
+          var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
+          this.$routes.forEach(function(node) {
+            node.gain.setTargetAtTime(0, t, tC);
+          });
+        }
+      }, this);
+    }
     this.stop(t + dur);
   }
 
@@ -199,14 +205,20 @@ NeuSynth.prototype.fade = function(t, val, dur) {
   dur = util.finite(this.$context.toSeconds(dur));
 
   if (this._state === START) {
-    var v0 = this.$routes[0].gain.value;
-    var v1 = val;
-    var vT = v0 + (v1 - v0) * 0.99;
-    var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
-    this.$routes.forEach(function(node) {
-      node.gain.setTargetAtTime(v1, t, tC);
-      node.gain.setValueAtTime(v1, t + dur);
-    });
+    if (this.$routes.length) {
+      this.$context.sched(t, function(t) {
+        var v0 = this.$routes[0].gain.value;
+        if (v0 !== val) {
+          var v1 = val;
+          var vT = v0 + (v1 - v0) * 0.99;
+          var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
+          this.$routes.forEach(function(node) {
+            node.gain.setTargetAtTime(v1, t, tC);
+            node.gain.setValueAtTime(v1, t + dur);
+          });
+        }
+      }, this);
+    }
   }
 
   return this;
