@@ -78,7 +78,7 @@ describe("neume.Synth", function() {
   });
 
   describe("#start", function() {
-    it("(t: number|string): self", function() {
+    it("([startTime: timevalue]): self", function() {
       var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.start() === synth);
@@ -123,7 +123,7 @@ describe("neume.Synth", function() {
   });
 
   describe("#stop", function() {
-    it("(t: number|string): self", function() {
+    it("([startTime: timevalue]): self", function() {
       var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.stop() === synth);
@@ -177,7 +177,7 @@ describe("neume.Synth", function() {
   });
 
   describe("#fadeIn", function() {
-    it("(t: number|string, dur: number|string): self", function() {
+    it("([startTime: timevalue, duration: timevalue]): self", function() {
       var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.fadeIn() === synth);
@@ -217,10 +217,12 @@ describe("neume.Synth", function() {
   });
 
   describe("#fadeOut", function() {
-    it("(t: number|string, dur: number|string): self", function() {
+    it("([startTime: timevalue, duration: timevalue]): self", function() {
       var synth = new neume.Synth(context, NOP, []);
 
-      assert(synth.fadeIn() === synth);
+      synth.start();
+
+      assert(synth.fadeOut() === synth);
     });
     it("works", function() {
       var synth = new neume.Synth(context, function($) {
@@ -274,7 +276,14 @@ describe("neume.Synth", function() {
   });
 
   describe("#fade", function() {
-    it("(t: number|string, val: number, dur: number|string): self", function() {
+    it("([startTime: timevalue, value: number, duration: timevalue]): self", function() {
+      var synth = new neume.Synth(context, NOP, []);
+
+      synth.start();
+
+      assert(synth.fade() === synth);
+    });
+    it("works", function() {
       var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);

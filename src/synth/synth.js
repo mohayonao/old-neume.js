@@ -102,44 +102,48 @@ NeuSynth.prototype.find = function(selector) {
   return this._db.find(selector);
 };
 
-NeuSynth.prototype.start = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
+NeuSynth.prototype.start = function(startTime) {
+  var context = this.$context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  startTime = util.finite(startTime);
 
   if (this._state === INIT) {
     this._state = START;
     this._stateString = "SCHEDULED";
 
-    this.$context.sched(t, function() {
+    context.sched(startTime, function() {
       this._stateString = "PLAYING";
     }, this);
 
     this.$routes.forEach(function(node, index) {
       this.connect(node, this.getAudioBus(index));
-    }, this.$context);
+    }, context);
 
     this._db.all().forEach(function(ugen) {
-      ugen.$unit.start(t);
+      ugen.$unit.start(startTime);
     });
 
     this._timers.forEach(function(timer) {
-      timer.start(t);
+      timer.start(startTime);
     });
 
-    this.$context.start(); // auto start(?)
+    context.start(); // auto start(?)
   }
 
   return this;
 };
 
-NeuSynth.prototype.stop = function(t) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-
+NeuSynth.prototype.stop = function(startTime) {
   var context = this.$context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  startTime = util.finite(startTime);
 
   if (this._state === START) {
     this._state = STOP;
 
-    context.sched(t, function(t) {
+    context.sched(startTime, function(t0) {
       this._stateString = "FINISHED";
 
       context.nextTick(function() {
@@ -149,11 +153,11 @@ NeuSynth.prototype.stop = function(t) {
       }, this);
 
       this._db.all().forEach(function(ugen) {
-        ugen.$unit.stop(t);
+        ugen.$unit.stop(t0);
       });
 
       this._timers.forEach(function(timer) {
-        timer.stop(t);
+        timer.stop(t0);
       });
     }, this);
   }
@@ -161,52 +165,79 @@ NeuSynth.prototype.stop = function(t) {
   return this;
 };
 
-NeuSynth.prototype.fadeIn = function(t, dur) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  dur = util.finite(this.$context.toSeconds(dur));
+NeuSynth.prototype.fadeIn = function(startTime, duration) {
+  var context = this.$context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  duration = util.defaults(context.toSeconds(duration), 0.5);
+
+  startTime = util.finite(startTime);
+  duration = util.finite(duration);
 
   if (this._state === INIT) {
-    var tC = -Math.max(1e-6, dur) / -4.605170185988091;
+    var tC = -Math.max(1e-6, duration) / -4.605170185988091;
     this.$routes.forEach(function(node) {
       node.gain.value = 0;
-      node.gain.setTargetAtTime(1, t, tC);
+      node.gain.setTargetAtTime(1, startTime, tC);
     });
-    this.start(t);
+    this.start(startTime);
   }
 
   return this;
 };
 
-NeuSynth.prototype.fadeOut = function(t, dur) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  dur = util.finite(this.$context.toSeconds(dur));
+NeuSynth.prototype.fadeOut = function(startTime, duration) {
+  var context = this.$context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  duration = util.defaults(context.toSeconds(duration), 0.5);
+
+  startTime = util.finite(startTime);
+  duration = util.finite(duration);
 
   if (this._state === START) {
-    this.$routes.forEach(function(node) {
-      var v0 = node.gain.value;
-      var tC = -Math.max(1e-6, dur) / Math.log(0.01 / v0);
-      node.gain.setTargetAtTime(0, t, tC);
-    });
-    this.stop(t + dur);
+    if (this.$routes.length) {
+      context.sched(startTime, function(t0) {
+        var startValue = this.$routes[0].gain.value;
+        if (startValue !== 0) {
+          var tC = -Math.max(1e-6, duration) / Math.log(0.01 / startValue);
+          this.$routes.forEach(function(node) {
+            node.gain.setTargetAtTime(0, t0, tC);
+          });
+        }
+      }, this);
+    }
+    this.stop(startTime + duration);
   }
 
   return this;
 };
 
-NeuSynth.prototype.fade = function(t, val, dur) {
-  t = util.finite(this.$context.toSeconds(t)) || this.$context.currentTime;
-  val = util.finite(val);
-  dur = util.finite(this.$context.toSeconds(dur));
+NeuSynth.prototype.fade = function(startTime, value, duration) {
+  var context = this.$context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  duration = util.defaults(context.toSeconds(duration), 0.5);
+
+  startTime = util.finite(startTime);
+  value = util.finite(value);
+  duration = util.finite(duration);
 
   if (this._state === START) {
-    var v0 = this.$routes[0].gain.value;
-    var v1 = val;
-    var vT = v0 + (v1 - v0) * 0.99;
-    var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
-    this.$routes.forEach(function(node) {
-      node.gain.setTargetAtTime(v1, t, tC);
-      node.gain.setValueAtTime(v1, t + dur);
-    });
+    if (this.$routes.length) {
+      context.sched(startTime, function(t0) {
+        var v0 = this.$routes[0].gain.value;
+        if (v0 !== value) {
+          var v1 = value;
+          var vT = v0 + (v1 - v0) * 0.99;
+          var tC = -Math.max(1e-6, duration) / Math.log((vT - v1) / (v0 - v1));
+          this.$routes.forEach(function(node) {
+            node.gain.setTargetAtTime(v1, t0, tC);
+            node.gain.setValueAtTime(v1, t0 + duration);
+          });
+        }
+      }, this);
+    }
   }
 
   return this;
