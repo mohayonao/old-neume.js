@@ -1514,7 +1514,9 @@ NeuContext.prototype.reset = function() {
     this.$inlet.disconnect();
   }
 
-  this._audioBuses = [];
+  this._audioBuses.splice(0).forEach(function(bus) {
+    bus.toAudioNode().disconnect();
+  }, this);
 
   this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
   this.connect(this.$inlet, this.$analyser);
@@ -2304,7 +2306,7 @@ function neume() {
   return neume.impl.apply(null, arguments);
 }
 
-neume.version = "0.3.1";
+neume.version = "0.3.2";
 
 module.exports = neume;
 
