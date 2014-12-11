@@ -52,6 +52,10 @@ NeuTransport.prototype.toSeconds = function(value) {
     return util.finite(value);
   }
 
+  if (value && typeof value === "object" && typeof value.playbackTime === "number") {
+    return util.finite(value.playbackTime);
+  }
+
   if (typeof value === "string") {
     var m, offset = 0, time = 0;
 
