@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>demo - neume.js</title>
+  <title>neume.js editor</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/theme/monokai.min.css">
@@ -21,7 +21,7 @@
 </head>
 <body>
   <div id="header">
-    <h1>neume.js</h1>
+    <h1>neume.js editor</h1>
     <div class="btn" id="run">Run</div>
     <div class="btn" id="link">Link</div>
   </div>
@@ -30,6 +30,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/mode/javascript/javascript.min.js"></script>
+  <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="../../build/neume.js"></script>
   <script>
   var Neume = neume(new AudioContext());
@@ -44,21 +45,21 @@
 
     $("#run").on("click", function() {
       var code = editor.getValue();
-      Neume.context.reset();
+      Neume.reset();
       eval.call(null, code);
     });
 
     $("#link").on("click", function() {
-      window.location = "#" + window.encodeURIComponent(editor.getValue());
+      window.location = "#js:" + window.encodeURIComponent(editor.getValue());
     });
 
-    window.addEventListener("message", function(e) {
-      if (typeof e.data.code === "string") {
-        editor.setValue(e.data.code);
+    var hash = window.decodeURIComponent(window.location.hash.substr(1));
+
+    if (hash) {
+      if (hash.substr(0, 3) === "js:") {
+        editor.setValue(hash.substr(3));
       }
-    });
-
-    editor.setValue(window.decodeURIComponent(window.location.hash.substr(1)));
+    }
   });
   </script>
 </body>
