@@ -51,11 +51,7 @@ module.exports = function(neume, util) {
     var type = spec.type;
 
     if (!isWave(type)) {
-      if (type === "pulse") {
-        type = makePeriodicWave(context, util.finite(util.defaults(spec.width, 0.5)));
-      } else {
-        type = makePeriodicWave(context, WAVE_TYPES[type] || "sine");
-      }
+      type = makePeriodicWave(context, WAVE_TYPES[type] || "sine");
     }
 
     return make(setup(type, ugen, spec, inputs));
@@ -76,11 +72,6 @@ module.exports = function(neume, util) {
     neume.register(name, function(ugen, spec, inputs) {
       return make(setup(makePeriodicWave(ugen.$context, type), ugen, spec, inputs));
     });
-  });
-
-  neume.register("pulse", function(ugen, spec, inputs) {
-    var type = makePeriodicWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
-    return make(setup(type, ugen, spec, inputs));
   });
 
   function isWave(wave) {
@@ -154,10 +145,6 @@ module.exports = function(neume, util) {
       return "sine";
     }
 
-    if (typeof type === "number") {
-      type = util.int(util.clip(type, 0, 1) * 256);
-    }
-
     if (_waves[type]) {
       return _waves[type];
     }
@@ -174,9 +161,6 @@ module.exports = function(neume, util) {
       break;
     case "triangle":
       makePeriodicWaveTriangle(real, imag);
-      break;
-    default:
-      makePeriodicWavePulse(real, imag, type);
       break;
     }
 
@@ -213,20 +197,6 @@ module.exports = function(neume, util) {
         }
       }
     }
-  }
-
-  function makePeriodicWavePulse(real, imag, width) {
-    var buffer = new Float32Array(2048);
-    var width2 = width * (2048 / 256);
-
-    for (var i = 0; i < 2048; i++) {
-      buffer[i] = i < width2 ? -1 : +1;
-    }
-
-    var fft = neume.FFT.forward(buffer);
-
-    real.set(fft.real);
-    imag.set(fft.imag);
   }
 
 };
