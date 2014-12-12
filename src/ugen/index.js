@@ -14,6 +14,7 @@ module.exports = function(neume) {
   neume.use(require("./function"));
   neume.use(require("./inout"));
   neume.use(require("./iter"));
+  neume.use(require("./lfpulse"));
   neume.use(require("./line"));
   neume.use(require("./mono"));
   neume.use(require("./mul"));
