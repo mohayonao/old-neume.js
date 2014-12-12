@@ -43,14 +43,12 @@ function Neume(context) {
       enumerable: true
     },
     toSeconds: {
-      value: function(value) {
-        return context.toSeconds(value);
-      }
+      value: context.toSeconds.bind(context),
+      enumerable: true
     },
     toFrequency: {
-      value: function(value) {
-        return context.toFrequency(value);
-      }
+      value: context.toFrequency.bind(context),
+      enumerable: true
     },
     Synth: {
       value: function(func) {
@@ -126,6 +124,27 @@ neume.impl = function(destination, spec) {
             audioContext.startRendering();
           });
         }
+      },
+      start: {
+        value: function() {
+          context.start();
+          return this;
+        },
+        enumerable: true
+      },
+      stop: {
+        value: function() {
+          context.stop();
+          return this;
+        },
+        enumerable: true
+      },
+      reset: {
+        value: function() {
+          context.reset();
+          return this;
+        },
+        enumerable: true
       },
       analyser: {
         value: context.$analyser,
