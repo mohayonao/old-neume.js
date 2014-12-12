@@ -80,6 +80,15 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.$ = function() {
+  var args = util.toArray(arguments);
+  var key = args.shift();
+  var spec = util.isDictionary(args[0]) ? args.shift() : {};
+  var inputs = Array.prototype.concat.apply([ this ], args);
+
+  return this.$builder(key, spec, inputs);
+};
+
 NeuUGen.prototype.mul = function(value) {
   return this.$builder("*", this, util.defaults(value, 1));
 };

@@ -92,6 +92,65 @@ describe("neume.UGen", function() {
     });
   });
 
+  describe("#$", function() {
+    it("(key:string): neume.UGen", function() {
+      var node = context.createGain();
+      var spy = sinon.spy();
+
+      var a = neume.UGen.build({
+        $context: context,
+        $builder: spy
+      }, "sin", { add: 880 }, []);
+
+      a.$("lpf");
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("lpf", {}, [ a ]));
+    });
+    it("(key:string, spec:object): neume.UGen", function() {
+      var node = context.createGain();
+      var spy = sinon.spy();
+
+      var a = neume.UGen.build({
+        $context: context,
+        $builder: spy
+      }, "sin", { add: 880 }, []);
+
+      a.$("lpf", { freq: 200 });
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("lpf", { freq: 200 }, [ a ]));
+    });
+    it("(key:string, ...args:any): neume.UGen", function() {
+      var node = context.createGain();
+      var spy = sinon.spy();
+
+      var a = neume.UGen.build({
+        $context: context,
+        $builder: spy
+      }, "sin", { add: 880 }, []);
+
+      a.$("lpf", ugen0);
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("lpf", {}, [ a, ugen0 ]));
+    });
+    it("(key:string, spec:object, ...args: any): neume.UGen", function() {
+      var node = context.createGain();
+      var spy = sinon.spy();
+
+      var a = neume.UGen.build({
+        $context: context,
+        $builder: spy
+      }, "sin", { add: 880 }, []);
+
+      a.$("lpf", { freq: 200 }, ugen0);
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith("lpf", { freq: 200 }, [ a, ugen0 ]));
+    });
+  });
+
   describe("#mul", function() {
     it("(value: any): neume.UGen", function() {
       var node = context.createGain();
