@@ -162,8 +162,8 @@ module.exports = function(neume, util) {
       return _waves[type];
     }
 
-    var real = new Float32Array(2048);
-    var imag = new Float32Array(2048);
+    var real = new Float32Array(4096);
+    var imag = new Float32Array(4096);
 
     switch (type) {
     case "square":
@@ -188,28 +188,30 @@ module.exports = function(neume, util) {
   }
 
   function makePeriodicWaveSquare(real, imag) {
-    for (var i = 1, imax = real.length; i < imax; i++) {
-      var omega = 2 * Math.PI * i;
-      var invOmega = 1 / omega;
-
-      imag[i] = invOmega * ((i & 1) ? 2 : 0);
+    for (var i = 1, imax = imag.length; i < imax; i++) {
+      if (i % 2 === 1) {
+        imag[i] = 1 / i;
+      }
     }
   }
 
   function makePeriodicWaveSawtooth(real, imag) {
-    for (var i = 1, imax = real.length; i < imax; i++) {
-      var omega = 2 * Math.PI * i;
-      var invOmega = 1 / omega;
-
-      imag[i] = -invOmega * Math.cos(0.5 * omega);
+    for (var i = 1, imax = imag.length; i < imax; i++) {
+      imag[i] = 1 / i;
+      if (i % 2 === 0) {
+        imag[i] *= -1;
+      }
     }
   }
 
-  function makePeriodicWaveTriangle(real /*, imag*/) {
-    for (var i = 1, imax = real.length; i < imax; i++) {
-      var omega = 2 * Math.PI * i;
-
-      real[i] = (4 - 4 * Math.cos(0.5 * omega)) / (i * i * Math.PI * Math.PI);
+  function makePeriodicWaveTriangle(real, imag) {
+    for (var i = 1, imax = imag.length; i < imax; i++) {
+      if (i % 2) {
+        imag[i] = 1 / (i * i);
+        if (i % 4 === 3) {
+          imag[i] *= -1;
+        }
+      }
     }
   }
 
