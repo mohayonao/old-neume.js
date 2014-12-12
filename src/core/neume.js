@@ -52,7 +52,7 @@ function Neume(context) {
     },
     Synth: {
       value: function(func) {
-        return new neume.SynthDef(context, func).apply(null, util.toArray(arguments).slice(1));
+        return new neume.Synth(context, func, util.toArray(arguments).slice(1));
       },
       enumerable: true
     },
