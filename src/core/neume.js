@@ -155,6 +155,7 @@ neume.impl = function(destination, spec) {
 };
 
 neume.util = util;
+neume.KVS = require("./kvs");
 neume.Context = require("./context");
 neume.Transport = require("./transport");
 neume.Component = require("../component/component");
