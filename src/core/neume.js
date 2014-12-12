@@ -11,20 +11,20 @@ function Neume(context) {
   }
 
   Object.defineProperties(fn, {
-    audioContext: {
-      value: context.audioContext,
-      enumerable: true
-    },
     context: {
       value: context,
       enumerable: true
     },
-    destination: {
-      value: context.$destination,
+    audioContext: {
+      value: context.audioContext,
       enumerable: true
     },
     sampleRate: {
       value: context.sampleRate,
+      enumerable: true
+    },
+    destination: {
+      value: context.$destination,
       enumerable: true
     },
     currentTime: {
@@ -41,6 +41,16 @@ function Neume(context) {
         context.bpm = value;
       },
       enumerable: true
+    },
+    toSeconds: {
+      value: function(value) {
+        return context.toSeconds(value);
+      }
+    },
+    toFrequency: {
+      value: function(value) {
+        return context.toFrequency(value);
+      }
     },
     Synth: {
       value: function(func) {
@@ -84,16 +94,6 @@ function Neume(context) {
         return new neume.Timeout(context, schedTime, callback);
       },
       enumerable: true
-    },
-    toSeconds: {
-      value: function(value) {
-        return context.toSeconds(value);
-      }
-    },
-    toFrequency: {
-      value: function(value) {
-        return context.toFrequency(value);
-      }
     },
   });
 
