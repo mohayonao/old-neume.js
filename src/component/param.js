@@ -215,9 +215,9 @@ NeuParam.prototype.cancel = function(startTime) {
 
 NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
-NeuParam.prototype.update = function(value, startTime) {
+NeuParam.prototype.update = function(value, startTime, lag) {
   var context = this.$context;
-  var endTime = startTime + util.finite(context.toSeconds(this._lag));
+  var endTime = startTime + util.finite(context.toSeconds(util.defaults(lag, this._lag, 0)));
   var startValue = this.valueAtTime(startTime);
   var curve = this._curve;
   var scheduled = null;
