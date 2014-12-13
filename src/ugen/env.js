@@ -1,6 +1,8 @@
 module.exports = function(neume, util) {
   "use strict";
 
+  var KVSKEY = "@neume:env:";
+
   /**
    * $("env", {
    *   table: Array<number|string> = []
@@ -84,7 +86,7 @@ module.exports = function(neume, util) {
     return make([ 1, ">", 0, r ], ugen, spec, inputs);
   });
 
-  function toEnv(src) {
+  function toEnv(src, conv) {
     var list = [], env = {
       init: util.finite(src.shift()),
       list: list,
@@ -98,7 +100,7 @@ module.exports = function(neume, util) {
       var value = src[i++];
 
       if (typeof value === "number") {
-        list.push([ util.clip(util.finite(value), 0, 1), src[i++] ]);
+        list.push([ conv(util.clip(util.finite(value), 0, 1)), src[i++] ]);
       } else {
         if (/^(>|r(elease)?)$/i.test(value)) {
           env.releaseNode = list.length;
@@ -118,12 +120,12 @@ module.exports = function(neume, util) {
     var ws, wsCurve = null;
 
     if (typeof curve === "number") {
-      curve = util.finite(curve);
-      if (0.001 <= Math.abs(curve)) {
-        wsCurve = makeCurveFromNumber(curve);
+      if (!neume.KVS.exists(KVSKEY + curve)) {
+        neume.KVS.set(KVSKEY + curve, makeCurveFrom(curve));
       }
-    } else {
-      wsCurve = makeCurveFromType(curve);
+    }
+    if (neume.KVS.exists(KVSKEY + curve)) {
+      wsCurve = neume.KVS.get(KVSKEY + curve);
     }
 
     if (wsCurve != null) {
@@ -136,68 +138,126 @@ module.exports = function(neume, util) {
     return outlet;
   }
 
-  function makeCurveFromNumber(type) {
-    if (makeCurveFromNumber[type]) {
-      return makeCurveFromNumber[type];
-    }
-
-    var curve = new Float32Array(4096);
-    var a1 = 1 / (1.0 - Math.exp(type));
-    var grow = Math.exp(type / 2048);
+  neume.KVS.set(KVSKEY + "sine", function() {
+    var data = new Float32Array(4096);
 
     for (var i = 0; i < 2048; i++) {
-      curve[i + 2048] = a1 - a1 * Math.pow(grow, i);
+      var x = i / 2048;
+      data[i + 2048] = x - Math.sin(x * 2 * Math.PI) * 0.15;
     }
 
-    makeCurveFromNumber[type] = curve;
+    return data;
+  });
 
-    return curve;
-  }
-
-  function makeCurveFromType(type) {
-    if (makeCurveFromType[type]) {
-      return makeCurveFromType[type];
-    }
-    var func = shapeFunc[type];
-    if (!func) {
-      return;
-    }
-
-    var curve = new Float32Array(4096);
+  neume.KVS.set(KVSKEY + "welch", function() {
+    var data = new Float32Array(4096);
 
     for (var i = 0; i < 2048; i++) {
-      curve[i + 2048] = func(i / 2048);
+      var x = i / 2048;
+      data[i + 2048] = Math.sin(x * 0.5 * Math.PI);
     }
 
-    makeCurveFromType[type] = curve;
+    return data;
+  });
 
-    return curve;
+  neume.KVS.set(KVSKEY + "squared", function() {
+    var data = new Float32Array(4096);
+
+    for (var i = 0; i < 2048; i++) {
+      var x = i / 2048;
+      data[i + 2048] = x * x;
+    }
+
+    return data;
+  });
+
+  neume.KVS.set(KVSKEY + "cubic", function() {
+    var data = new Float32Array(4096);
+
+    for (var i = 0; i < 2048; i++) {
+      var x = i / 2048;
+      data[i + 2048] = x * x * x;
+    }
+
+    return data;
+  });
+
+  function makeCurveFrom(curve) {
+    var data = new Float32Array(4096);
+    var grow = Math.exp(curve);
+    var a = 1 / (1 - grow);
+
+    for (var i = 0; i < 2048; i++) {
+      var x = i / 2048;
+      data[i + 2048] = a - (a * Math.pow(grow, x));
+    }
+
+    return data;
   }
 
-  var shapeFunc = {};
+  var invFunc = {
+    sine: function(x) {
+      // HACK: umm, uncool..
+      var h = 1, m, l = 0, y;
 
-  shapeFunc.sine = function(x) {
-    // TODO: FIX
-    return x - Math.sin(x * 2 * Math.PI) * 0.10355338794738156;
+      if (x === 0) {
+        return 0;
+      }
+      if (x === 1) {
+        return 1;
+      }
+
+      while (true) {
+        m = (h + l) * 0.5;
+        y = m - Math.sin(m * 2 * Math.PI) * 0.15;
+        if (Math.abs(x - y) < 1e-6) {
+          break;
+        }
+        if (y < x) {
+          l = m;
+        } else {
+          h = m;
+        }
+      }
+
+      return m;
+    },
+    welch: function(x) {
+      return 2 * Math.asin(x) / Math.PI;
+    },
+    squared: function(x) {
+      return Math.pow(x, 1 / 2);
+    },
+    cubic: function(x) {
+      return Math.pow(x, 1 / 3);
+    },
+    identity: function(x) {
+      return x;
+    }
   };
 
-  shapeFunc.welch = function(x) {
-    return Math.sin(x * Math.PI * 0.5);
-  };
+  function curveInv(curve) {
+    if (typeof curve === "number") {
+      return function(x) {
+        var a = 1 / (1 - Math.exp(curve));
+        return Math.log((a - x) / a) / curve;
+      };
+    }
+    return invFunc[curve] || invFunc.identity;
+  }
 
-  shapeFunc.squared = function(x) {
-    return x * x;
-  };
-
-  shapeFunc.cubic = function(x) {
-    return x * x * x;
-  };
 
   function make(src, ugen, spec, inputs) {
     var context = ugen.$context;
 
-    var env = toEnv(src);
     var curve = util.defaults(spec.curve, "lin");
+    if (typeof curve === "number") {
+      curve = util.finite(curve);
+      if (Math.abs(curve) < 0.001) {
+        curve = "lin";
+      }
+    }
+    var env = toEnv(src, curveInv(curve));
     var param = new neume.Param(context, env.init);
 
     var schedId, releaseSchedId, scheduled;
