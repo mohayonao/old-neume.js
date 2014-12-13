@@ -89,6 +89,30 @@ describe("neume", function() {
         assert(spy.calledOnce);
       }));
     });
+    describe(".start", function() {
+      it("(): self", sinon.test(function() {
+        var spy = this.spy(Neume.context, "start");
+
+        assert(Neume.start() === Neume);
+        assert(spy.calledOnce);
+      }));
+    });
+    describe(".stop", function() {
+      it("(): self", sinon.test(function() {
+        var spy = this.spy(Neume.context, "stop");
+
+        assert(Neume.stop() === Neume);
+        assert(spy.calledOnce);
+      }));
+    });
+    describe(".reset", function() {
+      it("(): self", sinon.test(function() {
+        var spy = this.spy(Neume.context, "reset");
+
+        assert(Neume.reset() === Neume);
+        assert(spy.calledOnce);
+      }));
+    });
     describe(".analyser", function() {
       it("\\getter: AnalyserNode", function() {
         assert(Neume.analyser instanceof global.AnalyserNode);

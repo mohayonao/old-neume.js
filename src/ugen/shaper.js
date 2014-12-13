@@ -2,6 +2,7 @@ module.exports = function(neume, util) {
   "use strict";
 
   var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
+  var KVSKEY = "@neume:shaper:";
 
   /**
    * $("shaper", {
@@ -25,7 +26,8 @@ module.exports = function(neume, util) {
   neume.register("shaper", function(ugen, spec, inputs) {
     var curve = null;
     if (typeof spec.curve === "number") {
-      curve = createCurve(util.finite(spec.curve));
+      var n = Math.floor(util.clip(util.finite(spec.curve), 0, 1) * 256);
+      curve = neume.KVS.get(KVSKEY + n, n);
     } else {
       curve = spec.curve;
     }
@@ -33,7 +35,7 @@ module.exports = function(neume, util) {
   });
 
   neume.register("clip", function(ugen, spec, inputs) {
-    var curve = createCurve(0);
+    var curve = neume.KVS.get(KVSKEY + "0");
     return make(curve, ugen, spec, inputs);
   });
 
@@ -53,33 +55,44 @@ module.exports = function(neume, util) {
     });
   }
 
-  var curves = {};
+  (function() {
+    // http://stackoverflow.com/questions/7840347/web-audio-api-waveshapernode
+    function createCurve(amount) {
+      var curve = new Float32Array(WS_CURVE_SIZE);
 
-  function createCurve(amount) {
-    amount = util.clip(amount, 0, 1);
+      var k = 2 * amount / (1 - amount);
+      var x;
 
-    if (!curves[amount]) {
-      curves[amount] = (amount === 1) ? createSquare() : createWSCurve(amount);
+      for (var i = 0; i < WS_CURVE_SIZE; i++) {
+        x = i * 2 / WS_CURVE_SIZE - 1;
+        curve[i] = (1 + k) * x / (1 + k * Math.abs(x));
+      }
+
+      return curve;
     }
 
-    return curves[amount];
-  }
+    function _createCurve(amount) {
+      return function() {
+        return createCurve(amount);
+      };
+    }
 
-  // http://stackoverflow.com/questions/7840347/web-audio-api-waveshapernode
-  function createWSCurve(amount) {
+    for (var i = 1; i < 256; i++) {
+      neume.KVS.set(KVSKEY + i, _createCurve(i / 256));
+    }
+  })();
+
+  neume.KVS.set(KVSKEY + "0", function() {
     var curve = new Float32Array(WS_CURVE_SIZE);
 
-    var k = 2 * amount / (1 - amount);
-
     for (var i = 0; i < WS_CURVE_SIZE; i++) {
-      var x = i * 2 / WS_CURVE_SIZE - 1;
-      curve[i] = (1 + k) * x / (1 + k * Math.abs(x));
+      curve[i] = (i / WS_CURVE_SIZE) * 2 - 1;
     }
 
     return curve;
-  }
+  });
 
-  function createSquare() {
+  neume.KVS.set(KVSKEY + "256", function() {
     var curve = new Float32Array(WS_CURVE_SIZE);
     var half = WS_CURVE_SIZE >> 1;
 
@@ -88,5 +101,6 @@ module.exports = function(neume, util) {
     }
 
     return curve;
-  }
+  });
+
 };

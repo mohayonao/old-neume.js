@@ -29,7 +29,7 @@ function NeuSynthDollar(synth) {
   builder.method = $method(synth, this.methods);
   builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
-  builder.stop = $stop(synth, this.timers);
+  builder.stop = $stop(synth);
 
   this.builder = builder;
 }
@@ -154,21 +154,12 @@ function $interval(synth, timers) {
   };
 }
 
-function $stop(synth, timers) {
+function $stop(synth) {
   var context = synth.$context;
 
   return function(stopTime) {
-    var schedId = 0;
-    timers.push({
-      start: function(t) {
-        schedId = context.sched(t, function() {
-          synth.stop(stopTime);
-        });
-      },
-      stop: function() {
-        context.unsched(schedId);
-        schedId = 0;
-      }
+    context.sched(context.toSeconds(stopTime), function(t0) {
+      synth.stop(t0);
     });
   };
 }

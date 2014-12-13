@@ -3,7 +3,7 @@
 [![Build Status](http://img.shields.io/travis/mohayonao/neume.js.svg?style=flat)](https://travis-ci.org/mohayonao/neume.js)
 [![Coverage Status](http://img.shields.io/coveralls/mohayonao/neume.js.svg?style=flat)](https://coveralls.io/r/mohayonao/neume.js?branch=master)
 [![Dependency Status](http://img.shields.io/david/mohayonao/neume.js.svg?style=flat)](https://david-dm.org/mohayonao/neume.js)
-[![devDependency Status](http://img.shields.io/david/dev/mohayonao/neume.js.svg?style=flat)](https://david-dm.org/mohayonao/neume.js)
+[![devDependency Status](http://img.shields.io/david/dev/mohayonao/neume.js.svg?style=flat)](https://david-dm.org/mohayonao/neume.js#info=devDependencies&view=table)
 
 ![](http://upload.wikimedia.org/wikipedia/commons/a/ab/Gregorian_chant.gif)
 
@@ -12,69 +12,117 @@
 
 ## Examples
 
-  - [8bit-sequencer](http://mohayonao.github.io/neume.js/examples/8bit-sequencer.html)
-    - real time audio processing rhythm machine
-  - [buffer-work](http://mohayonao.github.io/neume.js/examples/buffer-work.html)
-    - load an audio file and edit it like tape music
   - [mml-piano](http://mohayonao.github.io/neume.js/examples/mml-piano.html)
     - toy piano with Music Macro Language
+  - [sine-storm](http://mohayonao.github.io/neume.js/examples/sine-storm.html)
+    - sine wave drone
+  - [8bit-sequencer](http://mohayonao.github.io/neume.js/examples/8bit-sequencer.html)
+    - simple rhythm machine
   - [rendering-reich](http://mohayonao.github.io/neume.js/examples/rendering-reich.html)
-    - rendering audio and play it
-  - weird demo
-    - [6chars drums](http://the.mohayonao.com/6chars/)
-    - [formant khoomii](http://the.mohayonao.com/khoomii/)
-    - [scalable mario](http://the.mohayonao.com/scalable-mario/)
+    - render sound and play it with phase-shift
+  - [buffer-work](http://mohayonao.github.io/neume.js/examples/buffer-work.html)
+    - buffer edit like tape (cut, paste, reverse...)
 
 ## Installation
 
-##### Bower
+#### Bower
 
 ```sh
 $ bower install neume.js
 ```
 
-##### Downloads
+#### Downloads
 
   - [neume.js](http://mohayonao.github.io/neume.js/build/neume.js)
   - [neume.min.js](http://mohayonao.github.io/neume.js/build/neume.min.js)
-
-```html
-<script src="neume.js"></script>
-```
+  - [neume.min.js.map](http://mohayonao.github.io/neume.js/build/neume.min.js.map)
 
 Neume.js is dependent on `Web Audio API` and `Promise`.
 
   - [es6-promise](https://github.com/jakearchibald/es6-promise)
 
+In a browser, include it in your html.
+
+```html
+<script src="/path/to/es6-promise.js"></script>
+<script src="/path/to/neume.min.js"></script>
+```
+
+Here is boilerplate html in order to play a sine tone metronome in neume.js. ->  [sample](http://mohayonao.github.io/neume.js/examples/metronome.html)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="/path/to/es6-promise.js"></script>
+  <script src="/path/to/neume.min.js"></script>
+</head>
+<body>
+  <button id="start">start</button>
+  <script>
+    var Neume = neume(new AudioContext());
+
+    function Sine($, freq, dur) {
+      return $("sin", { freq: freq })
+      .$("xline", { start: 0.2, dur: dur }).on("end", $.stop);
+    }
+
+    var timer = null;
+
+    function start() {
+      if (timer) {
+        timer.stop();
+        timer = null;
+      } else {
+        timer = Neume.Interval("4n", function(e) {
+          var freq = [ 880, 440, 440, 440 ][e.count % 4];
+          var dur = [ 0.5, 0.125, 0.125, 0.125 ][e.count % 4];
+
+          Neume.Synth(Sine, freq, dur).start(e.playbackTime);
+        }).start();
+      }
+    }
+
+    document.getElementById("start").onclick = start;
+  </script>
+</body>
+</html>
+```
+
 ## How do work?
 
-This code generates an audio graph like below.
+This example makes a modulated sine tone with a decay of about 1 second.
 
 ```javascript
-var synth = Neume.Synth(function($) {
-  var out;
+// initialize Neume inteface with AudioContext
+var Neume = neume(new AudioContext());
 
-  out = $("sin", { freq: $("sin", { freq: 2, mul: 20, add: 880 } )});
-  out = $("xline", { start: 0.25, end: 0.001, dur: 1 }, out).on("end", function(e) {
-    this.stop(e.playbackTime);
-  });
+// define synth and play it
+Neume.Synth(function($) {
+  return $("sin", {
+    freq: $("sin", { freq: 8 }).mul(20).add(880)
+  })
+  .$("xline", {
+    start: 0.25, end: 0.001, dur: 1
+  }).on("end", $.stop);
+}).start();
+```
 
-  return out;
-});
+Above code generates an audio graph like a below. Graphs are optimized flexibly by neume.js.
+
 ```
-```
-                           +-------------------+
-                           | OscillatorNode    |
-                           | - type     : sine |
-                           | - frequency: 2    |
-                           | - detune   : 0    |
-                           +-------------------+
-+-----------------------+    |
-| OscillatorNode        |  +------------+
-| - type     : sine     |  | GainNode   |
-| - frequency: 880      |--| - gain: 20 |
-| - detune   : 0        |  +------------+
-+-----------------------+
+                        +-------------------+
+                        | OscillatorNode    |
+                        | - type     : sine |
+                        | - frequency: 8    |
+                        | - detune   : 0    |
+                        +-------------------+
++-------------------+     |
+| OscillatorNode    |   +------------+
+| - type     : sine |   | GainNode   |
+| - frequency: 880  |<--| - gain: 20 |
+| - detune   : 0    |   +------------+
++-------------------+
   |
 +-----------------------+
 | GainNode              |
@@ -83,9 +131,22 @@ var synth = Neume.Synth(function($) {
   |
 ```
 
+In SuperCollider
+
+```ruby
+{
+  SinOsc.ar(SinOsc.kr(8) * 20 + 880) *
+    XLine.kr(0.25, 0.001, 1, doneAction:2)
+}.play;
+```
+
+In MAX patch
+
+![max-capture](http://otononaru.appspot.com/cdn/neume/capture-max.png)
+
 ## Documents
 
-  - [Getting Started](https://github.com/mohayonao/neume.js/wiki/tutorial-Getting-Started) (:construction_worker: partially Japanese)
+  - [Reference](https://github.com/mohayonao/neume.js/wiki) ( :construction_worker: work in progress )
 
 ## License
 

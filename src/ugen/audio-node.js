@@ -25,6 +25,16 @@ module.exports = function(neume) {
     var context = ugen.$context;
     var outlet = spec.value;
 
+    Object.keys(spec).forEach(function(name) {
+      if (typeof outlet[name] !== "undefined") {
+        if (outlet[name] instanceof global.AudioParam) {
+          context.connect(spec[name], outlet[name]);
+        } else {
+          outlet[name] = spec[name];
+        }
+      }
+    });
+
     if (outlet.numberOfInputs) {
       context.connect(inputs, outlet);
     }

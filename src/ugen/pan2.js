@@ -2,14 +2,7 @@ module.exports = function(neume, util) {
   "use strict";
 
   var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
-
-  var curveL = new Float32Array(WS_CURVE_SIZE);
-  var curveR = new Float32Array(WS_CURVE_SIZE);
-
-  for (var i = 0; i < WS_CURVE_SIZE; i++) {
-    curveL[i] = Math.cos((i / WS_CURVE_SIZE) * Math.PI * 0.5);
-    curveR[i] = Math.sin((i / WS_CURVE_SIZE) * Math.PI * 0.5);
-  }
+  var KVSKEY = "@neume:pan2:";
 
   /**
    * $("pan2", {
@@ -62,9 +55,10 @@ module.exports = function(neume, util) {
     } else {
       var wsL = context.createWaveShaper();
       var wsR = context.createWaveShaper();
+      var panCurve = neume.KVS.get(KVSKEY + "curve");
 
-      wsL.curve = curveL;
-      wsR.curve = curveR;
+      wsL.curve = panCurve.L;
+      wsR.curve = panCurve.R;
 
       context.connect(pos, wsL);
       context.connect(pos, wsR);
@@ -87,5 +81,17 @@ module.exports = function(neume, util) {
       outlet: merger
     });
   }
+
+  neume.KVS.set(KVSKEY + "curve", function() {
+    var curveL = new Float32Array(WS_CURVE_SIZE);
+    var curveR = new Float32Array(WS_CURVE_SIZE);
+
+    for (var i = 0; i < WS_CURVE_SIZE; i++) {
+      curveL[i] = Math.cos((i / WS_CURVE_SIZE) * Math.PI * 0.5);
+      curveR[i] = Math.sin((i / WS_CURVE_SIZE) * Math.PI * 0.5);
+    }
+
+    return { L: curveL, R: curveR };
+  });
 
 };

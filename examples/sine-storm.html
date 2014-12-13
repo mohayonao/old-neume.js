@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title>sine-storm - neume.js</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
+    body { font-family:"Source Sans Pro",sans-serif }
     #start { margin:10px 0 }
     #canvas { width:100%;height:240px;background:black }
     #code { padding:0;margin:0;background:white;border:none }
@@ -37,54 +39,44 @@
   var Neume = neume(new AudioContext());
 
   var visualizer = null;
+  var sines = [];
 
-  function Sine($) {
-    // `$.param` is used to export the parameter to a synth.
-    // so you can operate this parameter like `synth.freq = 880` later.
+  var root, chord;
 
-    var out;
-    var mod  = $.param("mod" , exprand( 0.01,  20.0));
-    var freq = $.param("freq", exprand(55.00, 880.0));
-    var amp  = $.param("amp" , exprand( 0.05,   0.1));
-
-    out = $("sin", { freq: freq, mul: amp });
-    out = $("sin", { freq: mod }, out);
-    out = $("out", { bus: 1 }, out);
-
-    return out;
+  function Sine($, freq, mod, amp) {
+    return $("sin", { freq: $.param("freq", freq), detune: rand2(10)|0 })
+    .$("sin", { freq: $.param("mod", mod), mul: $.param("amp", amp) })
+    .$("out", { bus: 1 });
   }
 
-  function Destination($) {
-    var out;
-
-    out = $("in", 1);
-    out = $("comp", { mul: 0.8 }, out);
-    out = $("out", { bus: 0 }, out);
-
-    return out;
+  function FBDelay($) {
+    return $("in", 1)
+    .$("delay", {
+      delay: $("sin", { freq: 0.1, mul: 0.00125, add: 0.125 }),
+      feedback: $("sin", { freq: 0.05, mul: 0.15, add: 0.75 })
+    });
   }
 
   var players = [];
 
   function start() {
-    Neume.context.reset();
+    var delay = Neume.Synth(FBDelay);
+    var timer = Neume.Sched(function() {
+      var duration = compose();
 
-    var sines = _.range(25).map(function() {
-      return Neume.Synth(Sine).start();
+      sines = _.range(7).map(function() {
+        var freq = midicps(root + _.sample(chord) + _.sample([ 0, 12, 24, 36 ]));
+        var mod = exprand(0.01, 500.0);
+        var amp = exprand(0.01, 0.075);
+
+        return Neume.Synth(Sine, freq, mod, amp)
+        .fadeIn("now", 1).fadeOut("+" + duration, 1);
+      });
+
+      return { next: "+" + duration };
     });
 
-    var timer = Neume.Interval(4.000, function(e) {
-      var t = e.playbackTime;
-      var sine = _.sample(sines);
-      var startTime = t + Math.random() * 2;
-      var timeConstant = _.sample([ 0.5, 5, 10, 20, 30, 60 ]);
-
-      sine.mod .targetAt(exprand( 0.01,  20.0), startTime, timeConstant);
-      sine.freq.targetAt(exprand(55.00, 880.0), startTime, timeConstant);
-      sine.amp .targetAt(exprand( 0.05,   0.1), startTime, timeConstant);
-    });
-
-    players = [ Neume.Synth(Destination), timer, visualizer ];
+    players = [ delay, timer, visualizer ];
 
     players.forEach(function(player) {
       player.start();
@@ -97,12 +89,28 @@
     });
   }
 
+  function compose() {
+    if (Math.random() < 0.75) {
+      root = 36 + _.sample([ 0, 0, 0, 5, 7, 7 ]);
+      chord = [ 0, 4, 5, 7, 11, 12 ];
+    } else {
+      root = 36 + _.sample([ 2, 4, 4, 6, 6, 6 ]);
+      chord = [ 0, 3, 5, 7, 11, 12 ];
+    }
+
+    return _.sample([ 2.5, 5, 10, 15, 20, 25 ]);
+  }
+
   function rand2(size) {
     return (Math.random() * 2 - 1) * size;
   }
 
   function exprand(min, max) {
     return linexp(Math.random(), 0, 1, min, max);
+  }
+
+  function midicps(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
   }
 
   function linexp(value, inMin, inMax, outMin, outMax) {
@@ -121,20 +129,17 @@
         this.width  = spec.width;
         this.height = spec.height;
 
-        this._analyser = analyser
-        this._analyser.fftSize = 512;
         this._state = "init";
-        this._timeData = new Uint8Array(analyser.frequencyBinCount);
-
         this._canvas = spec.canvas;
         this._canvas.width  = this.width;
         this._canvas.height = this.height;
         this._context = this._canvas.getContext("2d");
-        this._context.fillStyle   = "rgba(0, 0, 0, 0.05)";
-        this._context.strokeStyle = "white";
-        this._xy = X;
+        this._context.fillStyle   = "rgba(0, 0, 0, 0.4)";
+        this._context.strokeStyle = "#c0c0c0";
+        this._context.lineWidth = 0.5;
+        this._index = 0;
 
-        this.fps = 15;
+        this.fps = 20;
       }
 
       WaveVisualizer.prototype.start = function() {
@@ -159,7 +164,6 @@
 
         if (1 / this.fps < dt) {
           this._prevT = t;
-          this._analyser.getByteTimeDomainData(this._timeData);
           this._render(t);
         }
 
@@ -168,35 +172,40 @@
         }
       };
 
-      WaveVisualizer.prototype._render = function(t) {
-        this._context.fillRect(0, 0, this.width, this.height);
+      WaveVisualizer.prototype._render = function() {
+        var sine = sines[this._index++ % sines.length];
 
-        var data = this._timeData;
-        var maxValue = 0, minValue = 256;
-        var maxIndex = 0, minIndex = 0;
-
-        for (var i = 0, imax = data.length; i < imax; i++) {
-          if (maxValue < data[i]) {
-            maxValue = data[i];
-            maxIndex = i;
-          }
-          if (data[i] < minValue) {
-            minValue = data[i];
-            minIndex = i;
-          }
+        if (!sine) {
+          return;
         }
 
-        var x = ((maxIndex / data.length) * this.width)|0;
-        this._context.beginPath();
-        this._context.moveTo(x, 0);
-        this._context.lineTo(x, this.height);
-        this._context.stroke();
+        var freq = sine.freq.value * 0.0125;
+        var mod = sine.mod.value * 20;
+        var amp = sine.amp.value * 10;
 
-        var y = ((minIndex / data.length) * this.height)|0;
-        this._context.beginPath();
-        this._context.moveTo(0, y);
-        this._context.lineTo(this.width, y);
-        this._context.stroke();
+        var context = this._context;
+
+        var w = this.width;
+        var h = this.height;
+
+        freq = Math.round(freq) * 2 * Math.PI;
+        mod = Math.round(mod) * 2 * Math.PI;
+        amp *= this._index % 2 ? -1 : +1;
+
+        context.fillRect(0, 0, w, h);
+
+        context.beginPath();
+        context.moveTo(0, h * 0.5);
+        for (var i = 1; i < w; i += 2) {
+          var p = i / w;
+          var v = Math.sin(freq * p) * Math.sin(mod * p) * amp;
+          var x = Math.round(p * w);
+          var y = Math.round(h * (1 - v) * 0.5);
+
+          context.lineTo(x, y);
+        }
+        context.lineTo(w, h * 0.5);
+        context.stroke();
       };
 
       return WaveVisualizer;
@@ -215,6 +224,7 @@
       },
       methods: {
         toggle: function() {
+          Neume.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);

@@ -11,20 +11,20 @@ function Neume(context) {
   }
 
   Object.defineProperties(fn, {
-    audioContext: {
-      value: context.audioContext,
-      enumerable: true
-    },
     context: {
       value: context,
       enumerable: true
     },
-    destination: {
-      value: context.$destination,
+    audioContext: {
+      value: context.audioContext,
       enumerable: true
     },
     sampleRate: {
       value: context.sampleRate,
+      enumerable: true
+    },
+    destination: {
+      value: context.$destination,
       enumerable: true
     },
     currentTime: {
@@ -42,9 +42,17 @@ function Neume(context) {
       },
       enumerable: true
     },
+    toSeconds: {
+      value: context.toSeconds.bind(context),
+      enumerable: true
+    },
+    toFrequency: {
+      value: context.toFrequency.bind(context),
+      enumerable: true
+    },
     Synth: {
       value: function(func) {
-        return new neume.SynthDef(context, func).apply(null, util.toArray(arguments).slice(1));
+        return new neume.Synth(context, func, util.toArray(arguments).slice(1));
       },
       enumerable: true
     },
@@ -85,16 +93,6 @@ function Neume(context) {
       },
       enumerable: true
     },
-    toSeconds: {
-      value: function(value) {
-        return context.toSeconds(value);
-      }
-    },
-    toFrequency: {
-      value: function(value) {
-        return context.toFrequency(value);
-      }
-    },
   });
 
   return fn;
@@ -127,6 +125,27 @@ neume.impl = function(destination, spec) {
           });
         }
       },
+      start: {
+        value: function() {
+          context.start();
+          return this;
+        },
+        enumerable: true
+      },
+      stop: {
+        value: function() {
+          context.stop();
+          return this;
+        },
+        enumerable: true
+      },
+      reset: {
+        value: function() {
+          context.reset();
+          return this;
+        },
+        enumerable: true
+      },
       analyser: {
         value: context.$analyser,
         enumerable: true
@@ -136,6 +155,7 @@ neume.impl = function(destination, spec) {
 };
 
 neume.util = util;
+neume.KVS = require("./kvs");
 neume.Context = require("./context");
 neume.Transport = require("./transport");
 neume.Component = require("../component/component");

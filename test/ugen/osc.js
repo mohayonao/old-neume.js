@@ -124,34 +124,6 @@ describe("ugen/osc", function() {
         ]
       });
     });
-    it("$('pulse')", function() {
-      var synth = Neume.Synth(function($) {
-        return $("pulse");
-      });
-
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "custom",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
     it("$(PeriodicWave)", function() {
       var synth = Neume.Synth(function($) {
         var wave = Neume.context.createPeriodicWave(
@@ -329,34 +301,6 @@ describe("ugen/osc", function() {
     it("$('osc', {type:'tri'})", function() {
       var synth = Neume.Synth(function($) {
         return $("osc", { type: "tri" });
-      });
-
-      assert.deepEqual(synth.toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "custom",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
-    it("$('osc', {type:'pulse'})", function() {
-      var synth = Neume.Synth(function($) {
-        return $("osc", { type: "pulse" });
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {

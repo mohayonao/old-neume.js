@@ -400,6 +400,35 @@ describe("neume.Param", function() {
       param.$context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, 495.000, 1e-2), "00:00.300");
     });
+    it("(value, startTime, lag): self // when curve:lin", function() {
+      var param = new neume.Param(context, 440, { curve: "lin" });
+
+      param.connect(context.destination);
+
+      param.setAt(440, 0.000);
+      param.update(220, 0.100, 0.2);
+      param.update(660, 0.200, 0.2);
+
+      assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
+
+      param.$context.audioContext.$processTo("00:00.050");
+      assert(closeTo(param.value, 440.000, 1e-2), "00:00.050");
+
+      param.$context.audioContext.$processTo("00:00.100");
+      assert(closeTo(param.value, 440.000, 1e-2), "00:00.100");
+
+      param.$context.audioContext.$processTo("00:00.150");
+      assert(closeTo(param.value, 385.000, 1e-2), "00:00.150");
+
+      param.$context.audioContext.$processTo("00:00.200");
+      assert(closeTo(param.value, 330.000, 1e-2), "00:00.200");
+
+      param.$context.audioContext.$processTo("00:00.250");
+      assert(closeTo(param.value, 412.500, 1e-2), "00:00.250");
+
+      param.$context.audioContext.$processTo("00:00.300");
+      assert(closeTo(param.value, 495.000, 1e-2), "00:00.300");
+    });
   });
 
   describe("#toAudioNode", function() {

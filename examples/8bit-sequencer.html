@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title>8bit-sequencer - neume.js</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
+    body { font-family:"Source Sans Pro",sans-serif }
     .pattern {
       font-family:"Courier New",monospace;margin-top:10px;
       user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;
@@ -60,72 +62,39 @@
 
   // define synth
   function Seq1($, freq) {
-    var out;
-
-    out = [
-      $(famiconTriangle, { freq: freq * 0.99 }),
-      $(famiconTriangle, { freq: freq * 1.01 }),
-    ];
-    out = $("xline", { start: 0.05, dur: "8n" }, out).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-
-    return out;
+    return $("+", [ 0.99, 1.01 ].map(function(rate) {
+      return $(famiconTriangle, { freq: freq * rate });
+    }))
+    .$("xline", { start: 0.05, dur: "8n" }).on("end", $.stop);
   }
 
   function Seq2($, freq) {
-    var out;
+    var out = $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: "4nd" }) })
+    .$("sin", { freq: freq * 7 })
+    .$("xline", { start: 0.05, dur: "4nd" }).on("end", $.stop)
 
-    out = $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: "4nd" }) });
-    out = $("sin", { freq: freq * 7 }, out);
-
-    out = $("xline", { start: 0.05, dur: "4nd" }, out).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-
-    out = [ out, $("delay", { delay: "16nt", feedback: 0.5 }, out.mul(0.25)) ];
-    out = $("+", out);
-
-    return out;
+    return $("+", [ out, $("delay", { delay: "16nt", feedback: 0.5 }, out.mul(0.25)) ]);
   }
 
   function HiHat($, amp) {
-    var out;
-
-    out = $("white");
-    out = $("hpf", { freq: 8000, Q: 25 }, out);
-    out = $("xline", { start: amp * 0.005, dur: 0.050 }, out).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-
-    return out;
+    return $("white")
+    .$("hpf", { freq: 8000, Q: 25 })
+    .$("xline", { start: amp * 0.005, dur: 0.050 }).on("end", $.stop);
   }
 
   function Snare($, dur) {
-    var out;
-
-    out = $("pink");
-    out = $("lpf", { freq: 2400, Q: 10 }, out);
-    out = $("xline", { start: 0.1, dur: dur * 0.1 }, out).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-
-    return out;
+    return $("pink")
+    .$("lpf", { freq: 2400, Q: 10 })
+    .$("xline", { start: 0.1, dur: dur * 0.1 }).on("end", $.stop);
   }
 
   function Bass($) {
-    var out;
-
-    out = [
-      $("clip", { mul: 0.4 }, $("tri", { freq: 80, mul: 2 })),
-      $("pink", { mul: 0.05 }),
-    ];
-    out = $("lpf", { freq: 180, Q: 4 }, out);
-    out = $("xline", { start: 0.4, dur: 0.100 }, out).on("end", function(e) {
-      this.stop(e.playbackTime);
-    });
-
-    return out;
+    return $("+",
+      $("tri", { freq: 80, mul: 2 }).$("clip", { mul: 0.4 }),
+      $("pink", { mul: 0.05 })
+    )
+    .$("lpf", { freq: 180, Q: 4 })
+    .$("xline", { start: 0.4, dur: 0.100 }).on("end", $.stop);
   }
 
   var instruments = [
@@ -139,8 +108,6 @@
   var players = [];
 
   function start(score) {
-    Neume.context.reset();
-
     var timer = Neume.Interval("16n", function(e) {
       var index = e.count % 32;
 
@@ -278,6 +245,7 @@
       },
       methods: {
         toggle: function() {
+          Neume.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);

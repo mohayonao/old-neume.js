@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var NeuSynthDB = require("./db");
 var NeuSynthDollar = require("./dollar");
 
@@ -18,6 +19,7 @@ function NeuSynth(context, func, args) {
 
   this.$builder = $.builder;
 
+  var param = new neume.Param(context, 1, { curve: "lin" });
   var result = func.apply(null, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.$isOutput) {
@@ -28,6 +30,7 @@ function NeuSynth(context, func, args) {
     var gain = context.createGain();
 
     context.connect(node, gain);
+    context.connect(param, gain.gain);
 
     return gain;
   });
@@ -37,6 +40,7 @@ function NeuSynth(context, func, args) {
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
   this._timers = $.timers;
+  this._param = param;
 
   var methodNames = [];
 
@@ -175,11 +179,12 @@ NeuSynth.prototype.fadeIn = function(startTime, duration) {
   duration = util.finite(duration);
 
   if (this._state === INIT) {
-    var tC = -Math.max(1e-6, duration) / -4.605170185988091;
-    this.$routes.forEach(function(node) {
-      node.gain.value = 0;
-      node.gain.setTargetAtTime(1, startTime, tC);
-    });
+    if (this.$routes.length) {
+      this._param.value = 0;
+      context.sched(startTime, function(t0) {
+        this._param.update(1, t0, duration);
+      }, this);
+    }
     this.start(startTime);
   }
 
@@ -198,13 +203,7 @@ NeuSynth.prototype.fadeOut = function(startTime, duration) {
   if (this._state === START) {
     if (this.$routes.length) {
       context.sched(startTime, function(t0) {
-        var startValue = this.$routes[0].gain.value;
-        if (startValue !== 0) {
-          var tC = -Math.max(1e-6, duration) / Math.log(0.01 / startValue);
-          this.$routes.forEach(function(node) {
-            node.gain.setTargetAtTime(0, t0, tC);
-          });
-        }
+        this._param.update(0, t0, duration);
       }, this);
     }
     this.stop(startTime + duration);
@@ -226,16 +225,7 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
   if (this._state === START) {
     if (this.$routes.length) {
       context.sched(startTime, function(t0) {
-        var v0 = this.$routes[0].gain.value;
-        if (v0 !== value) {
-          var v1 = value;
-          var vT = v0 + (v1 - v0) * 0.99;
-          var tC = -Math.max(1e-6, duration) / Math.log((vT - v1) / (v0 - v1));
-          this.$routes.forEach(function(node) {
-            node.gain.setTargetAtTime(v1, t0, tC);
-            node.gain.setValueAtTime(v1, t0 + duration);
-          });
-        }
+        this._param.update(value, t0, duration);
       }, this);
     }
   }

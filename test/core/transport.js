@@ -68,6 +68,13 @@ describe("neume.Transport", function() {
       assert(transport.toSeconds(2) === 2);
       assert(transport.toSeconds(Infinity) === 0);
     });
+    it("(value: { playbackTime: number }): number", function() {
+      var transport = new neume.Transport(context);
+
+      assert(transport.toSeconds({ playbackTime: 2.5 }) === 2.5);
+      assert(transport.toSeconds(null) === null);
+      assert.deepEqual(transport.toSeconds({ foo: "bar" }), { foo: "bar" });
+    });
     it("(value: string): number // when milliseconds", function() {
       var transport = new neume.Transport(context);
 

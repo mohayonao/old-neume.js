@@ -2,6 +2,7 @@ module.exports = function(neume) {
   "use strict";
 
   var NOISE_DURATION = 4;
+  var KVSKEY = "@neume:noise:";
 
   /**
    * $("white")
@@ -14,23 +15,27 @@ module.exports = function(neume) {
    * +------------------+
    *   |
    */
-  neume.register("white", function(ugen) {
-    whiteNoise = whiteNoise || new WhiteNoise(ugen.$context.sampleRate * NOISE_DURATION);
-    return make(whiteNoise, ugen);
+  neume.register("noise", function(ugen, spec) {
+    var type = {
+      pink: "pink",
+      brown: "brown"
+    }[spec.type] || "white";
+    return make(type, ugen);
   });
 
-  neume.register("pink", function(ugen) {
-    pinkNoise = pinkNoise || new PinkNoise(ugen.$context.sampleRate * NOISE_DURATION);
-    return make(pinkNoise, ugen);
+  [
+    "white", "pink", "brown"
+  ].forEach(function(type) {
+    neume.register(type, function(ugen) {
+      return make(type, ugen);
+    });
   });
 
-  function make(data, ugen) {
-    var buf = ugen.$context.createBuffer(1, data.length, ugen.$context.sampleRate);
-    var bufSrc = ugen.$context.createBufferSource();
+  function make(type, ugen) {
+    var context = ugen.$context;
+    var bufSrc = context.createBufferSource();
 
-    buf.getChannelData(0).set(data);
-
-    bufSrc.buffer = buf;
+    bufSrc.buffer = neume.KVS.get(KVSKEY + type, context, NOISE_DURATION);
     bufSrc.loop = true;
 
     return new neume.Unit({
@@ -44,23 +49,23 @@ module.exports = function(neume) {
     });
   }
 
-  var whiteNoise = null;
-  var pinkNoise = null;
+  // http://noisehack.com/generate-noise-web-audio-api/
 
-  function WhiteNoise(length) {
+  neume.KVS.set(KVSKEY + "white", function(context, duration) {
+    var length = context.sampleRate * duration;
     var data = new Float32Array(length);
 
     for (var i = 0, imax = data.length; i < imax; i++) {
       data[i] = Math.random() * 2 - 1;
     }
 
-    return data;
-  }
+    var buf = context.createBuffer(1, length, context.sampleRate);
+    buf.getChannelData(0).set(data);
+    return buf;
+  });
 
-  function PinkNoise(length) {
-    // DSP generation of Pink (1/f) Noise
-    // http://www.firstpr.com.au/dsp/pink-noise/
-
+  neume.KVS.set(KVSKEY + "pink", function(context, duration) {
+    var length = context.sampleRate * duration;
     var data = new Float32Array(length);
 
     var white;
@@ -81,10 +86,32 @@ module.exports = function(neume) {
       b4 = 0.55000 * b4 + white * 0.5329522;
       b5 = -0.7616 * b5 - white * 0.0168980;
       data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-      data[i] *= 0.12; // adjust gain
+      data[i] *= 0.11; // (roughly) compensate for gain
       b6 = white * 0.115926;
     }
 
-    return data;
-  }
+    var buf = context.createBuffer(1, length, context.sampleRate);
+    buf.getChannelData(0).set(data);
+    return buf;
+  });
+
+  neume.KVS.set(KVSKEY + "brown", function(context, duration) {
+    var length = context.sampleRate * duration;
+    var data = new Float32Array(length);
+
+    var white;
+    var lastOut = 0;
+
+    for (var i = 0, imax = data.length; i < imax; i++) {
+      white = Math.random() * 2 - 1;
+      data[i] = (lastOut + (0.02 * white)) / 1.02;
+      lastOut = data[i];
+      data[i] *= 3.5; // (roughly) compensate for gain
+    }
+
+    var buf = context.createBuffer(1, length, context.sampleRate);
+    buf.getChannelData(0).set(data);
+    return buf;
+  });
+
 };

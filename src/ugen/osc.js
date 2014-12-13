@@ -1,6 +1,8 @@
 module.exports = function(neume, util) {
   "use strict";
 
+  var KVSKEY = "@neume:osc";
+
   /**
    * $("osc", {
    *   type: [string|PeriodicWave]="sin",
@@ -50,56 +52,38 @@ module.exports = function(neume, util) {
     var context = ugen.$context;
     var type = spec.type;
 
-    if (!isWave(type)) {
-      if (type === "pulse") {
-        type = makePeriodicWave(context, util.finite(util.defaults(spec.width, 0.5)));
-      } else {
-        type = makePeriodicWave(context, WAVE_TYPES[type] || "sine");
-      }
+    if (!isPeriodicWave(type)) {
+      type = type2wave(context, WAVE_TYPES[type] || "sine");
     }
 
-    return make(setup(type, ugen, spec, inputs));
+    return make(type, ugen, spec, inputs);
   });
 
   neume.register("PeriodicWave", function(ugen, spec, inputs) {
     var type = spec.value;
 
-    if (!isWave(type)) {
-      type = makePeriodicWave(ugen.$context, "sine");
+    if (!isPeriodicWave(type)) {
+      type = "sine";
     }
 
-    return make(setup(type, ugen, spec, inputs));
+    return make(type, ugen, spec, inputs);
   });
 
   Object.keys(WAVE_TYPES).forEach(function(name) {
     var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(setup(makePeriodicWave(ugen.$context, type), ugen, spec, inputs));
+      return make(type2wave(ugen.$context, type), ugen, spec, inputs);
     });
   });
 
-  neume.register("pulse", function(ugen, spec, inputs) {
-    var type = makePeriodicWave(ugen.$context, util.finite(util.defaults(spec.width, 0.5)));
-    return make(setup(type, ugen, spec, inputs));
-  });
-
-  function isWave(wave) {
-    if (global.PeriodicWave && wave instanceof global.PeriodicWave) {
-      return true;
-    }
-    return false;
-  }
-
-  function setup(type, ugen, spec, inputs) {
-    return inputs.length ?
-      hasInputs(type, ugen, spec, inputs) : noInputs(type, ugen, spec);
-  }
-
-  function make(osc) {
-    var ctrl = osc.ctrl;
+  function make(wave, ugen, spec, inputs) {
+    var elem = inputs.length ?
+      hasInputs(wave, ugen, spec, inputs) : noInputs(wave, ugen, spec);
+    var outlet = elem.outlet;
+    var ctrl = elem.ctrl;
 
     return new neume.Unit({
-      outlet: osc.outlet,
+      outlet: outlet,
       start: function(t) {
         ctrl.start(t);
       },
@@ -109,10 +93,28 @@ module.exports = function(neume, util) {
     });
   }
 
+  function noInputs(wave, ugen, spec) {
+    var osc = createOscillator(ugen.$context, wave, spec, 440);
+    return { outlet: osc, ctrl: osc };
+  }
+
+  function hasInputs(wave, ugen, spec, inputs) {
+    var context = ugen.$context;
+
+    var osc = createOscillator(context, wave, spec, 2);
+    var gain = ugen.$context.createGain();
+
+    gain.gain.value = 0;
+    context.connect(osc, gain.gain);
+    context.connect(inputs, gain);
+
+    return { outlet: gain, ctrl: osc };
+  }
+
   function createOscillator(context, type, spec, defaultFreq) {
     var osc = context.createOscillator();
 
-    if (isWave(type)) {
+    if (isPeriodicWave(type)) {
       osc.setPeriodicWave(type);
     } else {
       osc.type = type;
@@ -129,102 +131,57 @@ module.exports = function(neume, util) {
     return osc;
   }
 
-  function noInputs(type, ugen, spec) {
-    var osc = createOscillator(ugen.$context, type, spec, 440);
-    return { outlet: osc, ctrl: osc };
+  function isPeriodicWave(wave) {
+    return !!(global.PeriodicWave && wave instanceof global.PeriodicWave);
   }
 
-  function hasInputs(type, ugen, spec, inputs) {
-    var context = ugen.$context;
-
-    var osc = createOscillator(context, type, spec, 2);
-    var gain = ugen.$context.createGain();
-
-    gain.gain.value = 0;
-    context.connect(osc, gain.gain);
-    context.connect(inputs, gain);
-
-    return { outlet: gain, ctrl: osc };
+  function type2wave(context, type) {
+    return neume.KVS.get(KVSKEY + type, context);
   }
 
-  var _waves = {};
+  neume.KVS.set(KVSKEY + "sine", "sine");
 
-  function makePeriodicWave(context, type) {
-    if (type === "sine") {
-      return "sine";
+  neume.KVS.set(KVSKEY + "square", function(context) {
+    var real = new Float32Array(4096);
+    var imag = new Float32Array(4096);
+
+    for (var i = 1; i < 4096; i++) {
+      if (i % 2 === 1) {
+        imag[i] = 1 / i;
+      }
     }
 
-    if (typeof type === "number") {
-      type = util.int(util.clip(type, 0, 1) * 256);
+    return context.createPeriodicWave(real, imag);
+  });
+
+  neume.KVS.set(KVSKEY + "sawtooth", function(context) {
+    var real = new Float32Array(4096);
+    var imag = new Float32Array(4096);
+
+    for (var i = 1; i < 4096; i++) {
+      imag[i] = 1 / i;
+      if (i % 2 === 0) {
+        imag[i] *= -1;
+      }
     }
 
-    if (_waves[type]) {
-      return _waves[type];
+    return context.createPeriodicWave(real, imag);
+  });
+
+  neume.KVS.set(KVSKEY + "triangle", function(context) {
+    var real = new Float32Array(4096);
+    var imag = new Float32Array(4096);
+
+    for (var i = 1, imax = imag.length; i < imax; i++) {
+      if (i % 2) {
+        imag[i] = 1 / (i * i);
+        if (i % 4 === 3) {
+          imag[i] *= -1;
+        }
+      }
     }
 
-    var real = new Float32Array(2048);
-    var imag = new Float32Array(2048);
-
-    switch (type) {
-    case "square":
-      makePeriodicWaveSquare(real, imag);
-      break;
-    case "sawtooth":
-      makePeriodicWaveSawtooth(real, imag);
-      break;
-    case "triangle":
-      makePeriodicWaveTriangle(real, imag);
-      break;
-    default:
-      makePeriodicWavePulse(real, imag, type);
-      break;
-    }
-
-    var wave = context.createPeriodicWave(real, imag);
-
-    _waves[type] = wave;
-
-    return wave;
-  }
-
-  function makePeriodicWaveSquare(real, imag) {
-    for (var i = 1, imax = real.length; i < imax; i++) {
-      var omega = 2 * Math.PI * i;
-      var invOmega = 1 / omega;
-
-      imag[i] = invOmega * ((i & 1) ? 2 : 0);
-    }
-  }
-
-  function makePeriodicWaveSawtooth(real, imag) {
-    for (var i = 1, imax = real.length; i < imax; i++) {
-      var omega = 2 * Math.PI * i;
-      var invOmega = 1 / omega;
-
-      imag[i] = -invOmega * Math.cos(0.5 * omega);
-    }
-  }
-
-  function makePeriodicWaveTriangle(real /*, imag*/) {
-    for (var i = 1, imax = real.length; i < imax; i++) {
-      var omega = 2 * Math.PI * i;
-
-      real[i] = (4 - 4 * Math.cos(0.5 * omega)) / (i * i * Math.PI * Math.PI);
-    }
-  }
-
-  function makePeriodicWavePulse(real, imag, width) {
-    var buffer = new Float32Array(2048);
-    var width2 = width * (2048 / 256);
-
-    for (var i = 0; i < 2048; i++) {
-      buffer[i] = i < width2 ? -1 : +1;
-    }
-
-    var fft = neume.FFT.forward(buffer);
-
-    real.set(fft.real);
-    imag.set(fft.imag);
-  }
+    return context.createPeriodicWave(real, imag);
+  });
 
 };

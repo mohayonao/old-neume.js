@@ -44,6 +44,14 @@ function NeuContext(destination, duration, spec) {
       },
       enumerable: true
     },
+    destination: {
+      value: destination,
+      enumerable: true
+    },
+    listener: {
+      value: this.$context.listener,
+      enumerable: true
+    },
     bpm: {
       get: function() {
         return this._transport.getBpm();
@@ -53,14 +61,6 @@ function NeuContext(destination, duration, spec) {
       },
       enumerable: true
     },
-    destination: {
-      value: destination,
-      enumerable: true
-    },
-    listener: {
-      value: this.$context.listener,
-      enumerable: true
-    }
   });
 
   this._duration = duration;

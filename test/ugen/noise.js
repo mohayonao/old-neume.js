@@ -12,6 +12,39 @@ describe("ugen/noise", function() {
   });
 
   describe("graph", function() {
+    it("$('noise', { type: 'white' })", function() {
+      var synth = Neume.Synth(function($) {
+        return $("noise", { type: "white" });
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+        {
+          name: "AudioBufferSourceNode",
+          buffer: {
+            name: "AudioBuffer",
+            length: 44100 * 4,
+            duration: 4,
+            sampleRate: 44100,
+            numberOfChannels: 1
+          },
+          playbackRate: {
+            value: 1,
+            inputs: []
+          },
+          loop: true,
+          loopStart: 0,
+          loopEnd: 0,
+          inputs: []
+        }
+        ]
+      });
+    });
     it("$('white')", function() {
       var synth = Neume.Synth(function($) {
         return $("white");
@@ -75,6 +108,39 @@ describe("ugen/noise", function() {
             loopEnd: 0,
             inputs: []
           }
+        ]
+      });
+    });
+    it("$('brown')", function() {
+      var synth = Neume.Synth(function($) {
+        return $("brown");
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+        {
+          name: "AudioBufferSourceNode",
+          buffer: {
+            name: "AudioBuffer",
+            length: 44100 * 4,
+            duration: 4,
+            sampleRate: 44100,
+            numberOfChannels: 1
+          },
+          playbackRate: {
+            value: 1,
+            inputs: []
+          },
+          loop: true,
+          loopStart: 0,
+          loopEnd: 0,
+          inputs: []
+        }
         ]
       });
     });
