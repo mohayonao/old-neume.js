@@ -205,14 +205,14 @@ describe("neume.Synth", function() {
       assert(synth.state === "PLAYING", "00:02.000");
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.250), 0.438, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.500), 0.684, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.750), 0.822, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.000), 0.900, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.944, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.968, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.982, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.990, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.250), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(1.750), 0.375, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.000), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.625, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.750, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.875, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.000), 1.000, 1e-2));
     });
   });
 
@@ -264,14 +264,14 @@ describe("neume.Synth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(1.500), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.750), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(2.000), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.562, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.316, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.178, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.100, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.056, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.032, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.018, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.010, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.875, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.750, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.625, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.500, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.375, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.250, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.125, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.000, 1e-2));
     });
   });
 
@@ -301,13 +301,13 @@ describe("neume.Synth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(1.500), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.750), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(2.000), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.781, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.658, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.588, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.550, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.528, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.515, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.508, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.937, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.875, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.812, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.750, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.687, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.625, 1e-2));
+      assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.562, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(4.500), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(5.000), 0.500, 1e-2));
