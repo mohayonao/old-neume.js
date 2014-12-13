@@ -158,7 +158,7 @@ describe("neume.SynthDollar", function() {
       audioContext.$processTo("00:00.500");
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("+0.100"));
+      assert(spy.calledWith(0.100));
     });
   });
 
