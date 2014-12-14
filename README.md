@@ -2,13 +2,11 @@
 [![Bower](https://img.shields.io/bower/v/neume.js.svg?style=flat)](https://github.com/mohayonao/neume.js)
 [![Build Status](http://img.shields.io/travis/mohayonao/neume.js.svg?style=flat)](https://travis-ci.org/mohayonao/neume.js)
 [![Coverage Status](http://img.shields.io/coveralls/mohayonao/neume.js.svg?style=flat)](https://coveralls.io/r/mohayonao/neume.js?branch=master)
-[![Dependency Status](http://img.shields.io/david/mohayonao/neume.js.svg?style=flat)](https://david-dm.org/mohayonao/neume.js)
-[![devDependency Status](http://img.shields.io/david/dev/mohayonao/neume.js.svg?style=flat)](https://david-dm.org/mohayonao/neume.js#info=devDependencies&view=table)
 
 ![](http://upload.wikimedia.org/wikipedia/commons/a/ab/Gregorian_chant.gif)
 
 ## What is?
-**Neume.js** is a Web Audio API library for developing interactive music.
+**Neume.js** is a Web Audio API library for developing browser music.
 
 ## Examples
 
@@ -48,7 +46,7 @@ In a browser, include it in your html.
 <script src="/path/to/neume.min.js"></script>
 ```
 
-Here is boilerplate html in order to play a sine tone metronome in neume.js. ->  [sample](http://mohayonao.github.io/neume.js/examples/metronome.html)
+Here is boilerplate html in order to play a sine wave metronome in neume.js. ->  [sample](http://mohayonao.github.io/neume.js/examples/metronome.html)
 
 ```html
 <!DOCTYPE html>
@@ -91,10 +89,10 @@ Here is boilerplate html in order to play a sine tone metronome in neume.js. -> 
 
 ## How do work?
 
-This example makes a modulated sine tone with a decay of about 1 second.
+This example makes a modulated sine wave with a decay of about 1 second.
 
 ```javascript
-// initialize Neume inteface with AudioContext
+// initialize Neume interface with AudioContext
 var Neume = neume(new AudioContext());
 
 // define synth and play it
@@ -120,7 +118,7 @@ Above code generates an audio graph like a below. Graphs are optimized flexibly 
 +-------------------+     |
 | OscillatorNode    |   +------------+
 | - type     : sine |   | GainNode   |
-| - frequency: 880  |<--| - gain: 20 |
+| - frequency: 880  <---| - gain: 20 |
 | - detune   : 0    |   +------------+
 +-------------------+
   |
@@ -129,13 +127,18 @@ Above code generates an audio graph like a below. Graphs are optimized flexibly 
 | - gain: 0.25 -> 0.001 |
 +-----------------------+
   |
++-----------+
+| GainNode  | * This node is used to
+| - gain: 1 |     fade volume for a synth instance.
++-----------+
+  |
 ```
 
 In SuperCollider
 
 ```ruby
 {
-  SinOsc.ar(SinOsc.kr(8) * 20 + 880) *
+  SinOsc.ar(SinOsc.kr([ 8, 8 ]) * 20 + 880) *
     XLine.kr(0.25, 0.001, 1, doneAction:2)
 }.play;
 ```
@@ -143,6 +146,11 @@ In SuperCollider
 In MAX patch
 
 ![max-capture](http://otononaru.appspot.com/cdn/neume/capture-max.png)
+
+## Tools
+
+  - [neume.js editor](http://mohayonao.github.io/neume.js/examples/editor/)
+  - [audio-graph-viewer](http://mohayonao.github.io/neume.js/examples/audio-graph-viewer/)
 
 ## Documents
 
