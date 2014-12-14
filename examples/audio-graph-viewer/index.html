@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>neume.js editor</title>
+  <title>neume.js audio-graph-viewer</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/theme/monokai.min.css">
@@ -13,14 +13,14 @@
   #header h1 { float:left;font-family:"Source Sans Pro",sans-serif;font-size:16px;color:white;margin:6px 31px }
   #header ul { list-style:none }
   #header ul li { float:right;display:inline-block;width:60px;height:22px }
-  .CodeMirror { font-family:'Monaco','Consolas',monospace;font-size:14px;height:100%;padding-top:36px;box-sizing:border-box }
+  .CodeMirror { font-family:'Monaco','Consolas',monospace;font-size:14px;width:50%;height:100%;padding-top:36px;box-sizing:border-box;float:left }
   .btn { font-family:"Source Sans Pro",sans-serif;margin:5px;font-size:16px;text-align:center;color:#e6db74;cursor:pointer }
   .btn:hover { text-decoration:underline;color:#f92672;background:#49483e }
   </style>
 </head>
 <body>
   <div id="header">
-    <h1>neume.js editor</h1>
+    <h1>neume.js audio-graph-viewer</h1>
     <ul>
       <li class="btn" id="link">Link</li>
       <li class="btn" id="stop">Stop</li>
@@ -28,11 +28,12 @@
     </ul>
   </div>
   <textarea id="editor"></textarea>
+  <textarea id="result"></textarea>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/mode/javascript/javascript.min.js"></script>
-  <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
+  <script src="//mohayonao.github.io/web-audio-test-api/build/web-audio-test-api.js"></script>
   <script src="../../build/neume.js"></script>
   <script>
   var Neume = neume(new AudioContext());
@@ -42,14 +43,42 @@
     var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
       mode: "javascript", theme: "monokai", workTime: 200, lineNumbers: true,
     });
+    var result = CodeMirror.fromTextArea(document.getElementById("result"), {
+      mode: "javascript", theme: "monokai", readOnly: true
+    });
+
+    var timerId = 0;
+    var prevVal = "";
+
+    function reset() {
+      clearInterval(timerId);
+      Neume.audioContext.$reset();
+      Neume.reset();
+    }
+
+    function update(node) {
+      Neume.audioContext.$process(0.125);
+      var value = JSON.stringify(node.toAudioNode(), null, 2);
+      if (value !== prevVal) {
+        result.setValue(value);
+        prevVal = value;
+      }
+    }
 
     $("#run").on("click", function() {
-      Neume.reset();
-      eval.call(null, editor.getValue());
+      reset();
+      var node = eval.call(null, editor.getValue());
+      if (typeof node.toAudioNode !== "function") {
+        return;
+      }
+      update(node);
+      timerId = setInterval(function() {
+        update(node);
+      }, 125);
     });
 
     $("#stop").on("click", function() {
-      Neume.reset();
+      reset();
     });
 
     $("#link").on("click", function() {
