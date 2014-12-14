@@ -20,6 +20,10 @@
     - render sound and play it with phase-shift
   - [buffer-work](http://mohayonao.github.io/neume.js/examples/buffer-work.html)
     - buffer edit like tape (cut, paste, reverse...)
+  - weird demonstrations
+    - [6chars drum](http://the.mohayonao.com/6chars/)
+    - [scalable mario](http://the.mohayonao.com/scalable-mario/)
+    - [formant khoomii](http://the.mohayonao.com/khoomii/)
 
 ## Installation
 
@@ -138,7 +142,7 @@ In SuperCollider
 
 ```ruby
 {
-  SinOsc.ar(SinOsc.kr([ 8, 8 ]) * 20 + 880) *
+  SinOsc.ar(SinOsc.kr(8) * 20 + 880) *
     XLine.kr(0.25, 0.001, 1, doneAction:2)
 }.play;
 ```
