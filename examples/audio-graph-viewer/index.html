@@ -58,7 +58,7 @@
 
     function update(node) {
       Neume.audioContext.$process(0.125);
-      var value = JSON.stringify(node.toAudioNode(), null, 2);
+      var value = JSON.stringify(node.toJSON().inputs, null, 2);
       if (value !== prevVal) {
         result.setValue(value);
         prevVal = value;
@@ -67,10 +67,10 @@
 
     $("#run").on("click", function() {
       reset();
-      var node = eval.call(null, editor.getValue());
-      if (typeof node.toAudioNode !== "function") {
-        return;
-      }
+      eval.call(null, editor.getValue());
+
+      var node = Neume.context.getAudioBus(0).toAudioNode();
+
       update(node);
       timerId = setInterval(function() {
         update(node);
