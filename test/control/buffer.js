@@ -36,14 +36,15 @@ describe("neume.Buffer", function() {
 
   describe(".from", function() {
     it("(context: neume.Context, from: Array<number>|Float32Array): neume.Buffer", function() {
-      var buffer = neume.Buffer.from(context, [ 1, 2, 3, 4, 5, 6, 7, 8 ]);
+      var buffer = neume.Buffer.from(context, [ 0, 1, 2, 3, 4 ], [ 5, 6, 7, 8, 9 ]);
 
       assert(buffer instanceof neume.Buffer);
       assert(buffer.sampleRate === context.sampleRate);
-      assert(buffer.length === 8);
-      assert(buffer.duration === 8 / context.sampleRate);
-      assert(buffer.numberOfChannels === 1);
-      assert.deepEqual(buffer[0], new Float32Array([ 1, 2, 3, 4, 5, 6, 7, 8 ]));
+      assert(buffer.length === 5);
+      assert(buffer.duration === 5 / context.sampleRate);
+      assert(buffer.numberOfChannels === 2);
+      assert.deepEqual(buffer[0], new Float32Array([ 0, 1, 2, 3, 4 ]));
+      assert.deepEqual(buffer[1], new Float32Array([ 5, 6, 7, 8, 9 ]));
     });
   });
 
