@@ -17,7 +17,7 @@ function NeuSynthDollar(synth) {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isDictionary(args[0]) ? args.shift() : {};
-    var inputs = Array.prototype.concat.apply([], args);
+    var inputs = util.flatten(args);
     var ugen = neume.UGen.build(synth, key, spec, inputs);
 
     db.append(ugen);

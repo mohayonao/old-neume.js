@@ -13,6 +13,8 @@ function NeuSum(context, inputs) {
   var param = null;
   var nodes = [];
 
+  inputs = util.flatten(inputs);
+
   for (var i = 0, imax = inputs.length; i < imax; i++) {
     var x = inputs[i].valueOf();
 
