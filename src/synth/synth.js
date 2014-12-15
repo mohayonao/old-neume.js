@@ -131,7 +131,7 @@ NeuSynth.prototype.start = function(startTime) {
     }, context);
 
     this._db.all().forEach(function(ugen) {
-      ugen.$unit.start(startTime);
+      ugen.start(startTime);
     });
 
     this._timers.forEach(function(timer) {
@@ -163,7 +163,7 @@ NeuSynth.prototype.stop = function(startTime) {
       }, this);
 
       this._db.all().forEach(function(ugen) {
-        ugen.$unit.stop(t0);
+        ugen.stop(t0);
       });
 
       this._timers.forEach(function(timer) {

@@ -33,7 +33,7 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$unit = unit;
   this.$methods = unit.$methods;
 
-  var methods = Object.keys(unit.$methods).sort();
+  var methods = Object.keys(this.$methods).sort();
 
   methods.forEach(function(methodName) {
     var method = unit.$methods[methodName];
@@ -98,6 +98,16 @@ NeuUGen.prototype.mul = function(value) {
 
 NeuUGen.prototype.add = function(value) {
   return this.$builder("+", this, util.defaults(value, 0));
+};
+
+NeuUGen.prototype.start = function(startTime) {
+  this.$unit.start(startTime);
+  return this;
+};
+
+NeuUGen.prototype.stop = function(startTime) {
+  this.$unit.stop(startTime);
+  return this;
 };
 
 NeuUGen.prototype.toAudioNode = function() {

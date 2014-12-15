@@ -154,6 +154,28 @@ describe("neume.UGen", function() {
     }));
   });
 
+  describe("#start", function() {
+    it("(startTime: number)", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+      var spy = sinon.spy(ugen.$unit, "start");
+
+      assert(ugen.start(10) === ugen);
+      assert(spy.calledOnce);
+      assert(spy.calledWith(10));
+    });
+  });
+
+  describe("#stop", function() {
+    it("(startTime: number)", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+      var spy = sinon.spy(ugen.$unit, "stop");
+
+      assert(ugen.stop(10) === ugen);
+      assert(spy.calledOnce);
+      assert(spy.calledWith(10));
+    });
+  });
+
   describe("#toAudioNode", function() {
     it("(): AudioNode", function() {
       var ugen = neume.UGen.build(synth, "sin", {}, []);
