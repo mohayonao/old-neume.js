@@ -113,18 +113,19 @@ NeuSynth.prototype.query = function(selector) {
 NeuSynth.prototype.find = NeuSynth.prototype.query;
 
 NeuSynth.prototype.start = function(startTime) {
-  var context = this.$context;
+  if (this._state !== INIT) {
+    return this;
+  }
 
+  var context = this.$context;
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
   startTime = util.finite(startTime);
 
-  if (this._state === INIT) {
-    this._state = START;
-    this._stateString = "SCHEDULED";
+  this._state = START;
+  this._stateString = "SCHEDULED";
 
-    context.sched(startTime, function() {
-      this._stateString = "PLAYING";
-    }, this);
+  context.sched(startTime, function() {
+    this._stateString = "PLAYING";
 
     this.$routes.forEach(function(node, index) {
       this.connect(node, this.getAudioBus(index));
@@ -137,103 +138,110 @@ NeuSynth.prototype.start = function(startTime) {
     this._timers.forEach(function(timer) {
       timer.start(startTime);
     });
+  }, this);
 
-    context.start(); // auto start(?)
-  }
+  context.start(); // auto start(?)
 
   return this;
 };
 
 NeuSynth.prototype.stop = function(startTime) {
-  var context = this.$context;
+  if (this._state !== START) {
+    return this;
+  }
 
+  var context = this.$context;
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
   startTime = util.finite(startTime);
 
-  if (this._state === START) {
-    this._state = STOP;
+  this._state = STOP;
 
-    context.sched(startTime, function(t0) {
-      this._stateString = "FINISHED";
+  context.sched(startTime, function(t0) {
+    this._stateString = "FINISHED";
 
-      context.nextTick(function() {
-        this.$routes.forEach(function(node) {
-          context.disconnect(node);
-        });
-      }, this);
-
-      this._db.all().forEach(function(ugen) {
-        ugen.stop(t0);
-      });
-
-      this._timers.forEach(function(timer) {
-        timer.stop(t0);
+    context.nextTick(function() {
+      this.$routes.forEach(function(node) {
+        context.disconnect(node);
       });
     }, this);
-  }
+
+    this._db.all().forEach(function(ugen) {
+      ugen.stop(t0);
+    });
+
+    this._timers.forEach(function(timer) {
+      timer.stop(t0);
+    });
+  }, this);
 
   return this;
 };
 
 NeuSynth.prototype.fadeIn = function(startTime, duration) {
-  var context = this.$context;
-
-  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
-  duration = util.defaults(context.toSeconds(duration), 0.5);
-
-  startTime = util.finite(startTime);
-  duration = util.finite(duration);
-
-  if (this._state === INIT) {
-    if (this.$routes.length) {
-      this._param.value = 0;
-      context.sched(startTime, function(t0) {
-        this._param.update(1, t0, duration);
-      }, this);
-    }
-    this.start(startTime);
+  if (this._state !== INIT) {
+    return this;
   }
+
+  var context = this.$context;
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  startTime = util.finite(startTime);
+
+  if (this.$routes.length) {
+    duration = util.defaults(context.toSeconds(duration), 0.5);
+    duration = util.finite(duration);
+
+    this._param.value = 0;
+    context.sched(startTime, function(t0) {
+      this._param.update(1, t0, duration);
+    }, this);
+  }
+  this.start(startTime);
 
   return this;
 };
 
 NeuSynth.prototype.fadeOut = function(startTime, duration) {
+  if (this._state !== START) {
+    return this;
+  }
+
   var context = this.$context;
 
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
-  duration = util.defaults(context.toSeconds(duration), 0.5);
-
   startTime = util.finite(startTime);
+
+  duration = util.defaults(context.toSeconds(duration), 0.5);
   duration = util.finite(duration);
 
-  if (this._state === START) {
-    if (this.$routes.length) {
-      context.sched(startTime, function(t0) {
-        this._param.update(0, t0, duration);
-      }, this);
-    }
-    this.stop(startTime + duration);
+  if (this.$routes.length) {
+    context.sched(startTime, function(t0) {
+      this._param.update(0, t0, duration);
+    }, this);
   }
+  this.stop(startTime + duration);
 
   return this;
 };
 
 NeuSynth.prototype.fade = function(startTime, value, duration) {
+  if (this._state !== START) {
+    return this;
+  }
+
   var context = this.$context;
 
-  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
-  duration = util.defaults(context.toSeconds(duration), 0.5);
+  if (this.$routes.length) {
+    startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+    startTime = util.finite(startTime);
 
-  startTime = util.finite(startTime);
-  value = util.finite(value);
-  duration = util.finite(duration);
+    value = util.finite(value);
 
-  if (this._state === START) {
-    if (this.$routes.length) {
-      context.sched(startTime, function(t0) {
-        this._param.update(value, t0, duration);
-      }, this);
-    }
+    duration = util.defaults(context.toSeconds(duration), 0.5);
+    duration = util.finite(duration);
+
+    context.sched(startTime, function(t0) {
+      this._param.update(value, t0, duration);
+    }, this);
   }
 
   return this;

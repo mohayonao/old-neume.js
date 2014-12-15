@@ -114,12 +114,13 @@ describe("neume.Synth", function() {
       audioContext.$processTo("00:00.500");
       assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.called === true, "00:00.500");
+        assert(ugen.$unit.start.called === false, "00:00.500");
       });
 
       audioContext.$processTo("00:01.000");
       assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
+        assert(ugen.$unit.start.called === true, "00:01.000");
         assert(ugen.$unit.start.calledOnce === true, "00:01.000");
         assert.deepEqual(ugen.$unit.start.firstCall.args, [ 1 ]);
       });
