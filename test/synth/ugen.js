@@ -13,25 +13,20 @@ var NOP = function() {};
 describe("neume.UGen", function() {
   var context = null;
   var synth = null;
-  var ugen0 = null;
-  var registered = null;
 
   beforeEach(function() {
-    var audioContext = new global.AudioContext();
-    context = new neume.Context(audioContext.destination);
-    synth = {
-      $context: context
-    };
-    ugen0 = neume.UGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
-    ugen0.toAudioNode().$id = "ugen0";
+    context = new neume.Context(new global.AudioContext().destination);
+    synth = new neume.Synth(context, NOP, []);
   });
 
   describe("constructor", function() {
     it("(synth: neume.Synth, key: string, spec: object, inputs: Array<any>)", function() {
-      assert(ugen0 instanceof neume.UGen);
-      assert(ugen0 instanceof neume.Emitter);
-      assert(ugen0.$id === "ugen0");
-      assert.deepEqual(ugen0.$class, [ "kr", "lfo" ]);
+      var ugen = neume.UGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
+
+      assert(ugen instanceof neume.UGen);
+      assert(ugen instanceof neume.Emitter);
+      assert(ugen.$id === "ugen0");
+      assert.deepEqual(ugen.$class, [ "kr", "lfo" ]);
     });
     it("throw an error if given invalid key", function() {
       assert.throws(function() {
@@ -93,101 +88,77 @@ describe("neume.UGen", function() {
   });
 
   describe("#$", function() {
-    it("(key:string): neume.UGen", function() {
-      var node = context.createGain();
-      var spy = sinon.spy();
+    it("(key:string): neume.UGen", sinon.test(function() {
+      var spy = this.spy(synth, "$builder");
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      var a = neume.UGen.build({
-        $context: context,
-        $builder: spy
-      }, "sin", { add: 880 }, []);
-
-      a.$("lpf");
+      ugen.$("lpf");
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("lpf", {}, [ a ]));
-    });
-    it("(key:string, spec:object): neume.UGen", function() {
-      var node = context.createGain();
-      var spy = sinon.spy();
+      assert(spy.calledWith("lpf", {}, [ ugen ]));
+    }));
+    it("(key:string, spec:object): neume.UGen", sinon.test(function() {
+      var spy = this.spy(synth, "$builder");
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      var a = neume.UGen.build({
-        $context: context,
-        $builder: spy
-      }, "sin", { add: 880 }, []);
-
-      a.$("lpf", { freq: 200 });
+      ugen.$("lpf", { freq: 200 });
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("lpf", { freq: 200 }, [ a ]));
-    });
-    it("(key:string, ...args:any): neume.UGen", function() {
+      assert(spy.calledWith("lpf", { freq: 200 }, [ ugen ]));
+    }));
+    it("(key:string, ...args:any): neume.UGen", sinon.test(function() {
+      var spy = this.spy(synth, "$builder");
       var node = context.createGain();
-      var spy = sinon.spy();
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      var a = neume.UGen.build({
-        $context: context,
-        $builder: spy
-      }, "sin", { add: 880 }, []);
-
-      a.$("lpf", ugen0);
+      ugen.$("lpf", node);
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("lpf", {}, [ a, ugen0 ]));
-    });
-    it("(key:string, spec:object, ...args: any): neume.UGen", function() {
+      assert(spy.calledWith("lpf", {}, [ ugen, node ]));
+    }));
+    it("(key:string, spec:object, ...args: any): neume.UGen", sinon.test(function() {
+      var spy = this.spy(synth, "$builder");
       var node = context.createGain();
-      var spy = sinon.spy();
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      var a = neume.UGen.build({
-        $context: context,
-        $builder: spy
-      }, "sin", { add: 880 }, []);
-
-      a.$("lpf", { freq: 200 }, ugen0);
+      ugen.$("lpf", { freq: 200 }, node);
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("lpf", { freq: 200 }, [ a, ugen0 ]));
-    });
+      assert(spy.calledWith("lpf", { freq: 200 }, [ ugen, node ]));
+    }));
   });
 
   describe("#mul", function() {
-    it("(value: any): neume.UGen", function() {
+    it("(value: any): neume.UGen", sinon.test(function() {
+      var spy = this.spy(synth, "$builder");
       var node = context.createGain();
-      var spy = sinon.spy();
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      var a = neume.UGen.build({
-        $context: context,
-        $builder: spy
-      }, "sin", { add: 880 }, []);
-
-      a.mul(1000);
+      ugen.mul(1000);
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("*", a, 1000));
-    });
+      assert(spy.calledWith("*", ugen, 1000));
+    }));
   });
 
   describe("#add", function() {
-    it("(value: any): neume.UGen", function() {
+    it("(value: any): neume.UGen", sinon.test(function() {
+      var spy = this.spy(synth, "$builder");
       var node = context.createGain();
-      var spy = sinon.spy();
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
-      var a = neume.UGen.build({
-        $context: context,
-        $builder: spy
-      }, "sin", { add: 880 }, []);
-
-      a.add(1000);
+      ugen.add(1000);
 
       assert(spy.calledOnce);
-      assert(spy.calledWith("+", a, 1000));
-    });
+      assert(spy.calledWith("+", ugen, 1000));
+    }));
   });
 
   describe("#toAudioNode", function() {
     it("(): AudioNode", function() {
-      assert(ugen0.toAudioNode() instanceof global.AudioNode);
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+      assert(ugen.toAudioNode() instanceof global.AudioNode);
+      assert(ugen.toAudioNode() === ugen.toAudioNode());
     });
   });
 
@@ -195,7 +166,7 @@ describe("neume.UGen", function() {
     it("(to: AudioNode): self", function() {
       var node = context.createGain();
 
-      neume.UGen.build(synth, "sin#ugen0", {}, []).connect(node);
+      neume.UGen.build(synth, "sin", {}, []).connect(node);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -223,7 +194,7 @@ describe("neume.UGen", function() {
     it("(to: AudioNode): self // when with offset", function() {
       var node = context.createGain();
 
-      neume.UGen.build(synth, "sin#ugen0", { add: 880 }, []).connect(node);
+      neume.UGen.build(synth, "sin", { add: 880 }, []).connect(node);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -260,14 +231,12 @@ describe("neume.UGen", function() {
     it("(to: AudioParam): self", function() {
       var node = context.createGain();
 
-      node.gain.value = 0;
-
-      neume.UGen.build(synth, "sin#ugen0", {}, []).connect(node.gain);
+      neume.UGen.build(synth, "sin", {}, []).connect(node.gain);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
         gain: {
-          value: 0,
+          value: 1,
           inputs: [
             {
               name: "OscillatorNode",
@@ -290,9 +259,7 @@ describe("neume.UGen", function() {
     it("(to: AudioParam): self // when with offset", function() {
       var node = context.createGain();
 
-      node.gain.value = 0;
-
-      neume.UGen.build(synth, "sin#ugen0", { add: 880 }, []).connect(node.gain);
+      neume.UGen.build(synth, "sin", { add: 880 }, []).connect(node.gain);
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -323,7 +290,7 @@ describe("neume.UGen", function() {
     it("(): self", function() {
       var node = context.createGain();
 
-      neume.UGen.build(synth, "sin#ugen0", {}, []).connect(node).disconnect();
+      neume.UGen.build(synth, "sin", {}, []).connect(node).disconnect();
 
       assert.deepEqual(node.toJSON(), {
         name: "GainNode",
@@ -338,10 +305,10 @@ describe("neume.UGen", function() {
 
   describe("method bindings", function() {
     it("works", function() {
-      var ugen1 = neume.UGen.build(synth, "adsr", {}, []);
+      var ugen = neume.UGen.build(synth, "adsr", {}, []);
 
-      assert(ugen1.release() === ugen1);
-      assert(ugen1.release(0) === ugen1);
+      assert(ugen.release() === ugen);
+      assert(ugen.release(0) === ugen);
     });
   });
 
