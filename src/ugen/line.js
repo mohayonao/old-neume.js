@@ -3,25 +3,31 @@ module.exports = function(neume, util) {
 
   /*
    * $("line", {
-   *   start: [number] = 1
-   *   end: [number] = 0
-   *   dur: [number] = 1
-   * } ... inputs)
+   *   start: number = 1,
+   *   end: number = 0,
+   *   duration: timevlaue = 1,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * $("xline", {
-   *   start: [number] = 1
-   *   end: [number] = 0
-   *   dur: [number] = 1
-   * } ... inputs)
+   *   start: number = 1,
+   *   end: number = 0,
+   *   duration: timevalue = 1,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +---------------+
-   * | GainNode      |
-   * | - gain: value |
-   * +---------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- line value
+   * +----------+
    *   |
    */
   neume.register("line", function(ugen, spec, inputs) {

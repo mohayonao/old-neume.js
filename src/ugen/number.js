@@ -3,20 +3,25 @@ module.exports = function(neume, util) {
 
   /**
    * $(number, {
-   *   tC: [number] = 0
-   * } ... inputs)
+   *   curve: string|number = "step",
+   *   lag: timevalue = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * methods:
-   *   setValue(t, value)
+   *   setValue(startTime: timevalue, value: number)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +---------------+
-   * | GainNode      |
-   * | - gain: value |
-   * +---------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- number
+   * +----------+
    *   |
    */
   neume.register("number", function(ugen, spec, inputs) {

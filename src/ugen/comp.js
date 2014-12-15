@@ -3,24 +3,28 @@ module.exports = function(neume, util) {
 
   /**
    * $("comp", {
-   *   thresh: [number|UGen] = -24
-   *   knee: [number|UGen] =  30
-   *   ratio: [number|UGen] =  12
-   *   a: [number|UGen] =  0.003
-   *   r: [number|UGen] =  0.250
-   * } ... inputs)
+   *   threshold: signal = -24,
+   *   knee: signal = 30,
+   *   ratio: signal = 12,
+   *   attack: signal = 0.003,
+   *   release: signal = 0.250,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
-   * +--------+
-   * | inputs |
-   * +--------+
-   *   ||||||
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
    * +------------------------+
    * | DynamicsCompressorNode |
-   * | - threshold: thresh    |
+   * | - threshold: threshold |
    * | - knee: knee           |
    * | - ratio: ratio         |
-   * | - attack: a            |
-   * | - release: r           |
+   * | - attack: attack       |
+   * | - release: release     |
    * +------------------------+
    *   |
    */

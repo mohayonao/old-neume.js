@@ -5,48 +5,65 @@ module.exports = function(neume, util) {
 
   /**
    * $("env", {
-   *   table: Array<number|string> = []
-   *   curve: number|string = "lin"
-   * })
+   *   table: Array<number|string> = [],
+   *   curve: number|string = "lin",
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * aliases:
    *   $("adsr", {
-   *     a: [number|string] = 0.01  attackTime
-   *     d: [number|string] = 0.30  decayTime
-   *     s: [number] = 0.50  sustainLevel
-   *     r: [number|string] = 1.00  releaseTime
-   *     curve: [number|string] = "lin"  curve
-   *   })
+   *     attackTime: timevalue = 0.01,
+   *     decayTime: timevalue = 0.30,
+   *     sustainLevel: number = 0.50,
+   *     releaseTime: timevalue = 1.00,
+   *     curve: number|string = "lin",
+   *     mul: signal = 1,
+   *     add: signal = 0,
+   *   }, ...inputs: signal)
    *
    *   $("dadsr", {
-   *     delay: [number|string] = 0.10  delayTime
-   *     a: [number|string] = 0.01  attackTime
-   *     d: [number|string] = 0.30  decayTime
-   *     s: [number] = 0.50  sustainLevel
-   *     r: [number|string] = 1.00  releaseTime
-   *     curve: [number|string] = "lin"  curve
-   *   })
+   *     delayTime: timevalue = 0.10,
+   *     attackTime: timevalue = 0.01,
+   *     decayTime: timevalue = 0.30,
+   *     sustainLevel: number = 0.50,
+   *     releaseTime: timevalue = 1.00,
+   *     curve: number|string = "lin",
+   *     mul: signal = 1,
+   *     add: signal = 0,
+   *   }, ...inputs: signal)
    *
    *   $("asr", {
-   *     a: [number|string] = 0.01  attackTime
-   *     s: [number] = 1.00  sustainLevel
-   *     r: [number|string] = 1.00  releaseTime
-   *     curve: [number|string] = "lin"  curve
-   *   })
+   *     attackTime: timevalue = 0.01,
+   *     sustainLevel: number = 0.50,
+   *     releaseTime: timevalue = 1.00,
+   *     curve: number|string = "lin",
+   *     mul: signal = 1,
+   *     add: signal = 0,
+   *   }, ...inputs: signal)
    *
    *   $("cutoff", {
-   *     r: [number|string] = 0.1   releaseTime
-   *     curve: [number|string] = "lin"  curve
-   *   })
+   *     releaseTime: timevalue = 1.00,
+   *     curve: number|string = "lin",
+   *     mul: signal = 1,
+   *     add: signal = 0,
+   *   }, ...inputs: signal)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +---------------+
-   * | GainNode      |
-   * | - gain: value |
-   * +---------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- envelope value
+   * +----------+
+   *   |
+   * +----------------+
+   * | WaveShaperNode |
+   * | - curve: curve |
+   * +----------------+
    *   |
    */
   neume.register("env", function(ugen, spec, inputs) {

@@ -2,25 +2,30 @@ module.exports = function(neume, util) {
   "use strict";
 
   /**
-   * $([], {
-   *   mode: enum[ clip, wrap, fold ] = clip
-   *   tC: [number] = 0
-   * } ... inputs)
+   * $(Array<number>, {
+   *   clip: string = "clip",
+   *   curve: string|number = "step",
+   *   lag: timevalue = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * methods:
-   *   setValue(t, value)
-   *   at(t, index)
-   *   next(t)
-   *   prev(t)
+   *   setValue(startTime: timevalue, value: Array<number>)
+   *   at(startTime: timevalue, index: number)
+   *   next(startTime: timevalue)
+   *   prev(startTime: timevalue)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +----------------------+
-   * | GainNode             |
-   * | - gain: array[index] |
-   * +----------------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- Array<number>
+   * +----------+
    *   |
    */
   neume.register("array", function(ugen, spec, inputs) {

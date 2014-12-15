@@ -3,12 +3,15 @@ module.exports = function(neume) {
 
   /**
    * $("mono", {
-   *   mul: 1, add: 0
-   * } ... inputs)
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
-   * +--------+
-   * | inputs |
-   * +--------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
    *   |
    * +-----------+
    * | GainNode  |

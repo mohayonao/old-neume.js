@@ -6,22 +6,27 @@ module.exports = function(neume, util) {
 
   /**
    * $("iter", {
-   *   iter: [iterator] = null
-   *   tC: [number] = 0
-   * } ... inputs)
+   *   iter: iterator = null,
+   *   curve: string|number = "step",
+   *   lag: timevalue = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * methods:
-   *   next(t)
-   *   reset(t)
+   *   next(startTime: timevalue)
+   *   reset(startTime: timevalue)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +----------------------+
-   * | GainNode             |
-   * | - gain: array[index] |
-   * +----------------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- iterator value
+   * +----------+
    *   |
    */
   neume.register("iter", function(ugen, spec, inputs) {

@@ -3,6 +3,19 @@ module.exports = function(neume, util) {
 
   var AUDIO_BUS_CHANNELS = neume.AUDIO_BUS_CHANNELS;
 
+  /**
+  * $("in", {
+  *   mul: signal = 1,
+  *   add: signal = 0,
+  * }, ...bus: number)
+  *
+  *  +-------------+     +-------------+
+  *  | AudioBus[0] | ... | AudioBus[0] |
+  *  +-------------+     +-------------+
+  *   |                    |
+  *   +--------------------+
+  *   |
+  */
   neume.register("in", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var outlet = null;
@@ -18,6 +31,21 @@ module.exports = function(neume, util) {
     });
   });
 
+  /**
+   * $("out", {
+   *   bus: number = 0,
+   * }, ...inputs: signal)
+   *
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +---------------+
+   * | AudioBus[bus] |
+   * +---------------+
+   */
   neume.register("out", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var synth = ugen.$synth;
@@ -33,6 +61,19 @@ module.exports = function(neume, util) {
     });
   });
 
+  /**
+   * $("local-in", {
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...bus: number)
+   *
+   *  +-------------+     +-------------+
+   *  | LocalBus[0] | ... | LocalBus[0] |
+   *  +-------------+     +-------------+
+   *   |                    |
+   *   +--------------------+
+   *   |
+  */
   neume.register("local-in", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var synth = ugen.$synth;
@@ -49,6 +90,21 @@ module.exports = function(neume, util) {
     });
   });
 
+  /**
+   * $("local-out", {
+   *   bus: number = 0,
+   * }, ...inputs: signal)
+   *
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +---------------+
+   * | LocalBus[bus] |
+   * +---------------+
+  */
   neume.register("local-out", function(ugen, spec, inputs) {
     var context = ugen.$context;
     var synth = ugen.$synth;

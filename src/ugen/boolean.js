@@ -3,23 +3,28 @@ module.exports = function(neume, util) {
 
   /**
    * $(boolean, {
-   *   true: [number] = 1
-   *   false: [number] = 0
-   *   tC: [number] = 0
-   * } ... inputs)
+   *   true: number = 1,
+   *   false: number = 0,
+   *   curve: string|number = "step",
+   *   lag: timevalue = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * methods:
-   *   setValue(t, value)
-   *   toggle(t)
+   *   setValue(startTime: timevalue, value: boolean)
+   *   toggle(startTime: timevalue)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +------------------------------------+
-   * | GainNode                           |
-   * | - gain: value ? trueVal : falseVal |
-   * +------------------------------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- value ? trueVal : falseVal
+   * +----------+
    *   |
    */
   neume.register("boolean", function(ugen, spec, inputs) {

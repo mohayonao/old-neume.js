@@ -2,16 +2,16 @@ module.exports = function(neume) {
   "use strict";
 
   /**
-   * $("+" ... inputs)
+   * $("+", {
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
-   * +--------+
-   * | inputs |
-   * +--------+
-   *   ||||||
-   * +------------+
-   * | GainNode   |
-   * | - gain: 1  |
-   * +------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
    *   |
    */
   neume.register("+", function(ugen, spec, inputs) {
