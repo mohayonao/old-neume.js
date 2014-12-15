@@ -6,6 +6,7 @@ require("../../src/ugen/osc");
 require("../../src/ugen/add");
 require("../../src/ugen/mul");
 require("../../src/ugen/env");
+require("../../src/ugen/delay");
 
 var util = neume.util;
 var NOP = function() {};
@@ -352,6 +353,38 @@ describe("neume.UGen", function() {
       assert(ugen.release() === ugen);
       assert(ugen.release(10) === ugen);
       assert(ugen.release({}) === ugen);
+    });
+  });
+
+  describe("class: bypass", function() {
+    it("works", function() {
+      var a = context.createOscillator();
+      var b = context.createDelay();
+      var ugen = neume.UGen.build(synth, "delay.bypass", {}, [ a, b ]);
+
+      assert.deepEqual(ugen.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ a.toJSON(), b.toJSON() ]
+      });
+    });
+  });
+
+  describe("class: mute", function() {
+    it("works", function() {
+      var ugen = neume.UGen.build(synth, "sin.mute", {}, []);
+
+      assert.deepEqual(ugen.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
     });
   });
 

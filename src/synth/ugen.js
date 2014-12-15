@@ -23,20 +23,23 @@ function NeuUGen(synth, key, spec, inputs) {
 
   this.$builder = synth.$builder;
 
-  var unit = NeuUGen.registered[parsed.key](this, spec, inputs);
+  if (hasClass(this, "bypass")) {
+    this.$unit = NeuUGen.registered["+"](this, {}, inputs);
+    this._node = this.$unit.$outlet;
+  } else {
+    this.$unit = NeuUGen.registered[parsed.key](this, spec, inputs);
+    this._node = this.$unit.$outlet;
+    this._node = mul(this.$context, this._node, util.defaults(spec.mul, 1));
+    this._node = add(this.$context, this._node, util.defaults(spec.add, 0));
+  }
 
-  this._node = unit.$outlet;
-  this._node = mul(this.$context, this._node, util.defaults(spec.mul, 1));
-  this._node = add(this.$context, this._node, util.defaults(spec.add, 0));
-
-  this.$isOutput = unit.$isOutput;
-  this.$unit = unit;
-  this.$methods = unit.$methods;
+  this.$isOutput = this.$unit.$isOutput;
+  this.$methods = this.$unit.$methods;
 
   var methods = Object.keys(this.$methods).sort();
 
   methods.forEach(function(methodName) {
-    var method = unit.$methods[methodName];
+    var method = this.$unit.$methods[methodName];
     util.definePropertyIfNotExists(this, methodName, {
       value: function(t, v) {
         var context = this.$context;
@@ -105,7 +108,7 @@ NeuUGen.prototype.add = function(value) {
 };
 
 NeuUGen.prototype.start = function(startTime) {
-  if (this.$class.indexOf("trig") === -1) {
+  if (!hasClass(this, "trig")) {
     this.$unit.start(startTime);
   }
   return this;
@@ -130,7 +133,11 @@ NeuUGen.prototype.trig = function(startTime) {
 
 NeuUGen.prototype.toAudioNode = function() {
   if (this.$outlet === null) {
-    this.$outlet = this.$context.toAudioNode(this._node);
+    if (hasClass(this, "mute")) {
+      this.$outlet = this.$context.createGain();
+    } else {
+      this.$outlet = this.$context.toAudioNode(this._node);
+    }
   }
   return this.$outlet;
 };
@@ -176,6 +183,10 @@ function mul(context, a, b) {
 
 function add(context, a, b) {
   return new neume.Sum(context, [ a, b ]);
+}
+
+function hasClass(_this, className) {
+  return _this.$class.indexOf(className) !== -1;
 }
 
 module.exports = neume.UGen = NeuUGen;
