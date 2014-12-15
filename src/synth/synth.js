@@ -244,45 +244,43 @@ NeuSynth.prototype.toAudioNode = function() {
 };
 
 NeuSynth.prototype.hasListeners = function(event) {
-  var result = false;
-
-  iterateOverTargets(this._db, event, function(ugen, event) {
-    result = result || ugen.hasListeners(event);
-  });
-
-  return result;
+  return this._db.all().reduce(function(a, b) {
+    return a || b.hasListeners(event);
+  }, false);
 };
 
 NeuSynth.prototype.listeners = function(event) {
+  var tmp = this._db.all().reduce(function(a, b) {
+    return a.concat(b.listeners(event));
+  }, []);
+
   var listeners = [];
 
-  iterateOverTargets(this._db, event, function(ugen, event) {
-    ugen.listeners(event).forEach(function(listener) {
-      if (listeners.indexOf(listener) === -1) {
-        listeners.push(listener);
-      }
-    });
-  });
+  for (var i = 0, imax = tmp.length; i < imax; i++) {
+    if (listeners.indexOf(tmp[i]) === -1) {
+      listeners.push(tmp[i]);
+    }
+  }
 
   return listeners;
 };
 
 NeuSynth.prototype.on = function(event, listener) {
-  iterateOverTargets(this._db, event, function(ugen, event) {
+  this._db.all().forEach(function(ugen) {
     ugen.on(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.once = function(event, listener) {
-  iterateOverTargets(this._db, event, function(ugen, event) {
+  this._db.all().forEach(function(ugen) {
     ugen.once(event, listener);
   });
   return this;
 };
 
 NeuSynth.prototype.off = function(event, listener) {
-  iterateOverTargets(this._db, event, function(ugen, event) {
+  this._db.all().forEach(function(ugen) {
     ugen.off(event, listener);
   });
   return this;
@@ -298,34 +296,6 @@ function getMethods(db) {
   });
 
   return Object.keys(methodNames).sort();
-}
-
-function getTargets(db, selector) {
-  return selector ? db.find(Parser.parse(selector)) : db.all();
-}
-
-function iterateOverTargets(db, event, callback) {
-  var parsed = parseEvent(event);
-
-  if (parsed) {
-    getTargets(db, parsed.selector).forEach(function(ugen) {
-      callback(ugen, parsed.name);
-    });
-  }
-}
-
-function parseEvent(event) {
-  var matched = /^(?:(.*?):([a-z]\w+)|([a-z]\w+))$/.exec(event);
-
-  if (!matched) {
-    return null;
-  }
-
-  if (matched[3] != null) {
-    return { selector: null, name: matched[3] };
-  }
-
-  return { selector: matched[1], name: matched[2] };
 }
 
 module.exports = neume.Synth = NeuSynth;
