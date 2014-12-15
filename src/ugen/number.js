@@ -30,17 +30,14 @@ module.exports = function(neume, util) {
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function setValue(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
       var value = util.defaults(e.value, e.count, 0);
       if (util.isFinite(value)) {
-        context.sched(t0, function(startTime) {
-          update(value, startTime);
-        });
+        update(value, e.playbackTime);
       }
     }
 
     function update(value, startTime) {
-      param.update(value, startTime);
+      param.update(value, util.finite(context.toSeconds(startTime)));
     }
 
     return new neume.Unit({

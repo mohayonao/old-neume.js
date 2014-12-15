@@ -46,41 +46,28 @@ module.exports = function(neume, util) {
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function setValue(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
-      var value = e.value;
-      if (Array.isArray(value)) {
-        context.sched(util.finite(t0), function() {
-          data = value;
-        });
+      if (Array.isArray(e.value)) {
+        data = e.value;
       }
     }
 
     function at(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
-      var index = util.defaults(e.value, e.index, e.count);
-      context.sched(t0, function(startTime) {
-        update(util.int(index), startTime);
-      });
+      var index = util.int(util.defaults(e.value, e.index, e.count));
+      update(index, e.playbackTime);
     }
 
     function next(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
-      context.sched(t0, function(startTime) {
-        update(index + 1, startTime);
-      });
+      update(index + 1, e.playbackTime);
     }
 
     function prev(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
-      context.sched(t0, function(startTime) {
-        update(index - 1, startTime);
-      });
+      update(index - 1, e.playbackTime);
     }
 
     function update(nextIndex, startTime) {
       var value = mode(data, nextIndex);
 
-      param.update(value, startTime);
+      param.update(value, util.finite(context.toSeconds(startTime)));
 
       index = nextIndex;
     }

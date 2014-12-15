@@ -36,23 +36,18 @@ module.exports = function(neume, util) {
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function setValue(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
-      var value = e.value;
-      if (typeof value === "function") {
-        context.sched(t0, function() {
-          data = value;
-        });
+      if (typeof e.value === "function") {
+        data = e.value;
       }
     }
 
     function evaluate(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
-      context.sched(t0, function(startTime) {
-        update(startTime);
-      });
+      update(e.playbackTime);
     }
 
     function update(startTime) {
+      startTime = util.finite(context.toSeconds(startTime));
+
       var value = data({
         playbackTime: startTime,
         count: count++

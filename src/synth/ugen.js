@@ -39,7 +39,11 @@ function NeuUGen(synth, key, spec, inputs) {
     var method = unit.$methods[methodName];
     util.definePropertyIfNotExists(this, methodName, {
       value: function(t, v) {
-        method(toArg(t, v));
+        var context = this.$context;
+        var arg = toArg(t, v);
+        context.sched(context.toSeconds(arg.playbackTime), function() {
+          method(arg);
+        });
         return this;
       }
     });
