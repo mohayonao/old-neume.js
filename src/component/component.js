@@ -1,8 +1,8 @@
 "use strict";
 
 var util = require("../util");
+var Emitter = require("../util/emitter");
 var neume = require("../namespace");
-var Emitter = require("../event/emitter");
 
 function NeuComponent(context, node) {
   Emitter.call(this);

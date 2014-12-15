@@ -1,4 +1,3 @@
-require("./db");
 require("./dollar");
 require("./synth");
 require("./synthdef");

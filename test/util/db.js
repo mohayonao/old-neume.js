@@ -1,19 +1,19 @@
 "use strict";
 
-var NeuSynthDB = require("../../src/synth/db");
+var neume = require("../../src");
 
-describe("NeuSynthDB", function() {
+describe("neume.DB", function() {
   describe("constructor", function() {
     it("()", function() {
-      var db = new NeuSynthDB();
+      var db = new neume.DB();
 
-      assert(db instanceof NeuSynthDB);
+      assert(db instanceof neume.DB);
     });
   });
 
   describe("#append", function() {
     it("(obj: any): self", function() {
-      var db = new NeuSynthDB();
+      var db = new neume.DB();
 
       assert(db.append() === db);
       db.append({ a: 0 });
@@ -26,7 +26,7 @@ describe("NeuSynthDB", function() {
 
   describe("#all", function() {
     it("(): Array<any>", function() {
-      var db = new NeuSynthDB();
+      var db = new neume.DB();
 
       db.append({ a: 0 });
       db.append({ b: 1 });
@@ -38,7 +38,7 @@ describe("NeuSynthDB", function() {
 
   describe("#find", function() {
     it("(selector: string): Array<any>", function() {
-      var db = new NeuSynthDB();
+      var db = new neume.DB();
 
       db.append({ $key: "line", $id: "id1", $class: [ "amp" ] });
       db.append({ $key: "line", $id: "id2", $class: [ "amp" ] });
@@ -49,36 +49,36 @@ describe("NeuSynthDB", function() {
       db.append({ $key: "gate", $id: "id7", $class: [ "mod", "ar" ] });
       db.append({ $key: "gate", $id: "id8", $class: [ "mod", "kr" ] });
 
-      assert.deepEqual(db.find("line"), [
+      assert.deepEqual(db.find({ key: "line" }), [
         { $key: "line", $id: "id1", $class: [ "amp" ] },
         { $key: "line", $id: "id2", $class: [ "amp" ] },
         { $key: "line", $id: "id3", $class: [ "mod" ] },
         { $key: "line", $id: "id4", $class: [ "mod" ] },
       ], "line:end");
 
-      assert.deepEqual(db.find("#id1"), [
+      assert.deepEqual(db.find({ id: "id1" }), [
         { $key: "line", $id: "id1", $class: [ "amp" ] },
       ], "#id:end");
 
-      assert.deepEqual(db.find(".mod"), [
+      assert.deepEqual(db.find({ class: [ "mod" ] }), [
         { $key: "line", $id: "id3", $class: [ "mod" ] },
         { $key: "line", $id: "id4", $class: [ "mod" ] },
         { $key: "gate", $id: "id7", $class: [ "mod", "ar" ] },
         { $key: "gate", $id: "id8", $class: [ "mod", "kr" ] },
       ], ".mod:end");
 
-      assert.deepEqual(db.find("gate.mod"), [
+      assert.deepEqual(db.find({ key: "gate", class: [ "mod" ] }), [
         { $key: "gate", $id: "id7", $class: [ "mod", "ar" ] },
         { $key: "gate", $id: "id8", $class: [ "mod", "kr" ] },
       ], "gate.mod:end");
 
-      assert.deepEqual(db.find("gate.mod.kr"), [
+      assert.deepEqual(db.find({ key: "gate", class: [ "mod", "kr" ] }), [
         { $key: "gate", $id: "id8", $class: [ "mod", "kr" ] },
       ], "gate.mod:end");
 
-      assert.deepEqual(db.find("gate#id1"), [], "gate#id1");
+      assert.deepEqual(db.find({ key: "gate", id: "id1" }), [], "gate#id1");
 
-      assert.deepEqual(db.find("#notExists"), [], "#notExists");
+      assert.deepEqual(db.find({ id: "notExists" }), [], "#notExists");
     });
   });
 

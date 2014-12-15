@@ -2,13 +2,13 @@
 
 var util = require("../util");
 var neume = require("../namespace");
-var Emitter = require("../event/emitter");
-var SelectorParser = require("../parser/selector");
+var Emitter = require("../util/emitter");
+var Parser = require("./parser");
 
 function NeuUGen(synth, key, spec, inputs) {
   Emitter.call(this);
 
-  var parsed = SelectorParser.parse(key);
+  var parsed = Parser.parse(key);
 
   if (!NeuUGen.registered.hasOwnProperty(parsed.key)) {
     throw new Error("unknown key: " + key);
@@ -56,7 +56,7 @@ NeuUGen.$name = "NeuUGen";
 NeuUGen.registered = {};
 
 NeuUGen.register = function(name, func) {
-  if (!SelectorParser.isValidUGenName(name)) {
+  if (!Parser.isValidUGenName(name)) {
     throw new Error("invalid ugen name: " + name);
   }
   if (typeof func !== "function") {

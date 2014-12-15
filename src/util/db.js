@@ -1,14 +1,13 @@
 "use strict";
 
 var util = require("../util");
-var selectorParser = require("../parser/selector");
 
-function NeuSynthDB() {
+function DB() {
   this._all = [];
   this._ids = {};
 }
 
-NeuSynthDB.prototype.append = function(obj) {
+DB.prototype.append = function(obj) {
   if (util.isObject(obj)) {
     this._all.push(obj);
     if (obj.hasOwnProperty("$id")) {
@@ -17,15 +16,13 @@ NeuSynthDB.prototype.append = function(obj) {
   }
   return this;
 };
-NeuSynthDB.$name = "NeuSynthDB";
 
-NeuSynthDB.prototype.all = function() {
+DB.prototype.all = function() {
   return this._all;
 };
 
-NeuSynthDB.prototype.find = function(selector) {
+DB.prototype.find = function(parsed) {
   var result = null;
-  var parsed = selectorParser.parse(selector);
 
   if (parsed.id) {
     result = this._ids[parsed.id] ? [ this._ids[parsed.id] ] : [];
@@ -33,11 +30,13 @@ NeuSynthDB.prototype.find = function(selector) {
     result = this._all;
   }
 
-  parsed.class.forEach(function(cls) {
-    result = result.filter(function(obj) {
-      return obj.$class.indexOf(cls) !== -1;
+  if (parsed.class) {
+    parsed.class.forEach(function(cls) {
+      result = result.filter(function(obj) {
+        return obj.$class.indexOf(cls) !== -1;
+      });
     });
-  });
+  }
 
   if (parsed.key) {
     result = result.filter(function(obj) {
@@ -48,4 +47,4 @@ NeuSynthDB.prototype.find = function(selector) {
   return result;
 };
 
-module.exports = NeuSynthDB;
+module.exports = DB;

@@ -2,13 +2,12 @@
 
 var util = require("../util");
 var neume = require("../namespace");
-var NeuSynthDB = require("./db");
 
 require("../component/param");
 require("./ugen");
 
 function NeuSynthDollar(synth) {
-  var db = new NeuSynthDB();
+  var db = new neume.DB();
 
   this.db = db;
   this.params = {};

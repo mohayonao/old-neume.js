@@ -1,12 +1,13 @@
 "use strict";
 
 var util = require("../util");
+var DB = require("../util/db");
 var neume = require("../namespace");
-var NeuSynthDB = require("./db");
+var Parser = require("./parser");
 
 require("./dollar");
 
-var EMPTY_DB = new NeuSynthDB();
+var EMPTY_DB = new DB();
 var INIT = 0;
 var START = 1;
 var STOP = 2;
@@ -104,7 +105,7 @@ function NeuSynth(context, func, args) {
 NeuSynth.$name = "NeuSynth";
 
 NeuSynth.prototype.find = function(selector) {
-  return this._db.find(selector);
+  return this._db.find(Parser.parse(selector));
 };
 
 NeuSynth.prototype.start = function(startTime) {
@@ -298,7 +299,7 @@ NeuSynth.prototype.off = function(event, listener) {
 };
 
 function getTargets(db, selector) {
-  return selector ? db.find(selector) : db.all();
+  return selector ? db.find(Parser.parse(selector)) : db.all();
 }
 
 function iterateOverTargets(db, event, callback) {

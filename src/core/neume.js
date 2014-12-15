@@ -5,9 +5,16 @@ require("./shim");
 var util = require("../util");
 var neume = require("../namespace");
 
+require("./context");
 require("../component");
 require("../control");
 require("../synth");
+
+neume.util = util;
+neume.DB = require("../util/db");
+neume.Emitter = require("../util/emitter");
+neume.FFT = require("../util/fft");
+neume.KVS = require("../util/kvs");
 
 function Neume(context) {
   function fn(spec) {
@@ -157,13 +164,6 @@ neume.impl = function(destination, spec) {
     }
   );
 };
-
-neume.util = util;
-neume.KVS = require("./kvs");
-neume.Context = require("./context");
-neume.Transport = require("./transport");
-neume.FFT = require("../dsp/fft");
-neume.Emitter = require("../event/emitter");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {

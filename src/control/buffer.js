@@ -2,7 +2,7 @@
 
 var util = require("../util");
 var neume = require("../namespace");
-var FFT = require("../dsp/fft");
+var FFT = require("../util/fft");
 
 function NeuBuffer(context, buffer) {
   this.$context = context;

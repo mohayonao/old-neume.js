@@ -4,6 +4,8 @@ var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
 
+require("./transport");
+
 var INIT = 0;
 var START = 1;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
