@@ -66,6 +66,12 @@ util.toArray = function(value) {
   return Array.prototype.slice.call(value);
 };
 
+util.flatten = function(list) {
+  return list.reduce(function(a, b) {
+    return a.concat(Array.isArray(b) ? util.flatten(b) : b);
+  }, []);
+};
+
 util.clipAt = function(list, index) {
   return list[Math.max(0, Math.min(index|0, list.length - 1))];
 };

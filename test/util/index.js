@@ -117,6 +117,12 @@ describe("util", function() {
     });
   });
 
+  describe(".flatten", function() {
+    it("flattens a nested array", function() {
+      assert.deepEqual(util.flatten([ 1, [ 2 ], [ 3, [ [ 4 ] ] ] ]), [ 1, 2, 3, 4 ]);
+    });
+  });
+
   describe(".clipAt(list, index)", function() {
     it("gets the element with the clipped index", function() {
       var list = [ 0, 1, 2, 3, 4, 5 ];
