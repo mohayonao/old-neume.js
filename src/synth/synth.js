@@ -46,19 +46,6 @@ function NeuSynth(context, func, args) {
 
   var methodNames = [];
 
-  Object.keys($.methods).forEach(function(methodName) {
-    var method = $.methods[methodName];
-
-    methodNames.push(methodName);
-
-    Object.defineProperty(this, methodName, {
-      value: function() {
-        method.apply(this, util.toArray(arguments));
-        return this;
-      }
-    });
-  }, this);
-
   this._db.all().forEach(function(ugen) {
     Object.keys(ugen.$unit.$methods).forEach(function(methodName) {
       if (!this.hasOwnProperty(methodName)) {

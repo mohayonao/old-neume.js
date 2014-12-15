@@ -338,20 +338,14 @@ describe("neume.Synth", function() {
     var ugen3 = null;
     var ugen4 = null;
     var passed = null;
-    var bang = null;
 
     beforeEach(function() {
       passed = [];
-      bang = false;
       synth = new neume.Synth(context, function($) {
         ugen1 = $("line#ugen1.amp");
         ugen2 = $("adsr#ugen2.amp");
         ugen3 = $("line#ugen3.fo");
         ugen4 = $("adsr#ugen4.lfo");
-
-        $.method("bang", function() {
-          bang = true;
-        });
 
         return $("+", ugen1, ugen2, ugen3, ugen4);
       }, []);
@@ -485,8 +479,6 @@ describe("neume.Synth", function() {
       it("works", function() {
         assert(synth.release() === synth);
         assert(synth.release(0) === synth);
-        assert(synth.bang() === synth);
-        assert(bang === true);
       });
     });
 

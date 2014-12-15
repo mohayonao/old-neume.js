@@ -11,7 +11,6 @@ function NeuSynthDollar(synth) {
 
   this.db = db;
   this.params = {};
-  this.methods = {};
   this.timers = [];
 
   function builder() {
@@ -27,7 +26,6 @@ function NeuSynthDollar(synth) {
   }
 
   builder.param = $param(synth, this.params);
-  builder.method = $method(synth, this.methods);
   builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
   builder.stop = $stop(synth);
@@ -55,14 +53,6 @@ function $param(synth, params) {
     params[name] = param;
 
     return param;
-  };
-}
-
-function $method(synth, methods) {
-  return function(methodName, func) {
-    if (/^[a-z]\w*$/.test(methodName) && typeof func === "function") {
-      methods[methodName] = func;
-    }
   };
 }
 
