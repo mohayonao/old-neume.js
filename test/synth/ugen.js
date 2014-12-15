@@ -176,6 +176,26 @@ describe("neume.UGen", function() {
     });
   });
 
+  describe("#trig", function() {
+    it("(startTime: timevalue): self", function() {
+      var ugen = neume.UGen.build(synth, "sin.trig", {}, []);
+      var spy = sinon.spy(ugen.$unit, "start");
+
+      assert(ugen.start(0) === ugen);
+      assert(ugen.trig(0.1) === ugen);
+
+      context.start();
+
+      context.audioContext.$processTo("00:00.050");
+      assert(!spy.called);
+
+      context.audioContext.$processTo("00:00.100");
+
+      assert(spy.calledOnce);
+      assert(spy.calledWith(0.1));
+    });
+  });
+
   describe("#toAudioNode", function() {
     it("(): AudioNode", function() {
       var ugen = neume.UGen.build(synth, "sin", {}, []);

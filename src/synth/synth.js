@@ -91,7 +91,7 @@ NeuSynth.prototype.query = function(selector) {
   var array = this._db.find(Parser.parse(selector));
 
   [
-    "on", "once", "off"
+    "on", "once", "off", "trig"
   ].concat(this.methods).forEach(function(methodName) {
     array[methodName] = function() {
       var args = util.toArray(arguments);
@@ -174,6 +174,13 @@ NeuSynth.prototype.stop = function(startTime) {
     });
   }, this);
 
+  return this;
+};
+
+NeuSynth.prototype.trig = function(startTime) {
+  this._db.all().forEach(function(ugen) {
+    ugen.trig(startTime);
+  });
   return this;
 };
 

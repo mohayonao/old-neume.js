@@ -105,12 +105,26 @@ NeuUGen.prototype.add = function(value) {
 };
 
 NeuUGen.prototype.start = function(startTime) {
-  this.$unit.start(startTime);
+  if (this.$class.indexOf("trig") === -1) {
+    this.$unit.start(startTime);
+  }
   return this;
 };
 
 NeuUGen.prototype.stop = function(startTime) {
   this.$unit.stop(startTime);
+  return this;
+};
+
+NeuUGen.prototype.trig = function(startTime) {
+  var context = this.$context;
+
+  startTime = util.finite(context.toSeconds(startTime));
+
+  context.sched(startTime, function() {
+    this.$unit.start(startTime);
+  }, this);
+
   return this;
 };
 

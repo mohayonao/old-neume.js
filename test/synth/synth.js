@@ -187,6 +187,25 @@ describe("neume.Synth", function() {
     }));
   });
 
+  describe("#trig", function() {
+    it("(startTime: timevalue): self", function() {
+      var spy1, spy2;
+      var synth = new neume.Synth(context, function($) {
+        var a = $("sin"), b = $("saw");
+        spy1 = sinon.spy(a, "trig");
+        spy2 = sinon.spy(b, "trig");
+        return $("+", a, b);
+      });
+
+      assert(synth.trig(0.5) === synth);
+
+      assert(spy1.calledOnce);
+      assert(spy1.calledWith(0.5));
+      assert(spy2.calledOnce);
+      assert(spy2.calledWith(0.5));
+    });
+  });
+
   describe("#fadeIn", function() {
     it("([startTime: timevalue, duration: timevalue]): self", function() {
       var synth = new neume.Synth(context, NOP, []);
