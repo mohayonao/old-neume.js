@@ -314,23 +314,6 @@ describe("neume.Synth", function() {
     });
   });
 
-  describe("#call", function() {
-    it("r(method: string, ...args: Array<any>): self", function() {
-      var synth = new neume.Synth(context, NOP, []);
-
-      assert(synth.call() === synth);
-    });
-    it("calls #apply(method, args)", function() {
-      var synth = new neume.Synth(context, NOP, []);
-      var spy = sinon.spy(synth, "apply");
-
-      synth.call("method", 1, 2, 3);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ "method", [ 1, 2, 3 ] ]);
-    });
-  });
-
   describe("works", function() {
     var synth = null;
     var ugen1 = null;
@@ -349,21 +332,6 @@ describe("neume.Synth", function() {
 
         return $("+", ugen1, ugen2, ugen3, ugen4);
       }, []);
-    });
-
-    describe("#apply", function() {
-      it("(method: string, args: Array<any>): self", function() {
-        assert(synth.apply() === synth);
-      });
-
-      it("calls ugen.$unit.apply(method, args)", function() {
-        synth.apply(".amp:release", [ 10, 20 ]);
-        //
-        // assert.deepEqual(passed, [
-        //   [ "ugen1", "release", [ 10, 20 ]],
-        //   [ "ugen2", "release", [ 10, 20 ]],
-        // ]);
-      });
     });
 
     describe("#hasListeners", function() {

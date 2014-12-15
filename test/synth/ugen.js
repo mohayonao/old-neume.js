@@ -308,7 +308,8 @@ describe("neume.UGen", function() {
       var ugen = neume.UGen.build(synth, "adsr", {}, []);
 
       assert(ugen.release() === ugen);
-      assert(ugen.release(0) === ugen);
+      assert(ugen.release(10) === ugen);
+      assert(ugen.release({}) === ugen);
     });
   });
 

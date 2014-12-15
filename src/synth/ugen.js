@@ -30,24 +30,27 @@ function NeuUGen(synth, key, spec, inputs) {
   this._node = add(this.$context, this._node, util.defaults(spec.add, 0));
 
   this.$isOutput = unit.$isOutput;
-
   this.$unit = unit;
+  this.$methods = unit.$methods;
 
-  Object.keys(unit.$methods).forEach(function(name) {
-    var method = unit.$methods[name];
-    util.definePropertyIfNotExists(this, name, {
+  var methods = Object.keys(unit.$methods).sort();
+
+  methods.forEach(function(methodName) {
+    var method = unit.$methods[methodName];
+    util.definePropertyIfNotExists(this, methodName, {
       value: function(t, v) {
-        var e;
-        if (t != null && typeof t !== "object") {
-          e = { playbackTime: t, value: v };
-        } else {
-          e = t || {};
-        }
-        method.call(this, e);
+        method(toArg(t, v));
         return this;
       }
     });
   }, this);
+
+  Object.defineProperties(this, {
+    methods: {
+      value: methods,
+      enumerable: true
+    }
+  });
 }
 util.inherits(NeuUGen, Emitter);
 
@@ -113,6 +116,17 @@ NeuUGen.prototype.disconnect = function() {
   this._node.disconnect();
   return this;
 };
+
+function toArg(t, v) {
+  if (t == null) {
+    return {};
+  }
+  if (typeof t === "object") {
+    return t;
+  }
+
+  return { playbackTime: t, value: v };
+}
 
 function mul(context, a, b) {
   if (b === 1) {

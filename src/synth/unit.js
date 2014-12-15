@@ -30,14 +30,4 @@ NeuUnit.prototype.stop = function(t) {
   }
 };
 
-NeuUnit.prototype.apply = function(method, args) {
-  if (this.$methods[method]) {
-    this.$methods[method].apply(null, args);
-  }
-};
-
-NeuUnit.prototype.toAudioNode = function() {
-  return this.$outlet;
-};
-
 module.exports = neume.Unit = NeuUnit;

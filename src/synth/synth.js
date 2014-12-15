@@ -44,26 +44,22 @@ function NeuSynth(context, func, args) {
   this._timers = $.timers;
   this._param = param;
 
-  var methodNames = [];
+  var methods = getMethods(this._db);
 
-  this._db.all().forEach(function(ugen) {
-    Object.keys(ugen.$unit.$methods).forEach(function(methodName) {
-      if (!this.hasOwnProperty(methodName)) {
-        methodNames.push(methodName);
-        Object.defineProperty(this, methodName, {
-          value: function(t, v) {
-            var e;
-            if (t != null && typeof t !== "object") {
-              e = { playbackTime: t, value: v };
-            } else {
-              e = t || {};
-            }
-            this.call(methodName, e);
-            return this;
+  methods.filter(function(methodName) {
+    return !this.hasOwnProperty(methodName);
+  }, this).forEach(function(methodName) {
+    Object.defineProperty(this, methodName, {
+      value: function() {
+        var args = util.toArray(arguments);
+        this._db.all().forEach(function(ugen) {
+          if (typeof ugen[methodName] === "function") {
+            ugen[methodName].apply(ugen, args);
           }
         });
+        return this;
       }
-    }, this);
+    });
   }, this);
 
   Object.defineProperties(this, {
@@ -84,7 +80,7 @@ function NeuSynth(context, func, args) {
       enumerable: true
     },
     methods: {
-      value: methodNames.sort(),
+      value: methods,
       enumerable: true
     }
   });
@@ -222,20 +218,6 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
   return this;
 };
 
-NeuSynth.prototype.apply = function(method, args) {
-  iterateOverTargets(this._db, method, function(ugen, method) {
-    ugen.$unit.apply(method, args);
-  });
-  return this;
-};
-
-NeuSynth.prototype.call = function() {
-  var args = util.toArray(arguments);
-  var method = args.shift();
-
-  return this.apply(method, args);
-};
-
 NeuSynth.prototype.toAudioNode = function() {
   return this.$context.toAudioNode(this.$routes[0]);
 };
@@ -284,6 +266,18 @@ NeuSynth.prototype.off = function(event, listener) {
   });
   return this;
 };
+
+function getMethods(db) {
+  var methodNames = {};
+
+  db.all().forEach(function(ugen) {
+    ugen.methods.forEach(function(methodName) {
+      methodNames[methodName] = true;
+    });
+  });
+
+  return Object.keys(methodNames).sort();
+}
 
 function getTargets(db, selector) {
   return selector ? db.find(Parser.parse(selector)) : db.all();
