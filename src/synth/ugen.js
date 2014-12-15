@@ -136,4 +136,4 @@ function add(context, a, b) {
   return new neume.Sum(context, [ a, b ]);
 }
 
-module.exports = NeuUGen;
+module.exports = neume.UGen = NeuUGen;

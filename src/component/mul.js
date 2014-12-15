@@ -2,7 +2,8 @@
 
 var util = require("../util");
 var neume = require("../namespace");
-var NeuComponent = require("./component");
+
+require("./component");
 
 function NeuMul(context, a, b) {
   a = a.valueOf();
@@ -12,7 +13,7 @@ function NeuMul(context, a, b) {
     return new neume.DC(context, a * b);
   }
 
-  NeuComponent.call(this, context);
+  neume.Component.call(this, context);
 
   if (typeof a === "number") {
     var t = a; a = b; b = t;
@@ -25,7 +26,7 @@ function NeuMul(context, a, b) {
   this._a = a;
   this._b = b;
 }
-util.inherits(NeuMul, NeuComponent);
+util.inherits(NeuMul, neume.Component);
 
 NeuMul.$name = "NeuMul";
 
@@ -59,4 +60,4 @@ NeuMul.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = NeuMul;
+module.exports = neume.Mul = NeuMul;

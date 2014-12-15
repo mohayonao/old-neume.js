@@ -1,9 +1,11 @@
 "use strict";
 
 var util = require("../util");
-var NeuParam = require("../component/param");
+var neume = require("../namespace");
 var NeuSynthDB = require("./db");
-var NeuUGen = require("./ugen");
+
+require("../component/param");
+require("./ugen");
 
 function NeuSynthDollar(synth) {
   var db = new NeuSynthDB();
@@ -18,7 +20,7 @@ function NeuSynthDollar(synth) {
     var key = args.shift();
     var spec = util.isDictionary(args[0]) ? args.shift() : {};
     var inputs = Array.prototype.concat.apply([], args);
-    var ugen = NeuUGen.build(synth, key, spec, inputs);
+    var ugen = neume.UGen.build(synth, key, spec, inputs);
 
     db.append(ugen);
 
@@ -44,7 +46,7 @@ function $param(synth, params) {
 
     validateParam(name, defaultValue);
 
-    var param = new NeuParam(synth.$context, defaultValue);
+    var param = new neume.Param(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
       value: param,
@@ -172,4 +174,4 @@ function validateParam(name) {
   }
 }
 
-module.exports = NeuSynthDollar;
+module.exports = neume.SynthDollar = NeuSynthDollar;

@@ -1,19 +1,19 @@
 "use strict";
 
-var neume = require("../../src");
+var NeuSynthDB = require("../../src/synth/db");
 
-describe("neume.SynthDB", function() {
+describe("NeuSynthDB", function() {
   describe("constructor", function() {
     it("()", function() {
-      var db = new neume.SynthDB();
+      var db = new NeuSynthDB();
 
-      assert(db instanceof neume.SynthDB);
+      assert(db instanceof NeuSynthDB);
     });
   });
 
   describe("#append", function() {
     it("(obj: any): self", function() {
-      var db = new neume.SynthDB();
+      var db = new NeuSynthDB();
 
       assert(db.append() === db);
       db.append({ a: 0 });
@@ -26,7 +26,7 @@ describe("neume.SynthDB", function() {
 
   describe("#all", function() {
     it("(): Array<any>", function() {
-      var db = new neume.SynthDB();
+      var db = new NeuSynthDB();
 
       db.append({ a: 0 });
       db.append({ b: 1 });
@@ -38,7 +38,7 @@ describe("neume.SynthDB", function() {
 
   describe("#find", function() {
     it("(selector: string): Array<any>", function() {
-      var db = new neume.SynthDB();
+      var db = new NeuSynthDB();
 
       db.append({ $key: "line", $id: "id1", $class: [ "amp" ] });
       db.append({ $key: "line", $id: "id2", $class: [ "amp" ] });

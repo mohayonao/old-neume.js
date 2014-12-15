@@ -2,16 +2,18 @@
 
 var C = require("../const");
 var util = require("../util");
-var NeuComponent = require("./component");
+var neume = require("../namespace");
+
+require("./component");
 
 var filled0 = new FilledFloat32Array(C.DC_BUF_SIZE, 0);
 var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
 
 function NeuDC(context, value) {
-  NeuComponent.call(this, context);
+  neume.Component.call(this, context);
   this._value = util.finite(value);
 }
-util.inherits(NeuDC, NeuComponent);
+util.inherits(NeuDC, neume.Component);
 
 NeuDC.$name = "NeuDC";
 
@@ -70,4 +72,4 @@ function createDCNode(context, value) {
   return node;
 }
 
-module.exports = NeuDC;
+module.exports = neume.DC = NeuDC;

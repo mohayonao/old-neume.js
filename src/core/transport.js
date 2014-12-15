@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 
 function NeuTransport(context) {
   this.$context = context;
@@ -131,4 +132,4 @@ function note2sec(num, note, bpm) {
   return num === 0 ? 0 : ticks2sec((4 / num) * 480 * acc, bpm);
 }
 
-module.exports = NeuTransport;
+module.exports = neume.Transport = NeuTransport;

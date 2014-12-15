@@ -5,6 +5,10 @@ require("./shim");
 var util = require("../util");
 var neume = require("../namespace");
 
+require("../component");
+require("../control");
+require("../synth");
+
 function Neume(context) {
   function fn(spec) {
     return new neume.SynthDef(context, spec);
@@ -158,24 +162,8 @@ neume.util = util;
 neume.KVS = require("./kvs");
 neume.Context = require("./context");
 neume.Transport = require("./transport");
-neume.Component = require("../component/component");
-neume.DC = require("../component/dc");
-neume.DryWet = require("../component/drywet");
-neume.Mul = require("../component/mul");
-neume.Sum = require("../component/sum");
-neume.Param = require("../component/param");
-neume.AudioBus = require("../control/audio-bus");
-neume.Buffer = require("../control/buffer");
-neume.Sched = require("../control/sched");
-neume.Interval = require("../control/interval");
-neume.Timeout = require("../control/timeout");
 neume.FFT = require("../dsp/fft");
 neume.Emitter = require("../event/emitter");
-neume.SynthDB = require("../synth/db");
-neume.Synth = require("../synth/synth");
-neume.SynthDef = require("../synth/synthdef");
-neume.UGen = require("../synth/ugen");
-neume.Unit = require("../synth/unit");
 
 (function(C) {
   Object.keys(C).forEach(function(key) {

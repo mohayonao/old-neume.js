@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 
 function NeuSched(context, schedTime, callback) {
   this.$context = context;
@@ -107,4 +108,4 @@ NeuSched.prototype._onsched = function(t0) {
   this._stateString = "FINISHED";
 };
 
-module.exports = NeuSched;
+module.exports = neume.Sched = NeuSched;

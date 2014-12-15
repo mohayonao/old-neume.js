@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 
 var INIT = 0;
 var START = 1;
@@ -39,4 +40,4 @@ NeuUnit.prototype.toAudioNode = function() {
   return this.$outlet;
 };
 
-module.exports = NeuUnit;
+module.exports = neume.Unit = NeuUnit;

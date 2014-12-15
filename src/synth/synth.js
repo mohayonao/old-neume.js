@@ -3,7 +3,8 @@
 var util = require("../util");
 var neume = require("../namespace");
 var NeuSynthDB = require("./db");
-var NeuSynthDollar = require("./dollar");
+
+require("./dollar");
 
 var EMPTY_DB = new NeuSynthDB();
 var INIT = 0;
@@ -15,7 +16,7 @@ function NeuSynth(context, func, args) {
   this.$routes = [];
   this.$localBuses = [];
 
-  var $ = new NeuSynthDollar(this);
+  var $ = new neume.SynthDollar(this);
 
   this.$builder = $.builder;
 
@@ -324,4 +325,4 @@ function parseEvent(event) {
   return { selector: matched[1], name: matched[2] };
 }
 
-module.exports = NeuSynth;
+module.exports = neume.Synth = NeuSynth;

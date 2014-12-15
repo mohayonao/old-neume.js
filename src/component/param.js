@@ -2,11 +2,12 @@
 
 var util = require("../util");
 var neume = require("../namespace");
-var NeuComponent = require("./component");
+
+require("./component");
 
 function NeuParam(context, value, spec) {
   spec = spec || {};
-  NeuComponent.call(this, context);
+  neume.Component.call(this, context);
   this._value = util.finite(value);
   this._params = [];
   this._events = [];
@@ -14,7 +15,7 @@ function NeuParam(context, value, spec) {
   this._lag = util.defaults(spec.lag, 0);
   this._scheduled = null;
 }
-util.inherits(NeuParam, NeuComponent);
+util.inherits(NeuParam, neume.Component);
 
 NeuParam.$name = "NeuParam";
 
@@ -343,4 +344,4 @@ function calcValueCurve(v, t, t0, t1, curve) {
   return util.defaults(curve[(curve.length * dt)|0], v);
 }
 
-module.exports = NeuParam;
+module.exports = neume.Param = NeuParam;

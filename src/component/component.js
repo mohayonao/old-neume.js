@@ -39,4 +39,4 @@ NeuComponent.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = NeuComponent;
+module.exports = neume.Component = NeuComponent;

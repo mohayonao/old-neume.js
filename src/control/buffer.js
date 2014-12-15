@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require("../util");
+var neume = require("../namespace");
 var FFT = require("../dsp/fft");
 
 function NeuBuffer(context, buffer) {
@@ -296,4 +297,4 @@ function resample1(data, size) {
   return result;
 }
 
-module.exports = NeuBuffer;
+module.exports = neume.Buffer = NeuBuffer;

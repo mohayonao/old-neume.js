@@ -347,4 +347,4 @@ function onaudioprocess(e) {
   }
 }
 
-module.exports = NeuContext;
+module.exports = neume.Context = NeuContext;
