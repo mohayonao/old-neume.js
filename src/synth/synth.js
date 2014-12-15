@@ -87,9 +87,30 @@ function NeuSynth(context, func, args) {
 }
 NeuSynth.$name = "NeuSynth";
 
-NeuSynth.prototype.find = function(selector) {
-  return this._db.find(Parser.parse(selector));
+NeuSynth.prototype.query = function(selector) {
+  var array = this._db.find(Parser.parse(selector));
+
+  [
+    "on", "once", "off"
+  ].concat(this.methods).forEach(function(methodName) {
+    array[methodName] = function() {
+      var args = util.toArray(arguments);
+      array.forEach(function(ugen) {
+        if (typeof ugen[methodName] === "function") {
+          ugen[methodName].apply(ugen, args);
+        }
+      });
+      return array;
+    };
+  });
+
+  return array;
 };
+
+/**
+* @deprecated since version 0.5.0
+*/
+NeuSynth.prototype.find = NeuSynth.prototype.query;
 
 NeuSynth.prototype.start = function(startTime) {
   var context = this.$context;

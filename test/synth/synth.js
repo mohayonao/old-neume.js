@@ -2,6 +2,9 @@
 
 var neume = require("../../src");
 
+neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/array"));
+
 var NOP = function() {};
 
 describe("neume.Synth", function() {
@@ -61,19 +64,26 @@ describe("neume.Synth", function() {
     }));
   });
 
-  describe("#find", function() {
+  describe("#query", function() {
     it("(selector: string): Array<neume.UGen>", function() {
-      var a, b, c;
+      var a, b, c, d, spy;
       var synth = new neume.Synth(context, function($) {
         a = $("sin");
         b = $("tri");
         c = $("sin");
-        return $("+", a, b, c);
+        d = $([ 1 ]);
+        spy = sinon.spy(a, "on");
+        return $("+", a, b, c, d);
       }, []);
 
-      assert.deepEqual(synth.find("sin"), [ a, c ]);
-      assert.deepEqual(synth.find("tri"), [ b ]);
-      assert.deepEqual(synth.find("saw"), []);
+      assert.deepEqual(synth.query("sin").slice(), [ a, c ]);
+      assert.deepEqual(synth.query("tri").slice(), [ b ]);
+      assert.deepEqual(synth.query("saw").slice(), []);
+
+      assert(synth.query("sin").on("foo", it).slice(), [ a, c ]);
+      assert(synth.query("sin").next().slice(), [ a, c ]);
+      assert(spy.calledOnce);
+      assert(spy.calledWith("foo", it));
     });
   });
 
