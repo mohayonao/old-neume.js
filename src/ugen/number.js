@@ -3,20 +3,25 @@ module.exports = function(neume, util) {
 
   /**
    * $(number, {
-   *   tC: [number] = 0
-   * } ... inputs)
+   *   curve: string|number = "step",
+   *   lag: timevalue = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * methods:
-   *   setValue(t, value)
+   *   setValue(startTime: timevalue, value: number)
    *
-   * +--------+      +-------+
-   * | inputs |  or  | DC(1) |
-   * +--------+      +-------+
-   *   ||||||
-   * +---------------+
-   * | GainNode      |
-   * | - gain: value |
-   * +---------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +----------+
+   * | GainNode |
+   * | - gain: <--- number
+   * +----------+
    *   |
    */
   neume.register("number", function(ugen, spec, inputs) {
@@ -30,17 +35,14 @@ module.exports = function(neume, util) {
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
     function setValue(e) {
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
       var value = util.defaults(e.value, e.count, 0);
       if (util.isFinite(value)) {
-        context.sched(t0, function(startTime) {
-          update(value, startTime);
-        });
+        update(value, e.playbackTime);
       }
     }
 
     function update(value, startTime) {
-      param.update(value, startTime);
+      param.update(value, util.finite(context.toSeconds(startTime)));
     }
 
     return new neume.Unit({

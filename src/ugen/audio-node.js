@@ -1,6 +1,25 @@
 module.exports = function(neume) {
   "use strict";
 
+  /**
+   * $(AudioNode, {
+   *   [attributes],
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
+   *
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   *  +-----------+
+   *  | AudioNode |
+   *  +-----------+
+   *    |
+   */
+
   [
     "AudioBufferSourceNode",
     "MediaElementAudioSourceNode",

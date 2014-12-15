@@ -56,24 +56,6 @@ describe("neume.SynthDollar", function() {
         }, TypeError);
       });
     });
-    describe(".method", function() {
-      it("(methodName: string, func: function): void", function() {
-        var passed = null;
-        var synth = new neume.Synth(context, function($) {
-          $.method("func", function(a, b) {
-            passed = [ "func", a, b ];
-          });
-          $.method("****", function( a, b) {
-            passed = [ "****", a, b ];
-          });
-        });
-
-        assert.deepEqual(synth.methods, [ "func" ]);
-
-        synth.func(1, 2);
-        assert.deepEqual(passed, [ "func", 1, 2 ]);
-      });
-    });
     describe(".timeout", function() {
       it("(timeout: number, ...callbacks: Array<function>): void", function() {
         var passed = [];

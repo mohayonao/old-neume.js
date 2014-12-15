@@ -48,22 +48,4 @@ describe("neume.Unit", function() {
     });
   });
 
-  describe("#apply", function() {
-    it("(method: string, args: Array<any>): self", function() {
-      var spy = sinon.spy(spec.methods, "bang");
-
-      unit.apply("bang", [ 1, 2, 3 ]);
-      unit.apply("bong", [ 4, 5, 6 ]);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ 1, 2, 3 ]);
-    });
-  });
-
-  describe("#toAudioNode", function() {
-    it("(): AudioNode", function() {
-      assert(unit.toAudioNode() instanceof global.AudioNode);
-    });
-  });
-
 });

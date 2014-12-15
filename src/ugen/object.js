@@ -1,6 +1,35 @@
 module.exports = function(neume, util) {
   "use strict";
 
+  /**
+  * $(object, {
+  *   key: string|number = "",
+  *   curve: string|number = "step",
+  *   lag: timevalue = 0,
+  *   mul: signal = 1,
+  *   add: signal = 0,
+  * }, ...inputs: signal)
+  *
+  * $(Float32Array, {
+  *   key: number = 0,
+  *   curve: string|number = "step",
+  *   lag: timevalue = 0,
+  *   mul: signal = 1,
+  *   add: signal = 0,
+  * }, ...inputs: signal)
+  *
+  * +-----------+     +-----------+
+  * | inputs[0] | ... | inputs[N] |
+  * +-----------+     +-----------+
+  *   |                 |
+  *   +-----------------+
+  *   |
+  * +----------+
+  * | GainNode |
+  * | - gain: <--- value
+  * +----------+
+  *   |
+  */
   neume.register("object", make);
   neume.register("Float32Array", make);
 

@@ -5,12 +5,12 @@ module.exports = function(neume, util) {
 
   /**
    * $("lfpulse", {
-   *  freq: audiolet=440,
-   *  detune: audiolet=0,
-   *  width: audiolet=0.5,
-   *  mul: audiolet=1,
-   *  add: audiolet=0,
-   * }, ...inputs:audiolet)
+   *   frequency: signal = 440,
+   *   detune: signal = 0,
+   *   width: signal = 0.5,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs:signal)
    *
    * +----------------------+  +-------+  +-------+
    * | OscillatorNode       |  | DC(1) |  | DC(1) |

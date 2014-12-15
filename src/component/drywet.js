@@ -3,7 +3,8 @@
 var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
-var NeuComponent = require("./component");
+
+require("./component");
 
 var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
 var curveWet = new Float32Array(WS_CURVE_SIZE);
@@ -21,7 +22,7 @@ var curveDry = new Float32Array(WS_CURVE_SIZE);
 })();
 
 function NeuDryWet(context, dryIn, wetIn, mixIn) {
-  NeuComponent.call(this, context);
+  neume.Component.call(this, context);
 
   mixIn = mixIn.valueOf();
 
@@ -38,7 +39,7 @@ function NeuDryWet(context, dryIn, wetIn, mixIn) {
   this._wetIn = wetIn;
   this._mixIn = mixIn;
 }
-util.inherits(NeuDryWet, NeuComponent);
+util.inherits(NeuDryWet, neume.Component);
 
 NeuDryWet.$name = "NeuDryWet";
 
@@ -111,4 +112,4 @@ function createMixNodeWithNode(context, dryIn, wetIn, mixIn) {
   return mixNode;
 }
 
-module.exports = NeuDryWet;
+module.exports = neume.DryWet = NeuDryWet;

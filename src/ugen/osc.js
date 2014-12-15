@@ -5,39 +5,38 @@ module.exports = function(neume, util) {
 
   /**
    * $("osc", {
-   *   type: [string|PeriodicWave]="sin",
-   *   freq: [number|UGen]=440,
-   *   dt: [number|UGen]=0
-   * } ... inputs)
+   *   type: string|PeriodicWave = "sin",
+   *   frequency: signal = 440,
+   *   detune: signal = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * aliases:
    *   $("sin"), $("square"), $("saw"), $("tri"), $(PeriodicWave)
-   *
-   * start:
-   *   start OscillatorNode
-   *
-   * stop:
-   *   stop OscillatorNode
-   *
    *
    * no inputs
    * +------------------------+
    * | OscillatorNode         |
    * | - type: type           |
-   * | - frequency: freq(440) |
-   * | - detune: detune(0)    |
+   * | - frequency: frequency |
+   * | - detune: detune       |
    * +------------------------+
    *   |
    *
    * has inputs
-   * +--------+
-   * | inputs |
-   * +--------+     +----------------------+
-   *   ||||||       | OscillatorNode       |
-   * +-----------+  | - type: type         |
-   * | GainNode  |  | - frequency: freq(2) |
-   * | - gain: 0 |--| - detune: detune(0)  |
-   * +-----------+  +----------------------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   *   |             +------------------------+
+   *   |             | OscillatorNode         |
+   * +-----------+   | - type: type           |
+   * | GainNode  |   | - frequency: frequency |
+   * | - gain: 0 <---| - detune: detune       |
+   * +-----------+   +------------------------+
    *   |
    */
 

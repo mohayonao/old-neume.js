@@ -1,24 +1,24 @@
 "use strict";
 
 var util = require("../util");
-var NeuParam = require("../component/param");
-var NeuSynthDB = require("./db");
-var NeuUGen = require("./ugen");
+var neume = require("../namespace");
+
+require("../component/param");
+require("./ugen");
 
 function NeuSynthDollar(synth) {
-  var db = new NeuSynthDB();
+  var db = new neume.DB();
 
   this.db = db;
   this.params = {};
-  this.methods = {};
   this.timers = [];
 
   function builder() {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isDictionary(args[0]) ? args.shift() : {};
-    var inputs = Array.prototype.concat.apply([], args);
-    var ugen = NeuUGen.build(synth, key, spec, inputs);
+    var inputs = util.flatten(args);
+    var ugen = neume.UGen.build(synth, key, spec, inputs);
 
     db.append(ugen);
 
@@ -26,7 +26,6 @@ function NeuSynthDollar(synth) {
   }
 
   builder.param = $param(synth, this.params);
-  builder.method = $method(synth, this.methods);
   builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
   builder.stop = $stop(synth);
@@ -44,7 +43,7 @@ function $param(synth, params) {
 
     validateParam(name, defaultValue);
 
-    var param = new NeuParam(synth.$context, defaultValue);
+    var param = new neume.Param(synth.$context, defaultValue);
 
     Object.defineProperty(synth, name, {
       value: param,
@@ -54,14 +53,6 @@ function $param(synth, params) {
     params[name] = param;
 
     return param;
-  };
-}
-
-function $method(synth, methods) {
-  return function(methodName, func) {
-    if (/^[a-z]\w*$/.test(methodName) && typeof func === "function") {
-      methods[methodName] = func;
-    }
   };
 }
 
@@ -172,4 +163,4 @@ function validateParam(name) {
   }
 }
 
-module.exports = NeuSynthDollar;
+module.exports = neume.SynthDollar = NeuSynthDollar;

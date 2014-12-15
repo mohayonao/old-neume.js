@@ -1,19 +1,19 @@
 module.exports = function(neume, util) {
   "use strict";
 
-  /*
+  /**
+   * $("*", {
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
+   *
    * +-----------+
    * | inputs[0] |
    * +-----------+
    *   |
    * +-----------+
    * | GainNode  |  +-----------+
-   * | - gain: 0 |--| inputs[1] |
-   * +-----------+  +-----------+
-   *   |
-   * +-----------+
-   * | GainNode  |  +-----------+
-   * | - gain: 0 |--| inputs[2] |
+   * | - gain: 0 <--| inputs[N] |
    * +-----------+  +-----------+
    *   |
    * +------------------+

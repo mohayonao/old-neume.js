@@ -3,30 +3,26 @@ module.exports = function(neume, util) {
 
   /**
    * $("buf", {
-   *   buf: [AudioBuffer|NeuBuffer] = null
-   *   rate: [number|UGen] = 1
-   *   loop: [boolean] = false
-   *   start: [number] = 0
-   *   end: [number] = 0
+   *   buffer: AudioBuffer|neume.Buffer = null,
+   *   playbackRate: signal = 1,
+   *   loop: boolean = false,
+   *   loopStart: number = 0,
+   *   loopEnd: number = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
    * })
    *
    * aliases:
-   *   $(AudioBuffer), $(NeuBuffer)
+   *   $(AudioBuffer), $(neume.Buffer)
    *
-   * start:
-   *   start BufferSourceNode
-   *
-   * stop:
-   *   stop BufferSourceNode
-   *
-   * +-------------------------+
-   * | BufferSourceNode        |
-   * | - buffer: buf(null)     |
-   * | - playbackRate: rate(1) |
-   * | - loop: loop(false)     |
-   * | - loopStart: start(0)   |
-   * | - loopEnd: end(0)       |
-   * +-------------------------+
+   * +------------------------------+
+   * | BufferSourceNode             |
+   * | - buffer: buffer             |
+   * | - playbackRate: playbackRate |
+   * | - loop: loop                 |
+   * | - loopStart: loopStart       |
+   * | - loopEnd: loopEnd           |
+   * +------------------------------+
    *   |
    */
   neume.register("buf", function(ugen, spec) {

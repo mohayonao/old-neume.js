@@ -5,15 +5,21 @@ module.exports = function(neume, util) {
 
   /**
    * $("delay", {
-   *   delayTime: [number|UGen] = 0
-   *   feedback: [number|UGen] = 0
-   *   maxDelay: [number] = delay
-   * } ... inputs)
+   *   delayTime: signal = 0,
+   *   feedback: signal = 0,
+   *   maxDelayTime: number = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
-   * +--------+
-   * | inputs |
-   * +--------+             +-----+
-   *   ||||||               |     |
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   *   |                    +-----+
+   *   |                    |     |
    * +------------------------+   |
    * | DelayNode              |   |
    * | - delayTime: delayTime |   |

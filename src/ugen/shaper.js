@@ -6,16 +6,20 @@ module.exports = function(neume, util) {
 
   /**
    * $("shaper", {
-   *   curve: [Float32Array|number] = 0
-   * } ... inputs)
+   *   curve: Float32Array|number = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
    * aliases:
    *   $("clip")
    *
-   * +--------+
-   * | inputs |
-   * +--------+
-   *   ||||||
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
    * +--------------------------+
    * | WaveShaperNode           |
    * | - curve: curve           |

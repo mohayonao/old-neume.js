@@ -2,17 +2,20 @@
 
 var neume = require("../../src");
 
+neume.use(require("../../src/ugen/osc"));
+neume.use(require("../../src/ugen/add"));
+neume.use(require("../../src/ugen/env"));
+neume.use(require("../../src/ugen/array"));
+
 var NOP = function() {};
 
 describe("neume.Synth", function() {
   var audioContext = null;
   var context = null;
-  var osc = null;
 
   beforeEach(function() {
     audioContext = new global.AudioContext();
     context = new neume.Context(audioContext.destination);
-    osc = context.createOscillator();
   });
 
   describe("constructor", function() {
@@ -61,19 +64,26 @@ describe("neume.Synth", function() {
     }));
   });
 
-  describe("#find", function() {
+  describe("#query", function() {
     it("(selector: string): Array<neume.UGen>", function() {
-      var a, b, c;
+      var a, b, c, d, spy;
       var synth = new neume.Synth(context, function($) {
         a = $("sin");
         b = $("tri");
         c = $("sin");
-        return $("+", a, b, c);
+        d = $([ 1 ]);
+        spy = sinon.spy(a, "on");
+        return $("+", a, b, c, d);
       }, []);
 
-      assert.deepEqual(synth.find("sin"), [ a, c ]);
-      assert.deepEqual(synth.find("tri"), [ b ]);
-      assert.deepEqual(synth.find("saw"), []);
+      assert.deepEqual(synth.query("sin").slice(), [ a, c ]);
+      assert.deepEqual(synth.query("tri").slice(), [ b ]);
+      assert.deepEqual(synth.query("saw").slice(), []);
+
+      assert(synth.query("sin").on("foo", it).slice(), [ a, c ]);
+      assert(synth.query("sin").next().slice(), [ a, c ]);
+      assert(spy.calledOnce);
+      assert(spy.calledWith("foo", it));
     });
   });
 
@@ -104,12 +114,13 @@ describe("neume.Synth", function() {
       audioContext.$processTo("00:00.500");
       assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.called === true, "00:00.500");
+        assert(ugen.$unit.start.called === false, "00:00.500");
       });
 
       audioContext.$processTo("00:01.000");
       assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
+        assert(ugen.$unit.start.called === true, "00:01.000");
         assert(ugen.$unit.start.calledOnce === true, "00:01.000");
         assert.deepEqual(ugen.$unit.start.firstCall.args, [ 1 ]);
       });
@@ -174,6 +185,25 @@ describe("neume.Synth", function() {
 
       audioContext.$processTo("00:02.250");
     }));
+  });
+
+  describe("#trig", function() {
+    it("(startTime: timevalue): self", function() {
+      var spy1, spy2;
+      var synth = new neume.Synth(context, function($) {
+        var a = $("sin"), b = $("saw");
+        spy1 = sinon.spy(a, "trig");
+        spy2 = sinon.spy(b, "trig");
+        return $("+", a, b);
+      });
+
+      assert(synth.trig(0.5) === synth);
+
+      assert(spy1.calledOnce);
+      assert(spy1.calledWith(0.5));
+      assert(spy2.calledOnce);
+      assert(spy2.calledWith(0.5));
+    });
   });
 
   describe("#fadeIn", function() {
@@ -314,182 +344,102 @@ describe("neume.Synth", function() {
     });
   });
 
-  describe("#call", function() {
-    it("r(method: string, ...args: Array<any>): self", function() {
-      var synth = new neume.Synth(context, NOP, []);
+  describe("#hasListeners", function() {
+    it("(event: string): boolean", function() {
+      var synth = new neume.Synth(context, function($) {
+        return $("+", $("sin"), $("saw"));
+      });
 
-      assert(synth.call() === synth);
-    });
-    it("calls #apply(method, args)", function() {
-      var synth = new neume.Synth(context, NOP, []);
-      var spy = sinon.spy(synth, "apply");
+      synth.query("sin").on("foo", it);
+      synth.query("saw").on("foo", it).on("bar", it);
 
-      synth.call("method", 1, 2, 3);
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ "method", [ 1, 2, 3 ] ]);
+      assert(synth.hasListeners("foo") === true);
+      assert(synth.hasListeners("bar") === true);
+      assert(synth.hasListeners("baz") === false);
     });
   });
 
-  describe("works", function() {
-    var synth = null;
-    var ugen1 = null;
-    var ugen2 = null;
-    var ugen3 = null;
-    var ugen4 = null;
-    var passed = null;
-    var bang = null;
+  describe("#listeners", function() {
+    it("(event: string): Array<function>", function() {
+      var synth = new neume.Synth(context, function($) {
+        return $("+", $("sin"), $("saw"));
+      });
 
-    beforeEach(function() {
-      passed = [];
-      bang = false;
-      synth = new neume.Synth(context, function($) {
-        ugen1 = $("line#ugen1.amp");
-        ugen2 = $("adsr#ugen2.amp");
-        ugen3 = $("line#ugen3.fo");
-        ugen4 = $("adsr#ugen4.lfo");
+      synth.query("sin").on("foo", it);
+      synth.query("saw").on("foo", it).on("bar", describe);
 
-        $.method("bang", function() {
-          bang = true;
-        });
-
-        return $("+", ugen1, ugen2, ugen3, ugen4);
-      }, []);
+      assert.deepEqual(synth.listeners("foo"), [ it ]);
+      assert.deepEqual(synth.listeners("bar"), [ describe ]);
+      assert.deepEqual(synth.listeners("bax"), []);
     });
+  });
 
-    describe("#apply", function() {
-      it("(method: string, args: Array<any>): self", function() {
-        assert(synth.apply() === synth);
+  describe("#on", function() {
+    it("(event: string, listener:function): self", function() {
+      var spy1, spy2;
+      var synth = new neume.Synth(context, function($) {
+        var a = $("sin"), b = $("saw");
+        spy1 = sinon.spy(a, "on");
+        spy2 = sinon.spy(b, "on");
+        return $("+", a, b);
       });
 
-      it("calls ugen.$unit.apply(method, args)", function() {
-        synth.apply(".amp:release", [ 10, 20 ]);
-        //
-        // assert.deepEqual(passed, [
-        //   [ "ugen1", "release", [ 10, 20 ]],
-        //   [ "ugen2", "release", [ 10, 20 ]],
-        // ]);
-      });
+      assert(synth.on("foo", it) === synth);
+
+      assert(spy1.calledOnce);
+      assert(spy1.calledWith("foo", it));
+      assert(spy2.calledOnce);
+      assert(spy2.calledWith("foo", it));
     });
+  });
 
-    describe("#hasListeners", function() {
-      it("(event: string): boolean", function() {
-        synth.on(".amp:end", it);
-
-        assert(synth.hasListeners("end") === true);
-        assert(synth.hasListeners("line:end") === true);
-        assert(synth.hasListeners("adsr:end") === true);
-        assert(synth.hasListeners("#ugen1:end") === true);
-        assert(synth.hasListeners("#ugen2:end") === true);
-        assert(synth.hasListeners("#ugen3:end") === false);
-        assert(synth.hasListeners("#ugen4:end") === false);
-        assert(synth.hasListeners(".amp:end") === true);
-        assert(synth.hasListeners(".lfo:end") === false);
-        assert(synth.hasListeners("done") === false);
+  describe("#once", function() {
+    it("(event: string, listener:function): self", function() {
+      var spy1, spy2;
+      var synth = new neume.Synth(context, function($) {
+        var a = $("sin"), b = $("saw");
+        spy1 = sinon.spy(a, "once");
+        spy2 = sinon.spy(b, "once");
+        return $("+", a, b);
       });
-      it("case of an invalid event name", function() {
-        synth.on("*", it);
 
-        assert(synth.hasListeners("*") === false);
-      });
+      assert(synth.once("foo", it) === synth);
+
+      assert(spy1.calledOnce);
+      assert(spy1.calledWith("foo", it));
+      assert(spy2.calledOnce);
+      assert(spy2.calledWith("foo", it));
     });
+  });
 
-    describe("#listeners", function() {
-      it("(event: string): Array<function>", function() {
-        synth.on("end", it);
-
-        assert.deepEqual(synth.listeners("end"), [ it ]);
+  describe("#off", function() {
+    it("(event: string, listener:function): self", function() {
+      var spy1, spy2;
+      var synth = new neume.Synth(context, function($) {
+        var a = $("sin"), b = $("saw");
+        spy1 = sinon.spy(a, "off");
+        spy2 = sinon.spy(b, "off");
+        return $("+", a, b);
       });
+
+      assert(synth.off("foo", it) === synth);
+
+      assert(spy1.calledOnce);
+      assert(spy1.calledWith("foo", it));
+      assert(spy2.calledOnce);
+      assert(spy2.calledWith("foo", it));
     });
+  });
 
-    describe("#on", function() {
-      it("(event: string, listener: function): self", function() {
-        assert(synth.on("end", it) === synth);
+  describe("method bindings", function() {
+    it("works", function() {
+      var synth = new neume.Synth(context, function($) {
+        return $("sin").$("env");
       });
-      it("adds the listener to event targets", function() {
-        var passed = [];
-        var listener = function(n) {
-          passed.push(n);
-        };
 
-        synth.on(".amp:end", listener);
-
-        ugen1.emit("end", 1); // .amp *
-        ugen2.emit("end", 2); // .amp *
-        ugen3.emit("end", 3); // .lfo
-        ugen4.emit("end", 4); // .lfo
-
-        ugen1.emit("end", 1); // .amp *
-        ugen2.emit("end", 2); // .amp *
-        ugen3.emit("end", 3); // .lfo
-        ugen4.emit("end", 4); // .lfo
-
-        assert.deepEqual(passed, [ 1, 2, 1, 2 ]);
-      });
+      assert(synth.release() === synth);
+      assert(synth.release(0) === synth);
     });
-
-    describe("#once", function() {
-      it("(event: string, listener: function): self", function() {
-        assert(synth.once("end", it) === synth);
-      });
-      it("adds the single-shot listener to event targets", function() {
-        var passed = [];
-        var listener = function(n) {
-          passed.push(n);
-        };
-
-        synth.once("line:end", listener);
-
-        ugen1.emit("end", 1); // line *
-        ugen2.emit("end", 2); // adsr
-        ugen3.emit("end", 3); // line *
-        ugen4.emit("end", 4); // adsr
-
-        ugen1.emit("end", 1); // line
-        ugen2.emit("end", 2); // adsr
-        ugen3.emit("end", 3); // line
-        ugen4.emit("end", 4); // adsr
-
-        assert.deepEqual(passed, [ 1, 3 ]);
-      });
-    });
-
-    describe("#off", function() {
-      it("(event: string, listener: function): self", function() {
-        assert(synth.off("end", it) === synth);
-      });
-      it("removes the listener from event targets", function() {
-        var passed = [];
-        var listener = function(n) {
-          passed.push(n);
-        };
-
-        synth.on("end", listener);
-        synth.off("#ugen4:end", listener);
-
-        ugen1.emit("end", 1); // #ugen1 *
-        ugen2.emit("end", 2); // #ugen2 *
-        ugen3.emit("end", 3); // #ugen3 *
-        ugen4.emit("end", 4); // #ugen4
-
-        ugen1.emit("end", 1); // #ugen1 *
-        ugen2.emit("end", 2); // #ugen2 *
-        ugen3.emit("end", 3); // #ugen3 *
-        ugen4.emit("end", 4); // #ugen4
-
-        assert.deepEqual(passed, [ 1, 2, 3, 1, 2, 3 ]);
-      });
-    });
-
-    describe("method bindings", function() {
-      it("works", function() {
-        assert(synth.release() === synth);
-        assert(synth.release(0) === synth);
-        assert(synth.bang() === synth);
-        assert(bang === true);
-      });
-    });
-
   });
 
 });

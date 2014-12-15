@@ -1,7 +1,8 @@
 "use strict";
 
 var util = require("../util");
-var FFT = require("../dsp/fft");
+var neume = require("../namespace");
+var FFT = require("../util/fft");
 
 function NeuBuffer(context, buffer) {
   this.$context = context;
@@ -42,10 +43,18 @@ NeuBuffer.create = function(context, channels, length, sampleRate) {
   return new NeuBuffer(context, context.createBuffer(channels, length, sampleRate));
 };
 
-NeuBuffer.from = function(context, data) {
-  var buffer = context.createBuffer(1, data.length, context.sampleRate);
+NeuBuffer.from = function(context) {
+  var args = util.toArray(arguments).slice(1);
+  var numberOfChannels = args.length;
+  var length = args.reduce(function(a, b) {
+    return Math.max(a, b.length);
+  }, 0);
 
-  buffer.getChannelData(0).set(data);
+  var buffer = context.createBuffer(numberOfChannels, length, context.sampleRate);
+
+  for (var i = 0; i < numberOfChannels; i++) {
+    buffer.getChannelData(i).set(args[i]);
+  }
 
   return new NeuBuffer(context, buffer);
 };
@@ -296,4 +305,4 @@ function resample1(data, size) {
   return result;
 }
 
-module.exports = NeuBuffer;
+module.exports = neume.Buffer = NeuBuffer;

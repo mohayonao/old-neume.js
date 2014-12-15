@@ -29,4 +29,4 @@ function NeuSynthDef(defaultContext, func) {
   return SynthDef;
 }
 
-module.exports = NeuSynthDef;
+module.exports = neume.SynthDef = NeuSynthDef;

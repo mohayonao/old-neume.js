@@ -2,6 +2,7 @@
 
 var C = require("../const");
 var util = require("../util");
+var neume = require("../namespace");
 
 function NeuAudioBus(context) {
   this.$context = context;
@@ -92,4 +93,4 @@ NeuAudioBus.prototype.ondisconnected = function(from) {
   }
 };
 
-module.exports = NeuAudioBus;
+module.exports = neume.AudioBus = NeuAudioBus;

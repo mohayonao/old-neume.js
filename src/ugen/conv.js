@@ -3,19 +3,23 @@ module.exports = function(neume, util) {
 
   /**
    * $("conv", {
-   *   buf: [AudioBuffer|NeuBuffer] = null
-   *   normalize: [boolean] = true
-   * } ... inputs)
+   *   buffer: AudioBuffer|neume.Buffer = null,
+   *   normalize: boolean = true,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
    *
-   * +--------+
-   * | inputs |
-   * +--------+
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
    *   |
-   * +------------------------------+
-   * | ConvolverNode                |
-   * | - buffer: buffer(null)       |
-   * | - normalize: normalize(true) |
-   * +------------------------------+
+   * +------------------------+
+   * | ConvolverNode          |
+   * | - buffer: buffer       |
+   * | - normalize: normalize |
+   * +------------------------+
    *   |
    */
   neume.register("conv", function(ugen, spec, inputs) {

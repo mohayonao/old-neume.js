@@ -5,9 +5,14 @@ module.exports = function(neume) {
   var KVSKEY = "@neume:noise:";
 
   /**
-   * $("white")
+   * $("noise", {
+   *   type: string = "white",
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * })
    *
-   * $("pink")
+   * aliases:
+   * $("white"), $("pink"), $("brown")
    *
    * +------------------+
    * | BufferSourceNode |

@@ -47,6 +47,8 @@ describe("ugen/inout", function() {
 
       synth.start(0);
 
+      Neume.context.audioContext.$processTo("00:00.010");
+
       assert.deepEqual(synth.context.getAudioBus(1).toAudioNode().toJSON(), {
         name: "GainNode",
         gain: {

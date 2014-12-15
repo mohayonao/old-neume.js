@@ -2,15 +2,18 @@
 
 var util = require("../util");
 var neume = require("../namespace");
-var NeuComponent = require("./component");
+
+require("./component");
 
 function NeuSum(context, inputs) {
-  NeuComponent.call(this, context);
+  neume.Component.call(this, context);
 
   var number = 0;
   var hasNumber = false;
   var param = null;
   var nodes = [];
+
+  inputs = util.flatten(inputs);
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {
     var x = inputs[i].valueOf();
@@ -42,7 +45,7 @@ function NeuSum(context, inputs) {
   this._nodes = nodes;
   this._inputs = inputs;
 }
-util.inherits(NeuSum, NeuComponent);
+util.inherits(NeuSum, neume.Component);
 
 NeuSum.$name = "NeuSum";
 
@@ -106,4 +109,4 @@ NeuSum.prototype.disconnect = function() {
   return this;
 };
 
-module.exports = NeuSum;
+module.exports = neume.Sum = NeuSum;
