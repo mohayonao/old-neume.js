@@ -24,6 +24,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//mohayonao.github.io/gretro/build/gretro.min.js"></script>
   <script src="../build/neume.js"></script>
+  <script>_.mixin(neume._.exports());</script>
 </head>
 <body>
   <div class="container">
@@ -113,7 +114,7 @@
 
       instruments.forEach(function(instrument, i) {
         if (score[i][index].checked) {
-          var arg = wrapAt(instrument.arg, index);
+          var arg = _.wrapAt(instrument.arg, index);
 
           Neume.Synth(instrument.func, arg).start(e.playbackTime);
         }
@@ -131,10 +132,6 @@
     players.forEach(function(player) {
       player.stop();
     });
-  }
-
-  function wrapAt(list, index) {
-    return list[index % list.length];
   }
   </script>
 

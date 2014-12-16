@@ -38,10 +38,10 @@ module.exports = function(neume, util) {
     var index = 0;
     var data = spec.value;
     var mode = {
-      clip: util.clipAt,
-      wrap: util.wrapAt,
-      fold: util.foldAt,
-    }[spec.clip || spec.mode] || /* istanbul ignore next*/ util.clipAt;
+      clip: neume._.clipAt,
+      wrap: neume._.wrapAt,
+      fold: neume._.foldAt,
+    }[spec.clip || spec.mode] || /* istanbul ignore next*/ neume._.clipAt;
 
     if (!Array.isArray(data) || data.length === 0)  {
       data = [ 0 ];

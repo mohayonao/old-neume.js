@@ -11,6 +11,7 @@ require("../control");
 require("../synth");
 
 neume.util = util;
+neume._ = require("../util/underscore");
 neume.DB = require("../util/db");
 neume.Emitter = require("../util/emitter");
 neume.FFT = require("../util/fft");

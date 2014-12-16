@@ -35,9 +35,9 @@ $ bower install neume.js
 
 #### Downloads
 
-  - [neume.js](http://mohayonao.github.io/neume.js/build/neume.js)
-  - [neume.min.js](http://mohayonao.github.io/neume.js/build/neume.min.js)
-  - [neume.min.js.map](http://mohayonao.github.io/neume.js/build/neume.min.js.map)
+  - [neume.js](https://raw.githubusercontent.com/mohayonao/neume.js/master/build/neume.js)
+  - [neume.min.js](https://raw.githubusercontent.com/mohayonao/neume.js/master/build/neume.min.js)
+  - [neume.min.js.map](https://raw.githubusercontent.com/mohayonao/neume.js/master/build/neume.min.js.map)
 
 Neume.js is dependent on `Web Audio API` and `Promise`.
 

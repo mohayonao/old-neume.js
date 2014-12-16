@@ -21,6 +21,7 @@
   <script src="../build/neume.js"></script>
   <script src="../plugins/pluck.js"></script>
   <script src="../plugins/freeverb.js"></script>
+  <script>_.mixin(neume._.exports());</script>
 </head>
 <body>
   <div class="container">
@@ -45,7 +46,7 @@
   var visualizer = null;
 
   var score = _.range(8);
-  var freqs = [ 69, 71, 72, 76, 69, 71, 72, 76 ].map(mtof);
+  var freqs = [ 69, 71, 72, 76, 69, 71, 72, 76 ].map(_.midicps);
   var rates = [ 300/300, 299/300 ];
 
   function Pluck($, freq) {
@@ -69,10 +70,6 @@
     .$("out", { bus: 0 });
   }
 
-  function mtof(midi) {
-    return 440 * Math.pow(2, (midi - 69) / 12);
-  }
-
   var players = [];
 
   function start() {
@@ -80,7 +77,7 @@
 
     Neume.render(2.000, function(Neume) {
       Neume.Interval(0.250, function(e) {
-        var index = score[e.count % score.length] >> 1;
+        var index = _.wrapAt(score, e.count) >> 1;
         Neume.Synth(Pluck, freqs[index]).start(e.playbackTime);
       }).start();
     }).then(function(buffer) {
