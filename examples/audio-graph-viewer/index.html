@@ -29,16 +29,17 @@
   </div>
   <textarea id="editor"></textarea>
   <textarea id="result"></textarea>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/mode/javascript/javascript.min.js"></script>
   <script src="//mohayonao.github.io/web-audio-test-api/build/web-audio-test-api.js"></script>
   <script src="../../build/neume.js"></script>
   <script>
-  var Neume = neume(new AudioContext());
-  $(function() {
+  window.onload = function() {
     "use strict";
+    _.mixin(neume._.exports());
+
+    window.Neume = neume(new AudioContext());
 
     var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
       mode: "javascript", theme: "monokai", workTime: 200, lineNumbers: true,
@@ -65,7 +66,7 @@
       }
     }
 
-    $("#run").on("click", function() {
+    document.getElementById("run").addEventListener("click", function() {
       reset();
       eval.call(null, editor.getValue());
 
@@ -75,18 +76,18 @@
       timerId = setInterval(function() {
         update(node);
       }, 125);
-    });
+    }, false);
 
-    $("#stop").on("click", function() {
+    document.getElementById("stop").addEventListener("click", function() {
       reset();
-    });
+    }, false);
 
-    $("#link").on("click", function() {
+    document.getElementById("link").addEventListener("click", function() {
       window.location = "#" + window.encodeURIComponent(editor.getValue());
-    });
+    }, false);
 
     editor.setValue(window.decodeURIComponent(window.location.hash.substr(1)));
-  });
+  };
   </script>
 </body>
 </html>

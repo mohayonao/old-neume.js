@@ -19,6 +19,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="../build/neume.js"></script>
+  <script>_.mixin(neume._.exports());</script>
 </head>
 <body>
   <div class="container">
@@ -72,7 +73,7 @@
   glitch.fn = [];
 
   glitch.fn.push(function beep(buffer) {
-    if (Math.random() < 0.6 || buffer.length < 128) {
+    if (_.coin(0.6) || buffer.length < 128) {
       return buffer;
     }
     var a = _.random(0, buffer.length);

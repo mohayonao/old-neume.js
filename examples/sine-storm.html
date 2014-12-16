@@ -17,6 +17,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="../build/neume.js"></script>
+  <script>_.mixin(neume._.exports());</script>
 </head>
 <body>
   <div class="container">
@@ -44,7 +45,7 @@
   var root, chord;
 
   function Sine($, freq, mod, amp) {
-    return $("sin", { freq: $.param("freq", freq), detune: rand2(10)|0 })
+    return $("sin", { freq: $.param("freq", freq), detune: _.rand2(10) })
     .$("sin", { freq: $.param("mod", mod), mul: $.param("amp", amp) })
     .$("out", { bus: 1 });
   }
@@ -65,9 +66,9 @@
       var duration = compose();
 
       sines = _.range(7).map(function() {
-        var freq = midicps(root + _.sample(chord) + _.sample([ 0, 12, 24, 36 ]));
-        var mod = exprand(0.01, 500.0);
-        var amp = exprand(0.01, 0.075);
+        var freq = _.midicps(root + _.sample(chord) + _.sample([ 0, 12, 24, 36 ]));
+        var mod = _.exprand(0.01, 500.0);
+        var amp = _.exprand(0.01, 0.075);
 
         return Neume.Synth(Sine, freq, mod, amp)
         .fadeIn("now", 1).fadeOut("+" + duration, 1);
@@ -90,7 +91,7 @@
   }
 
   function compose() {
-    if (Math.random() < 0.75) {
+    if (_.coin(0.75)) {
       root = 36 + _.sample([ 0, 0, 0, 5, 7, 7 ]);
       chord = [ 0, 4, 5, 7, 11, 12 ];
     } else {
@@ -99,22 +100,6 @@
     }
 
     return _.sample([ 2.5, 5, 10, 15, 20, 25 ]);
-  }
-
-  function rand2(size) {
-    return (Math.random() * 2 - 1) * size;
-  }
-
-  function exprand(min, max) {
-    return linexp(Math.random(), 0, 1, min, max);
-  }
-
-  function midicps(midi) {
-    return 440 * Math.pow(2, (midi - 69) / 12);
-  }
-
-  function linexp(value, inMin, inMax, outMin, outMax) {
-    return Math.pow(outMax / outMin, (value - inMin) / (inMax - inMin)) * outMin;
   }
   </script>
 
@@ -135,7 +120,7 @@
         this._canvas.height = this.height;
         this._context = this._canvas.getContext("2d");
         this._context.fillStyle   = "rgba(0, 0, 0, 0.4)";
-        this._context.strokeStyle = "#c0c0c0";
+        this._context.strokeStyle = "#fff";
         this._context.lineWidth = 0.5;
         this._index = 0;
 
