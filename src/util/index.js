@@ -72,39 +72,6 @@ util.flatten = function(list) {
   }, []);
 };
 
-util.clipAt = function(list, index) {
-  return list[Math.max(0, Math.min(index|0, list.length - 1))];
-};
-
-util.wrapAt = function(list, index) {
-  index = index|0;
-
-  index %= list.length;
-  if (index < 0) {
-    index += list.length;
-  }
-
-  return list[index];
-};
-
-util.foldAt = function(list, index) {
-  index = index|0;
-
-  var len2 = list.length * 2 - 2;
-
-  index = index % len2;
-
-  if (index < 0) {
-    index += len2;
-  }
-
-  if (list.length <= index) {
-    index = len2 - index;
-  }
-
-  return list[index];
-};
-
 util.definePropertyIfNotExists = function(obj, prop, descriptor) {
   if (!obj.hasOwnProperty(prop)) {
     Object.defineProperty(obj, prop, descriptor);
