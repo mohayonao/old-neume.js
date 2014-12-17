@@ -2,6 +2,8 @@
 
 var neume = require("../../src");
 
+neume.use(require("../../src/ugen/osc"));
+
 var NOP = function() {};
 
 describe("neume.SynthDollar", function() {
@@ -26,29 +28,34 @@ describe("neume.SynthDollar", function() {
         synth, "sin", { freq: 880 }, [ 1, 2, 3 ]
       ]);
     }));
-    describe(".params", function() {
-      it("(name:string, defaultValue: number): neume.Param", function() {
+    it("works", sinon.test(function() {
+      var spy = this.spy(neume.UGen, "build");
+
+      var synth = new neume.Synth(context, function($) {
+        return $(10);
+      }, []);
+
+      assert(spy.calledOnce === true);
+    }));
+    describe("@params", function() {
+      it("works", function() {
         var params = {};
 
         var synth = new neume.Synth(context, function($) {
-          params.freq = $.param("freq", 440);
-          params.amp = $.param("amp", 0.25);
-          params.amp2 = $.param("amp");
+          params.freq = $("@freq", 440);
+          params.amp1 = $("@amp", 0.25);
+          params.amp2 = $("@amp");
         }, []);
 
-        assert(params.freq instanceof neume.Param);
-        assert(params.amp  instanceof neume.Param);
-        assert(params.freq === synth.freq);
-        assert(params.amp === synth.amp );
-        assert(params.amp === params.amp2);
-
-        synth.freq.value = 880;
-
-        assert(params.freq.value === 880);
+        assert(synth.freq instanceof neume.Param);
+        assert(synth.amp  instanceof neume.Param);
+        assert(params.freq instanceof neume.UGen);
+        assert(params.amp1 instanceof neume.UGen);
+        assert(params.amp1 === params.amp2);
       });
-      it("(invalidName:string, defaultValue: number): throw an error", function() {
+      it("invalidName -> throw an error", function() {
         var func = function($) {
-          $.param("*", Infinity);
+          $("@@", Infinity);
         };
 
         assert.throws(function() {

@@ -10,14 +10,22 @@ function NeuSynthDollar(synth) {
   var db = new neume.DB();
 
   this.db = db;
-  this.params = {};
   this.timers = [];
+
+  var atParam = createParamBuilder(synth);
 
   function builder() {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isDictionary(args[0]) ? args.shift() : {};
     var inputs = util.flatten(args);
+
+    if (typeof key === "string") {
+      if (key.charAt(0) === "@") {
+        return atParam(key.substr(1), spec, inputs[0]);
+      }
+    }
+
     var ugen = neume.UGen.build(synth, key, spec, inputs);
 
     db.append(ugen);
@@ -25,7 +33,6 @@ function NeuSynthDollar(synth) {
     return ugen;
   }
 
-  builder.param = $param(synth, this.params);
   builder.timeout = $timeout(synth, this.timers);
   builder.interval = $interval(synth, this.timers);
   builder.stop = $stop(synth);
@@ -33,26 +40,27 @@ function NeuSynthDollar(synth) {
   this.builder = builder;
 }
 
-function $param(synth, params) {
-  return function(name, defaultValue) {
+function createParamBuilder(synth) {
+  var params = {};
+
+  return function(name, spec, defaultValue) {
     if (params.hasOwnProperty(name)) {
       return params[name];
     }
+    validateParam(name, defaultValue);
 
     defaultValue = util.finite(util.defaults(defaultValue, 0));
 
-    validateParam(name, defaultValue);
-
-    var param = new neume.Param(synth.$context, defaultValue);
+    var param = new neume.Param(synth.$context, defaultValue, spec);
 
     Object.defineProperty(synth, name, {
       value: param,
       enumerable: true
     });
 
-    params[name] = param;
+    params[name] = neume.UGen.build(synth, "+", spec, [ param ]);
 
-    return param;
+    return params[name];
   };
 }
 
