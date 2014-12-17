@@ -1,6 +1,6 @@
 "use strict";
 
-var reUGenName = /^([a-zA-Z](-?[a-zA-Z0-9]+)*!?\??~?|[-+*\/%<=>!?&|@]+~?)/;
+var reUGenName = /^([a-zA-Z](-?[a-zA-Z0-9]+)*!?\??~?|[-+*\/%<=>!?&|]+~?)/;
 
 function isValidUGenName(name) {
   var exec = reUGenName.exec(name);

@@ -64,7 +64,7 @@ describe("neume.UGen", function() {
   describe(".register", function() {
     it("(name: string, func: function): void", function() {
       [
-        "fb-sin", "DX7", "OD-1", "<@-@>"
+        "fb-sin", "DX7", "OD-1", "<*-*>"
       ].forEach(function(ok) {
         assert.doesNotThrow(function() {
           neume.UGen.register(ok, NOP);

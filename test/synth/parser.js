@@ -10,7 +10,7 @@ describe("Parser", function() {
       assert(Parser.isValidUGenName("s-i-n-e"));
       assert(Parser.isValidUGenName("DX7"));
       assert(Parser.isValidUGenName("OD-1"));
-      assert(Parser.isValidUGenName("<@-@>"));
+      assert(Parser.isValidUGenName("<*-*>"));
       assert(Parser.isValidUGenName("sin!"));
       assert(Parser.isValidUGenName("sin?"));
       assert(Parser.isValidUGenName("sin!?"));
