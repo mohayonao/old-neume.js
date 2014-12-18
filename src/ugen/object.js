@@ -37,8 +37,8 @@ module.exports = function(neume, util) {
     var context = ugen.$context;
 
     var data = util.defaults(spec.value, 0);
-    var key = util.defaults(spec.key, "");
-    var interval = util.defaults(spec.interval, 0.250);
+    var key = util.defaults(spec.i, spec.index, spec.key, "");
+    var interval = util.defaults(spec.poll, spec.pollTime, spec.interval, 0.250);
     var schedId = 0;
     var valueOf = null;
 

@@ -31,16 +31,16 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("line", function(ugen, spec, inputs) {
-    var startValue = util.finite(util.defaults(spec.start, spec.startValue, 1));
-    var endValue = util.finite(util.defaults(spec.end, spec.endValue, 0));
-    var duration = util.finite(util.defaults(ugen.$context.toSeconds(spec.dur, spec.duration), 1));
+    var startValue = util.finite(util.defaults(spec.start, spec.startValue, spec.from, 1));
+    var endValue = util.finite(util.defaults(spec.end, spec.endValue, spec.to, 0));
+    var duration = util.finite(ugen.$context.toSeconds(util.defaults(spec.dur, spec.duration, 1)));
     return make("linTo", ugen, startValue, endValue, duration, inputs);
   });
 
   neume.register("xline", function(ugen, spec, inputs) {
-    var startValue = Math.max(1e-6, util.finite(util.defaults(spec.start, spec.startValue, 1)));
-    var endValue = Math.max(1e-6, util.finite(util.defaults(spec.end, spec.endValue, 0)));
-    var duration = util.finite(util.defaults(ugen.$context.toSeconds(spec.dur, spec.duration), 1));
+    var startValue = Math.max(1e-6, util.finite(util.defaults(spec.start, spec.startValue, spec.from, 1)));
+    var endValue = Math.max(1e-6, util.finite(util.defaults(spec.end, spec.endValue, spec.to, 0)));
+    var duration = util.finite(ugen.$context.toSeconds(util.defaults(spec.dur, spec.duration, 1)));
     return make("expTo", ugen, startValue, endValue, duration, inputs);
   });
 

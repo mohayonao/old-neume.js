@@ -26,7 +26,7 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("buf", function(ugen, spec) {
-    return make(spec.buf || spec.buffer, ugen, spec);
+    return make(util.defaults(spec.buf, spec.buffer), ugen, spec);
   });
 
   neume.register("AudioBuffer", function(ugen, spec) {
