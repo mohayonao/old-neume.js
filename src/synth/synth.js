@@ -107,11 +107,6 @@ NeuSynth.prototype.query = function(selector) {
   return array;
 };
 
-/**
-* @deprecated since version 0.5.0
-*/
-NeuSynth.prototype.find = NeuSynth.prototype.query;
-
 NeuSynth.prototype.start = function(startTime) {
   if (this._state !== INIT) {
     return this;

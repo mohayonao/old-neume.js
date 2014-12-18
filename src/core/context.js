@@ -85,48 +85,6 @@ Object.keys(global.AudioContext.prototype).forEach(function(key) {
   };
 });
 
-/**
- * @deprecated since version 0.3.0
- */
-NeuContext.prototype.createNeuComponent = function(node) {
-  return new neume.Component(this, node);
-};
-
-/**
-* @deprecated since version 0.3.0
-*/
-NeuContext.prototype.createNeuDC = function(value) {
-  return new neume.DC(this, util.finite(value));
-};
-
-/**
-* @deprecated since version 0.3.0
-*/
-NeuContext.prototype.createNeuMul = function(a, b) {
-  return new neume.Mul(this, a, b);
-};
-
-/**
-* @deprecated since version 0.3.0
-*/
-NeuContext.prototype.createNeuSum = function(inputs) {
-  return new neume.Sum(this, inputs);
-};
-
-/**
-* @deprecated since version 0.3.0
-*/
-NeuContext.prototype.createNeuParam = function(value, spec) {
-  return new neume.Param(this, util.finite(value), spec);
-};
-
-/**
-* @deprecated since version 0.3.0
-*/
-NeuContext.prototype.createNeuDryWet = function(dryIn, wetIn, mixIn) {
-  return new neume.DryWet(this, dryIn, wetIn, mixIn);
-};
-
 NeuContext.prototype.getAudioBus = function(index) {
   index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
