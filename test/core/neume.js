@@ -15,27 +15,15 @@ describe("neume", function() {
     it("(destination: AudioContext)", sinon.test(function() {
       var neu = neume(audioContext);
 
-      assert(typeof neu === "function");
+      assert(typeof neu === "object");
       assert(neu.audioContext === audioContext);
       assert(neu.destination === audioContext.destination);
-
-      var stub = this.stub(neume, "SynthDef", function() {
-        return { result: "ok" };
-      });
-
-      var spec = {};
-      var result = new neu(spec);
-
-      assert.deepEqual(result, { result: "ok" });
-      assert(stub.calledOnce);
-      assert(stub.calledWithNew);
-      assert(stub.calledWith(neu.context, spec));
     }));
     it("(destination: AudioNode)", function() {
       var lpf = audioContext.createBiquadFilter();
       var neu = neume(lpf);
 
-      assert(typeof neu === "function");
+      assert(typeof neu === "object");
       assert(neu.audioContext === audioContext);
       assert(neu.destination === lpf);
     });

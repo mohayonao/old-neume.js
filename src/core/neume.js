@@ -18,11 +18,7 @@ neume.FFT = require("../util/fft");
 neume.KVS = require("../util/kvs");
 
 function NEU(context) {
-  function neu(spec) {
-    return new neume.SynthDef(context, spec);
-  }
-
-  Object.defineProperties(neu, {
+  return Object.defineProperties({}, {
     context: {
       value: context,
       enumerable: true
@@ -106,8 +102,6 @@ function NEU(context) {
       enumerable: true
     },
   });
-
-  return neu;
 }
 
 neume.impl = function(destination, spec) {
