@@ -131,7 +131,7 @@ describe("util", function() {
     });
   });
 
-  describe(".defaults(value1, value2, defaultValue)", function() {
+  describe(".defaults(..args: any)", function() {
     it("return default value if it receives null or undefined", function() {
       assert(util.defaults(1, 10) === 1);
       assert(util.defaults(0, 10) === 0);
@@ -141,6 +141,7 @@ describe("util", function() {
       assert(util.defaults(undefined, 0, 10) === 0);
       assert(util.defaults(null, null, 10) === 10);
       assert(util.defaults(undefined, undefined, 10) === 10);
+      assert(util.defaults(undefined, undefined, undefined) === null);
     });
   });
 
