@@ -5,15 +5,15 @@ var neume = require("../../src");
 neume.use(require("../../src/ugen/shaper"));
 
 describe("ugen/shaper", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('shaper')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("shaper");
       });
 
@@ -33,7 +33,7 @@ describe("ugen/shaper", function() {
       });
     });
     it("$('clip')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("clip");
       });
 
@@ -56,13 +56,13 @@ describe("ugen/shaper", function() {
 
   describe("works", function() {
     it("curve(number)", function() {
-      var synth1 = Neume.Synth(function($) {
+      var synth1 = neu.Synth(function($) {
         return $("shaper", { curve: 1 });
       });
-      var synth2 = Neume.Synth(function($) {
+      var synth2 = neu.Synth(function($) {
         return $("shaper", { curve: 1 });
       });
-      var synth3 = Neume.Synth(function($) {
+      var synth3 = neu.Synth(function($) {
         return $("shaper", { curve: 0.5 });
       });
 

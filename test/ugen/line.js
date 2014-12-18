@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/line"));
 
 describe("ugen/line", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('line')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("line");
       });
 
@@ -37,7 +37,7 @@ describe("ugen/line", function() {
       });
     });
     it("$('line', $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("line", $("sin"));
       });
 
@@ -77,7 +77,7 @@ describe("ugen/line", function() {
 
   describe("works", function() {
     it("$('line')", function(done) {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       });
 
@@ -86,7 +86,7 @@ describe("ugen/line", function() {
         done();
       });
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 880, 1e-2));
@@ -100,7 +100,7 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440, 1e-2));
     });
     it("$('xline')", function(done) {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("xline", { start: 880, end: 440, dur: 0.200 });
       });
 
@@ -109,7 +109,7 @@ describe("ugen/line", function() {
         done();
       });
 
-      Neume.audioContext.$processTo("00:00.350");
+      neu.audioContext.$processTo("00:00.350");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 880.000, 1e-2));
@@ -129,7 +129,7 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440.000, 1e-2));
     });
     it("stop", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       });
 
@@ -138,7 +138,7 @@ describe("ugen/line", function() {
       });
       synth.stop(0.200);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
     });
   });
 

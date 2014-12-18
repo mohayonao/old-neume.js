@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/comp"));
 
 describe("ugen/comp", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('comp')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("comp");
       });
 
@@ -57,7 +57,7 @@ describe("ugen/comp", function() {
       });
     });
     it("$('comp', $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("comp", $("sin"));
       });
 
@@ -117,7 +117,7 @@ describe("ugen/comp", function() {
 
   describe("parameters", function() {
     it("full name", function() {
-      var json = Neume.Synth(function($) {
+      var json = neu.Synth(function($) {
         return $("comp", { threshold: 1, knee: 2, ratio: 3, attack: 4, release: 5 });
       }).toAudioNode().toJSON().inputs[0];
 
@@ -128,7 +128,7 @@ describe("ugen/comp", function() {
       assert(json.release.value === 5);
     });
     it("short name", function() {
-      var json = Neume.Synth(function($) {
+      var json = neu.Synth(function($) {
         return $("comp", { thresh: 1, knee: 2, ratio: 3, a: 4, r: 5 });
       }).toAudioNode().toJSON().inputs[0];
 

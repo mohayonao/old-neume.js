@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/inout"));
 neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/inout", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("$(in)", function() {
     it("graph", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("in", 1);
       });
 
@@ -41,13 +41,13 @@ describe("ugen/inout", function() {
 
   describe("$(out)", function() {
     it("graph", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("out", { bus: 1 }, $("osc"));
       });
 
       synth.start(0);
 
-      Neume.context.audioContext.$processTo("00:00.010");
+      neu.context.audioContext.$processTo("00:00.010");
 
       assert.deepEqual(synth.context.getAudioBus(1).toAudioNode().toJSON(), {
         name: "GainNode",

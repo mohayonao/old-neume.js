@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/lfpulse"));
 
 describe("ugen/lfpulse", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('lfpulse')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lfpulse");
       });
 
@@ -48,7 +48,7 @@ describe("ugen/lfpulse", function() {
       });
     });
     it("$('lfpulse', { width: 0.25 })", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lfpulse", { width: 0.25 });
       });
 
@@ -90,7 +90,7 @@ describe("ugen/lfpulse", function() {
       });
     });
     it("$('lfpulse', { width: $('delay') })", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lfpulse", { width: $("delay") });
       });
 
@@ -142,7 +142,7 @@ describe("ugen/lfpulse", function() {
       });
     });
     it("$('lfpulse', $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lfpulse", $("sin"));
       });
 
@@ -202,14 +202,14 @@ describe("ugen/lfpulse", function() {
 
   describe("works", function() {
     it("start/stop", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lfpulse");
       });
 
       synth.start(0.100);
       synth.stop(0.200);
 
-      Neume.audioContext.$processTo("00:00.300");
+      neu.audioContext.$processTo("00:00.300");
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");

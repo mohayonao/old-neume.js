@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/conv"));
 
 describe("ugen/conv", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('conv')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("conv");
       });
 
@@ -37,8 +37,8 @@ describe("ugen/conv", function() {
 
   describe("parameters", function() {
     it("full name", function() {
-      var buffer = Neume.context.createBuffer(1, 16, 44100);
-      var synth = Neume.Synth(function($) {
+      var buffer = neu.context.createBuffer(1, 16, 44100);
+      var synth = neu.Synth(function($) {
         return $("conv", { buffer: buffer, normalize: false });
       });
 
@@ -48,8 +48,8 @@ describe("ugen/conv", function() {
       assert(json.normalize === false);
     });
     it("short name", function() {
-      var buffer = Neume.context.createBuffer(1, 16, 44100);
-      var synth = Neume.Synth(function($) {
+      var buffer = neu.context.createBuffer(1, 16, 44100);
+      var synth = neu.Synth(function($) {
         return $("conv", { buf: buffer, normalize: false });
       });
 

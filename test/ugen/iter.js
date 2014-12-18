@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/iter"));
 
 describe("ugen/iter", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('iter')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("iter");
       });
 
@@ -37,7 +37,7 @@ describe("ugen/iter", function() {
       });
     });
     it("$('iter', $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("iter", $("sin"));
       });
 
@@ -77,7 +77,7 @@ describe("ugen/iter", function() {
 
   describe("works", function() {
     it("next", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         var iter = {
           count: 0,
           next: function() {
@@ -96,7 +96,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -112,7 +112,7 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 4);
     });
     it("next // done", function(done) {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         var iter = {
           count: 0,
           next: function() {
@@ -135,7 +135,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -151,7 +151,7 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 2);
     });
     it("next // value", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         var iter = {
           count: 0,
           next: function() {
@@ -170,7 +170,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -186,7 +186,7 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 4);
     });
     it("next // valueOf()", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         var iter = {
           count: 0,
           valueOf: function() {
@@ -205,7 +205,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -221,7 +221,7 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 4);
     });
     it("next // null", function(done) {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("iter").on("end", function(e) {
           assert(e.playbackTime === 0);
           done();
@@ -235,7 +235,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -252,7 +252,7 @@ describe("ugen/iter", function() {
     });
 
     it("setValue", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("iter", { iter: 1 }).on("end", function() {
           assert(!"NOT REACHED");
         });
@@ -272,7 +272,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      Neume.audioContext.$processTo("00:00.500");
+      neu.audioContext.$processTo("00:00.500");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 1);

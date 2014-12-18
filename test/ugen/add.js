@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/add"));
 
 describe("ugen/add", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('+', 0)", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("+", 0);
       });
 
@@ -28,7 +28,7 @@ describe("ugen/add", function() {
       });
     });
     it("$('+', 1, 2, 3)", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("+", 1, 2, 3);
       });
 
@@ -53,12 +53,12 @@ describe("ugen/add", function() {
       assert(synth.toAudioNode().$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("$('+', $('sin', {freq:1}), $('sin', {freq:2}), $('sin', {freq:3}))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("+", $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
       });
 
       function oscillator(freq) {
-        var node = Neume.context.createOscillator();
+        var node = neu.context.createOscillator();
         node.frequency.value = freq;
         return node.toJSON();
       }

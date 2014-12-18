@@ -6,21 +6,21 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/biquad"));
 
 describe("ugen/biquad", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   function biquad(type) {
-    var node = Neume.context.createBiquadFilter();
+    var node = neu.context.createBiquadFilter();
     node.type = type;
     return node.toJSON();
   }
 
   describe("graph", function() {
     it("$('biquad')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("biquad");
       });
 
@@ -34,7 +34,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('lowpass')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lowpass");
       });
 
@@ -48,7 +48,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('highpass')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("highpass");
       });
 
@@ -62,7 +62,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('bandpass')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("bandpass");
       });
 
@@ -76,7 +76,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('lowshelf')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lowshelf");
       });
 
@@ -90,7 +90,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('highshelf')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("highshelf");
       });
 
@@ -104,7 +104,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('peaking')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("peaking");
       });
 
@@ -118,7 +118,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('notch')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("notch");
       });
 
@@ -132,7 +132,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('allpass')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("allpass");
       });
 
@@ -146,7 +146,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('lpf')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("lpf");
       });
 
@@ -160,7 +160,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('hpf')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("hpf");
       });
 
@@ -174,7 +174,7 @@ describe("ugen/biquad", function() {
       });
     });
     it("$('bpf')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("bpf");
       });
 
@@ -191,7 +191,7 @@ describe("ugen/biquad", function() {
 
   describe("parameters", function() {
     it("full name", function() {
-      var json = Neume.Synth(function($) {
+      var json = neu.Synth(function($) {
         return $("biquad", { frequency: 220, detune: 1200, Q: 10, gain: 5 });
       }).toAudioNode().toJSON().inputs[0];
 
@@ -201,7 +201,7 @@ describe("ugen/biquad", function() {
       assert(json.gain.value === 5);
     });
     it("short name", function() {
-      var json = Neume.Synth(function($) {
+      var json = neu.Synth(function($) {
         return $("biquad", { freq: 220, dt: 1200 });
       }).toAudioNode().toJSON().inputs[0];
 

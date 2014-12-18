@@ -5,15 +5,15 @@ var neume = require("../../src");
 neume.use(require("../../src/ugen/noise"));
 
 describe("ugen/noise", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('noise', { type: 'white' })", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("noise", { type: "white" });
       });
 
@@ -46,7 +46,7 @@ describe("ugen/noise", function() {
       });
     });
     it("$('white')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("white");
       });
 
@@ -79,7 +79,7 @@ describe("ugen/noise", function() {
       });
     });
     it("$('pink')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("pink");
       });
 
@@ -112,7 +112,7 @@ describe("ugen/noise", function() {
       });
     });
     it("$('brown')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("brown");
       });
 
@@ -147,14 +147,14 @@ describe("ugen/noise", function() {
   });
   describe("works", function() {
     it("start/stop", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("white");
       });
 
       synth.start(0.100);
       synth.stop(0.200);
 
-      Neume.audioContext.$processTo("00:00.300");
+      neu.audioContext.$processTo("00:00.300");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
