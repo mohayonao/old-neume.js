@@ -20,6 +20,7 @@ function NeuUGen(synth, key, spec, inputs) {
   this.$class = parsed.class;
   this.$id = parsed.id;
   this.$outlet = null;
+  this._scheds = [];
 
   this.$builder = synth.$builder;
 
@@ -128,6 +129,13 @@ NeuUGen.prototype.trig = function(startTime) {
     this.$unit.start(startTime);
   }, this);
 
+  return this;
+};
+
+NeuUGen.prototype.sched = function(schedIter, callback) {
+  if (schedIter && typeof schedIter.next === "function" && typeof callback === "function") {
+    this.$synth.$scheds.push([ schedIter, callback ]);
+  }
   return this;
 };
 

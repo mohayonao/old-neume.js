@@ -304,13 +304,14 @@ describe("neume.SynthDollar", function() {
       it("(timeout: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
-          $.timeout(0.030, function(e) {
+          return $("sin")
+          .sched($.timeout(0.030), function(e) {
             passed.push([ "fizz", e.playbackTime, e.count ]);
-          });
-          $.timeout(0.050, function(e) {
+          })
+          .sched($.timeout(0.050), function(e) {
             passed.push([ "buzz", e.playbackTime, e.count ]);
-          });
-          $.timeout(0.150, function(e) {
+          })
+          .sched($.timeout(0.150), function(e) {
             passed.push([ "fizzbuzz", e.playbackTime, e.count ]);
           });
         }, []);
@@ -321,8 +322,8 @@ describe("neume.SynthDollar", function() {
         audioContext.$processTo("00:00.200");
 
         assert.deepEqual(passed, [
-          [ "fizz", 0.040, 1 ],
-          [ "buzz", 0.060000000000000005, 1 ],
+          [ "fizz", 0.040, 0 ],
+          [ "buzz", 0.060000000000000005, 0 ],
         ]);
       });
     });
@@ -330,10 +331,11 @@ describe("neume.SynthDollar", function() {
       it("(interval: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
-          $.interval(0.030, function(e) {
+          return $("sin")
+          .sched($.interval(0.030), function(e) {
             passed.push([ "fizz", e.playbackTime, e.count ]);
-          });
-          $.interval(0.050, function(e) {
+          })
+          .sched($.interval(0.050), function(e) {
             passed.push([ "buzz", e.playbackTime, e.count ]);
           });
         }, []);
@@ -344,16 +346,17 @@ describe("neume.SynthDollar", function() {
         audioContext.$processTo("00:00.200");
 
         assert.deepEqual(passed, [
-          [ "fizz", 0.04, 1 ],
-          [ "buzz", 0.060000000000000005, 1 ],
-          [ "fizz", 0.06999999999999999, 2 ],
-          [ "fizz", 0.09999999999999999, 3 ]
+          [ "fizz", 0.04, 0 ],
+          [ "buzz", 0.060000000000000005, 0 ],
+          [ "fizz", 0.07, 1 ],
+          [ "fizz", 0.1, 2 ]
         ]);
       });
       it("works", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
-          $.interval("32n", function(e) {
+          return $("sin")
+          .sched($.interval("32n"), function(e) {
             passed.push([ "fizz", e.playbackTime, e.count ]);
           });
         }, []);
@@ -364,9 +367,9 @@ describe("neume.SynthDollar", function() {
         audioContext.$processTo("00:00.500");
 
         assert.deepEqual(passed, [
-          [ "fizz", 0.0725, 1 ],
-          [ "fizz", 0.1350, 2 ],
-          [ "fizz", 0.1975, 3 ]
+          [ "fizz", 0.0725, 0 ],
+          [ "fizz", 0.1350, 1 ],
+          [ "fizz", 0.1975, 2 ]
         ]);
       });
     });

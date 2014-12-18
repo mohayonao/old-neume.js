@@ -19,6 +19,7 @@ function NeuSynth(context, func, args) {
   var $ = new neume.SynthDollar(this);
 
   this.$builder = $.builder;
+  this.$scheds = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
   var result = func.apply(null, [ $.builder ].concat(args));
@@ -40,8 +41,8 @@ function NeuSynth(context, func, args) {
   this._db = this.$routes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._stateString = "UNSCHEDULED";
-  this._timers = $.timers;
   this._param = param;
+  this._scheds = null;
 
   var methods = getMethods(this._db);
 
@@ -134,9 +135,9 @@ NeuSynth.prototype.start = function(startTime) {
       ugen.start(startTime);
     });
 
-    this._timers.forEach(function(timer) {
-      timer.start(startTime);
-    });
+    this._scheds = this.$scheds.splice(0).map(function(set) {
+      return new neume.Sched(context, set[0], set[1]).start(startTime);
+    }, this);
   }, this);
 
   context.start(); // auto start(?)
@@ -168,8 +169,8 @@ NeuSynth.prototype.stop = function(startTime) {
       ugen.stop(t0);
     });
 
-    this._timers.forEach(function(timer) {
-      timer.stop(t0);
+    this._scheds.forEach(function(sched) {
+      sched.stop(t0);
     });
   }, this);
 

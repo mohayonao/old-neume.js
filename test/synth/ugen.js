@@ -197,6 +197,14 @@ describe("neume.UGen", function() {
     });
   });
 
+  describe("#sched", function() {
+    it("(schedIter: iterator, callback: function): self", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+
+      assert(ugen.sched() === ugen);
+    });
+  });
+
   describe("#toAudioNode", function() {
     it("(): AudioNode", function() {
       var ugen = neume.UGen.build(synth, "sin", {}, []);
