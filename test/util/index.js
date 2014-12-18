@@ -4,37 +4,15 @@ var util = require("../../src/util");
 
 describe("util", function() {
 
-  describe(".isArray(value)", function() {
-    it("checks if value is an array", function() {
-      assert(util.isArray([]) === true);
-      assert(util.isArray(arguments) === false);
-    });
-  });
-
-  describe(".isBoolean(value)", function() {
-    it("checks if value is a boolean value", function() {
-      assert(util.isBoolean(true ) === true);
-      assert(util.isBoolean(false) === true);
-      assert(util.isBoolean(null ) === false);
-    });
-  });
-
-  describe(".isDictionary(value)", function() {
+  describe(".isPlainObject(value)", function() {
     it("checks if value is an object created by the Object constructor", function() {
-      assert(util.isDictionary({}) === true);
-      assert(util.isDictionary(new RegExp()) === false);
-    });
-  });
-
-  describe(".isFunction(value)", function() {
-    it("checks if value is a function", function() {
-      assert(util.isFunction(it) === true);
-      assert(util.isFunction("") === false);
+      assert(util.isPlainObject({}) === true);
+      assert(util.isPlainObject(new RegExp()) === false);
     });
   });
 
   describe(".isFinite(value)", function() {
-    it("checks if value is, or can be coerced to, a finite number", function() {
+    it("checks if value is a finite number", function() {
       assert(util.isFinite(10) === true);
       assert(util.isFinite(Infinity) === false);
       assert(util.isFinite(NaN) === false);
@@ -42,70 +20,11 @@ describe("util", function() {
     });
   });
 
-  describe(".isNaN", function() {
-    it("checks if value is NaN.", function() {
-      assert(util.isNaN(NaN) === true);
-      assert(util.isNaN(10) === false);
-      assert(util.isNaN(Infinity) === false);
-      assert(util.isNaN("NaN") === false);
-    });
-  });
-
-  describe(".isNull(value)", function() {
-    it("checks if value is null", function() {
-      assert(util.isNull(null) === true);
-      assert(util.isNull(0) === false);
-      assert(util.isNull(undefined) === false);
-    });
-  });
-
-  describe(".isNumber(value)", function() {
-    it("checks if value is a number", function() {
-      assert(util.isNumber(10) === true);
-      assert(util.isNumber(Infinity) === true);
-      assert(util.isNumber(NaN) === false);
-      assert(util.isNumber("10") === false);
-    });
-  });
-
-  describe(".isObject(value)", function() {
-    it("checks if value is the language type of Object", function() {
-      assert(util.isObject({}) === true);
-      assert(util.isObject(it) === true);
-      assert(util.isObject(null) === false);
-      assert(util.isObject(1000) === false);
-      assert(util.isObject("10") === false);
-    });
-  });
-
-  describe(".isString(value)", function() {
-    it("checks if value is a string.", function() {
-      assert(util.isString("") === true);
-      assert(util.isString([]) === false);
-    });
-  });
-
-  describe(".isTypedArray(value)", function() {
-    it("checks if value is an instance of TypedArray", function() {
-      assert(util.isTypedArray(new Float32Array()) === true);
-      assert(util.isTypedArray(new Uint8Array()) === true);
-      assert(util.isTypedArray(new Int8Array()) === true);
-      assert(util.isTypedArray(new Uint16Array()) === true);
-      assert(util.isTypedArray(new Int16Array()) === true);
-      assert(util.isTypedArray(new Uint32Array()) === true);
-      assert(util.isTypedArray(new Int32Array()) === true);
-      assert(util.isTypedArray(new Float64Array()) === true);
-      assert(util.isTypedArray(new Uint8ClampedArray()) === true);
-      assert(util.isTypedArray([]) === false);
-      assert(util.isTypedArray("") === false);
-    });
-  });
-
-  describe(".isUndefined(value)", function() {
-    it("checks if value is undefined", function() {
-      assert(util.isUndefined(undefined) === true);
-      assert(util.isUndefined(0) === false);
-      assert(util.isUndefined(null) === false);
+  describe(".isIterator(value)", function() {
+    it("checks is value is an iterator", function() {
+      assert(util.isIterator({ next: it }) === true);
+      assert(util.isIterator({ prev: it }) === false);
+      assert(util.isIterator() === false);
     });
   });
 

@@ -15,10 +15,8 @@ describe("neume.DB", function() {
     it("(obj: any): self", function() {
       var db = new neume.DB();
 
-      assert(db.append() === db);
-      db.append({ a: 0 });
-      db.append({ b: 1 });
-      db.append("string");
+      assert(db.append({ a: 0 }) === db);
+      assert(db.append({ b: 1 }) === db);
 
       assert.deepEqual(db.all(), [ { a: 0 }, { b: 1 } ]);
     });

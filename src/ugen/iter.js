@@ -43,7 +43,6 @@ module.exports = function(neume, util) {
 
     function start(t) {
       var items = iterNext();
-
       if (items.done) {
         state = FINISHED;
         ugen.emit("end", { playbackTime: t }, ugen.$synth);
@@ -53,7 +52,7 @@ module.exports = function(neume, util) {
     }
 
     function setValue(e) {
-      if (typeof e.value === "object" && typeof e.value.next === "function") {
+      if (util.isIterator(e.value)) {
         iter = e.value;
       }
     }
@@ -73,19 +72,7 @@ module.exports = function(neume, util) {
     }
 
     function iterNext() {
-      if (iter == null) {
-        return { value: undefined, done: true };
-      }
-      var items;
-      if (typeof iter.next === "function") {
-        items = iter.next();
-        if (!util.isObject(items)) {
-          items = { value: items, done: false };
-        }
-      } else {
-        items = { value: iter.valueOf(), done: false };
-      }
-      return items;
+      return util.isIterator(iter) ? iter.next() : { done: true };
     }
 
     return new neume.Unit({

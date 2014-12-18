@@ -2,61 +2,16 @@
 
 var util = {};
 
-util.isArray = function(value) {
-  return Array.isArray(value);
-};
-
-util.isBoolean = function(value) {
-  return typeof value === "boolean";
-};
-
-util.isDictionary = function(value) {
+util.isPlainObject = function(value) {
   return value != null && value.constructor === Object;
-};
-
-util.isFunction = function(value) {
-  return typeof value === "function";
 };
 
 util.isFinite = function(value) {
   return typeof value === "number" && isFinite(value);
 };
 
-util.isNaN = function(value) {
-  return value !== value;
-};
-
-util.isNull = function(value) {
-  return value === null;
-};
-
-util.isNumber = function(value) {
-  return typeof value === "number" && !isNaN(value);
-};
-
-util.isObject = function(value) {
-  var type = typeof value;
-  return type === "function" || type === "object" && value !== null;
-};
-
-util.isString = function(value) {
-  return typeof value === "string";
-};
-
-util.isTypedArray = function(value) {
-  return value instanceof Float32Array ||
-    value instanceof Uint8Array ||
-    value instanceof Int8Array ||
-    value instanceof Uint16Array ||
-    value instanceof Int16Array ||
-    value instanceof Uint32Array ||
-    value instanceof Int32Array ||
-    value instanceof Float64Array ||
-    value instanceof Uint8ClampedArray;
-};
-
-util.isUndefined = function(value) {
-  return value === void 0;
+util.isIterator = function(value) {
+  return !!value && typeof value.next === "function";
 };
 
 util.toArray = function(value) {
@@ -109,29 +64,28 @@ util.clip = function(value, min, max) {
 };
 
 util.typeOf = function(value) {
-  if (util.isNumber(value)) {
-    return "number";
+  var type = typeof value;
+
+  if (type === "number") {
+    return value === value ? "number" : "nan";
   }
-  if (util.isArray(value)) {
-    return "array";
-  }
-  if (util.isString(value)) {
+  if (type === "string") {
     return "string";
   }
-  if (util.isFunction(value)) {
+  if (type === "function") {
     return "function";
   }
-  if (util.isBoolean(value)) {
+  if (type === "boolean") {
     return "boolean";
   }
-  if (util.isNull(value)) {
+  if (value === null) {
     return "null";
   }
-  if (util.isUndefined(value)) {
+  if (value === void 0) {
     return "undefined";
   }
-  if (util.isNaN(value)) {
-    return "nan";
+  if (Array.isArray(value)) {
+    return "array";
   }
 
   var name;

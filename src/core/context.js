@@ -156,7 +156,7 @@ NeuContext.prototype.stop = function() {
 NeuContext.prototype.sched = function(time, callback, ctx) {
   time = util.finite(time);
 
-  if (!util.isFunction(callback)) {
+  if (typeof callback !== "function") {
     return 0;
   }
 

@@ -94,7 +94,7 @@ NeuUGen.build = function(synth, key, spec, inputs) {
 NeuUGen.prototype.$ = function() {
   var args = util.toArray(arguments);
   var key = args.shift();
-  var spec = util.isDictionary(args[0]) ? args.shift() : {};
+  var spec = util.isPlainObject(args[0]) ? args.shift() : {};
   var inputs = Array.prototype.concat.apply([ this ], args);
 
   return this.$builder(key, spec, inputs);
@@ -133,7 +133,7 @@ NeuUGen.prototype.trig = function(startTime) {
 };
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
-  if (schedIter && typeof schedIter.next === "function" && typeof callback === "function") {
+  if (util.isIterator(schedIter) && typeof callback === "function") {
     this.$synth.$scheds.push([ schedIter, callback ]);
   }
   return this;

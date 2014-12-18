@@ -1,18 +1,14 @@
 "use strict";
 
-var util = require("../util");
-
 function DB() {
   this._all = [];
   this._ids = {};
 }
 
 DB.prototype.append = function(obj) {
-  if (util.isObject(obj)) {
-    this._all.push(obj);
-    if (obj.hasOwnProperty("$id")) {
-      this._ids[obj.$id] = obj;
-    }
+  this._all.push(obj);
+  if (obj.hasOwnProperty("$id")) {
+    this._ids[obj.$id] = obj;
   }
   return this;
 };
