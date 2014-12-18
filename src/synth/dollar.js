@@ -5,6 +5,7 @@ var neume = require("../namespace");
 
 require("../component/param");
 require("./ugen");
+require("./ugen-promise");
 
 function NeuSynthDollar(synth) {
   var db = new neume.DB();
@@ -13,20 +14,40 @@ function NeuSynthDollar(synth) {
   this.timers = [];
 
   var atParam = createParamBuilder(synth);
+  var promises = {};
 
   function builder() {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isDictionary(args[0]) ? args.shift() : {};
     var inputs = util.flatten(args);
+    var ugen, promise;
 
     if (typeof key === "string") {
       if (key.charAt(0) === "@") {
-        return atParam(key.substr(1), spec, inputs.pop(), inputs);
+        key = key.substr(1);
+        return atParam(key, spec, inputs.pop(), inputs);
+      }
+      if (key.charAt(0) === "#") {
+        key = key.substr(1);
+        ugen = promises[key] || db.find({ id: key })[0];
+        if (ugen == null) {
+          ugen = new neume.UGenPromise(synth, key);
+          promises[key] = ugen;
+        }
+        return ugen;
       }
     }
 
-    var ugen = neume.UGen.build(synth, key, spec, inputs);
+    ugen = neume.UGen.build(synth, key, spec, inputs);
+
+    if (ugen.$id) {
+      promise = promises[ugen.$id];
+      if (promise) {
+        promise.resolve(ugen);
+      }
+      promises[ugen.$id] = null;
+    }
 
     db.append(ugen);
 

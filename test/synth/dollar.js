@@ -151,6 +151,155 @@ describe("neume.SynthDollar", function() {
         }, TypeError);
       });
     });
+    describe("#id", function() {
+      it("works", function() {
+        var saved = {};
+
+        var synth = new neume.Synth(context, function($) {
+          saved.osc1 = $("#osc");
+          saved.osc2 = $("#osc");
+          saved.sin1 = $("sin#osc");
+          saved.sin2 = $("sin#amp");
+          saved.osc3 = $("#osc");
+        }, []);
+
+        assert(saved.osc1 instanceof neume.UGenPromise);
+        assert(saved.osc1 === saved.osc2);
+        assert(saved.osc3 === saved.sin1);
+      });
+      it("graph", function() {
+        /*
+         * +------------+
+         * | sin        |
+         * +------------+
+         *   |        |
+         * +-------+  |
+         * | delay |  |
+         * +-------+  |
+         *   |        |
+         * +------------+
+         * | +          |
+         * +------------+
+         */
+        var synth = new neume.Synth(context, function($) {
+          return $("sin#osc")
+          .$("delay")
+          .$("+", $("#osc"));
+        }, []);
+
+        assert(synth.toAudioNode().toJSON(), {
+          name: "GainNode",
+          gain: {
+            value: 1,
+            inputs: []
+          },
+          inputs: [
+            {
+              name: "DelayNode",
+              delay: {
+                value: 0,
+                inputs: []
+              },
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sine",
+                  frequency: {
+                    value: 440,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
+            },
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 440,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        });
+      });
+      it("graph: feedback", function() {
+        /*
+         * +----------------+
+         * | sin            |
+         * | freq: 880 + x <---+
+         * +----------------+  |
+         *   |    |            |
+         *   |  +-------+      |
+         *   |  | * 100 |------+
+         *   |  +-------+
+         *   |
+         */
+        var synth = new neume.Synth(context, function($) {
+          return $("sin#osc", {
+            freq: $("+", 880, $("#osc").mul(100))
+          });
+        }, []);
+
+        assert.deepEqual(synth.toAudioNode().toJSON(), {
+          name: "GainNode",
+          gain: {
+            value: 1,
+            inputs: []
+          },
+          inputs: [
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 880,
+                inputs: [
+                  {
+                    name: "GainNode",
+                    gain: {
+                      value: 100,
+                      inputs: []
+                    },
+                    inputs: [
+                      "<circular:OscillatorNode>"
+                    ]
+                  }
+                ]
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        });
+      });
+      it("graph: standalone", function() {
+        var synth = new neume.Synth(context, function($) {
+          return $("#osc");
+        }, []);
+
+        assert.deepEqual(synth.toAudioNode().toJSON(), {
+          name: "GainNode",
+          gain: {
+            value: 1,
+            inputs: []
+          },
+          inputs: []
+        });
+      });
+    });
+
     describe(".timeout", function() {
       it("(timeout: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
