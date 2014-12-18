@@ -67,9 +67,7 @@ module.exports = function(neume, util) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
-        ugen.emit("end", {
-          playbackTime: context.currentTime
-        }, ugen.$synth);
+        ugen.emit("end", { type: "end", playbackTime: context.currentTime }, ugen.$synth);
       };
     }
 

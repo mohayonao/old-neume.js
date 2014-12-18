@@ -59,10 +59,7 @@ NeuSched.prototype.start = function(startTime) {
   this._state = STATE_START;
 
   context.sched(startTime, function(t0) {
-    this.emit("start", {
-      type: "start",
-      playbackTime: t0
-    });
+    this.emit("start", { type: "start", playbackTime: t0 });
     this._state = STATE_RUNNING;
     sched(this, t0);
   }, this);
@@ -83,10 +80,7 @@ NeuSched.prototype.stop = function(startTime) {
   startTime = util.finite(startTime);
 
   context.sched(startTime, function(t0) {
-    this.emit("stop", {
-      type: "stop",
-      playbackTime: t0
-    });
+    this.emit("stop", { type: "stop", playbackTime: t0 });
     this._state = STATE_DONE;
   }, this);
 
