@@ -17,12 +17,12 @@ neume.Emitter = require("../util/emitter");
 neume.FFT = require("../util/fft");
 neume.KVS = require("../util/kvs");
 
-function Neume(context) {
-  function fn(spec) {
+function NEU(context) {
+  function neu(spec) {
     return new neume.SynthDef(context, spec);
   }
 
-  Object.defineProperties(fn, {
+  Object.defineProperties(neu, {
     context: {
       value: context,
       enumerable: true
@@ -107,7 +107,7 @@ function Neume(context) {
     },
   });
 
-  return fn;
+  return neu;
 }
 
 neume.impl = function(destination, spec) {
@@ -121,7 +121,7 @@ neume.impl = function(destination, spec) {
   var context = new neume.Context(destination, Infinity, spec);
 
   return Object.defineProperties(
-    new Neume(context), {
+    new NEU(context), {
       render: {
         value: function(duration, func) {
           var sampleRate = context.sampleRate;
@@ -132,7 +132,7 @@ neume.impl = function(destination, spec) {
             audioContext.oncomplete = function(e) {
               resolve(new neume.Buffer(context, e.renderedBuffer));
             };
-            func(new Neume(new neume.Context(audioContext.destination, duration)));
+            func(new NEU(new neume.Context(audioContext.destination, duration)));
             audioContext.startRendering();
           });
         }
