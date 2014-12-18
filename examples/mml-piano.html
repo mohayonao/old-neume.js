@@ -39,7 +39,7 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume(new AudioContext());
 
   var mmlData    = null;
   var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/mml-emitter/
@@ -58,7 +58,7 @@
       data[i] *= i < spec.room ? 1 : 0.05;
     }
 
-    return Neume.Buffer.from(data);
+    return neu.Buffer.from(data);
   }
 
   function Piano($, freq, dur) {
@@ -82,17 +82,17 @@
   function start() {
     var irData = new IRData({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 });
 
-    mmlEmitter = new MMLEmitter(Neume.context, mmlData);
+    mmlEmitter = new MMLEmitter(neu.context, mmlData);
 
     mmlEmitter.tracks.forEach(function(track) {
       track.on("note", function(e) {
         // routing: Piano[output:0] -> Reverb[input:0] -> destination
-        Neume.Synth(Piano, e.frequency, e.duration).start(e.playbackTime);
+        neu.Synth(Piano, e.frequency, e.duration).start(e.playbackTime);
         visualizer.push(e);
       });
     });
 
-    players = [ Neume.Synth(Destination, irData), mmlEmitter, visualizer ];
+    players = [ neu.Synth(Destination, irData), mmlEmitter, visualizer ];
 
     players.forEach(function(player) {
       player.start();
@@ -226,7 +226,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    visualizer = new MMLVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
+    visualizer = new MMLVisualizer(neu.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, -100, -75);
 
@@ -239,7 +239,7 @@
       },
       methods: {
         toggle: function() {
-          Neume.reset();
+          neu.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start();

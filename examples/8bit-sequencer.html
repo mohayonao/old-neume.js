@@ -50,12 +50,12 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume(new AudioContext());
 
   var visualizer = null; // gretro: http://mohayonao.github.io/gretro/
 
   // create a PeriodicWave from the array
-  var famiconTriangle = Neume.Buffer.from([
+  var famiconTriangle = neu.Buffer.from([
     +0.000, +0.125, +0.250, +0.375, +0.500, +0.625, +0.750, +0.875,
     +0.875, +0.750, +0.625, +0.500, +0.375, +0.250, +0.125, +0.000,
     -0.125, -0.250, -0.375, -0.500, -0.625, -0.750, -0.875, -1.000,
@@ -109,14 +109,14 @@
   var players = [];
 
   function start(score) {
-    var timer = Neume.Interval("16n", function(e) {
+    var timer = neu.Interval("16n", function(e) {
       var index = e.count % 32;
 
       instruments.forEach(function(instrument, i) {
         if (score[i][index].checked) {
           var arg = _.wrapAt(instrument.arg, index);
 
-          Neume.Synth(instrument.func, arg).start(e.playbackTime);
+          neu.Synth(instrument.func, arg).start(e.playbackTime);
         }
       });
     });
@@ -214,7 +214,7 @@
 
     var canvas = document.getElementById("canvas");
 
-    visualizer = new WaveVisualizer(Neume.analyser, {
+    visualizer = new WaveVisualizer(neu.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
@@ -242,7 +242,7 @@
       },
       methods: {
         toggle: function() {
-          Neume.reset();
+          neu.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);

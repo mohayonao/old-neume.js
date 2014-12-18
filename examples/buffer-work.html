@@ -39,15 +39,15 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume(new AudioContext());
 
   var visualizer = null; // three.js: http://threejs.org/
 
   var buffer = null;
-  Neume.Buffer.load("./amen.wav").then(function(result) {
+  neu.Buffer.load("./amen.wav").then(function(result) {
     buffer = result;
   }).catch(function(e) {
-    console.error("Neume.Buffer.load: failed");
+    console.error("neu.Buffer.load: failed");
   });
 
   function Granular($, buffer, depth) {
@@ -112,11 +112,11 @@
   var players = [];
 
   function start() {
-    Neume.context.reset();
+    neu.context.reset();
 
     if (buffer) {
-      players = [ Neume.Interval(0.500, function(e) {
-        Neume.Synth(Granular, buffer, 4).start(e.playbackTime);
+      players = [ neu.Interval(0.500, function(e) {
+        neu.Synth(Granular, buffer, 4).start(e.playbackTime);
       }), visualizer ];
     }
 
@@ -268,7 +268,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    visualizer = new WaveVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
+    visualizer = new WaveVisualizer(neu.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, 0, -300);
 

@@ -41,7 +41,7 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume(new AudioContext());
 
   var visualizer = null;
 
@@ -75,20 +75,20 @@
   function start() {
     score = _.shuffle(score);
 
-    Neume.render(2.000, function(Neume) {
-      Neume.Interval(0.250, function(e) {
+    neu.render(2.000, function(neu) {
+      neu.Interval(0.250, function(e) {
         var index = _.wrapAt(score, e.count) >> 1;
-        Neume.Synth(Pluck, freqs[index]).start(e.playbackTime);
+        neu.Synth(Pluck, freqs[index]).start(e.playbackTime);
       }).start();
     }).then(function(buffer) {
       rates.forEach(function(rate) {
-        Neume.Synth(Tape, buffer, rate).start();
+        neu.Synth(Tape, buffer, rate).start();
       });
     }).catch(function(e) {
       console.error(e);
     });
 
-    players = [ Neume.Synth(Destination), visualizer ];
+    players = [ neu.Synth(Destination), visualizer ];
 
     players.forEach(function(player) {
       player.start();
@@ -204,7 +204,7 @@
 
     var canvas = document.getElementById("canvas");
 
-    visualizer = new WaveVisualizer(Neume.analyser, {
+    visualizer = new WaveVisualizer(neu.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
@@ -215,7 +215,7 @@
       },
       methods: {
         toggle: function() {
-          Neume.reset();
+          neu.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start();
