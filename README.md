@@ -6,7 +6,7 @@
 ![](http://upload.wikimedia.org/wikipedia/commons/a/ab/Gregorian_chant.gif)
 
 ## What is?
-**Neume.js** is a Web Audio API library for developing browser music.
+**Neume** (/ˈnjuːm/; ja: ニューム) is a Web Audio API library for developing browser music. The architecture of neume.js provides very simple operation for creating web-based audio application and generates optimized audio-graph for Web Audio API.
 
 ## Examples
 
@@ -62,7 +62,7 @@ Here is boilerplate html in order to play a sine wave metronome in neume.js. -> 
 <body>
   <button id="start">start</button>
   <script>
-    var Neume = neume(new AudioContext());
+    var neu = neume(new AudioContext());
 
     function Sine($, freq, dur) {
       return $("sin", { freq: freq })
@@ -76,11 +76,11 @@ Here is boilerplate html in order to play a sine wave metronome in neume.js. -> 
         timer.stop();
         timer = null;
       } else {
-        timer = Neume.Interval("4n", function(e) {
+        timer = neu.Interval("4n", function(e) {
           var freq = [ 880, 440, 440, 440 ][e.count % 4];
           var dur = [ 0.5, 0.125, 0.125, 0.125 ][e.count % 4];
 
-          Neume.Synth(Sine, freq, dur).start(e.playbackTime);
+          neu.Synth(Sine, freq, dur).start(e.playbackTime);
         }).start();
       }
     }
@@ -97,10 +97,10 @@ This example makes a modulated sine wave with a decay of about 1 second.
 
 ```javascript
 // initialize Neume interface with AudioContext
-var Neume = neume(new AudioContext());
+var neu = neume(new AudioContext());
 
 // define synth and play it
-Neume.Synth(function($) {
+neu.Synth(function($) {
   return $("sin", {
     freq: $("sin", { freq: 8 }).mul(20).add(880)
   })
