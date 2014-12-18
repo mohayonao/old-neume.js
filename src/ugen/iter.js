@@ -51,23 +51,26 @@ module.exports = function(neume, util) {
       }
     }
 
-    function setValue(e) {
-      if (util.isIterator(e.value)) {
-        iter = e.value;
+    function setValue(e, value) {
+      if (util.isIterator(value)) {
+        iter = value;
       }
     }
 
-    function next(e) {
-      if (state === ITERATE) {
-        var items = iterNext();
-        var t0 = util.finite(context.toSeconds(e.playbackTime));
+    function next(t) {
+      if (state !== ITERATE) {
+        return;
+      }
 
-        if (items.done) {
-          state = FINISHED;
-          ugen.emit("end", { playbackTime: t0 }, ugen.$synth);
-        } else {
-          param.update(util.finite(items.value), t0);
-        }
+      t = util.finite(context.toSeconds(t));
+
+      var items = iterNext();
+
+      if (items.done) {
+        state = FINISHED;
+        ugen.emit("end", { playbackTime: t }, ugen.$synth);
+      } else {
+        param.update(util.finite(items.value), t);
       }
     }
 

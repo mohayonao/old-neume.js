@@ -42,11 +42,11 @@ function NeuUGen(synth, key, spec, inputs) {
   methods.forEach(function(methodName) {
     var method = this.$unit.$methods[methodName];
     util.definePropertyIfNotExists(this, methodName, {
-      value: function(t, v) {
+      value: function() {
         var context = this.$context;
-        var arg = toArg(t, v);
-        context.sched(context.toSeconds(arg.playbackTime), function() {
-          method(arg);
+        var args = util.toArray(arguments);
+        context.sched(context.toSeconds(args[0]), function() {
+          method.apply(null, args);
         });
         return this;
       }
@@ -159,17 +159,6 @@ NeuUGen.prototype.disconnect = function() {
   this._node.disconnect();
   return this;
 };
-
-function toArg(t, v) {
-  if (t == null) {
-    return {};
-  }
-  if (typeof t === "object") {
-    return t;
-  }
-
-  return { playbackTime: t, value: v };
-}
 
 function mul(context, a, b) {
   if (b === 1) {

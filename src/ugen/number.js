@@ -34,10 +34,9 @@ module.exports = function(neume, util) {
     var param = new neume.Param(context, util.finite(spec.value), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    function setValue(e) {
-      var value = util.defaults(e.value, e.count, 0);
+    function setValue(t, value) {
       if (util.isFinite(value)) {
-        update(value, e.playbackTime);
+        update(value, t);
       }
     }
 
