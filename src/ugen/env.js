@@ -22,17 +22,6 @@ module.exports = function(neume, util) {
    *     add: signal = 0,
    *   }, ...inputs: signal)
    *
-   *   $("dadsr", {
-   *     delayTime: timevalue = 0.10,
-   *     attackTime: timevalue = 0.01,
-   *     decayTime: timevalue = 0.30,
-   *     sustainLevel: number = 0.50,
-   *     releaseTime: timevalue = 1.00,
-   *     curve: number|string = "lin",
-   *     mul: signal = 1,
-   *     add: signal = 0,
-   *   }, ...inputs: signal)
-   *
    *   $("asr", {
    *     attackTime: timevalue = 0.01,
    *     sustainLevel: number = 0.50,
@@ -77,16 +66,6 @@ module.exports = function(neume, util) {
     var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
     return make([ 0, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
-  });
-
-  neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = util.defaults(spec.delay, spec.delayTime, 0.1);
-    var a = util.defaults(spec.a, spec.attackTime, 0.01);
-    var d = util.defaults(spec.d, spec.decayTime, 0.30);
-    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
-    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
-
-    return make([ 0, 0, delay, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("asr", function(ugen, spec, inputs) {

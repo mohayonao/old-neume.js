@@ -930,47 +930,6 @@ describe("ugen/env", function() {
     });
   });
 
-  describe("$('dadsr')", function() {
-    it("works", function() {
-      var synth = neu.Synth(function($) {
-        return $("dadsr", { delay: 0.05, a: 0.1, d: 0.2, s: 0.25, r: 0.5 });
-      });
-
-      var ended = 0;
-
-      synth.start(0.000).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.500);
-
-      neu.audioContext.$processTo("00:01.000");
-
-      var outlet = synth.toAudioNode().$inputs[0];
-      assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.150), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.200), 0.812, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.250), 0.625, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.300), 0.437, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.350), 0.250, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.400), 0.250, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.450), 0.250, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.500), 0.250, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.550), 0.225, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.600), 0.200, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.650), 0.175, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.700), 0.150, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.750), 0.125, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.800), 0.100, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.850), 0.075, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
-    });
-  });
-
   describe("$('asr')", function() {
     it("works", function() {
       var synth = neu.Synth(function($) {
