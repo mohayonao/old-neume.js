@@ -15,7 +15,6 @@ var STOP = 2;
 function NeuSynth(context, func, args) {
   this.$context = context;
   this.$routes = [];
-  this.$localBuses = [];
 
   var $ = new neume.SynthDollar(this);
 
