@@ -54,10 +54,6 @@ function NEU(context) {
       value: context.toSeconds.bind(context),
       enumerable: true
     },
-    toFrequency: {
-      value: context.toFrequency.bind(context),
-      enumerable: true
-    },
     Synth: {
       value: function(func) {
         return new neume.Synth(context, func, util.toArray(arguments).slice(1));

@@ -282,10 +282,6 @@ NeuContext.prototype.toSeconds = function(value) {
   return this._transport.toSeconds(value);
 };
 
-NeuContext.prototype.toFrequency = function(value) {
-  return this._transport.toFrequency(value);
-};
-
 function onaudioprocess(e) {
   // Safari 7.0.6 does not support e.playbackTime
   var currentTime = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;

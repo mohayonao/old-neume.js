@@ -200,10 +200,5 @@ describe("neume", function() {
         assert(neu.toSeconds("4n") === 0.5);
       });
     });
-    describe(".toFrequency", function() {
-      it("(value: number|string): number", function() {
-        assert(neu.toFrequency("4n") === 2);
-      });
-    });
   });
 });

@@ -101,7 +101,7 @@ module.exports = function(neume, util) {
     osc.frequency.value = 0;
     osc.detune.value = 0;
 
-    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, defaultFreq));
+    var frequency = util.defaults(spec.freq, spec.frequency, defaultFreq);
     var detune = util.defaults(spec.dt, spec.detune, 0);
 
     context.connect(frequency, osc.frequency);

@@ -110,16 +110,6 @@ NeuTransport.prototype.toSeconds = function(value) {
   return value;
 };
 
-NeuTransport.prototype.toFrequency = function(value) {
-  if (typeof value === "number") {
-    return util.finite(value);
-  }
-  if (typeof value === "string") {
-    return util.finite(1 / this.toSeconds(value));
-  }
-  return value;
-};
-
 function ticks2sec(ticks, bpm) {
   return 60 / bpm * (ticks / 480);
 }

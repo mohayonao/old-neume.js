@@ -742,12 +742,6 @@ describe("neume.Context", function() {
     });
   });
 
-  describe("#toFrequency", function() {
-    it("(): number", function() {
-      assert(context.toFrequency("500ms") === 2);
-    });
-  });
-
   describe("offline rendering", function() {
     it("works", function() {
       var audioContext = new global.OfflineAudioContext(2, 44100 * 0.5, 44100);

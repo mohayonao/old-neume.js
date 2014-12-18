@@ -161,28 +161,4 @@ describe("neume.Transport", function() {
     });
   });
 
-  describe("#toFrequency", function() {
-    it("(value: number): number", function() {
-      var transport = new neume.Transport(context);
-
-      assert(transport.toFrequency(1) === 1);
-      assert(transport.toFrequency(2) === 2);
-      assert(transport.toFrequency(Infinity) === 0);
-    });
-    it("(value: string): number // when milliseconds", function() {
-      var transport = new neume.Transport(context);
-
-      assert(transport.toFrequency("500ms") === 2);
-      assert(transport.toFrequency("750ms") === 1.3333333333333333);
-    });
-    it("(value: any): any // else", function() {
-      var transport = new neume.Transport(context);
-      var a = {};
-
-      assert(transport.toFrequency(a) === a);
-      assert(transport.toFrequency(null) === null);
-      assert(transport.toFrequency() === undefined);
-    });
-  });
-
 });
