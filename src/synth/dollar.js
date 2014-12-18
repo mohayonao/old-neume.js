@@ -22,7 +22,7 @@ function NeuSynthDollar(synth) {
 
     if (typeof key === "string") {
       if (key.charAt(0) === "@") {
-        return atParam(key.substr(1), spec, inputs[0]);
+        return atParam(key.substr(1), spec, inputs.pop(), inputs);
       }
     }
 
@@ -43,7 +43,7 @@ function NeuSynthDollar(synth) {
 function createParamBuilder(synth) {
   var params = {};
 
-  return function(name, spec, defaultValue) {
+  return function(name, spec, defaultValue, inputs) {
     if (params.hasOwnProperty(name)) {
       return params[name];
     }
@@ -58,9 +58,18 @@ function createParamBuilder(synth) {
       enumerable: true
     });
 
-    params[name] = neume.UGen.build(synth, "+", spec, [ param ]);
+    var ugen;
 
-    return params[name];
+    if (inputs.length) {
+      ugen = neume.UGen.build(synth, "+", spec, [ inputs ]);
+      ugen = neume.UGen.build(synth, "+", { mul: param }, [ ugen ]);
+    } else {
+      ugen = neume.UGen.build(synth, "+", spec, [ param ]);
+    }
+
+    params[name] = ugen;
+
+    return ugen;
   };
 }
 

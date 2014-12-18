@@ -53,6 +53,94 @@ describe("neume.SynthDollar", function() {
         assert(params.amp1 instanceof neume.UGen);
         assert(params.amp1 === params.amp2);
       });
+      it("graph: param", function() {
+        var synth = new neume.Synth(context, function($) {
+          return $("sin", { freq: $("@freq", 220) });
+        }, []);
+
+        assert(synth.toAudioNode().toJSON(), {
+          name: "GainNode",
+          gain: {
+            value: 1,
+            inputs: []
+          },
+          inputs: [
+            {
+              name: "OscillatorNode",
+              type: "sine",
+              frequency: {
+                value: 220,
+                inputs: []
+              },
+              detune: {
+                value: 0,
+                inputs: []
+              },
+              inputs: []
+            }
+          ]
+        });
+      });
+      it("graph: inputs", function() {
+        var synth = new neume.Synth(context, function($) {
+          return $("sin").$("@amp", 0.25);
+        }, []);
+
+        assert(synth.toAudioNode().toJSON(), {
+          name: "GainNode",
+          gain: {
+            value: 1,
+            inputs: []
+          },
+          inputs: [
+            {
+              name: "GainNode",
+              gain: {
+                value: 0.25,
+                inputs: []
+              },
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sine",
+                  frequency: {
+                    value: 440,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
+            }
+          ]
+        });
+      });
+      it("graph: standalone", function() {
+        var synth = new neume.Synth(context, function($) {
+          return $("@param", 1000);
+        }, []);
+
+        assert(synth.toAudioNode().toJSON(), {
+          name: "GainNode",
+          gain: {
+            value: 1,
+            inputs: []
+          },
+          inputs: [
+            {
+              name: "GainNode",
+              gain: {
+                value: 1000,
+                inputs: []
+              },
+              inputs: [ DC(1) ]
+            }
+          ]
+        });
+      });
       it("invalidName -> throw an error", function() {
         var func = function($) {
           $("@@", Infinity);
