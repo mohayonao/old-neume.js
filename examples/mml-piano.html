@@ -39,7 +39,7 @@
   </div>
 
   <script id="example">
-  var neu = neume(new AudioContext());
+  var neu = neume();
 
   var mmlData    = null;
   var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/mml-emitter/
@@ -220,11 +220,10 @@
     })();
 
     var canvas = $("#canvas").on("mousemove", function(e) {
-      var x = (e.pageX - canvas.$offset.left) / visualizer.width  - 0.5;
+      var x = e.pageX / window.innerWidth - 0.5;
 
       visualizer.camera.position.set(Math.sin(x) * -100, Math.cos(x) * -100, -75);
     });
-    canvas.$offset = canvas.offset();
 
     visualizer = new MMLVisualizer(neu.analyser, { width: canvas.width(), height: 240 });
 
