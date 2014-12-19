@@ -1888,7 +1888,7 @@ function neume() {
   return neume.impl.apply(null, arguments);
 }
 
-neume.version = "0.7.0";
+neume.version = "0.7.1";
 
 module.exports = neume;
 
@@ -2542,11 +2542,12 @@ NeuUGen.prototype.trig = function(startTime) {
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
   if (util.isIterator(schedIter) && typeof callback === "function") {
-    this.synth.scheds.push([ schedIter, function(e) {
+    var synth = this.synth;
+    synth.scheds.push([ schedIter, function(e) {
       if (e.type === "start" || (e.type === "stop" && !e.done)) {
         return;
       }
-      callback(e);
+      callback.call(synth, e);
     } ]);
   }
   return this;
