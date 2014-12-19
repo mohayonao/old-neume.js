@@ -1,18 +1,14 @@
 "use strict";
 
-var util = require("../util");
-
 function DB() {
   this._all = [];
   this._ids = {};
 }
 
 DB.prototype.append = function(obj) {
-  if (util.isObject(obj)) {
-    this._all.push(obj);
-    if (obj.hasOwnProperty("$id")) {
-      this._ids[obj.$id] = obj;
-    }
+  this._all.push(obj);
+  if (obj.id) {
+    this._ids[obj.id] = obj;
   }
   return this;
 };
@@ -30,17 +26,17 @@ DB.prototype.find = function(parsed) {
     result = this._all;
   }
 
-  if (parsed.class) {
-    parsed.class.forEach(function(cls) {
+  if (parsed.classes) {
+    parsed.classes.forEach(function(cls) {
       result = result.filter(function(obj) {
-        return obj.$class.indexOf(cls) !== -1;
+        return obj.classes.indexOf(cls) !== -1;
       });
     });
   }
 
   if (parsed.key) {
     result = result.filter(function(obj) {
-      return obj.$key === parsed.key;
+      return obj.key === parsed.key;
     });
   }
 

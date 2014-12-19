@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>8bit-sequencer - neume.js</title>
+  <title>neume.js / 8bit Sequencer</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
@@ -28,7 +28,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>neume.js 8bit-sequencer</h1>
+    <div class="page-header">
+      <h1>neume.js / 8bit Sequencer</h1>
+      <div>Web Audio API library for developing browser music</div>
+    </div>
     <canvas id="canvas"></canvas>
     <div id="app">
       <div class="pattern">
@@ -50,12 +53,12 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume();
 
   var visualizer = null; // gretro: http://mohayonao.github.io/gretro/
 
   // create a PeriodicWave from the array
-  var famiconTriangle = Neume.Buffer.from([
+  var famiconTriangle = neu.Buffer.from([
     +0.000, +0.125, +0.250, +0.375, +0.500, +0.625, +0.750, +0.875,
     +0.875, +0.750, +0.625, +0.500, +0.375, +0.250, +0.125, +0.000,
     -0.125, -0.250, -0.375, -0.500, -0.625, -0.750, -0.875, -1.000,
@@ -109,14 +112,14 @@
   var players = [];
 
   function start(score) {
-    var timer = Neume.Interval("16n", function(e) {
+    var timer = neu.Interval("16n", function(e) {
       var index = e.count % 32;
 
       instruments.forEach(function(instrument, i) {
         if (score[i][index].checked) {
           var arg = _.wrapAt(instrument.arg, index);
 
-          Neume.Synth(instrument.func, arg).start(e.playbackTime);
+          neu.Synth(instrument.func, arg).start(e.playbackTime);
         }
       });
     });
@@ -214,7 +217,7 @@
 
     var canvas = document.getElementById("canvas");
 
-    visualizer = new WaveVisualizer(Neume.analyser, {
+    visualizer = new WaveVisualizer(neu.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
@@ -242,7 +245,7 @@
       },
       methods: {
         toggle: function() {
-          Neume.reset();
+          neu.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);

@@ -277,51 +277,6 @@ describe("neume.Context", function() {
     });
   });
 
-  describe("#createNeuComponent", function() {
-    it("(node: any): neume.Component", function() {
-      assert(context.createNeuComponent({}) instanceof neume.Component);
-    });
-  });
-
-  describe("#createNeuDC", function() {
-    it("(value: any): neume.DC", function() {
-      assert(context.createNeuDC(0) instanceof neume.DC);
-    });
-  });
-
-  describe("#createNeuMul", function() {
-    it("(a: any, b: any): neume.Mul", function() {
-      var a = context.createOscillator();
-      var b = context.createOscillator();
-
-      assert(context.createNeuMul(a, b) instanceof neume.Mul);
-    });
-  });
-
-  describe("#createNeuSum", function() {
-    it("(inputs: Array<any>): neume.Sum", function() {
-      assert(context.createNeuSum([
-        context.createOscillator(), context.createOscillator()
-      ]) instanceof neume.Sum);
-    });
-  });
-
-  describe("#createNeuParam", function() {
-    it("(value: number, spec: object): neume.Param", function() {
-      assert(context.createNeuParam(0) instanceof neume.Param);
-    });
-  });
-
-  describe("#createNeuDryWet", function() {
-    it("(dryIn: any, wetIn: any, mixIn: any): neume.DryWet", function() {
-      var a = context.createGain();
-      var b = context.createGain();
-      var c = context.createGain();
-
-      assert(context.createNeuDryWet(a, b, c) instanceof neume.DryWet);
-    });
-  });
-
   describe("#getAudioBus", function() {
     it("(index: number): neume.AudioBus", function() {
       assert(context.getAudioBus(0) instanceof neume.AudioBus);
@@ -757,7 +712,7 @@ describe("neume.Context", function() {
       var from = context.createOscillator();
       var to = context.createGain();
 
-      from.$outputs = [ to ];
+      from.$$outputs = [ to ];
       to.ondisconnected = sinon.spy();
 
       context.connect(from, to);
@@ -768,28 +723,9 @@ describe("neume.Context", function() {
     });
   });
 
-  describe("#getBpm", function() {
-    it("(): number", function() {
-      assert(context.getBpm() === 120);
-    });
-  });
-
-  describe("#setBpm", function() {
-    it("(value: number, rampTime: number): self", function() {
-      assert(context.setBpm(200, 0) === context);
-      assert(context.getBpm() === 200);
-    });
-  });
-
   describe("#toSeconds", function() {
     it("(): number", function() {
       assert(context.toSeconds("2hz") === 0.5);
-    });
-  });
-
-  describe("#toFrequency", function() {
-    it("(): number", function() {
-      assert(context.toFrequency("500ms") === 2);
     });
   });
 

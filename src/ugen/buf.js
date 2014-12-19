@@ -26,7 +26,7 @@ module.exports = function(neume, util) {
    *   |
    */
   neume.register("buf", function(ugen, spec) {
-    return make(spec.buf || spec.buffer, ugen, spec);
+    return make(util.defaults(spec.buf, spec.buffer), ugen, spec);
   });
 
   neume.register("AudioBuffer", function(ugen, spec) {
@@ -38,7 +38,7 @@ module.exports = function(neume, util) {
   });
 
   function make(buffer, ugen, spec) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var bufSrc = context.createBufferSource();
 
     buffer = context.toAudioBuffer(buffer);
@@ -67,9 +67,7 @@ module.exports = function(neume, util) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
-        ugen.emit("end", {
-          playbackTime: context.currentTime
-        }, ugen.$synth);
+        ugen.emit("end", { type: "end", playbackTime: context.currentTime }, ugen.synth);
       };
     }
 

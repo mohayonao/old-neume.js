@@ -33,7 +33,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createDynamicsCompressor();
 
     outlet.threshold.value = 0;
@@ -45,8 +45,11 @@ module.exports = function(neume, util) {
     var threshold = util.defaults(spec.thresh, spec.threshold, -24);
     var knee = util.defaults(spec.knee, 30);
     var ratio = util.defaults(spec.ratio, 12);
-    var attack = context.toSeconds(util.defaults(spec.a, spec.attack, 0.003));
-    var release = context.toSeconds(util.defaults(spec.r, spec.release, 0.250));
+    var attack = util.defaults(spec.a, spec.attack, spec.attackTime, 0.003);
+    var release = util.defaults(spec.r, spec.release, spec.releaseTime, 0.250);
+
+    attack = context.toSeconds(attack);
+    release = context.toSeconds(release);
 
     context.connect(threshold, outlet.threshold);
     context.connect(knee, outlet.knee);

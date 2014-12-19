@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/mul"));
 
 describe("ugen/mul", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('*'')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("*");
       });
 
@@ -29,7 +29,7 @@ describe("ugen/mul", function() {
       assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("$('*', $('sin'), 0)", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("*", $("sin"), 0);
       });
 
@@ -44,7 +44,7 @@ describe("ugen/mul", function() {
       assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("$('*', $('sin'), 1)", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("*", $("sin"), 1);
       });
 
@@ -72,7 +72,7 @@ describe("ugen/mul", function() {
       });
     });
     it("$('*', $('sin'), 0.5)", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("*", $("sin"), 0.5);
       });
 
@@ -109,12 +109,12 @@ describe("ugen/mul", function() {
       });
     });
     it("$('*', 1, $('sin', {freq:1}), $('sin', {freq:2}), $('sin', {freq:3}))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }));
       });
 
       function oscillator(freq) {
-        var node = Neume.context.createOscillator();
+        var node = neu.context.createOscillator();
         node.frequency.value = freq;
         return node.toJSON();
       }
@@ -147,12 +147,12 @@ describe("ugen/mul", function() {
       });
     });
     it("$('*', 1, $('sin', {freq:1}), 2, $('sin', {freq:2}), 3, $('sin', {freq:3}))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("*", 1, $("sin", { freq: 1 }), 2, $("sin", { freq: 2 }), 3, $("sin", { freq: 3 }));
       });
 
       function oscillator(freq) {
-        var node = Neume.context.createOscillator();
+        var node = neu.context.createOscillator();
         node.frequency.value = freq;
         return node.toJSON();
       }

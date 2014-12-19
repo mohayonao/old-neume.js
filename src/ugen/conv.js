@@ -27,15 +27,17 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createConvolver();
 
-    var buffer = context.toAudioBuffer(spec.buf || spec.buffer);
+    var buffer = util.defaults(spec.buf, spec.buffer);
+
+    buffer = context.toAudioBuffer(buffer);
 
     if (buffer != null) {
       outlet.buffer = buffer;
     }
-    outlet.normalize = !!util.defaults(spec.normalize, true);
+    outlet.normalize = !!util.defaults(spec.norm, spec.normalize, true);
 
     context.connect(inputs, outlet);
 

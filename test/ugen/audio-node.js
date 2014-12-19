@@ -6,16 +6,16 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/audio-node"));
 
 describe("ugen/audio-node", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$(DelayNode)", function() {
-      var synth = Neume.Synth(function($) {
-        return $(Neume.context.createDelay());
+      var synth = neu.Synth(function($) {
+        return $(neu.context.createDelay());
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -37,8 +37,8 @@ describe("ugen/audio-node", function() {
       });
     });
     it("$(BiquadFilterNode, { type: 'highpass', frequency: 1000, foo: 10 })", function() {
-      var synth = Neume.Synth(function($) {
-        return $(Neume.context.createBiquadFilter(), { type: "highpass", frequency: 1000 });
+      var synth = neu.Synth(function($) {
+        return $(neu.context.createBiquadFilter(), { type: "highpass", frequency: 1000 });
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -73,8 +73,8 @@ describe("ugen/audio-node", function() {
       });
     });
     it("$(DelayNode, $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
-        return $(Neume.context.createDelay(), $("sin"));
+      var synth = neu.Synth(function($) {
+        return $(neu.context.createDelay(), $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -110,8 +110,8 @@ describe("ugen/audio-node", function() {
       });
     });
     it("$(OscillatorNode, $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
-        return $(Neume.context.createOscillator(), $("sin"));
+      var synth = neu.Synth(function($) {
+        return $(neu.context.createOscillator(), $("sin"));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {

@@ -33,32 +33,28 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;
     var param = new neume.Param(context, util.finite(data(0, count++)), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    function setValue(e) {
-      if (typeof e.value === "function") {
-        data = e.value;
+    function setValue(t, value) {
+      if (typeof value === "function") {
+        data = value;
       }
     }
 
-    function evaluate(e) {
-      update(e.playbackTime);
-    }
-
-    function update(startTime) {
-      startTime = util.finite(context.toSeconds(startTime));
+    function evaluate(t) {
+      t = util.finite(context.toSeconds(t));
 
       var value = data({
-        playbackTime: startTime,
+        playbackTime: t,
         count: count++
       });
 
-      param.update(value, startTime);
+      param.update(value, t);
     }
 
     return new neume.Unit({

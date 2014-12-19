@@ -34,7 +34,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
@@ -43,49 +43,39 @@ module.exports = function(neume, util) {
 
     function start(t) {
       var items = iterNext();
-
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { playbackTime: t }, ugen.$synth);
+        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
       } else {
         param.setValueAtTime(util.finite(items.value), t);
       }
     }
 
-    function setValue(e) {
-      if (typeof e.value === "object" && typeof e.value.next === "function") {
-        iter = e.value;
+    function setValue(e, value) {
+      if (util.isIterator(value)) {
+        iter = value;
       }
     }
 
-    function next(e) {
-      if (state === ITERATE) {
-        var items = iterNext();
-        var t0 = util.finite(context.toSeconds(e.playbackTime));
+    function next(t) {
+      if (state !== ITERATE) {
+        return;
+      }
 
-        if (items.done) {
-          state = FINISHED;
-          ugen.emit("end", { playbackTime: t0 }, ugen.$synth);
-        } else {
-          param.update(util.finite(items.value), t0);
-        }
+      t = util.finite(context.toSeconds(t));
+
+      var items = iterNext();
+
+      if (items.done) {
+        state = FINISHED;
+        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+      } else {
+        param.update(util.finite(items.value), t);
       }
     }
 
     function iterNext() {
-      if (iter == null) {
-        return { value: undefined, done: true };
-      }
-      var items;
-      if (typeof iter.next === "function") {
-        items = iter.next();
-        if (!util.isObject(items)) {
-          items = { value: items, done: false };
-        }
-      } else {
-        items = { value: iter.valueOf(), done: false };
-      }
-      return items;
+      return util.isIterator(iter) ? iter.next() : { done: true };
     }
 
     return new neume.Unit({

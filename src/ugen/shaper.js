@@ -44,7 +44,7 @@ module.exports = function(neume, util) {
   });
 
   function make(curve, ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createWaveShaper();
 
     if (curve instanceof Float32Array) {

@@ -32,6 +32,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/mode/javascript/javascript.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/addon/edit/matchbrackets.min.js"></script>
   <script src="//mohayonao.github.io/web-audio-test-api/build/web-audio-test-api.js"></script>
   <script src="../../build/neume.js"></script>
   <script>
@@ -39,13 +40,13 @@
     "use strict";
     _.mixin(neume._.exports());
 
-    window.Neume = neume(new AudioContext());
+    window.neu = neume(new AudioContext());
 
     var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-      mode: "javascript", theme: "monokai", workTime: 200, lineNumbers: true,
+      mode: "javascript", theme: "monokai", workTime: 200, lineNumbers: true, matchBrackets: true,
     });
     var result = CodeMirror.fromTextArea(document.getElementById("result"), {
-      mode: "javascript", theme: "monokai", readOnly: true
+      mode: "javascript", theme: "monokai", readOnly: true, matchBrackets: true,
     });
 
     var timerId = 0;
@@ -53,12 +54,12 @@
 
     function reset() {
       clearInterval(timerId);
-      Neume.audioContext.$reset();
-      Neume.reset();
+      neu.audioContext.$reset();
+      neu.reset();
     }
 
     function update(node) {
-      Neume.audioContext.$process(0.125);
+      neu.audioContext.$process(0.125);
       var value = JSON.stringify(node.toJSON().inputs, null, 2);
       if (value !== prevVal) {
         result.setValue(value);
@@ -70,7 +71,7 @@
       reset();
       eval.call(null, editor.getValue());
 
-      var node = Neume.context.getAudioBus(0).toAudioNode();
+      var node = neu.context.getAudioBus(0).toAudioNode();
 
       update(node);
       timerId = setInterval(function() {

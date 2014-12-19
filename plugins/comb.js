@@ -85,7 +85,7 @@
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
     var gainNode, ffNode, fbNode;
 

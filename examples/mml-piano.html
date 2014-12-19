@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>mml-piano - neume.js</title>
+  <title>neume.js / MML Piano</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
@@ -23,7 +23,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>neume.js mml-piano</h1>
+    <div class="page-header">
+      <h1>neume.js / MML Piano</h1>
+      <div>Web Audio API library for developing browser music</div>
+    </div>
     <div id="canvas"></div>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -39,7 +42,7 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume();
 
   var mmlData    = null;
   var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/mml-emitter/
@@ -49,17 +52,18 @@
     mmlData = data;
   });
 
-  function IRData(spec) {
-    var data = new Float32Array(spec.length);
+  var IRData = (function IRData() {
+    var data = new Float32Array(65536);
 
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < 65536; i++) {
       data[i] = Math.random() * 2 - 1;
-      data[i] *= 1 - (i / data.length);
-      data[i] *= i < spec.room ? 1 : 0.05;
+      data[i] *= 1 - (i / 65536);
+      data[i] *= i < 256 ? 1 : 0.05;
+      data[i] *= i <  32 ? Math.random() : 1;
     }
 
-    return Neume.Buffer.from(data);
-  }
+    return neu.Buffer.from(data);
+  })();
 
   function Piano($, freq, dur) {
     return $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
@@ -71,28 +75,26 @@
     .$("out", { bus: 1 });
   }
 
-  function Destination($, buffer) {
+  function Reverb($) {
     return $("in", 1)
-    .$("conv", { buf: buffer })
+    .$("conv", { buf: IRData })
     .$("out", { bus: 0 });
   }
 
   var players = [];
 
   function start() {
-    var irData = new IRData({ room: _.sample([ 32, 128, 256, 512, 1024, 8192 ]), length: 65536 });
-
-    mmlEmitter = new MMLEmitter(Neume.context, mmlData);
+    mmlEmitter = new MMLEmitter(neu.context, mmlData);
 
     mmlEmitter.tracks.forEach(function(track) {
       track.on("note", function(e) {
         // routing: Piano[output:0] -> Reverb[input:0] -> destination
-        Neume.Synth(Piano, e.frequency, e.duration).start(e.playbackTime);
+        neu.Synth(Piano, e.frequency, e.duration).start(e.playbackTime);
         visualizer.push(e);
       });
     });
 
-    players = [ Neume.Synth(Destination, irData), mmlEmitter, visualizer ];
+    players = [ neu.Synth(Reverb), mmlEmitter, visualizer ];
 
     players.forEach(function(player) {
       player.start();
@@ -220,13 +222,12 @@
     })();
 
     var canvas = $("#canvas").on("mousemove", function(e) {
-      var x = (e.pageX - canvas.$offset.left) / visualizer.width  - 0.5;
+      var x = e.pageX / window.innerWidth - 0.5;
 
       visualizer.camera.position.set(Math.sin(x) * -100, Math.cos(x) * -100, -75);
     });
-    canvas.$offset = canvas.offset();
 
-    visualizer = new MMLVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
+    visualizer = new MMLVisualizer(neu.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, -100, -75);
 
@@ -239,7 +240,7 @@
       },
       methods: {
         toggle: function() {
-          Neume.reset();
+          neu.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start();

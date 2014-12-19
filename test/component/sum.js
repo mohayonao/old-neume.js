@@ -26,13 +26,13 @@ describe("neume.Sum", function() {
     });
     it("(context: neume.Context, inputs: Array<number>): neume.DC", function() {
       var a = 1;
-      var b = context.createNeuDC(2);
+      var b = new neume.DC(context, 2);
       var sum = new neume.Sum(context, [ a, b ]);
 
       assert(sum instanceof neume.DC);
     });
     it("(context: neume.Context, inputs: [ neume.Param ]): neume.Param", function() {
-      var a = context.createNeuParam(0);
+      var a = new neume.Param(context, 0);
       var sum = new neume.Sum(context, [ a ]);
 
       assert(sum instanceof neume.Param);

@@ -5,11 +5,7 @@ require("./shim");
 var util = require("../util");
 var neume = require("../namespace");
 
-require("./context");
-require("../component");
-require("../control");
-require("../synth");
-
+neume.webaudio = global;
 neume.util = util;
 neume._ = require("../util/underscore");
 neume.DB = require("../util/db");
@@ -17,12 +13,13 @@ neume.Emitter = require("../util/emitter");
 neume.FFT = require("../util/fft");
 neume.KVS = require("../util/kvs");
 
-function Neume(context) {
-  function fn(spec) {
-    return new neume.SynthDef(context, spec);
-  }
+require("./context");
+require("../component");
+require("../control");
+require("../synth");
 
-  Object.defineProperties(fn, {
+function NEU(context) {
+  return Object.defineProperties({}, {
     context: {
       value: context,
       enumerable: true
@@ -36,7 +33,7 @@ function Neume(context) {
       enumerable: true
     },
     destination: {
-      value: context.$destination,
+      value: context.destination,
       enumerable: true
     },
     currentTime: {
@@ -56,10 +53,6 @@ function Neume(context) {
     },
     toSeconds: {
       value: context.toSeconds.bind(context),
-      enumerable: true
-    },
-    toFrequency: {
-      value: context.toFrequency.bind(context),
       enumerable: true
     },
     Synth: {
@@ -88,8 +81,8 @@ function Neume(context) {
       enumerable: true
     },
     Sched: {
-      value: function(callback) {
-        return new neume.Sched(context, 0, callback);
+      value: function(schedIter, callback) {
+        return new neume.Sched(context, schedIter, callback);
       },
       enumerable: true
     },
@@ -106,33 +99,33 @@ function Neume(context) {
       enumerable: true
     },
   });
-
-  return fn;
 }
 
-neume.impl = function(destination, spec) {
-  if (destination instanceof global.AudioContext) {
+neume.impl = function(destination) {
+  if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
+  } else if (typeof destination === "undefined") {
+    destination = new neume.webaudio.AudioContext().destination;
   }
-  if (!(destination instanceof global.AudioNode)) {
+  if (!(destination instanceof neume.webaudio.AudioNode)) {
     throw new TypeError("neume(): Illegal arguments");
   }
 
-  var context = new neume.Context(destination, Infinity, spec);
+  var context = new neume.Context(destination, Infinity);
 
   return Object.defineProperties(
-    new Neume(context), {
+    new NEU(context), {
       render: {
         value: function(duration, func) {
           var sampleRate = context.sampleRate;
           var length = util.int(sampleRate * duration);
 
           return new Promise(function(resolve) {
-            var audioContext = new global.OfflineAudioContext(2, length, sampleRate);
+            var audioContext = new neume.webaudio.OfflineAudioContext(2, length, sampleRate);
             audioContext.oncomplete = function(e) {
               resolve(new neume.Buffer(context, e.renderedBuffer));
             };
-            func(new Neume(new neume.Context(audioContext.destination, duration)));
+            func(new NEU(new neume.Context(audioContext.destination, duration)));
             audioContext.startRendering();
           });
         }
@@ -159,7 +152,7 @@ neume.impl = function(destination, spec) {
         enumerable: true
       },
       analyser: {
-        value: context.$analyser,
+        value: context.analyser,
         enumerable: true
       }
     }

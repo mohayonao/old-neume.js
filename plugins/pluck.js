@@ -20,10 +20,10 @@
   "use strict";
 
   neume.register("pluck", function(ugen, spec) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
-    var frequency = context.toFrequency(util.defaults(spec.freq, 440));
+    var frequency = util.defaults(spec.freq, 440);
 
     var noise = createNoiseChunk(Math.round(context.sampleRate / frequency));
     var bufSrc = createNoiseChunkBufferSource(context, noise);

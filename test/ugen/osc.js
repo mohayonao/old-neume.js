@@ -5,15 +5,15 @@ var neume = require("../../src");
 neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/osc", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('sin')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("sin");
       });
 
@@ -41,7 +41,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('square')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("square");
       });
 
@@ -69,7 +69,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('saw')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("saw");
       });
 
@@ -97,7 +97,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('tri')", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("tri");
       });
 
@@ -125,8 +125,8 @@ describe("ugen/osc", function() {
       });
     });
     it("$(PeriodicWave)", function() {
-      var synth = Neume.Synth(function($) {
-        var wave = Neume.context.createPeriodicWave(
+      var synth = neu.Synth(function($) {
+        var wave = neu.context.createPeriodicWave(
           new Float32Array(2048), new Float32Array(2048)
         );
         return $(wave);
@@ -156,8 +156,8 @@ describe("ugen/osc", function() {
       });
     });
     it("$('PeriodicWave', {value:PeriodicWave})", function() {
-      var synth = Neume.Synth(function($) {
-        var wave = Neume.context.createPeriodicWave(
+      var synth = neu.Synth(function($) {
+        var wave = neu.context.createPeriodicWave(
           new Float32Array(2048), new Float32Array(2048)
         );
         return $("PeriodicWave", { value: wave });
@@ -187,7 +187,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('PeriodicWave', {value:!PeriodicWave})", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("PeriodicWave", { value: "not periodic wave" });
       });
 
@@ -215,7 +215,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', {type:'sin'})", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("osc", { type: "sin" });
       });
 
@@ -243,7 +243,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', {type:'square'})", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("osc", { type: "square" });
       });
 
@@ -271,7 +271,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', {type:'saw'})", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("osc", { type: "saw" });
       });
 
@@ -299,7 +299,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', {type:'tri'})", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("osc", { type: "tri" });
       });
 
@@ -327,7 +327,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', {type:'unknown'})", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("osc", { type: "unknown" });
       });
 
@@ -355,8 +355,8 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', {type:PeriodicWave})", function() {
-      var synth = Neume.Synth(function($) {
-        var wave = Neume.context.createPeriodicWave(
+      var synth = neu.Synth(function($) {
+        var wave = neu.context.createPeriodicWave(
           new Float32Array(2048), new Float32Array(2048)
         );
         return $("osc", { type: wave });
@@ -386,7 +386,7 @@ describe("ugen/osc", function() {
       });
     });
     it("$('osc', $('osc'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("osc", $("osc"));
       });
 
@@ -440,14 +440,14 @@ describe("ugen/osc", function() {
 
   describe("works", function() {
     it("start/stop", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("sin");
       });
 
       synth.start(0.100);
       synth.stop(0.200);
 
-      Neume.audioContext.$processTo("00:00.300");
+      neu.audioContext.$processTo("00:00.300");
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");

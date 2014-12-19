@@ -58,15 +58,15 @@ module.exports = function(neume, util) {
   }
 
   function noInputs(ugen, spec) {
-    var pulse = createPulseOscillator(ugen.$context, spec, 440);
+    var pulse = createPulseOscillator(ugen.context, spec, 440);
     return { outlet: pulse.outlet, ctrl: pulse.ctrl };
   }
 
   function hasInputs(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var pulse = createPulseOscillator(context, spec, 2);
-    var gain = ugen.$context.createGain();
+    var gain = ugen.context.createGain();
 
     gain.gain.value = 0;
     context.connect(pulse.outlet, gain.gain);
@@ -101,7 +101,7 @@ module.exports = function(neume, util) {
     osc.frequency.value = 0;
     osc.detune.value = 0;
 
-    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, defaultFreq));
+    var frequency = util.defaults(spec.freq, spec.frequency, defaultFreq);
     var detune = util.defaults(spec.dt, spec.detune, 0);
 
     context.connect(frequency, osc.frequency);

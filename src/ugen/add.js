@@ -20,7 +20,7 @@ module.exports = function(neume) {
 
   function make(ugen, spec, inputs) {
     return new neume.Unit({
-      outlet: new neume.Sum(ugen.$context, inputs)
+      outlet: new neume.Sum(ugen.context, inputs)
     });
   }
 

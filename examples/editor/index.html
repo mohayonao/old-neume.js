@@ -31,6 +31,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/codemirror.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/mode/javascript/javascript.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.8.0/addon/edit/matchbrackets.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="../../build/neume.js"></script>
   <script>
@@ -39,19 +40,19 @@
 
     _.mixin(neume._.exports());
 
-    window.Neume = neume(new AudioContext());
+    window.neu = neume(new AudioContext());
 
     var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-      mode: "javascript", theme: "monokai", workTime: 200, lineNumbers: true,
+      mode: "javascript", theme: "monokai", workTime: 200, lineNumbers: true, matchBrackets: true,
     });
 
     document.getElementById("run").addEventListener("click", function() {
-      Neume.reset();
+      neu.reset();
       eval.call(null, editor.getValue());
     }, false);
 
     document.getElementById("stop").addEventListener("click", function() {
-      Neume.reset();
+      neu.reset();
     }, false);
 
     document.getElementById("link").addEventListener("click", function() {

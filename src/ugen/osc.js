@@ -48,7 +48,7 @@ module.exports = function(neume, util) {
   };
 
   neume.register("osc", function(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var type = spec.type;
 
     if (!isPeriodicWave(type)) {
@@ -71,7 +71,7 @@ module.exports = function(neume, util) {
   Object.keys(WAVE_TYPES).forEach(function(name) {
     var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(type2wave(ugen.$context, type), ugen, spec, inputs);
+      return make(type2wave(ugen.context, type), ugen, spec, inputs);
     });
   });
 
@@ -93,15 +93,15 @@ module.exports = function(neume, util) {
   }
 
   function noInputs(wave, ugen, spec) {
-    var osc = createOscillator(ugen.$context, wave, spec, 440);
+    var osc = createOscillator(ugen.context, wave, spec, 440);
     return { outlet: osc, ctrl: osc };
   }
 
   function hasInputs(wave, ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var osc = createOscillator(context, wave, spec, 2);
-    var gain = ugen.$context.createGain();
+    var gain = ugen.context.createGain();
 
     gain.gain.value = 0;
     context.connect(osc, gain.gain);
@@ -121,7 +121,7 @@ module.exports = function(neume, util) {
     osc.frequency.value = 0;
     osc.detune.value = 0;
 
-    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, defaultFreq));
+    var frequency = util.defaults(spec.freq, spec.frequency, defaultFreq);
     var detune = util.defaults(spec.dt, spec.detune, 0);
 
     context.connect(frequency, osc.frequency);
@@ -131,7 +131,7 @@ module.exports = function(neume, util) {
   }
 
   function isPeriodicWave(wave) {
-    return !!(global.PeriodicWave && wave instanceof global.PeriodicWave);
+    return wave instanceof neume.webaudio.PeriodicWave;
   }
 
   function type2wave(context, type) {

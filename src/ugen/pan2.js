@@ -11,26 +11,27 @@ module.exports = function(neume, util) {
    *   add: signal = 0,
    * }, ...inputs: signal)
    *
-   * +-----+              +-----------+     +-----------+
-   * | pos |              | inputs[0] | ... | inputs[N] |
-   * +-----+              +-----------+     +-----------+
-   *   |                    |                 |
-   *   |                    +-----------------+
-   *   |                    |
-   *   +--------------------|-----------------------------+
-   *   |                    |                             |
-   *   |                    +--------------+              |
-   *   |                    |              |              |
-   * +-----------------+  +-----------+  +-----------+  +-----------------+
-   * | WaveShaperNode  |  | GainNode  |  | GainNode  |  | WaveShaperNode  |
-   * | - curve: curveL |--| - gain: 0 |  | - gain: 0 |--| - curve: curveR |
-   * +-----------------+  +-----------+  +-----------+  +-----------------+
-   *   |                                                  |
-   *   |               +----------------------------------+
-   *   |               |
-   * +-------------------+
-   * | ChannelMergerNode |
-   * +-------------------+
+   * +-----------+     +-----------+     +-----+
+   * | inputs[0] | ... | inputs[N] |     | pos |
+   * +-----------+     +-----------+     +-----+
+   *   |                 |                  |
+   *   +-----------------+   +--------------+------+
+   *   |                     |                     |
+   *   |     +-----------------+   +-----------------+
+   *   |     | WaveShaperNode  |   | WaveShaperNode  |
+   *   |     | - curve: curveL |   | - curve: curveR |
+   *   |     +-----------------+   +-----------------+
+   *   |             |                   |
+   *   +-------------|------+            |
+   *   |             |      |            |
+   * +-----------+   |   +-----------+   |
+   * | GainNode  |   |   | GainNode  |   |
+   * | - gain: 0 <---+   | - gain: 0 <---+
+   * +-----------+       +-----------+
+   *   |                   |
+   * +-----------------------+
+   * | ChannelMergerNode     |
+   * +-----------------------+
    *   |
    */
   neume.register("pan2", function(ugen, spec, inputs) {
@@ -38,7 +39,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var gainL = context.createGain();
     var gainR = context.createGain();

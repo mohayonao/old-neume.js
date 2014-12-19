@@ -44,7 +44,7 @@ module.exports = function(neume, util) {
   }
 
   function setup(ugen, nodes, multiple) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     if (multiple === 0) {
       return new neume.DC(context, 0);

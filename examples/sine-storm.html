@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>sine-storm - neume.js</title>
+  <title>neume.js / Sine Storm</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
@@ -21,7 +21,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>neume.js sine-storm</h1>
+    <div class="page-header">
+      <h1>neume.js / Sine Storm</h1>
+      <div>Web Audio API library for developing browser music</div>
+    </div>
     <canvas id="canvas"></canvas>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -37,7 +40,7 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume();
 
   var visualizer = null;
   var sines = [];
@@ -45,8 +48,8 @@
   var root, chord;
 
   function Sine($, freq, mod, amp) {
-    return $("sin", { freq: $.param("freq", freq), detune: _.rand2(10) })
-    .$("sin", { freq: $.param("mod", mod), mul: $.param("amp", amp) })
+    return $("sin", { freq: $("@freq", freq), detune: _.rand2(10) })
+    .$("sin", { freq: $("@mod", mod), mul: $("@amp", amp) })
     .$("out", { bus: 1 });
   }
 
@@ -61,20 +64,23 @@
   var players = [];
 
   function start() {
-    var delay = Neume.Synth(FBDelay);
-    var timer = Neume.Sched(function() {
-      var duration = compose();
+    var iter = {
+      next: function() {
+        return { value: _.sample([ 2.5, 5, 10, 15, 20, 25 ]), done: false };
+      }
+    };
+    var delay = neu.Synth(FBDelay);
+    var timer = neu.Sched(iter, function(e) {
+      compose();
 
       sines = _.range(7).map(function() {
         var freq = _.midicps(root + _.sample(chord) + _.sample([ 0, 12, 24, 36 ]));
         var mod = _.exprand(0.01, 500.0);
         var amp = _.exprand(0.01, 0.075);
 
-        return Neume.Synth(Sine, freq, mod, amp)
-        .fadeIn("now", 1).fadeOut("+" + duration, 1);
+        return neu.Synth(Sine, freq, mod, amp)
+        .fadeIn("now", 1).fadeOut("+" + e.duration, 1);
       });
-
-      return { next: "+" + duration };
     });
 
     players = [ delay, timer, visualizer ];
@@ -98,8 +104,6 @@
       root = 36 + _.sample([ 2, 4, 4, 6, 6, 6 ]);
       chord = [ 0, 3, 5, 7, 11, 12 ];
     }
-
-    return _.sample([ 2.5, 5, 10, 15, 20, 25 ]);
   }
   </script>
 
@@ -198,7 +202,7 @@
 
     var canvas = document.getElementById("canvas");
 
-    visualizer = new WaveVisualizer(Neume.analyser, {
+    visualizer = new WaveVisualizer(neu.analyser, {
       canvas: canvas, width: $(canvas).width(), height: 240
     });
 
@@ -209,7 +213,7 @@
       },
       methods: {
         toggle: function() {
-          Neume.reset();
+          neu.reset();
           this.isPlaying = !this.isPlaying;
           if (this.isPlaying) {
             start(this.$data.score);

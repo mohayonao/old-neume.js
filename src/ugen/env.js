@@ -22,17 +22,6 @@ module.exports = function(neume, util) {
    *     add: signal = 0,
    *   }, ...inputs: signal)
    *
-   *   $("dadsr", {
-   *     delayTime: timevalue = 0.10,
-   *     attackTime: timevalue = 0.01,
-   *     decayTime: timevalue = 0.30,
-   *     sustainLevel: number = 0.50,
-   *     releaseTime: timevalue = 1.00,
-   *     curve: number|string = "lin",
-   *     mul: signal = 1,
-   *     add: signal = 0,
-   *   }, ...inputs: signal)
-   *
    *   $("asr", {
    *     attackTime: timevalue = 0.01,
    *     sustainLevel: number = 0.50,
@@ -77,16 +66,6 @@ module.exports = function(neume, util) {
     var r = util.defaults(spec.r, spec.releaseTime, 1.00);
 
     return make([ 0, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
-  });
-
-  neume.register("dadsr", function(ugen, spec, inputs) {
-    var delay = util.defaults(spec.delay, spec.delayTime, 0.1);
-    var a = util.defaults(spec.a, spec.attackTime, 0.01);
-    var d = util.defaults(spec.d, spec.decayTime, 0.30);
-    var s = util.defaults(spec.s, spec.sustainLevel, 0.50);
-    var r = util.defaults(spec.r, spec.releaseTime, 1.00);
-
-    return make([ 0, 0, delay, 1, a, s, d, ">", 0, r ], ugen, spec, inputs);
   });
 
   neume.register("asr", function(ugen, spec, inputs) {
@@ -265,7 +244,7 @@ module.exports = function(neume, util) {
 
 
   function make(src, ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var curve = util.defaults(spec.curve, "lin");
     if (typeof curve === "number") {
@@ -303,14 +282,14 @@ module.exports = function(neume, util) {
       isStopped = true;
     }
 
-    function release(e) {
+    function release(t) {
       if (isStopped || releaseSchedId || env.releaseNode === -1) {
         return;
       }
 
-      var t0 = util.finite(context.toSeconds(e.playbackTime));
+      t = util.finite(context.toSeconds(t));
 
-      releaseSchedId = context.sched(t0, function(t0) {
+      releaseSchedId = context.sched(t, function(t0) {
         context.unsched(schedId);
 
         schedId = 0;
@@ -371,7 +350,7 @@ module.exports = function(neume, util) {
       if (env.index === env.length) {
         schedId = context.sched(t1, function(t) {
           schedId = 0;
-          ugen.emit("end", { playbackTime: t }, ugen.$synth);
+          ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
         });
       } else if (env.index !== env.releaseNode) {
         schedId = context.sched(t1, resume);

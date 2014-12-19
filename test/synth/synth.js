@@ -93,19 +93,19 @@ describe("neume.Synth", function() {
 
       assert(synth.start() === synth);
     });
-    it("calls each ugen.$unit.start(t) only once", sinon.test(function() {
+    it("calls each ugen._unit.start(t) only once", sinon.test(function() {
       var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
       }, []);
 
       var ugens = synth._db.all();
       ugens.forEach(function(ugen) {
-        sinon.spy(ugen.$unit, "start");
+        sinon.spy(ugen._unit, "start");
       });
 
       assert(synth.state === "UNSCHEDULED", "00:00.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.called === false, "00:00.000");
+        assert(ugen._unit.start.called === false, "00:00.000");
       });
 
       synth.start(1.000);
@@ -114,21 +114,21 @@ describe("neume.Synth", function() {
       audioContext.$processTo("00:00.500");
       assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.called === false, "00:00.500");
+        assert(ugen._unit.start.called === false, "00:00.500");
       });
 
       audioContext.$processTo("00:01.000");
       assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.called === true, "00:01.000");
-        assert(ugen.$unit.start.calledOnce === true, "00:01.000");
-        assert.deepEqual(ugen.$unit.start.firstCall.args, [ 1 ]);
+        assert(ugen._unit.start.called === true, "00:01.000");
+        assert(ugen._unit.start.calledOnce === true, "00:01.000");
+        assert.deepEqual(ugen._unit.start.firstCall.args, [ 1 ]);
       });
 
       audioContext.$processTo("00:01.500");
       assert(synth.state === "PLAYING", "00:01.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.start.calledTwice === false, "00:01.500");
+        assert(ugen._unit.start.calledTwice === false, "00:01.500");
       });
     }));
   });
@@ -139,19 +139,19 @@ describe("neume.Synth", function() {
 
       assert(synth.stop() === synth);
     });
-    it("calls each ugen.$unit.stop(t) only once with calling start first", sinon.test(function() {
+    it("calls each ugen._unit.stop(t) only once with calling start first", sinon.test(function() {
       var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
       }, []);
 
       var ugens = synth._db.all();
       ugens.forEach(function(ugen) {
-        sinon.spy(ugen.$unit, "stop");
+        sinon.spy(ugen._unit, "stop");
       });
 
       assert(synth.state === "UNSCHEDULED", "00:00.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.stop.called === false, "00:00.000");
+        assert(ugen._unit.stop.called === false, "00:00.000");
       });
 
       synth.stop(0.000);
@@ -161,26 +161,26 @@ describe("neume.Synth", function() {
       audioContext.$processTo("00:00.500");
       assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.stop.called === false, "00:00.500");
+        assert(ugen._unit.stop.called === false, "00:00.500");
       });
 
       audioContext.$processTo("00:01.000");
       assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.stop.called === false, "00:01.000");
+        assert(ugen._unit.stop.called === false, "00:01.000");
       });
 
       audioContext.$processTo("00:01.500");
       assert(synth.state === "PLAYING", "00:01.500");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.stop.called === false, "00:01.500");
+        assert(ugen._unit.stop.called === false, "00:01.500");
       });
 
       audioContext.$processTo("00:02.000");
       assert(synth.state === "FINISHED", "00:02.000");
       ugens.forEach(function(ugen) {
-        assert(ugen.$unit.stop.calledOnce === true, "00:02.000");
-        assert.deepEqual(ugen.$unit.stop.firstCall.args, [ 2 ]);
+        assert(ugen._unit.stop.calledOnce === true, "00:02.000");
+        assert.deepEqual(ugen._unit.stop.firstCall.args, [ 2 ]);
       });
 
       audioContext.$processTo("00:02.250");

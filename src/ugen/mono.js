@@ -24,7 +24,7 @@ module.exports = function(neume) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createGain();
 
     outlet.channelCount = 1;

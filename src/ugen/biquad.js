@@ -61,7 +61,7 @@ module.exports = function(neume, util) {
   });
 
   function make(type, ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createBiquadFilter();
 
     outlet.type = type;
@@ -70,9 +70,9 @@ module.exports = function(neume, util) {
     outlet.Q.value = 0;
     outlet.gain.value = 0;
 
-    var frequency = context.toFrequency(util.defaults(spec.freq, spec.frequency, 350));
+    var frequency = util.defaults(spec.freq, spec.frequency, 350);
     var detune = util.defaults(spec.dt, spec.detune, 0);
-    var q = util.defaults(spec.Q, 1);
+    var q = util.defaults(spec.q, spec.Q, 1);
     var gain = util.defaults(spec.gain, 0);
 
     context.connect(frequency, outlet.frequency);

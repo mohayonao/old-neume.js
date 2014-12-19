@@ -33,7 +33,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var index = 0;
     var data = spec.value;
@@ -50,23 +50,22 @@ module.exports = function(neume, util) {
     var param = new neume.Param(context, util.finite(data[0]), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    function setValue(e) {
-      if (Array.isArray(e.value)) {
-        data = e.value;
+    function setValue(t, value) {
+      if (Array.isArray(value)) {
+        data = value;
       }
     }
 
-    function at(e) {
-      var index = util.int(util.defaults(e.value, e.index, e.count));
-      update(index, e.playbackTime);
+    function at(t, value) {
+      update(util.int(value), t);
     }
 
-    function next(e) {
-      update(index + 1, e.playbackTime);
+    function next(t) {
+      update(index + 1, t);
     }
 
-    function prev(e) {
-      update(index - 1, e.playbackTime);
+    function prev(t) {
+      update(index - 1, t);
     }
 
     function update(nextIndex, startTime) {

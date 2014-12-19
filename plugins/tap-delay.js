@@ -74,7 +74,7 @@
    *    |
    */
   neume.register("tap-delay", function(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var inlet = context.createGain();
     var outlet = context.createGain();
 

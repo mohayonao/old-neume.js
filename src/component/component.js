@@ -6,36 +6,36 @@ var neume = require("../namespace");
 
 function NeuComponent(context, node) {
   Emitter.call(this);
-  this.$context = context;
-  this.$outlet = null;
+  this.context = context;
+  this.outlet = null;
   this._node = util.defaults(node, null);
 }
 util.inherits(NeuComponent, Emitter);
 
-NeuComponent.$name = "NeuComponent";
+NeuComponent.$$name = "NeuComponent";
 
 NeuComponent.prototype.mul = function(value) {
-  return new neume.Mul(this.$context, util.defaults(this._node, this), util.defaults(value, 1));
+  return new neume.Mul(this.context, util.defaults(this._node, this), util.defaults(value, 1));
 };
 
 NeuComponent.prototype.add = function(value) {
-  return new neume.Sum(this.$context, [ util.defaults(this._node, this), util.defaults(value, 0) ]);
+  return new neume.Sum(this.context, [ util.defaults(this._node, this), util.defaults(value, 0) ]);
 };
 
 NeuComponent.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
-    this.$outlet = this.$context.toAudioNode(util.defaults(this._node, this));
+  if (this.outlet === null) {
+    this.outlet = this.context.toAudioNode(util.defaults(this._node, this));
   }
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuComponent.prototype.connect = function(to) {
-  this.$context.connect(util.defaults(this._node, this), to);
+  this.context.connect(util.defaults(this._node, this), to);
   return this;
 };
 
 NeuComponent.prototype.disconnect = function() {
-  this.$context.disconnect(util.defaults(this._node, this));
+  this.context.disconnect(util.defaults(this._node, this));
   return this;
 };
 

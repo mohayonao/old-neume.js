@@ -38,7 +38,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var delayTime = context.toSeconds(util.defaults(spec.delay, spec.delayTime, 0));
     var feedback = util.defaults(spec.fb, spec.feedback, 0);

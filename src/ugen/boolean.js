@@ -32,7 +32,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var data = !!spec.value;
     var trueVal = util.finite(util.defaults(spec.true, 1));
@@ -40,14 +40,14 @@ module.exports = function(neume, util) {
     var param = new neume.Param(context, data ? trueVal : falseVal, spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;
 
-    function setValue(e) {
-      if (typeof e.value === "boolean") {
-        update(e.value, e.playbackTime);
+    function setValue(t, value) {
+      if (typeof value === "boolean") {
+        update(value, t);
       }
     }
 
-    function toggle(e) {
-      update(!data, e.playbackTime);
+    function toggle(t) {
+      update(!data, t);
     }
 
     function update(value, startTime) {

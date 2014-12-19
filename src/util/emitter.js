@@ -13,26 +13,28 @@ Emitter.prototype.listeners = function(event) {
 };
 
 Emitter.prototype.on = function(event, listener) {
+  if (typeof listener === "function") {
+    if (!this.hasListeners(event)) {
+      this._callbacks[event] = [];
+    }
 
-  if (!this.hasListeners(event)) {
-    this._callbacks[event] = [];
+    this._callbacks[event].push(listener);
   }
-
-  this._callbacks[event].push(listener);
 
   return this;
 };
 
 Emitter.prototype.once = function(event, listener) {
+  if (typeof listener === "function") {
+    var fn = function(payload) {
+      this.off(event, fn);
+      listener.call(this, payload);
+    };
 
-  function fn(payload) {
-    this.off(event, fn);
-    listener.call(this, payload);
+    fn.listener = listener;
+
+    this.on(event, fn);
   }
-
-  fn.listener = listener;
-
-  this.on(event, fn);
 
   return this;
 };

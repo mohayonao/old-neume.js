@@ -6,15 +6,15 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/pan2"));
 
 describe("ugen/pan2", function() {
-  var Neume = null;
+  var neu = null;
 
   beforeEach(function() {
-    Neume = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext());
   });
 
   describe("graph", function() {
     it("$('pan2', $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("pan2", { pos: 0 }, $("sin"));
       });
 
@@ -78,7 +78,7 @@ describe("ugen/pan2", function() {
       });
     });
     it("$('pan2', { pos: $('sin', { freq: 1 }) }, $('sin'))", function() {
-      var synth = Neume.Synth(function($) {
+      var synth = neu.Synth(function($) {
         return $("pan2", { pos: $("sin", { freq: 1 }) }, $("sin"));
       });
 

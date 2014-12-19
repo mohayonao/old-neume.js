@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>buffer-work - neume.js</title>
+  <title>neume.js / Buffer Work</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
@@ -23,7 +23,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>neume.js buffer-work</h1>
+    <div class="page-header">
+      <h1>neume.js / Buffer Work</h1>
+      <div>Web Audio API library for developing browser music</div>
+    </div>
     <div id="canvas"></div>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
@@ -39,15 +42,15 @@
   </div>
 
   <script id="example">
-  var Neume = neume(new AudioContext());
+  var neu = neume();
 
   var visualizer = null; // three.js: http://threejs.org/
 
   var buffer = null;
-  Neume.Buffer.load("./amen.wav").then(function(result) {
+  neu.Buffer.load("./amen.wav").then(function(result) {
     buffer = result;
   }).catch(function(e) {
-    console.error("Neume.Buffer.load: failed");
+    console.error("neu.Buffer.load: failed");
   });
 
   function Granular($, buffer, depth) {
@@ -112,11 +115,11 @@
   var players = [];
 
   function start() {
-    Neume.context.reset();
+    neu.context.reset();
 
     if (buffer) {
-      players = [ Neume.Interval(0.500, function(e) {
-        Neume.Synth(Granular, buffer, 4).start(e.playbackTime);
+      players = [ neu.Interval(0.500, function(e) {
+        neu.Synth(Granular, buffer, 4).start(e.playbackTime);
       }), visualizer ];
     }
 
@@ -268,7 +271,7 @@
     });
     canvas.$offset = canvas.offset();
 
-    visualizer = new WaveVisualizer(Neume.analyser, { width: canvas.width(), height: 240 });
+    visualizer = new WaveVisualizer(neu.analyser, { width: canvas.width(), height: 240 });
 
     visualizer.camera.position.set(0, 0, -300);
 

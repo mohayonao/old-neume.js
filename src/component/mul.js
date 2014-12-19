@@ -28,35 +28,35 @@ function NeuMul(context, a, b) {
 }
 util.inherits(NeuMul, neume.Component);
 
-NeuMul.$name = "NeuMul";
+NeuMul.$$name = "NeuMul";
 
 NeuMul.prototype.mul = function(value) {
   value = value.valueOf();
 
   if (typeof this._b === "number" && typeof value === "number") {
-    return new neume.Mul(this.$context, this._a, util.finite(this._b * value));
+    return new neume.Mul(this.context, this._a, util.finite(this._b * value));
   }
 
-  return new neume.Mul(this.$context, this.toAudioNode(), value);
+  return new neume.Mul(this.context, this.toAudioNode(), value);
 };
 
 NeuMul.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
-    this.$outlet = this.$context.createGain();
-    this.$outlet.gain.value = 0;
-    this.$context.connect(this._a, this.$outlet);
-    this.$context.connect(this._b, this.$outlet.gain);
+  if (this.outlet === null) {
+    this.outlet = this.context.createGain();
+    this.outlet.gain.value = 0;
+    this.context.connect(this._a, this.outlet);
+    this.context.connect(this._b, this.outlet.gain);
   }
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuMul.prototype.connect = function(to) {
-  this.$context.connect(this.toAudioNode(), to);
+  this.context.connect(this.toAudioNode(), to);
   return this;
 };
 
 NeuMul.prototype.disconnect = function() {
-  this.$context.disconnect(this.$outlet);
+  this.context.disconnect(this.outlet);
   return this;
 };
 

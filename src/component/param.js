@@ -17,7 +17,7 @@ function NeuParam(context, value, spec) {
 }
 util.inherits(NeuParam, neume.Component);
 
-NeuParam.$name = "NeuParam";
+NeuParam.$$name = "NeuParam";
 
 Object.defineProperties(NeuParam.prototype, {
   events: {
@@ -46,7 +46,7 @@ Object.defineProperties(NeuParam.prototype, {
 });
 
 NeuParam.prototype.valueAtTime = function(t) {
-  t = util.finite(this.$context.toSeconds(t));
+  t = util.finite(this.context.toSeconds(t));
 
   var value  = this._value;
   var events = this._events;
@@ -87,7 +87,7 @@ NeuParam.prototype.valueAtTime = function(t) {
 
 NeuParam.prototype.setAt = function(value, startTime) {
   value = util.finite(value);
-  startTime = util.finite(this.$context.toSeconds(startTime));
+  startTime = util.finite(this.context.toSeconds(startTime));
 
   var params = this._params;
 
@@ -108,7 +108,7 @@ NeuParam.prototype.setValueAtTime = NeuParam.prototype.setAt;
 
 NeuParam.prototype.linTo = function(value, endTime) {
   value = util.finite(value);
-  endTime = util.finite(this.$context.toSeconds(endTime));
+  endTime = util.finite(this.context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -129,7 +129,7 @@ NeuParam.prototype.linearRampToValueAtTime = NeuParam.prototype.linTo;
 
 NeuParam.prototype.expTo = function(value, endTime) {
   value = util.finite(value);
-  endTime = util.finite(this.$context.toSeconds(endTime));
+  endTime = util.finite(this.context.toSeconds(endTime));
 
   var params = this._params;
 
@@ -150,8 +150,8 @@ NeuParam.prototype.exponentialRampToValueAtTime = NeuParam.prototype.expTo;
 
 NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
   target = util.finite(target);
-  startTime = util.finite(this.$context.toSeconds(startTime));
-  timeConstant = util.finite(this.$context.toSeconds(timeConstant));
+  startTime = util.finite(this.context.toSeconds(startTime));
+  timeConstant = util.finite(this.context.toSeconds(timeConstant));
 
   var params = this._params;
 
@@ -172,8 +172,8 @@ NeuParam.prototype.targetAt = function(target, startTime, timeConstant) {
 NeuParam.prototype.setTargetAtTime = NeuParam.prototype.targetAt;
 
 NeuParam.prototype.curveAt = function(values, startTime, duration) {
-  startTime = util.finite(this.$context.toSeconds(startTime));
-  duration = util.finite(this.$context.toSeconds(duration));
+  startTime = util.finite(this.context.toSeconds(startTime));
+  duration = util.finite(this.context.toSeconds(duration));
 
   var params = this._params;
 
@@ -194,7 +194,7 @@ NeuParam.prototype.curveAt = function(values, startTime, duration) {
 NeuParam.prototype.setValueCurveAtTime = NeuParam.prototype.curveAt;
 
 NeuParam.prototype.cancel = function(startTime) {
-  startTime = util.finite(this.$context.toSeconds(startTime));
+  startTime = util.finite(this.context.toSeconds(startTime));
 
   var params = this._params;
   var events = this._events;
@@ -217,7 +217,7 @@ NeuParam.prototype.cancel = function(startTime) {
 NeuParam.prototype.cancelScheduledValues = NeuParam.prototype.cancel;
 
 NeuParam.prototype.update = function(value, startTime, lag) {
-  var context = this.$context;
+  var context = this.context;
   var endTime = startTime + util.finite(context.toSeconds(util.defaults(lag, this._lag, 0)));
   var startValue = this.valueAtTime(startTime);
   var curve = this._curve;
@@ -265,34 +265,34 @@ function terminateAudioParamScheduling(_this, startValue, startTime) {
 }
 
 NeuParam.prototype.toAudioNode = function(input) {
-  var context = this.$context;
+  var context = this.context;
 
-  if (this.$outlet == null) {
-    this.$outlet = context.createGain();
-    this.$outlet.gain.value = this._value;
-    this._params.push(this.$outlet.gain);
+  if (this.outlet == null) {
+    this.outlet = context.createGain();
+    this.outlet.gain.value = this._value;
+    this._params.push(this.outlet.gain);
     if (input) {
-      context.connect(input, this.$outlet);
+      context.connect(input, this.outlet);
     } else {
-      context.connect(new neume.DC(context, 1), this.$outlet);
+      context.connect(new neume.DC(context, 1), this.outlet);
     }
   }
 
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuParam.prototype.connect = function(to) {
-  if (to instanceof global.AudioParam) {
+  if (to instanceof neume.webaudio.AudioParam) {
     to.value = this._value;
     this._params.push(to);
   } else {
-    this.$context.connect(this.toAudioNode(), to);
+    this.context.connect(this.toAudioNode(), to);
   }
   return this;
 };
 
 NeuParam.prototype.disconnect = function() {
-  this.$context.disconnect(this.$outlet);
+  this.context.disconnect(this.outlet);
   return this;
 };
 

@@ -2,110 +2,116 @@
 
 var util = require("../util");
 var neume = require("../namespace");
+var Emitter = require("../util/emitter");
 
-function NeuSched(context, schedTime, callback) {
-  this.$context = context;
+var STATE_INIT = 0;
+var STATE_START = 1;
+var STATE_RUNNING = 2;
+// var STATE_STOP = 3;
+var STATE_DONE = 4;
 
-  this._schedTime = schedTime;
-  this._callback = callback;
+function NeuSched(context, schedIter, callback) {
+  Emitter.call(this);
 
-  this._state = NeuSched.STATE_INIT;
-  this._stateString = "UNSCHEDULED";
-  this._startTime = 0;
-  this._stopTime = Infinity;
+  this.context = context;
+
+  this._schedIter = schedIter;
+  this._state = STATE_INIT;
   this._count = 0;
 
   Object.defineProperties(this, {
-    context: {
-      value: this.$context,
-      enumerable: true
-    },
     state: {
       get: function() {
-        return this._stateString;
+        return [
+          "UNSCHEDULED",
+          "SCHEDULED",
+          "PLAYING",
+          "PLAYING",
+          "FINISHED"
+        ][this._state];
       },
       enumerable: true
     },
   });
+
+  this.on("start", callback).on("sched", callback).on("stop", callback);
 }
-NeuSched.$name = "NeuSched";
+util.inherits(NeuSched, Emitter);
 
-NeuSched.STATE_INIT = 0;
-NeuSched.STATE_START = 1;
-NeuSched.STATE_STOP = 2;
+NeuSched.$$name = "NeuSched";
 
-NeuSched.prototype.start = function(t0) {
-  var context = this.$context;
-
-  t0 = util.finite(util.defaults(context.toSeconds(t0), context.currentTime));
-
-  if (this._state === NeuSched.STATE_INIT) {
-    if (util.isFunction(this._callback)) {
-      this._state = NeuSched.STATE_START;
-      this._stateString = "SCHEDULED";
-      this._startTime = t0;
-
-      context.sched(t0, this._onsched, this);
-    } else {
-      this._state = NeuSched.STATE_STOP;
-      this._stateString = "FINISHED";
-    }
-
-    context.start(); // auto start(?)
+NeuSched.prototype.start = function(startTime) {
+  if (this._state !== STATE_INIT) {
+    return this;
   }
+
+  var context = this.context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  startTime = util.finite(startTime);
+
+  this._state = STATE_START;
+
+  context.sched(startTime, function(t0) {
+    this._state = STATE_RUNNING;
+    emit(this, t0, false);
+  }, this);
+
+  context.start(); // auto start
 
   return this;
 };
 
-NeuSched.prototype.stop = function(t0) {
-  var context = this.$context;
-
-  t0 = util.finite(util.defaults(context.toSeconds(t0), context.currentTime));
-
-  if (this._state === NeuSched.STATE_START) {
-    this._state = NeuSched.STATE_STOP;
-    this._stopTime = t0;
-    this.$context.sched(this._stopTime, function() {
-      this._stateString = "FINISHED";
-    }, this);
+NeuSched.prototype.stop = function(startTime) {
+  if (this._state !== STATE_RUNNING && this._state !== STATE_START) {
+    return this;
   }
+
+  var context = this.context;
+
+  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
+  startTime = util.finite(startTime);
+
+  context.sched(startTime, function(t0) {
+    this.emit("stop", {
+      type: "stop",
+      playbackTime: t0,
+      duration: 0,
+      count: this._count,
+      done: false
+    });
+    this._state = STATE_DONE;
+  }, this);
 
   return this;
 };
 
-NeuSched.prototype._onsched = function(t0) {
-  if (this._stopTime <= t0) {
-    this._state = NeuSched.STATE_STOP;
-    this._stateString = "FINISHED";
+function emit(_this, t0, done) {
+  if (_this._state !== STATE_RUNNING) {
     return;
   }
 
-  this._stateString = "PLAYING";
+  var context = _this.context;
+  var type = done ? "stop" : _this._count ? "sched" : "start";
+  var result = _this._schedIter.next();
+  var duration = done ? 0 : util.finite(context.toSeconds(result.value));
 
-  var result = this._callback({
+  _this.emit(type, {
+    type: type,
     playbackTime: t0,
-    count: this._count++
+    duration: duration,
+    count: _this._count++,
+    done: done
   });
 
-  var context = this.$context;
-
-  /* istanbul ignore else */
-  if (typeof result === "object") {
-    var schedTime = util.finite(context.toSeconds(result.next));
-
-    if (t0 < schedTime) {
-      if (util.isFunction(result.callback)) {
-        this._callback = result.callback;
-      }
-      this._schedTime = schedTime;
-
-      return context.sched(this._schedTime, this._onsched, this);
-    }
+  if (done) {
+    _this._state = STATE_DONE;
+  } else {
+    context.sched(t0 + duration, function(t0) {
+      emit(_this, t0, result.done);
+    });
   }
 
-  this._state = NeuSched.STATE_STOP;
-  this._stopTime = t0;
-  this._stateString = "FINISHED";
-};
+}
 
 module.exports = neume.Sched = NeuSched;

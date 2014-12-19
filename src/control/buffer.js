@@ -5,27 +5,13 @@ var neume = require("../namespace");
 var FFT = require("../util/fft");
 
 function NeuBuffer(context, buffer) {
-  this.$context = context;
-  this._buffer = buffer;
+  this.context = context;
+  this.sampleRate = buffer.sampleRate;
+  this.length = buffer.length;
+  this.duration = buffer.duration;
+  this.numberOfChannels = buffer.numberOfChannels;
 
-  Object.defineProperties(this, {
-    sampleRate: {
-      value: this._buffer.sampleRate,
-      enumerable: true
-    },
-    length: {
-      value: this._buffer.length,
-      enumerable: true
-    },
-    duration: {
-      value: this._buffer.duration,
-      enumerable: true
-    },
-    numberOfChannels: {
-      value: this._buffer.numberOfChannels,
-      enumerable: true
-    },
-  });
+  this._buffer = buffer;
 
   for (var i = 0; i < this._buffer.numberOfChannels; i++) {
     Object.defineProperty(this, i, {
@@ -33,7 +19,7 @@ function NeuBuffer(context, buffer) {
     });
   }
 }
-NeuBuffer.$name = "NeuBuffer";
+NeuBuffer.$$name = "NeuBuffer";
 
 NeuBuffer.create = function(context, channels, length, sampleRate) {
   channels = util.int(util.defaults(channels, 1));
@@ -73,7 +59,7 @@ NeuBuffer.load = function(context, url) {
 
 function loadWithXHR(url) {
   return new Promise(function(resolve, reject) {
-    var xhr = new global.XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
     xhr.open("GET", url);
     xhr.responseType = "arraybuffer";
@@ -115,7 +101,7 @@ NeuBuffer.prototype.concat = function() {
     return a + b.length;
   }, this.length);
   var sampleRate = this.sampleRate;
-  var buffer = this.$context.createBuffer(channels, length, sampleRate);
+  var buffer = this.context.createBuffer(channels, length, sampleRate);
 
   args.unshift(this);
 
@@ -130,18 +116,18 @@ NeuBuffer.prototype.concat = function() {
     }
   }
 
-  return new NeuBuffer(this.$context, buffer);
+  return new NeuBuffer(this.context, buffer);
 };
 
 NeuBuffer.prototype.reverse = function() {
   var channels = this.numberOfChannels;
-  var buffer = this.$context.createBuffer(channels, this.length, this.sampleRate);
+  var buffer = this.context.createBuffer(channels, this.length, this.sampleRate);
 
   for (var i = 0; i < channels; i++) {
     buffer.getChannelData(i).set(util.toArray(this[i]).reverse());
   }
 
-  return new NeuBuffer(this.$context, buffer);
+  return new NeuBuffer(this.context, buffer);
 };
 
 NeuBuffer.prototype.slice = function(start, end) {
@@ -165,15 +151,15 @@ NeuBuffer.prototype.slice = function(start, end) {
   var buffer = null;
 
   if (length <= 0) {
-    buffer = this.$context.createBuffer(channels, 1, sampleRate);
+    buffer = this.context.createBuffer(channels, 1, sampleRate);
   } else {
-    buffer = this.$context.createBuffer(channels, length, sampleRate);
+    buffer = this.context.createBuffer(channels, length, sampleRate);
     for (var i = 0; i < channels; i++) {
       buffer.getChannelData(i).set(this[i].subarray(start, end));
     }
   }
 
-  return new NeuBuffer(this.$context, buffer);
+  return new NeuBuffer(this.context, buffer);
 };
 
 NeuBuffer.prototype.split = function(n) {
@@ -199,13 +185,13 @@ NeuBuffer.prototype.split = function(n) {
 
 NeuBuffer.prototype.normalize = function() {
   var channels = this.numberOfChannels;
-  var buffer = this.$context.createBuffer(channels, this.length, this.sampleRate);
+  var buffer = this.context.createBuffer(channels, this.length, this.sampleRate);
 
   for (var i = 0; i < channels; i++) {
     buffer.getChannelData(i).set(normalize(this[i]));
   }
 
-  return new NeuBuffer(this.$context, buffer);
+  return new NeuBuffer(this.context, buffer);
 };
 
 NeuBuffer.prototype.resample = function(size, interpolation) {
@@ -213,13 +199,13 @@ NeuBuffer.prototype.resample = function(size, interpolation) {
   interpolation = !!util.defaults(interpolation, true);
 
   var channels = this.numberOfChannels;
-  var buffer = this.$context.createBuffer(channels, size, this.sampleRate);
+  var buffer = this.context.createBuffer(channels, size, this.sampleRate);
 
   for (var i = 0; i < channels; i++) {
     buffer.getChannelData(i).set(resample(this[i], size, interpolation));
   }
 
-  return new NeuBuffer(this.$context, buffer);
+  return new NeuBuffer(this.context, buffer);
 };
 
 NeuBuffer.prototype.toAudioBuffer = function() {
@@ -237,7 +223,7 @@ NeuBuffer.prototype.toPeriodicWave = function(ch) {
 
   var fft = FFT.forward(buffer);
 
-  return this.$context.createPeriodicWave(fft.real, fft.imag);
+  return this.context.createPeriodicWave(fft.real, fft.imag);
 };
 
 function normalize(data) {
