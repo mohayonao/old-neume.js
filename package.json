@@ -40,6 +40,7 @@
     "cover": "gulp cover",
     "jscs": "gulp jscs",
     "lint": "gulp lint",
+    "server": "python -m SimpleHTTPServer",
     "test": "gulp test",
     "travis": "gulp travis"
   }
