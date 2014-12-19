@@ -12,6 +12,12 @@ describe("neume", function() {
   });
 
   describe("constructor", function() {
+    it("()", function() {
+      var neu = neume();
+
+      assert(typeof neu === "object");
+      assert(neu.audioContext instanceof global.AudioContext);
+    });
     it("(destination: AudioContext)", sinon.test(function() {
       var neu = neume(audioContext);
 

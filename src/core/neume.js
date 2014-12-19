@@ -104,6 +104,8 @@ function NEU(context) {
 neume.impl = function(destination, spec) {
   if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
+  } else if (typeof destination === "undefined") {
+    destination = new neume.webaudio.AudioContext().destination;
   }
   if (!(destination instanceof neume.webaudio.AudioNode)) {
     throw new TypeError("neume(): Illegal arguments");
