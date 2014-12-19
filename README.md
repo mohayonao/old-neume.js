@@ -6,7 +6,7 @@
 ![](http://upload.wikimedia.org/wikipedia/commons/a/ab/Gregorian_chant.gif)
 
 ## What is?
-**Neume** (/ˈnjuːm/; ja: ニューム) is a Web Audio API library for developing browser music. The architecture of neume.js provides very simple operation for creating web-based audio application and generates optimized audio-graph for Web Audio API.
+**Neume** (/ˈnjuːm/; ja: ニューム) is a Web Audio API library for developing browser music. The architecture of neume.js provides a very simple interface for creating web-based audio application and generates optimized audio-graph for Web Audio API.
 
 ## Examples
 
@@ -15,12 +15,8 @@
   - [sine-storm](http://mohayonao.github.io/neume.js/examples/sine-storm.html)
     - sine wave drone
   - [8bit-sequencer](http://mohayonao.github.io/neume.js/examples/8bit-sequencer.html)
-    - simple rhythm machine
-  - [rendering-reich](http://mohayonao.github.io/neume.js/examples/rendering-reich.html)
-    - render sound and play it with phase-shift
-  - [buffer-work](http://mohayonao.github.io/neume.js/examples/buffer-work.html)
-    - buffer edit like tape (cut, paste, reverse...)
-  - weird demonstrations
+    - simple rhythm sequencer
+  - other weird demonstrations
     - [6chars drum](http://the.mohayonao.com/6chars/)
     - [scalable mario](http://the.mohayonao.com/scalable-mario/)
     - [formant khoomii](http://the.mohayonao.com/khoomii/)
@@ -39,24 +35,17 @@ $ bower install neume.js
   - [neume.min.js](https://raw.githubusercontent.com/mohayonao/neume.js/master/build/neume.min.js)
   - [neume.min.js.map](https://raw.githubusercontent.com/mohayonao/neume.js/master/build/neume.min.js.map)
 
-Neume.js is dependent on `Web Audio API` and `Promise`.
+You'll also need a Promise polyfill for older browsers.
 
   - [es6-promise](https://github.com/jakearchibald/es6-promise)
 
-In a browser, include it in your html.
-
-```html
-<script src="/path/to/es6-promise.js"></script>
-<script src="/path/to/neume.min.js"></script>
-```
-
-Here is boilerplate html in order to play a sine wave metronome in neume.js. ->  [sample](http://mohayonao.github.io/neume.js/examples/metronome.html)
+Here is boilerplate html in order to play a sine wave metronome in neume.js. →  [sample](http://mohayonao.github.io/neume.js/examples/metronome.html)
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="/path/to/es6-promise.js"></script>
+  <title>neume.js metronome</title>
   <script src="/path/to/neume.min.js"></script>
 </head>
 <body>
@@ -66,7 +55,7 @@ Here is boilerplate html in order to play a sine wave metronome in neume.js. -> 
 
     function Sine($, freq, dur) {
       return $("sin", { freq: freq })
-      .$("xline", { start: 0.2, dur: dur }).on("end", $.stop);
+      .$("xline", { dur: dur }).on("end", $.stop);
     }
 
     var timer = null;
@@ -93,24 +82,20 @@ Here is boilerplate html in order to play a sine wave metronome in neume.js. -> 
 
 ## How do work?
 
-This example makes a modulated sine wave with a decay of about 1 second.
+This example makes a modulated 880(±20) Hz sine wave with an exponential decay of about one second.
 
 ```javascript
-// initialize Neume interface with AudioContext
+// initialize neume interface with AudioContext
 var neu = neume(new AudioContext());
 
 // define synth and play it
 neu.Synth(function($) {
-  return $("sin", {
-    freq: $("sin", { freq: 8 }).mul(20).add(880)
-  })
-  .$("xline", {
-    start: 0.25, end: 0.001, dur: 1
-  }).on("end", $.stop);
+  return $("sin", { freq: $("sin", { freq: 8 }).mul(20).add(880) })
+  .$("xline", { start: 0.25, end: 0.001, dur: 1 }).on("end", $.stop);
 }).start();
 ```
 
-Above code generates an audio graph like a below. Graphs are optimized flexibly by neume.js.
+Above code generates an audio-graph like a below. Graphs are optimized flexibly by neume.js.
 
 ```
                         +-------------------+
