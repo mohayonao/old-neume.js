@@ -23,7 +23,7 @@
   // https://ccrma.stanford.edu/~jos/pasp/Freeverb.html
 
   neume.register("freeverb", function(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var room = new neume.Component(context, util.defaults(spec.room, 0.5)).mul(0.28).add(0.7);

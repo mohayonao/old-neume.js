@@ -21,7 +21,7 @@
 
   neume.register("ring1", function(ugen, spec, inputs) {
     // (a * b) + a
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -36,7 +36,7 @@
 
   neume.register("ring2", function(ugen, spec, inputs) {
     // ((a * b) + a + b)
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -51,7 +51,7 @@
 
   neume.register("ring3", function(ugen, spec, inputs) {
     // (a * a * b)
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -66,7 +66,7 @@
 
   neume.register("ring4", function(ugen, spec, inputs) {
     // ((a * a * b) - (a * b * b))
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -83,7 +83,7 @@
 
   neume.register("difsqr", function(ugen, spec, inputs) {
     // (a * a) - (b * b)
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -100,7 +100,7 @@
 
   neume.register("sumsqr", function(ugen, spec, inputs) {
     // (a * a) + (b * b)
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -117,7 +117,7 @@
 
   neume.register("sqrdif", function(ugen, spec, inputs) {
     // (a - b) ** 2
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
@@ -133,7 +133,7 @@
 
   neume.register("sqrsum", function(ugen, spec, inputs) {
     // (a + b) ** 2
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     var a = new neume.Sum(context, inputs);
