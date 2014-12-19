@@ -17,6 +17,6 @@ function NeuInterval(context, schedTime, callback) {
 }
 util.inherits(NeuInterval, neume.Sched);
 
-NeuInterval.$name = "NeuInterval";
+NeuInterval.$$name = "NeuInterval";
 
 module.exports = neume.Interval = NeuInterval;

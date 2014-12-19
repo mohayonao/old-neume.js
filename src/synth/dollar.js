@@ -38,12 +38,12 @@ function NeuSynthDollar(synth) {
 
     ugen = neume.UGen.build(synth, key, spec, inputs);
 
-    if (ugen.$id) {
-      promise = promises[ugen.$id];
+    if (ugen.id) {
+      promise = promises[ugen.id];
       if (promise) {
         promise.resolve(ugen);
       }
-      promises[ugen.$id] = null;
+      promises[ugen.id] = null;
     }
 
     db.append(ugen);
@@ -66,7 +66,7 @@ function NeuSynthDollar(synth) {
     };
   };
   builder.stop = function(stopTime) {
-    synth.$context.sched(synth.$context.toSeconds(stopTime), function(t0) {
+    synth.context.sched(synth.context.toSeconds(stopTime), function(t0) {
       synth.stop(t0);
     });
   };
@@ -86,11 +86,10 @@ function createParamBuilder(synth) {
 
     defaultValue = util.finite(util.defaults(defaultValue, 0));
 
-    var param = new neume.Param(synth.$context, defaultValue, spec);
+    var param = new neume.Param(synth.context, defaultValue, spec);
 
     Object.defineProperty(synth, name, {
-      value: param,
-      enumerable: true
+      value: param, enumerable: true
     });
 
     var ugen;

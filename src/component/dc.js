@@ -15,26 +15,26 @@ function NeuDC(context, value) {
 }
 util.inherits(NeuDC, neume.Component);
 
-NeuDC.$name = "NeuDC";
+NeuDC.$$name = "NeuDC";
 
 NeuDC.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
-    this.$outlet = createDCNode(this.$context, this._value);
+  if (this.outlet === null) {
+    this.outlet = createDCNode(this.context, this._value);
   }
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuDC.prototype.connect = function(to) {
   if (to instanceof global.AudioParam) {
     to.value = this._value;
   } else {
-    this.$context.connect(this.toAudioNode(), to);
+    this.context.connect(this.toAudioNode(), to);
   }
   return this;
 };
 
 NeuDC.prototype.disconnect = function() {
-  this.$context.disconnect(this.$outlet);
+  this.context.disconnect(this.outlet);
   return this;
 };
 

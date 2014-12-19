@@ -38,7 +38,7 @@ module.exports = function(neume, util) {
   });
 
   function make(buffer, ugen, spec) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var bufSrc = context.createBufferSource();
 
     buffer = context.toAudioBuffer(buffer);
@@ -67,7 +67,7 @@ module.exports = function(neume, util) {
         bufSrc.start(t, offset);
       }
       bufSrc.onended = function() {
-        ugen.emit("end", { type: "end", playbackTime: context.currentTime }, ugen.$synth);
+        ugen.emit("end", { type: "end", playbackTime: context.currentTime }, ugen.synth);
       };
     }
 

@@ -32,7 +32,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var data = !!spec.value;
     var trueVal = util.finite(util.defaults(spec.true, 1));

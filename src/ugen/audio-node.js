@@ -41,7 +41,7 @@ module.exports = function(neume) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = spec.value;
 
     Object.keys(spec).forEach(function(name) {

@@ -27,7 +27,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createConvolver();
 
     var buffer = util.defaults(spec.buf, spec.buffer);

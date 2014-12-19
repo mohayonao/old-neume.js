@@ -41,11 +41,11 @@ function NeuDryWet(context, dryIn, wetIn, mixIn) {
 }
 util.inherits(NeuDryWet, neume.Component);
 
-NeuDryWet.$name = "NeuDryWet";
+NeuDryWet.$$name = "NeuDryWet";
 
 NeuDryWet.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
-    var context = this.$context;
+  if (this.outlet === null) {
+    var context = this.context;
     var outlet;
 
     if (typeof this._mixIn === "number") {
@@ -54,16 +54,16 @@ NeuDryWet.prototype.toAudioNode = function() {
       outlet = createMixNodeWithNode(context, this._dryIn, this._wetIn, this._mixIn);
     }
 
-    this.$outlet = context.toAudioNode(outlet);
+    this.outlet = context.toAudioNode(outlet);
     this._dryIn = null;
     this._wetIn = null;
     this._mixIn = null;
   }
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuDryWet.prototype.connect = function(to) {
-  this.$context.connect(this.toAudioNode(), to);
+  this.context.connect(this.toAudioNode(), to);
   return this;
 };
 

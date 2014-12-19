@@ -37,7 +37,7 @@ module.exports = function(neume) {
   });
 
   function make(type, ugen) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var bufSrc = context.createBufferSource();
 
     bufSrc.buffer = neume.KVS.get(KVSKEY + type, context, NOISE_DURATION);

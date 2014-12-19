@@ -13,17 +13,13 @@ var STATE_DONE = 4;
 function NeuSched(context, schedIter, callback) {
   Emitter.call(this);
 
-  this.$context = context;
+  this.context = context;
 
   this._schedIter = schedIter;
   this._state = STATE_INIT;
   this._count = 0;
 
   Object.defineProperties(this, {
-    context: {
-      value: this.$context,
-      enumerable: true
-    },
     state: {
       get: function() {
         return [
@@ -44,14 +40,14 @@ function NeuSched(context, schedIter, callback) {
 }
 util.inherits(NeuSched, Emitter);
 
-NeuSched.$name = "NeuSched";
+NeuSched.$$name = "NeuSched";
 
 NeuSched.prototype.start = function(startTime) {
   if (this._state !== STATE_INIT) {
     return this;
   }
 
-  var context = this.$context;
+  var context = this.context;
 
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
   startTime = util.finite(startTime);
@@ -74,7 +70,7 @@ NeuSched.prototype.stop = function(startTime) {
     return this;
   }
 
-  var context = this.$context;
+  var context = this.context;
 
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
   startTime = util.finite(startTime);
@@ -88,7 +84,7 @@ NeuSched.prototype.stop = function(startTime) {
 };
 
 function sched(_this, t0) {
-  var context = _this.$context;
+  var context = _this.context;
 
   var result = _this._schedIter.next();
   var t1 = t0 + util.finite(context.toSeconds(result.value));

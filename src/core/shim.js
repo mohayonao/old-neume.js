@@ -32,7 +32,7 @@
     }
     if (typeof global.PeriodicWave === "undefined" && typeof global.WaveTable !== "undefined") {
       global.PeriodicWave = global.WaveTable;
-      global.WaveTable.$name = "PeriodicWave";
+      global.WaveTable.$$name = "PeriodicWave";
     }
   }
 })();

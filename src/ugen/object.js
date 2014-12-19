@@ -34,7 +34,7 @@ module.exports = function(neume, util) {
   neume.register("Float32Array", make);
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var data = util.defaults(spec.value, 0);
     var key = util.defaults(spec.i, spec.index, spec.key, "");

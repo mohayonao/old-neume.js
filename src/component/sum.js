@@ -47,15 +47,15 @@ function NeuSum(context, inputs) {
 }
 util.inherits(NeuSum, neume.Component);
 
-NeuSum.$name = "NeuSum";
+NeuSum.$$name = "NeuSum";
 
 NeuSum.prototype.add = function(value) {
-  return new neume.Sum(this.$context, this._inputs.concat(value));
+  return new neume.Sum(this.context, this._inputs.concat(value));
 };
 
 NeuSum.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
-    var context = this.$context;
+  if (this.outlet === null) {
+    var context = this.context;
     var nodes = this._nodes;
 
     var sumNode = context.createGain();
@@ -70,14 +70,14 @@ NeuSum.prototype.toAudioNode = function() {
       context.connect(this._number, sumNode);
     }
 
-    this.$outlet = sumNode;
+    this.outlet = sumNode;
   }
 
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuSum.prototype.connect = function(to) {
-  var context = this.$context;
+  var context = this.context;
   var number = this._number;
   var param = this._param;
   var nodes = this._nodes;
@@ -99,7 +99,7 @@ NeuSum.prototype.connect = function(to) {
 };
 
 NeuSum.prototype.disconnect = function() {
-  var context = this.$context;
+  var context = this.context;
   var inputs = this._inputs;
 
   for (var i = 0, imax = inputs.length; i < imax; i++) {

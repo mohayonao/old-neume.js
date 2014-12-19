@@ -71,16 +71,16 @@ describe("neume.Param", function() {
       assert(param.setAt(880, 0.250) === param);
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 880.000, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.500");
+      param.context.audioContext.$processTo("00:00.500");
       assert(closeTo(param.value, 880.000, 1e-2), "00:00.500");
 
-      param.$context.audioContext.$processTo("00:00.750");
+      param.context.audioContext.$processTo("00:00.750");
       assert(closeTo(param.value, 880.000, 1e-2), "00:00.750");
 
-      param.$context.audioContext.$processTo("00:01.000");
+      param.context.audioContext.$processTo("00:01.000");
       assert(closeTo(param.value, 880.000, 1e-2), "00:01.000");
 
       assert(closeTo(param.valueAtTime(0.000), 440.000, 1e-2));
@@ -106,16 +106,16 @@ describe("neume.Param", function() {
       assert(param.linTo(880, 1.000) === param);
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 550.000, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.500");
+      param.context.audioContext.$processTo("00:00.500");
       assert(closeTo(param.value, 660.000, 1e-2), "00:00.500");
 
-      param.$context.audioContext.$processTo("00:00.750");
+      param.context.audioContext.$processTo("00:00.750");
       assert(closeTo(param.value, 770.000, 1e-2), "00:00.750");
 
-      param.$context.audioContext.$processTo("00:01.000");
+      param.context.audioContext.$processTo("00:01.000");
       assert(closeTo(param.value, 880.000, 1e-2), "00:01.000");
 
       assert(closeTo(param.valueAtTime(0.000), 440.000, 1e-2));
@@ -141,16 +141,16 @@ describe("neume.Param", function() {
       assert(param.expTo(880, 1.000) === param);
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 523.251, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.500");
+      param.context.audioContext.$processTo("00:00.500");
       assert(closeTo(param.value, 622.253, 1e-2), "00:00.500");
 
-      param.$context.audioContext.$processTo("00:00.750");
+      param.context.audioContext.$processTo("00:00.750");
       assert(closeTo(param.value, 739.988, 1e-2), "00:00.750");
 
-      param.$context.audioContext.$processTo("00:01.000");
+      param.context.audioContext.$processTo("00:01.000");
       assert(closeTo(param.value, 880.000, 1e-2), "00:01.000");
 
       assert(closeTo(param.valueAtTime(0.000), 440.000, 1e-2));
@@ -176,16 +176,16 @@ describe("neume.Param", function() {
       assert(param.targetAt(880, 0.250, 0.25) === param);
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.500");
+      param.context.audioContext.$processTo("00:00.500");
       assert(closeTo(param.value, 718.133, 1e-2), "00:00.500");
 
-      param.$context.audioContext.$processTo("00:00.750");
+      param.context.audioContext.$processTo("00:00.750");
       assert(closeTo(param.value, 820.452, 1e-2), "00:00.750");
 
-      param.$context.audioContext.$processTo("00:01.000");
+      param.context.audioContext.$processTo("00:01.000");
       assert(closeTo(param.value, 858.093, 1e-2), "00:01.000");
 
       assert(closeTo(param.valueAtTime(0.000), 440.000, 1e-2));
@@ -211,28 +211,28 @@ describe("neume.Param", function() {
       assert(param.curveAt(values, 0.250, 0.25) === param);
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, values[0], 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.300");
+      param.context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, values[0], 1e-2), "00:00.300");
 
-      param.$context.audioContext.$processTo("00:00.350");
+      param.context.audioContext.$processTo("00:00.350");
       assert(closeTo(param.value, values[1], 1e-2), "00:00.350");
 
-      param.$context.audioContext.$processTo("00:00.400");
+      param.context.audioContext.$processTo("00:00.400");
       assert(closeTo(param.value, values[2], 1e-2), "00:00.400");
 
-      param.$context.audioContext.$processTo("00:00.450");
+      param.context.audioContext.$processTo("00:00.450");
       assert(closeTo(param.value, values[3], 1e-2), "00:00.450");
 
-      param.$context.audioContext.$processTo("00:00.500");
+      param.context.audioContext.$processTo("00:00.500");
       assert(closeTo(param.value, values[3], 1e-2), "00:00.500");
 
-      param.$context.audioContext.$processTo("00:00.750");
+      param.context.audioContext.$processTo("00:00.750");
       assert(closeTo(param.value, values[3], 1e-2), "00:00.750");
 
-      param.$context.audioContext.$processTo("00:01.000");
+      param.context.audioContext.$processTo("00:01.000");
       assert(closeTo(param.value, values[3], 1e-2), "00:01.000");
 
       assert(closeTo(param.valueAtTime(0.000), 440.000, 1e-2));
@@ -262,18 +262,18 @@ describe("neume.Param", function() {
 
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 550.000, 1e-2), "00:00.250");
 
       assert(param.cancel(0.5) === param);
 
-      param.$context.audioContext.$processTo("00:00.500");
+      param.context.audioContext.$processTo("00:00.500");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.500");
 
-      param.$context.audioContext.$processTo("00:00.750");
+      param.context.audioContext.$processTo("00:00.750");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.750");
 
-      param.$context.audioContext.$processTo("00:01.000");
+      param.context.audioContext.$processTo("00:01.000");
       assert(closeTo(param.value, 440.000, 1e-2), "00:01.000");
     });
     it("alias: #cancelScheduledValues", function() {
@@ -295,22 +295,22 @@ describe("neume.Param", function() {
 
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.050");
+      param.context.audioContext.$processTo("00:00.050");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.050");
 
-      param.$context.audioContext.$processTo("00:00.100");
+      param.context.audioContext.$processTo("00:00.100");
       assert(closeTo(param.value, 220.000, 1e-2), "00:00.100");
 
-      param.$context.audioContext.$processTo("00:00.150");
+      param.context.audioContext.$processTo("00:00.150");
       assert(closeTo(param.value, 220.000, 1e-2), "00:00.150");
 
-      param.$context.audioContext.$processTo("00:00.200");
+      param.context.audioContext.$processTo("00:00.200");
       assert(closeTo(param.value, 660.000, 1e-2), "00:00.200");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 660.000, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.300");
+      param.context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, 660.000, 1e-2), "00:00.300");
     });
     it("(value, startTime): self // when curve:lin, lag:0.1", function() {
@@ -324,22 +324,22 @@ describe("neume.Param", function() {
 
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.050");
+      param.context.audioContext.$processTo("00:00.050");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.050");
 
-      param.$context.audioContext.$processTo("00:00.100");
+      param.context.audioContext.$processTo("00:00.100");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.100");
 
-      param.$context.audioContext.$processTo("00:00.150");
+      param.context.audioContext.$processTo("00:00.150");
       assert(closeTo(param.value, 330.000, 1e-2), "00:00.150");
 
-      param.$context.audioContext.$processTo("00:00.200");
+      param.context.audioContext.$processTo("00:00.200");
       assert(closeTo(param.value, 220.000, 1e-2), "00:00.200");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.300");
+      param.context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, 660.000, 1e-2), "00:00.300");
     });
     it("(value, startTime): self // when curve:exp, lag:0.1", function() {
@@ -353,22 +353,22 @@ describe("neume.Param", function() {
 
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.050");
+      param.context.audioContext.$processTo("00:00.050");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.050");
 
-      param.$context.audioContext.$processTo("00:00.100");
+      param.context.audioContext.$processTo("00:00.100");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.100");
 
-      param.$context.audioContext.$processTo("00:00.150");
+      param.context.audioContext.$processTo("00:00.150");
       assert(closeTo(param.value, 311.126, 1e-2), "00:00.150");
 
-      param.$context.audioContext.$processTo("00:00.200");
+      param.context.audioContext.$processTo("00:00.200");
       assert(closeTo(param.value, 220.000, 1e-2), "00:00.200");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 381.051, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.300");
+      param.context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, 660.000, 1e-2), "00:00.300");
     });
     it("(value, startTime): self // when curve:lin, lag:0.2", function() {
@@ -382,22 +382,22 @@ describe("neume.Param", function() {
 
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.050");
+      param.context.audioContext.$processTo("00:00.050");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.050");
 
-      param.$context.audioContext.$processTo("00:00.100");
+      param.context.audioContext.$processTo("00:00.100");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.100");
 
-      param.$context.audioContext.$processTo("00:00.150");
+      param.context.audioContext.$processTo("00:00.150");
       assert(closeTo(param.value, 385.000, 1e-2), "00:00.150");
 
-      param.$context.audioContext.$processTo("00:00.200");
+      param.context.audioContext.$processTo("00:00.200");
       assert(closeTo(param.value, 330.000, 1e-2), "00:00.200");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 412.500, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.300");
+      param.context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, 495.000, 1e-2), "00:00.300");
     });
     it("(value, startTime, lag): self // when curve:lin", function() {
@@ -411,22 +411,22 @@ describe("neume.Param", function() {
 
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.000");
 
-      param.$context.audioContext.$processTo("00:00.050");
+      param.context.audioContext.$processTo("00:00.050");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.050");
 
-      param.$context.audioContext.$processTo("00:00.100");
+      param.context.audioContext.$processTo("00:00.100");
       assert(closeTo(param.value, 440.000, 1e-2), "00:00.100");
 
-      param.$context.audioContext.$processTo("00:00.150");
+      param.context.audioContext.$processTo("00:00.150");
       assert(closeTo(param.value, 385.000, 1e-2), "00:00.150");
 
-      param.$context.audioContext.$processTo("00:00.200");
+      param.context.audioContext.$processTo("00:00.200");
       assert(closeTo(param.value, 330.000, 1e-2), "00:00.200");
 
-      param.$context.audioContext.$processTo("00:00.250");
+      param.context.audioContext.$processTo("00:00.250");
       assert(closeTo(param.value, 412.500, 1e-2), "00:00.250");
 
-      param.$context.audioContext.$processTo("00:00.300");
+      param.context.audioContext.$processTo("00:00.300");
       assert(closeTo(param.value, 495.000, 1e-2), "00:00.300");
     });
   });

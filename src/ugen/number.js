@@ -29,7 +29,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var param = new neume.Param(context, util.finite(spec.value), spec);
     var outlet = inputs.length ? param.toAudioNode(inputs) : param;

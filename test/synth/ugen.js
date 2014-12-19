@@ -26,8 +26,8 @@ describe("neume.UGen", function() {
 
       assert(ugen instanceof neume.UGen);
       assert(ugen instanceof neume.Emitter);
-      assert(ugen.$id === "ugen0");
-      assert.deepEqual(ugen.$class, [ "kr", "lfo" ]);
+      assert(ugen.id === "ugen0");
+      assert.deepEqual(ugen.classes, [ "kr", "lfo" ]);
     });
     it("throw an error if given invalid key", function() {
       assert.throws(function() {
@@ -46,13 +46,13 @@ describe("neume.UGen", function() {
       var ugen = neume.UGen.build(synth, 100, {}, []);
 
       assert(ugen instanceof neume.UGen);
-      assert(ugen.$key === "number");
+      assert(ugen.key === "number");
     });
     it("(synth: neume.Synth, key: object, spec: object, inputs: Array<any>): neume.UGen", function() {
       var ugen = neume.UGen.build(synth, new Date(), {}, []);
 
       assert(ugen instanceof neume.UGen);
-      assert(ugen.$key === "object");
+      assert(ugen.key === "object");
     });
     it("(synth: neume.Synth, unknownKey: string, spec: object, inputs: Array<any>): throws an error", function() {
       assert.throws(function() {
@@ -90,7 +90,7 @@ describe("neume.UGen", function() {
 
   describe("#$", function() {
     it("(key:string): neume.UGen", sinon.test(function() {
-      var spy = this.spy(synth, "$builder");
+      var spy = this.spy(synth, "builder");
       var ugen = neume.UGen.build(synth, "sin", {}, []);
 
       ugen.$("lpf");
@@ -99,7 +99,7 @@ describe("neume.UGen", function() {
       assert(spy.calledWith("lpf", {}, [ ugen ]));
     }));
     it("(key:string, spec:object): neume.UGen", sinon.test(function() {
-      var spy = this.spy(synth, "$builder");
+      var spy = this.spy(synth, "builder");
       var ugen = neume.UGen.build(synth, "sin", {}, []);
 
       ugen.$("lpf", { freq: 200 });
@@ -108,7 +108,7 @@ describe("neume.UGen", function() {
       assert(spy.calledWith("lpf", { freq: 200 }, [ ugen ]));
     }));
     it("(key:string, ...args:any): neume.UGen", sinon.test(function() {
-      var spy = this.spy(synth, "$builder");
+      var spy = this.spy(synth, "builder");
       var node = context.createGain();
       var ugen = neume.UGen.build(synth, "sin", {}, []);
 
@@ -118,7 +118,7 @@ describe("neume.UGen", function() {
       assert(spy.calledWith("lpf", {}, [ ugen, node ]));
     }));
     it("(key:string, spec:object, ...args: any): neume.UGen", sinon.test(function() {
-      var spy = this.spy(synth, "$builder");
+      var spy = this.spy(synth, "builder");
       var node = context.createGain();
       var ugen = neume.UGen.build(synth, "sin", {}, []);
 
@@ -131,7 +131,7 @@ describe("neume.UGen", function() {
 
   describe("#mul", function() {
     it("(value: any): neume.UGen", sinon.test(function() {
-      var spy = this.spy(synth, "$builder");
+      var spy = this.spy(synth, "builder");
       var node = context.createGain();
       var ugen = neume.UGen.build(synth, "sin", {}, []);
 
@@ -144,7 +144,7 @@ describe("neume.UGen", function() {
 
   describe("#add", function() {
     it("(value: any): neume.UGen", sinon.test(function() {
-      var spy = this.spy(synth, "$builder");
+      var spy = this.spy(synth, "builder");
       var node = context.createGain();
       var ugen = neume.UGen.build(synth, "sin", {}, []);
 
@@ -158,7 +158,7 @@ describe("neume.UGen", function() {
   describe("#start", function() {
     it("(startTime: number)", function() {
       var ugen = neume.UGen.build(synth, "sin", {}, []);
-      var spy = sinon.spy(ugen.$unit, "start");
+      var spy = sinon.spy(ugen._unit, "start");
 
       assert(ugen.start(10) === ugen);
       assert(spy.calledOnce);
@@ -169,7 +169,7 @@ describe("neume.UGen", function() {
   describe("#stop", function() {
     it("(startTime: number)", function() {
       var ugen = neume.UGen.build(synth, "sin", {}, []);
-      var spy = sinon.spy(ugen.$unit, "stop");
+      var spy = sinon.spy(ugen._unit, "stop");
 
       assert(ugen.stop(10) === ugen);
       assert(spy.calledOnce);
@@ -180,7 +180,7 @@ describe("neume.UGen", function() {
   describe("#trig", function() {
     it("(startTime: timevalue): self", function() {
       var ugen = neume.UGen.build(synth, "sin.trig", {}, []);
-      var spy = sinon.spy(ugen.$unit, "start");
+      var spy = sinon.spy(ugen._unit, "start");
 
       assert(ugen.start(0) === ugen);
       assert(ugen.trig(0.1) === ugen);

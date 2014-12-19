@@ -16,6 +16,6 @@ function NeuTimeout(context, schedTime, callback) {
 }
 util.inherits(NeuTimeout, neume.Sched);
 
-NeuTimeout.$name = "NeuTimeout";
+NeuTimeout.$$name = "NeuTimeout";
 
 module.exports = neume.Timeout = NeuTimeout;

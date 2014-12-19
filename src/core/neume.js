@@ -32,7 +32,7 @@ function NEU(context) {
       enumerable: true
     },
     destination: {
-      value: context.$destination,
+      value: context.destination,
       enumerable: true
     },
     currentTime: {
@@ -149,7 +149,7 @@ neume.impl = function(destination, spec) {
         enumerable: true
       },
       analyser: {
-        value: context.$analyser,
+        value: context.analyser,
         enumerable: true
       }
     }

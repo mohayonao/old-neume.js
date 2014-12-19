@@ -61,7 +61,7 @@ module.exports = function(neume, util) {
   });
 
   function make(type, ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = context.createBiquadFilter();
 
     outlet.type = type;

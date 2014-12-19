@@ -39,7 +39,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var gainL = context.createGain();
     var gainR = context.createGain();

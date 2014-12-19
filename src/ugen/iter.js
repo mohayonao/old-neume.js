@@ -34,7 +34,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var iter = util.defaults(spec.iter, null);
     var state = ITERATE;
@@ -45,7 +45,7 @@ module.exports = function(neume, util) {
       var items = iterNext();
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.$synth);
+        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
       } else {
         param.setValueAtTime(util.finite(items.value), t);
       }
@@ -68,7 +68,7 @@ module.exports = function(neume, util) {
 
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.$synth);
+        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
       } else {
         param.update(util.finite(items.value), t);
       }

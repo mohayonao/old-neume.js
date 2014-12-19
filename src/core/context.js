@@ -13,44 +13,27 @@ var schedId = 1;
 
 function NeuContext(destination, duration, spec) {
   spec = spec || {};
-  this.$context = destination.context;
-  this.$destination = destination;
 
-  this.$analyser = this.$context.createAnalyser();
-  this.connect(this.$analyser, this.$destination);
+  this.context = this;
+  this.destination = destination;
+  this.audioContext = destination.context;
+  this.sampleRate = this.audioContext.sampleRate;
+  this.listener = this.audioContext.listener;
+  this.analyser = this.audioContext.createAnalyser();
+
   this._bpm = 120;
   this._scriptProcessor = null;
   this._audioBuses = [];
   this._processBufSize = util.int(util.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
+  this._inlet = null;
 
-  this.$inlet = null;
-  this.$outlet = this.$analyser;
+  this.connect(this.analyser, this.destination);
 
   Object.defineProperties(this, {
-    context: {
-      value: this,
-      enumerable: true
-    },
-    audioContext: {
-      value: this.$context,
-      enumerable: true
-    },
-    sampleRate: {
-      value: this.$context.sampleRate,
-      enumerable: true
-    },
     currentTime: {
       get: function() {
-        return this._currentTime || this.$context.currentTime;
+        return this._currentTime || this.audioContext.currentTime;
       },
-      enumerable: true
-    },
-    destination: {
-      value: destination,
-      enumerable: true
-    },
-    listener: {
-      value: this.$context.listener,
       enumerable: true
     },
     bpm: {
@@ -67,7 +50,7 @@ function NeuContext(destination, duration, spec) {
   this._duration = duration;
   this.reset();
 }
-NeuContext.$name = "NeuContext";
+NeuContext.$$name = "NeuContext";
 
 Object.keys(global.AudioContext.prototype).forEach(function(key) {
   var desc = Object.getOwnPropertyDescriptor(global.AudioContext.prototype, key);
@@ -80,7 +63,7 @@ Object.keys(global.AudioContext.prototype).forEach(function(key) {
   var method = global.AudioContext.prototype[key];
 
   NeuContext.prototype[key] = function() {
-    return method.apply(this.$context, arguments);
+    return method.apply(this.audioContext, arguments);
   };
 });
 
@@ -93,16 +76,16 @@ NeuContext.prototype.getAudioBus = function(index) {
 };
 
 NeuContext.prototype.reset = function() {
-  if (this.$inlet) {
-    this.$inlet.disconnect();
+  if (this._inlet) {
+    this._inlet.disconnect();
   }
 
   this._audioBuses.splice(0).forEach(function(bus) {
     bus.toAudioNode().disconnect();
   }, this);
 
-  this.$inlet = this._audioBuses[0] = this.getAudioBus(0);
-  this.connect(this.$inlet, this.$analyser);
+  this._inlet = this._audioBuses[0] = this.getAudioBus(0);
+  this.connect(this._inlet, this.analyser);
 
   this.disconnect(this._scriptProcessor);
 
@@ -118,7 +101,7 @@ NeuContext.prototype.reset = function() {
 NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
-    if (this.$context instanceof global.OfflineAudioContext) {
+    if (this.audioContext instanceof global.OfflineAudioContext) {
       startRendering.call(this);
     } else {
       startAudioTimer.call(this);
@@ -133,7 +116,7 @@ function startRendering() {
 }
 
 function startAudioTimer() {
-  var context = this.$context;
+  var context = this.audioContext;
   var scriptProcessor = context.createScriptProcessor(this._processBufSize, 1, 1);
   var bufferSource = context.createBufferSource();
 
@@ -259,8 +242,8 @@ NeuContext.prototype.connect = function(from, to) {
 NeuContext.prototype.disconnect = function(from) {
   if (from && from.disconnect) {
     from.disconnect();
-    if (from.$outputs) {
-      from.$outputs.forEach(function(to) {
+    if (from.$$outputs) {
+      from.$$outputs.forEach(function(to) {
         return to.ondisconnected && to.ondisconnected(from);
       });
     }
@@ -274,7 +257,7 @@ NeuContext.prototype.toSeconds = function(value) {
 
 function onaudioprocess(e) {
   // Safari 7.0.6 does not support e.playbackTime
-  var currentTime = e.playbackTime || /* istanbul ignore next */ this.$context.currentTime;
+  var currentTime = e.playbackTime || /* istanbul ignore next */ this.audioContext.currentTime;
   var nextCurrentTime = currentTime + this._currentTimeIncr;
   var events = this._events;
 

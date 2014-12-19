@@ -91,8 +91,8 @@ util.typeOf = function(value) {
   var name;
 
   if (value.constructor) {
-    if (typeof value.constructor.$name === "string") {
-      name = value.constructor.$name;
+    if (typeof value.constructor.$$name === "string") {
+      name = value.constructor.$$name;
     } else if (value.constructor.name && typeof value.constructor.name === "string") {
       name = value.constructor.name;
     }

@@ -6,13 +6,12 @@ var neume = require("../namespace");
 require("./ugen");
 
 function NeuUGenPromise(synth, id) {
-  this.$context = synth.$context;
-  this.$synth = synth;
-  this.$key = "";
-  this.$class = [];
-  this.$id = id;
-  this.$outlet = null;
-  this.$builder = synth.$builder;
+  this.context = synth.context;
+  this.synth = synth;
+  this.key = "";
+  this.classes = [];
+  this.id = id;
+  this.outlet = null;
 
   this._resolved = false;
   this._to = [];
@@ -20,13 +19,15 @@ function NeuUGenPromise(synth, id) {
 }
 util.inherits(NeuUGenPromise, neume.UGen);
 
+NeuUGenPromise.$$name = "NeuUGenPromise";
+
 NeuUGenPromise.prototype.resolve = function(ugen) {
 
   this._to.forEach(function(node) {
-    this.$context.connect(ugen, node);
+    this.context.connect(ugen, node);
   }, this);
   this._from.forEach(function(node) {
-    this.$context.connect(node, ugen);
+    this.context.connect(node, ugen);
   }, this);
 
   this._to = this._from = null;

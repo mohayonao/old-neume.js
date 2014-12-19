@@ -17,7 +17,7 @@ module.exports = function(neume, util) {
   *   |
   */
   neume.register("in", function(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
     var outlet = null;
 
     inputs = inputs.filter(util.isFinite).map(function(index) {
@@ -47,13 +47,12 @@ module.exports = function(neume, util) {
    * +---------------+
    */
   neume.register("out", function(ugen, spec, inputs) {
-    var context = ugen.$context;
-    var synth = ugen.$synth;
+    var context = ugen.context;
     var outlet = new neume.Sum(context, inputs);
 
     var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
 
-    synth.$routes[index] = outlet;
+    ugen.synth.routes[index] = outlet;
 
     return new neume.Unit({
       outlet: outlet,

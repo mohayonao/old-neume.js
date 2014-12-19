@@ -33,7 +33,7 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var context = ugen.$context;
+    var context = ugen.context;
 
     var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
     var count = 0;

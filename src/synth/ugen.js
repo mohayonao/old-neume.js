@@ -14,36 +14,31 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
-  this.$context = synth.$context;
-  this.$synth = synth;
-  this.$key = parsed.key;
-  this.$class = parsed.class;
-  this.$id = parsed.id;
-  this.$outlet = null;
-  this._scheds = [];
-
-  this.$builder = synth.$builder;
+  this.context = synth.context;
+  this.synth = synth;
+  this.key = parsed.key;
+  this.classes = parsed.classes;
+  this.id = parsed.id;
+  this.outlet = null;
 
   if (hasClass(this, "bypass")) {
-    this.$unit = NeuUGen.registered["+"](this, {}, inputs);
-    this._node = this.$unit.$outlet;
+    this._unit = NeuUGen.registered["+"](this, {}, inputs);
+    this._node = this._unit.outlet;
   } else {
-    this.$unit = NeuUGen.registered[parsed.key](this, spec, inputs);
-    this._node = this.$unit.$outlet;
-    this._node = mul(this.$context, this._node, util.defaults(spec.mul, 1));
-    this._node = add(this.$context, this._node, util.defaults(spec.add, 0));
+    this._unit = NeuUGen.registered[parsed.key](this, spec, inputs);
+    this._node = this._unit.outlet;
+    this._node = mul(this.context, this._node, util.defaults(spec.mul, 1));
+    this._node = add(this.context, this._node, util.defaults(spec.add, 0));
   }
 
-  this.$isOutput = this.$unit.$isOutput;
-  this.$methods = this.$unit.$methods;
+  this.isOutput = !!this._unit.isOutput;
+  this.methods = Object.keys(this._unit.methods).sort();
 
-  var methods = Object.keys(this.$methods).sort();
-
-  methods.forEach(function(methodName) {
-    var method = this.$unit.$methods[methodName];
+  this.methods.forEach(function(methodName) {
+    var method = this._unit.methods[methodName];
     util.definePropertyIfNotExists(this, methodName, {
       value: function() {
-        var context = this.$context;
+        var context = this.context;
         var args = util.toArray(arguments);
         context.sched(context.toSeconds(args[0]), function() {
           method.apply(null, args);
@@ -53,16 +48,11 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 
-  Object.defineProperties(this, {
-    methods: {
-      value: methods,
-      enumerable: true
-    }
-  });
+  this._scheds = [];
 }
 util.inherits(NeuUGen, Emitter);
 
-NeuUGen.$name = "NeuUGen";
+NeuUGen.$$name = "NeuUGen";
 
 NeuUGen.registered = {};
 
@@ -97,36 +87,36 @@ NeuUGen.prototype.$ = function() {
   var spec = util.isPlainObject(args[0]) ? args.shift() : {};
   var inputs = Array.prototype.concat.apply([ this ], args);
 
-  return this.$builder(key, spec, inputs);
+  return this.synth.builder(key, spec, inputs);
 };
 
 NeuUGen.prototype.mul = function(value) {
-  return this.$builder("*", this, util.defaults(value, 1));
+  return this.synth.builder("*", this, util.defaults(value, 1));
 };
 
 NeuUGen.prototype.add = function(value) {
-  return this.$builder("+", this, util.defaults(value, 0));
+  return this.synth.builder("+", this, util.defaults(value, 0));
 };
 
 NeuUGen.prototype.start = function(startTime) {
   if (!hasClass(this, "trig")) {
-    this.$unit.start(startTime);
+    this._unit.start(startTime);
   }
   return this;
 };
 
 NeuUGen.prototype.stop = function(startTime) {
-  this.$unit.stop(startTime);
+  this._unit.stop(startTime);
   return this;
 };
 
 NeuUGen.prototype.trig = function(startTime) {
-  var context = this.$context;
+  var context = this.context;
 
   startTime = util.finite(context.toSeconds(startTime));
 
   context.sched(startTime, function() {
-    this.$unit.start(startTime);
+    this._unit.start(startTime);
   }, this);
 
   return this;
@@ -134,20 +124,20 @@ NeuUGen.prototype.trig = function(startTime) {
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
   if (util.isIterator(schedIter) && typeof callback === "function") {
-    this.$synth.$scheds.push([ schedIter, callback ]);
+    this.synth.scheds.push([ schedIter, callback ]);
   }
   return this;
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.$outlet === null) {
+  if (this.outlet === null) {
     if (hasClass(this, "mute")) {
-      this.$outlet = this.$context.createGain();
+      this.outlet = this.context.createGain();
     } else {
-      this.$outlet = this.$context.toAudioNode(this._node);
+      this.outlet = this.context.toAudioNode(this._node);
     }
   }
-  return this.$outlet;
+  return this.outlet;
 };
 
 NeuUGen.prototype.connect = function(to) {
@@ -183,7 +173,7 @@ function add(context, a, b) {
 }
 
 function hasClass(_this, className) {
-  return _this.$class.indexOf(className) !== -1;
+  return _this.classes.indexOf(className) !== -1;
 }
 
 module.exports = neume.UGen = NeuUGen;

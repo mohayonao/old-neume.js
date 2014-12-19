@@ -123,7 +123,7 @@ describe("util", function() {
       assert(util.typeOf({ constructor: true }) === "object");
 
       function A() {} // minified
-      A.$name = "NeuBuffer";
+      A.$$name = "NeuBuffer";
 
       var a = new A();
 

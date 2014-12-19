@@ -712,7 +712,7 @@ describe("neume.Context", function() {
       var from = context.createOscillator();
       var to = context.createGain();
 
-      from.$outputs = [ to ];
+      from.$$outputs = [ to ];
       to.ondisconnected = sinon.spy();
 
       context.connect(from, to);

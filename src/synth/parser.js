@@ -10,7 +10,7 @@ function isValidUGenName(name) {
 function parse(selector) {
   selector = String(selector);
 
-  var parsed = { key: "", id: null, class: [] };
+  var parsed = { key: "", id: null, classes: [] };
 
   var keyMatched = selector.match(reUGenName);
   if (keyMatched) {
@@ -27,7 +27,7 @@ function parse(selector) {
           parsed.id = match.substr(1);
         }
       } else {
-        parsed.class.push(match.substr(1));
+        parsed.classes.push(match.substr(1));
       }
     });
   }
