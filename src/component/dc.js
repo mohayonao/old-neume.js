@@ -25,7 +25,7 @@ NeuDC.prototype.toAudioNode = function() {
 };
 
 NeuDC.prototype.connect = function(to) {
-  if (to instanceof global.AudioParam) {
+  if (to instanceof neume.webaudio.AudioParam) {
     to.value = this._value;
   } else {
     this.context.connect(this.toAudioNode(), to);

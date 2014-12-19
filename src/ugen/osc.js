@@ -131,7 +131,7 @@ module.exports = function(neume, util) {
   }
 
   function isPeriodicWave(wave) {
-    return !!(global.PeriodicWave && wave instanceof global.PeriodicWave);
+    return wave instanceof neume.webaudio.PeriodicWave;
   }
 
   function type2wave(context, type) {

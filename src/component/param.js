@@ -282,7 +282,7 @@ NeuParam.prototype.toAudioNode = function(input) {
 };
 
 NeuParam.prototype.connect = function(to) {
-  if (to instanceof global.AudioParam) {
+  if (to instanceof neume.webaudio.AudioParam) {
     to.value = this._value;
     this._params.push(to);
   } else {

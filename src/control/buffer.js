@@ -59,7 +59,7 @@ NeuBuffer.load = function(context, url) {
 
 function loadWithXHR(url) {
   return new Promise(function(resolve, reject) {
-    var xhr = new global.XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
     xhr.open("GET", url);
     xhr.responseType = "arraybuffer";

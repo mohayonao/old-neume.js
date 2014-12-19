@@ -5,17 +5,18 @@ require("./shim");
 var util = require("../util");
 var neume = require("../namespace");
 
-require("./context");
-require("../component");
-require("../control");
-require("../synth");
-
+neume.webaudio = global;
 neume.util = util;
 neume._ = require("../util/underscore");
 neume.DB = require("../util/db");
 neume.Emitter = require("../util/emitter");
 neume.FFT = require("../util/fft");
 neume.KVS = require("../util/kvs");
+
+require("./context");
+require("../component");
+require("../control");
+require("../synth");
 
 function NEU(context) {
   return Object.defineProperties({}, {
@@ -101,10 +102,10 @@ function NEU(context) {
 }
 
 neume.impl = function(destination, spec) {
-  if (destination instanceof global.AudioContext) {
+  if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
   }
-  if (!(destination instanceof global.AudioNode)) {
+  if (!(destination instanceof neume.webaudio.AudioNode)) {
     throw new TypeError("neume(): Illegal arguments");
   }
 
@@ -118,7 +119,7 @@ neume.impl = function(destination, spec) {
           var length = util.int(sampleRate * duration);
 
           return new Promise(function(resolve) {
-            var audioContext = new global.OfflineAudioContext(2, length, sampleRate);
+            var audioContext = new neume.webaudio.OfflineAudioContext(2, length, sampleRate);
             audioContext.oncomplete = function(e) {
               resolve(new neume.Buffer(context, e.renderedBuffer));
             };

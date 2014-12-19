@@ -46,7 +46,7 @@ module.exports = function(neume) {
 
     Object.keys(spec).forEach(function(name) {
       if (typeof outlet[name] !== "undefined") {
-        if (outlet[name] instanceof global.AudioParam) {
+        if (outlet[name] instanceof neume.webaudio.AudioParam) {
           context.connect(spec[name], outlet[name]);
         } else {
           outlet[name] = spec[name];

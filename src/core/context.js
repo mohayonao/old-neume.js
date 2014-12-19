@@ -52,15 +52,15 @@ function NeuContext(destination, duration, spec) {
 }
 NeuContext.$$name = "NeuContext";
 
-Object.keys(global.AudioContext.prototype).forEach(function(key) {
-  var desc = Object.getOwnPropertyDescriptor(global.AudioContext.prototype, key);
+Object.keys(neume.webaudio.AudioContext.prototype).forEach(function(key) {
+  var desc = Object.getOwnPropertyDescriptor(neume.webaudio.AudioContext.prototype, key);
 
   /* istanbul ignore next */
   if (typeof desc.value !== "function") {
     return;
   }
 
-  var method = global.AudioContext.prototype[key];
+  var method = neume.webaudio.AudioContext.prototype[key];
 
   NeuContext.prototype[key] = function() {
     return method.apply(this.audioContext, arguments);
@@ -101,7 +101,7 @@ NeuContext.prototype.reset = function() {
 NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
-    if (this.audioContext instanceof global.OfflineAudioContext) {
+    if (this.audioContext instanceof neume.webaudio.OfflineAudioContext) {
       startRendering.call(this);
     } else {
       startAudioTimer.call(this);
@@ -191,7 +191,7 @@ NeuContext.prototype.toAudioNode = function(obj) {
   } else if (typeof obj === "number") {
     obj = new neume.DC(this, obj).toAudioNode();
   }
-  if (!(obj instanceof global.AudioNode)) {
+  if (!(obj instanceof neume.webaudio.AudioNode)) {
     obj = null;
   }
   return obj;
@@ -201,7 +201,7 @@ NeuContext.prototype.toAudioBuffer = function(obj) {
   if (obj && obj.toAudioBuffer) {
     return obj.toAudioBuffer();
   }
-  if (!(obj instanceof global.AudioBuffer)) {
+  if (!(obj instanceof neume.webaudio.AudioBuffer)) {
     obj = null;
   }
   return obj;
@@ -215,7 +215,7 @@ NeuContext.prototype.connect = function(from, to) {
       }
     } else if (from instanceof neume.Component || from instanceof neume.UGen) {
       from.connect(to);
-    } else if (to instanceof global.AudioParam) {
+    } else if (to instanceof neume.webaudio.AudioParam) {
       if (typeof from === "number") {
         to.value = util.finite(from);
       } else {
@@ -224,7 +224,7 @@ NeuContext.prototype.connect = function(from, to) {
           from.connect(to);
         }
       }
-    } else if (to instanceof global.AudioNode) {
+    } else if (to instanceof neume.webaudio.AudioNode) {
       from = this.toAudioNode(from);
       if (from) {
         from.connect(to);
