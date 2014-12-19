@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>neume.js metronome</title>
     <script src="../build/neume.min.js"></script>
   </head>
   <body>
     <button id="start">start</button>
     <script>
-      var neu = neume();
+      var neu = neume(new AudioContext());
 
       function Sine($, freq, dur) {
         return $("sin", { freq: freq })
-        .$("xline", { start: 0.2, dur: dur }).on("end", $.stop);
+        .$("xline", { dur: dur }).on("end", $.stop);
       }
 
       var timer = null;

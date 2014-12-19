@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>rendering-reich - neume.js</title>
+  <title>neume.js / Rendering Reich</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
@@ -25,7 +25,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>neume.js rendering-reich</h1>
+    <div class="page-header">
+      <h1>neume.js / Rendering Reich</h1>
+      <div>Web Audio API library for developing browser music</div>
+    </div>
     <canvas id="canvas"></canvas>
     <div id="app">
       <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
