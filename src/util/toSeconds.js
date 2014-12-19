@@ -1,59 +1,13 @@
 "use strict";
 
 var util = require("../util");
-var neume = require("../namespace");
 
-function NeuTransport(context) {
-  this.$context = context;
-  this._bpm = 120;
-  this._ramp = null;
-}
-NeuTransport.$name = "NeuTransport";
-
-NeuTransport.prototype.getBpm = function() {
-  var ramp = this._ramp;
-
-  if (ramp !== null) {
-    var t = this.$context.currentTime;
-    if (ramp.t1 <= t) {
-      this._bpm = ramp.v1;
-      this._ramp = null;
-    } else {
-      var dt = (t - ramp.t0) / (ramp.t1 - ramp.t0);
-      this._bpm = ramp.v0 * Math.pow(ramp.v1 / ramp.v0, dt);
-    }
-  }
-
-  return this._bpm;
-};
-
-NeuTransport.prototype.setBpm = function(value, rampTime) {
-  rampTime = this.toSeconds(util.defaults(rampTime, 0));
-
-  var bpm = util.clip(util.finite(value), 1, 1000);
-
-  if (rampTime <= 0) {
-    this._bpm = bpm;
-    this._ramp = null;
-  } else {
-    var t0 = this.$context.currentTime;
-    this._ramp = {
-      v0: this.getBpm(),
-      t0: t0,
-      v1: bpm,
-      t1: t0 + rampTime
-    };
-  }
-
-  return this;
-};
-
-NeuTransport.prototype.toSeconds = function(value) {
+function toSeconds(value, bpm, sampleRate, currentTime) {
   if (typeof value === "number") {
     return util.finite(value);
   }
 
-  if (value && typeof value === "object" && typeof value.playbackTime === "number") {
+  if (value && typeof value.playbackTime === "number") {
     return util.finite(value.playbackTime);
   }
 
@@ -61,7 +15,7 @@ NeuTransport.prototype.toSeconds = function(value) {
     var m, offset = 0, time = 0;
 
     if (value.charAt(0) === "+") {
-      offset = this.$context.currentTime;
+      offset = currentTime;
       value = value.slice(1);
     }
 
@@ -74,7 +28,7 @@ NeuTransport.prototype.toSeconds = function(value) {
       for (var i = 0, imax = components.length; i < imax; i++) {
         var symb = components[i].trim();
         if (symb !== "") {
-          expr = expr.replace(symb, this.toSeconds(symb));
+          expr = expr.replace(symb, toSeconds(symb, bpm, sampleRate, currentTime));
         }
       }
 
@@ -84,22 +38,22 @@ NeuTransport.prototype.toSeconds = function(value) {
         throw new EvalError("Invalid Time Value Syntax: " + oringalTime);
       }
 
+    } else if (value === "now") {
+      return currentTime;
     } else if ((m = /^(\d+)ms$/.exec(value)) !== null) {
       time = +m[1] * 0.001;
     } else if ((m = /^(\d+(?:\.\d+)?)hz$/.exec(value)) !== null) {
       time = util.finite(1 / +m[1]);
     } else if ((m = /^(\d+)ticks$/.exec(value)) !== null) {
-      time = ticks2sec(+m[1], this.getBpm());
+      time = ticks2sec(+m[1], bpm);
     } else if ((m = /^(\d+)(n[td]?)$/.exec(value)) !== null) {
-      time = note2sec(+m[1], m[2], this.getBpm());
+      time = note2sec(+m[1], m[2], bpm);
     } else if ((m = /^(\d+)\.(\d+)\.(\d+)$/.exec(value)) !== null) {
-      time = ticks2sec((+m[1] * 4 + (+m[2])) * 480 + (+m[3]), this.getBpm());
+      time = ticks2sec((+m[1] * 4 + (+m[2])) * 480 + (+m[3]), bpm);
     } else if ((m = /^(\d\d):(\d\d):(\d\d)(?:\.(\d+))?$/.exec(value)) !== null) {
       time = ((+m[1] * 3600) + (+m[2] * 60) + (+m[3]) + (((m[4] || "") + "000").substr(0, 3) * 0.001));
     } else if ((m = /^(\d+)samples$/.exec(value)) !== null) {
-      time = (+m[1] / this.$context.sampleRate);
-    } else if (value === "now") {
-      return this.$context.currentTime;
+      time = (+m[1] / sampleRate);
     } else {
       time = util.finite(+value);
     }
@@ -108,7 +62,7 @@ NeuTransport.prototype.toSeconds = function(value) {
   }
 
   return value;
-};
+}
 
 function ticks2sec(ticks, bpm) {
   return 60 / bpm * (ticks / 480);
@@ -122,4 +76,4 @@ function note2sec(num, note, bpm) {
   return num === 0 ? 0 : ticks2sec((4 / num) * 480 * acc, bpm);
 }
 
-module.exports = neume.Transport = NeuTransport;
+module.exports = toSeconds;

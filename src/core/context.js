@@ -3,8 +3,7 @@
 var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
-
-require("./transport");
+var toSeconds = require("../util/toSeconds");
 
 var INIT = 0;
 var START = 1;
@@ -17,9 +16,9 @@ function NeuContext(destination, duration, spec) {
   this.$context = destination.context;
   this.$destination = destination;
 
-  this._transport = new neume.Transport(this);
   this.$analyser = this.$context.createAnalyser();
   this.connect(this.$analyser, this.$destination);
+  this._bpm = 120;
   this._scriptProcessor = null;
   this._audioBuses = [];
   this._processBufSize = util.int(util.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
@@ -56,10 +55,10 @@ function NeuContext(destination, duration, spec) {
     },
     bpm: {
       get: function() {
-        return this._transport.getBpm();
+        return this._bpm;
       },
       set: function(value) {
-        this._transport.setBpm(value);
+        this._bpm = Math.max(1e-6, util.finite(value));
       },
       enumerable: true
     },
@@ -269,17 +268,8 @@ NeuContext.prototype.disconnect = function(from) {
   return this;
 };
 
-NeuContext.prototype.getBpm = function() {
-  return this._transport.getBpm();
-};
-
-NeuContext.prototype.setBpm = function(value, rampTime) {
-  this._transport.setBpm(value, rampTime);
-  return this;
-};
-
 NeuContext.prototype.toSeconds = function(value) {
-  return this._transport.toSeconds(value);
+  return toSeconds(value, this._bpm, this.sampleRate, this.currentTime);
 };
 
 function onaudioprocess(e) {

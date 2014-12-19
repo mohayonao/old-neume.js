@@ -723,19 +723,6 @@ describe("neume.Context", function() {
     });
   });
 
-  describe("#getBpm", function() {
-    it("(): number", function() {
-      assert(context.getBpm() === 120);
-    });
-  });
-
-  describe("#setBpm", function() {
-    it("(value: number, rampTime: number): self", function() {
-      assert(context.setBpm(200, 0) === context);
-      assert(context.getBpm() === 200);
-    });
-  });
-
   describe("#toSeconds", function() {
     it("(): number", function() {
       assert(context.toSeconds("2hz") === 0.5);
