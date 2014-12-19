@@ -306,13 +306,15 @@ describe("neume.SynthDollar", function() {
         var synth = new neume.Synth(context, function($) {
           return $("sin")
           .sched($.timeout(0.030), function(e) {
+            assert(this instanceof neume.Synth);
             passed.push([ "fizz", e.playbackTime, e.count ]);
           })
           .sched($.timeout(0.050), function(e) {
+            assert(this instanceof neume.Synth);
             passed.push([ "buzz", e.playbackTime, e.count ]);
           })
           .sched($.timeout(0.150), function(e) {
-            passed.push([ "fizzbuzz", e.playbackTime, e.count ]);
+            throw new Error("NOT REACHED");
           });
         }, []);
 
@@ -333,9 +335,11 @@ describe("neume.SynthDollar", function() {
         var synth = new neume.Synth(context, function($) {
           return $("sin")
           .sched($.interval(0.030), function(e) {
+            assert(this instanceof neume.Synth);
             passed.push([ "fizz", e.playbackTime, e.count ]);
           })
           .sched($.interval(0.050), function(e) {
+            assert(this instanceof neume.Synth);
             passed.push([ "buzz", e.playbackTime, e.count ]);
           });
         }, []);
@@ -357,6 +361,7 @@ describe("neume.SynthDollar", function() {
         var synth = new neume.Synth(context, function($) {
           return $("sin")
           .sched($.interval("32n"), function(e) {
+            assert(this instanceof neume.Synth);
             passed.push([ "fizz", e.playbackTime, e.count ]);
           });
         }, []);
