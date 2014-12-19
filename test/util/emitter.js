@@ -45,6 +45,8 @@ describe("neume.Emitter", function() {
         passed.push("?", val);
       });
 
+      emitter.on("ding", "ding");
+
       emitter.emit("bang", 1);
       emitter.emit("ding", 2);
       emitter.emit("bang", 3);
@@ -64,6 +66,8 @@ describe("neume.Emitter", function() {
       emitter.once("bang", function(val) {
         passed.push("?", val);
       });
+
+      emitter.once("ding", "ding");
 
       emitter.emit("bang", 1);
       emitter.emit("ding", 2);
