@@ -124,7 +124,12 @@ NeuUGen.prototype.trig = function(startTime) {
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
   if (util.isIterator(schedIter) && typeof callback === "function") {
-    this.synth.scheds.push([ schedIter, callback ]);
+    this.synth.scheds.push([ schedIter, function(e) {
+      if (e.type === "start" || (e.type === "stop" && !e.done)) {
+        return;
+      }
+      callback(e);
+    } ]);
   }
   return this;
 };

@@ -81,8 +81,8 @@ function NEU(context) {
       enumerable: true
     },
     Sched: {
-      value: function(callback) {
-        return new neume.Sched(context, 0, callback);
+      value: function(schedIter, callback) {
+        return new neume.Sched(context, schedIter, callback);
       },
       enumerable: true
     },

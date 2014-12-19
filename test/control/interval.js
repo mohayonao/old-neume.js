@@ -66,30 +66,32 @@ describe("neume.Interval", function() {
 
     audioContext.$processTo("00:00.200");
     assert(sched.state === "PLAYING", "00:00.200");
-    assert(passed === null, "00:00.200");
+    assert(passed.count === 0, "00:00.200");
+    assert(passed.done === false, "00:00.250");
+    assert(closeTo(passed.playbackTime, 0.200, 1e-6), "00:00.200");
 
     audioContext.$processTo("00:00.250");
     assert(sched.state === "PLAYING", "00:00.250");
     assert(passed !== null, "00:00.250");
-    assert(passed.count === 0, "00:00.250");
+    assert(passed.count === 1, "00:00.250");
     assert(passed.done === false, "00:00.250");
     assert(closeTo(passed.playbackTime, 0.250, 1e-6), "00:00.250");
 
     audioContext.$processTo("00:00.305");
     assert(sched.state === "PLAYING", "00:00.300");
-    assert(passed.count === 1, "00:00.300");
+    assert(passed.count === 2, "00:00.300");
     assert(passed.done === false, "00:00.300");
     assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.300");
 
     audioContext.$processTo("00:00.350");
     assert(sched.state === "PLAYING", "00:00.350");
-    assert(passed.count === 2, "00:00.350");
+    assert(passed.count === 3, "00:00.350");
     assert(passed.done === false, "00:00.350");
     assert(closeTo(passed.playbackTime, 0.350, 1e-6), "00:00.350");
 
     audioContext.$processTo("00:00.400");
     assert(sched.state === "FINISHED", "00:00.400");
-    assert(passed.count === 2, "00:00.400");
+    assert(passed.count === 3, "00:00.400");
     assert(passed.done === false, "00:00.350");
     assert(closeTo(passed.playbackTime, 0.350, 1e-6), "00:00.400");
   });

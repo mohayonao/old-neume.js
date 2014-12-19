@@ -12,7 +12,9 @@ function NeuTimeout(context, schedTime, callback) {
       return { value: timeout, done: true };
     }
   };
-  neume.Sched.call(this, context, schedIter, callback);
+  neume.Sched.call(this, context, schedIter);
+
+  this.on("stop", callback);
 }
 util.inherits(NeuTimeout, neume.Sched);
 

@@ -71,7 +71,7 @@ describe("neume.Timeout", function() {
     audioContext.$processTo("00:00.250");
     assert(sched.state === "FINISHED", "00:00.250");
     assert(passed !== null, "00:00.250");
-    assert(passed.count === 0, "00:00.250");
+    assert(passed.count === 1, "00:00.250");
     assert(passed.done === true, "00:00.250");
     assert(closeTo(passed.playbackTime, 0.250, 1e-6), "00:00.250");
   });

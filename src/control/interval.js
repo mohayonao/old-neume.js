@@ -13,7 +13,9 @@ function NeuInterval(context, schedTime, callback) {
       return { value: interval, done: false };
     }
   };
-  neume.Sched.call(this, context, schedIter, callback);
+  neume.Sched.call(this, context, schedIter);
+
+  this.on("start", callback).on("sched", callback);
 }
 util.inherits(NeuInterval, neume.Sched);
 

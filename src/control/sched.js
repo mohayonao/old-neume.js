@@ -34,9 +34,7 @@ function NeuSched(context, schedIter, callback) {
     },
   });
 
-  if (typeof callback === "function") {
-    this.on("sched", callback);
-  }
+  this.on("start", callback).on("sched", callback).on("stop", callback);
 }
 util.inherits(NeuSched, Emitter);
 
@@ -55,9 +53,8 @@ NeuSched.prototype.start = function(startTime) {
   this._state = STATE_START;
 
   context.sched(startTime, function(t0) {
-    this.emit("start", { type: "start", playbackTime: t0 });
     this._state = STATE_RUNNING;
-    sched(this, t0);
+    emit(this, t0, false);
   }, this);
 
   context.start(); // auto start
@@ -76,35 +73,45 @@ NeuSched.prototype.stop = function(startTime) {
   startTime = util.finite(startTime);
 
   context.sched(startTime, function(t0) {
-    this.emit("stop", { type: "stop", playbackTime: t0 });
+    this.emit("stop", {
+      type: "stop",
+      playbackTime: t0,
+      duration: 0,
+      count: this._count,
+      done: false
+    });
     this._state = STATE_DONE;
   }, this);
 
   return this;
 };
 
-function sched(_this, t0) {
+function emit(_this, t0, done) {
+  if (_this._state !== STATE_RUNNING) {
+    return;
+  }
+
   var context = _this.context;
-
+  var type = done ? "stop" : _this._count ? "sched" : "start";
   var result = _this._schedIter.next();
-  var t1 = t0 + util.finite(context.toSeconds(result.value));
+  var duration = done ? 0 : util.finite(context.toSeconds(result.value));
 
-  context.sched(t1, function(t0) {
-    if (this._state !== STATE_RUNNING) {
-      return;
-    }
-    this.emit("sched", {
-      type: "sched",
-      playbackTime: t0,
-      count: this._count++,
-      done: result.done
+  _this.emit(type, {
+    type: type,
+    playbackTime: t0,
+    duration: duration,
+    count: _this._count++,
+    done: done
+  });
+
+  if (done) {
+    _this._state = STATE_DONE;
+  } else {
+    context.sched(t0 + duration, function(t0) {
+      emit(_this, t0, result.done);
     });
-    if (result.done) {
-      this._state = STATE_DONE;
-    } else {
-      sched(this, t0);
-    }
-  }, _this);
+  }
+
 }
 
 module.exports = neume.Sched = NeuSched;

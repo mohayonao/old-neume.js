@@ -322,8 +322,8 @@ describe("neume.SynthDollar", function() {
         audioContext.$processTo("00:00.200");
 
         assert.deepEqual(passed, [
-          [ "fizz", 0.040, 0 ],
-          [ "buzz", 0.060000000000000005, 0 ],
+          [ "fizz", 0.040, 1 ],
+          [ "buzz", 0.060000000000000005, 1 ],
         ]);
       });
     });
@@ -346,10 +346,10 @@ describe("neume.SynthDollar", function() {
         audioContext.$processTo("00:00.200");
 
         assert.deepEqual(passed, [
-          [ "fizz", 0.04, 0 ],
-          [ "buzz", 0.060000000000000005, 0 ],
-          [ "fizz", 0.07, 1 ],
-          [ "fizz", 0.1, 2 ]
+          [ "fizz", 0.04, 1 ],
+          [ "buzz", 0.060000000000000005, 1 ],
+          [ "fizz", 0.07, 2 ],
+          [ "fizz", 0.1, 3 ]
         ]);
       });
       it("works", function() {
@@ -367,9 +367,9 @@ describe("neume.SynthDollar", function() {
         audioContext.$processTo("00:00.500");
 
         assert.deepEqual(passed, [
-          [ "fizz", 0.0725, 0 ],
-          [ "fizz", 0.1350, 1 ],
-          [ "fizz", 0.1975, 2 ]
+          [ "fizz", 0.0725, 1 ],
+          [ "fizz", 0.1350, 2 ],
+          [ "fizz", 0.1975, 3 ]
         ]);
       });
     });
