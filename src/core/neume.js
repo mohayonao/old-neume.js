@@ -101,7 +101,7 @@ function NEU(context) {
   });
 }
 
-neume.impl = function(destination, spec) {
+neume.impl = function(destination) {
   if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
   } else if (typeof destination === "undefined") {
@@ -111,7 +111,7 @@ neume.impl = function(destination, spec) {
     throw new TypeError("neume(): Illegal arguments");
   }
 
-  var context = new neume.Context(destination, Infinity, spec);
+  var context = new neume.Context(destination, Infinity);
 
   return Object.defineProperties(
     new NEU(context), {

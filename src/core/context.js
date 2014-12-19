@@ -11,9 +11,7 @@ var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
 
-function NeuContext(destination, duration, spec) {
-  spec = spec || {};
-
+function NeuContext(destination, duration) {
   this.context = this;
   this.destination = destination;
   this.audioContext = destination.context;
@@ -24,7 +22,7 @@ function NeuContext(destination, duration, spec) {
   this._bpm = 120;
   this._scriptProcessor = null;
   this._audioBuses = [];
-  this._processBufSize = util.int(util.defaults(spec.processBufSize, C.PROCESS_BUF_SIZE));
+  this._processBufSize = C.PROCESS_BUF_SIZE;
   this._inlet = null;
 
   this.connect(this.analyser, this.destination);
