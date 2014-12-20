@@ -37,6 +37,7 @@ describe("neume.Interval", function() {
     var passed = null;
 
     var sched = new neume.Interval(context, 0.05, function(e) {
+      assert(this === sched);
       passed = e;
     });
 

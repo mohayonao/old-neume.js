@@ -43,10 +43,19 @@ describe("neume.Sched", function() {
     };
 
     var sched = new neume.Sched(context, iter).on("start", function(e) {
+      assert(this === sched);
+      assert(start === null);
+      assert(stop === null);
       start = e;
     }).on("sched", function(e) {
+      assert(this === sched);
+      assert(start !== null);
+      assert(stop === null);
       passed = e;
     }).on("stop", function(e) {
+      assert(this === sched);
+      assert(start !== null);
+      assert(stop === null);
       stop = e;
     });
 
@@ -116,10 +125,19 @@ describe("neume.Sched", function() {
     };
 
     var sched = new neume.Sched(context, iter).on("start", function(e) {
+      assert(this === sched);
+      assert(start === null);
+      assert(stop === null);
       start = e;
     }).on("sched", function(e) {
+      assert(this === sched);
+      assert(start !== null);
+      assert(stop === null);
       passed = e;
     }).on("stop", function(e) {
+      assert(this === sched);
+      assert(start !== null);
+      assert(stop === null);
       stop = e;
     });
 

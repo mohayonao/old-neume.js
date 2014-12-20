@@ -37,6 +37,7 @@ describe("neume.Timeout", function() {
     var passed = null;
 
     var sched = new neume.Timeout(context, 0.05, function(e) {
+      assert(this === sched);
       passed = e;
     });
 
