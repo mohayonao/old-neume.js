@@ -11,15 +11,27 @@
     #start { margin:10px 0 }
     #canvas { width:100%;height:240px;background:black }
     #code { padding:0;margin:0;background:white;border:none }
+    #app .btn { width:100px }
   </style>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
   <script src="//mohayonao.github.io/mml-emitter/build/mml-emitter.min.js"></script>
+  <script src="./visualizer.js"></script>
   <script src="../build/neume.js"></script>
-  <script>_.mixin(neume._.exports());</script>
+  <script>
+  function load(url) {
+    return new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url);
+      xhr.onload = function() { resolve(xhr.response); };
+      xhr.onerror = reject;
+      xhr.send();
+    });
+  }
+  _.mixin(neume._.exports());
+  </script>
 </head>
 <body>
   <div class="container">
@@ -29,7 +41,7 @@
     </div>
     <div id="canvas"></div>
     <div id="app">
-      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+      <button id="start" class="btn btn-default">Start</button>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -47,8 +59,9 @@
   var mmlData    = null;
   var mmlEmitter = null; // MMLEmitter: http://mohayonao.github.io/mml-emitter/
   var visualizer = null; // three.js  : http://threejs.org/
+  var master = null;
 
-  $.get("./invention.mml").then(function(data) {
+  load("./invention.mml").then(function(data) {
     mmlData = data;
   });
 
@@ -58,26 +71,31 @@
     for (var i = 0; i < 65536; i++) {
       data[i] = Math.random() * 2 - 1;
       data[i] *= 1 - (i / 65536);
-      data[i] *= i < 256 ? 1 : 0.05;
-      data[i] *= i <  32 ? Math.random() : 1;
+      data[i] *= i < 64 ? 1 : 0.05;
+      data[i] *= i < 32 ? Math.random() : 1;
     }
 
     return neu.Buffer.from(data);
   })();
 
   function Piano($, freq, dur) {
-    return $("+", { mul: 0.75 }, [ 1, 5, 13, 0.5 ].map(function(x, i) {
+    return $([ 1, 5, 13, 0.5 ].map(function(x, i) {
       return $("sin", { freq: freq * x });
-    }))
+    })).mul(0.75)
     .$("shaper", { curve: 0.75 })
     .$("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 6 })
     .$("xline", { start: 0.75, end: 0.01, dur: dur * 5 }).on("end", $.stop)
     .$("out", { bus: 1 });
   }
 
-  function Reverb($) {
-    return $("in", 1)
-    .$("conv", { buf: IRData })
+  function Master($) {
+    return $("in", { bus: 1 })
+    .$("drywet", {
+      mix: $("@mix", -0.25),
+      efx: function($) {
+        return $("conv", { buf: IRData }, $.inputs);
+      }
+    })
     .$("out", { bus: 0 });
   }
 
@@ -94,10 +112,12 @@
       });
     });
 
-    players = [ neu.Synth(Reverb), mmlEmitter, visualizer ];
+    master = neu.Synth(Master);
+
+    players = [ master, mmlEmitter, visualizer ];
 
     players.forEach(function(player) {
-      player.start();
+      player.start("+0.1");
     });
   }
 
@@ -109,151 +129,101 @@
   </script>
 
   <script>
-  function canUseWebGL() {
-    try {
-      return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
-    } catch(e) {
-      return false;
-    }
-  }
-  $(function() {
+  window.onload = function() {
     "use strict";
 
-    var MMLVisualizer = (function() {
-      function MMLVisualizer(analyser, spec) {
-        this._analyser = analyser;
+    var $ = document.getElementById.bind(document);
 
-        this.width  = spec.width;
-        this.height = spec.height;
+    var canvas = $("canvas");
 
-        this._scene  = new THREE.Scene();
-        this._camera = new THREE.PerspectiveCamera(70, this.width / this.height, 1, 1000);
-
-        if (canUseWebGL()) {
-          this._renderer = new THREE.WebGLRenderer();
-          this._maxPlaens = 48;
-        } else {
-          this._renderer = new THREE.CanvasRenderer();
-          this._maxPlaens = 16;
-        }
-        this._renderer.setSize(this.width, this.height);
-
-        this._state = "init";
-        this._plaens = [];
-        this._pushed = [];
-
-        Object.defineProperties(this, {
-          state: {
-            get: function() {
-              return this._state;
-            },
-            enumerable: true
-          },
-          domElement: {
-            value: this._renderer.domElement,
-            enumerable: true
-          },
-          camera: {
-            value: this._camera,
-            enumerable: true
-          }
-        })
-      }
-
-      MMLVisualizer.prototype.start = function() {
-        if (this._state !== "start") {
-          this._state = "start";
-          requestAnimationFrame(this.render.bind(this));
-        }
-        return this;
-      };
-
-      MMLVisualizer.prototype.stop = function() {
-        if (this._state === "start") {
-          this._state = "stop";
-        }
-        return this;
-      };
-
-      MMLVisualizer.prototype.push = function(e) {
-        this._pushed.push(e);
-      };
-
-      MMLVisualizer.prototype.render = function(t) {
-        this._render(t);
-
-        this._camera.lookAt(this._scene.position);
-        this._renderer.render(this._scene, this._camera);
-
-        if (this._state === "start") {
-          requestAnimationFrame(this.render.bind(this));
-        }
-      };
-
-      MMLVisualizer.prototype._render = function(t) {
-        this._pushed.splice(0).forEach(function(e) {
-          var geometry = new THREE.PlaneGeometry(40, 200);
-
-          var material = new THREE.MeshBasicMaterial({
-            side: THREE.DoubleSide,
-            color: new THREE.Color().setHSL(e.midi % 48 / 48, 0.8, 0.6).getHex(),
-            opacity: 0.5, transparent: true
-          });
-
-          var wave = new THREE.Mesh(geometry, material);
-
-          wave.position.set((e.midi - 69) * -40, 100, 0);
-          wave.time = t;
-
-          this._scene.add(wave);
-          this._plaens.unshift(wave);
-        }, this);
-
-        while (this._maxPlaens <= this._plaens.length) {
-          this._scene.remove(this._plaens.pop());
-        }
-
-        this._plaens.forEach(function(wave) {
-          wave.position.z = (t - wave.time) * 0.05;
-        }, this);
-      };
-
-      return MMLVisualizer;
-    })();
-
-    var canvas = $("#canvas").on("mousemove", function(e) {
+    canvas.onmousemove = function(e) {
       var x = e.pageX / window.innerWidth - 0.5;
 
-      visualizer.camera.position.set(Math.sin(x) * -100, Math.cos(x) * -100, -75);
-    });
-
-    visualizer = new MMLVisualizer(neu.analyser, { width: canvas.width(), height: 240 });
-
-    visualizer.camera.position.set(0, -100, -75);
-
-    canvas.append(visualizer.domElement);
-
-    var vue = new Vue({
-      el: "#app",
-      data: {
-        isPlaying: false,
-      },
-      methods: {
-        toggle: function() {
-          neu.reset();
-          this.isPlaying = !this.isPlaying;
-          if (this.isPlaying) {
-            start();
-          } else {
-            stop();
-          }
-        }
+      if (master) {
+        master.mix.value = _.linlin(Math.abs(x), 0, 0.5, -0.25, 1);
       }
+
+      visualizer.camera.position.set(Math.sin(x) * -100, Math.cos(x) * -100, -75);
+    };
+
+    visualizer = new Visualizer(canvas, function() {
+      this.camera = new THREE.PerspectiveCamera(70, this.width / this.height, 1, 1000);
+
+      this._scene = new THREE.Scene();
+
+      if (this.canUseWebGL()) {
+        this.fps = 40;
+        this._renderer = new THREE.WebGLRenderer();
+        this._maxPlaens = 48;
+      } else {
+        this.fps = 10;
+        this._renderer = new THREE.CanvasRenderer();
+        this._maxPlaens = 16;
+      }
+      this._renderer.setSize(this.width, this.height);
+
+      this._plaens = [];
+      this._pushed = [];
+
+      this.camera.position.set(0, -100, -75);
+      this.canvas.appendChild(this._renderer.domElement);
     });
 
-    $("#code").text($("#example").text());
+    visualizer.push = function(e) {
+      this._pushed.push(e);
+    };
+
+    visualizer.render = function(t) {
+      this._pushed.splice(0).forEach(function(e) {
+        var geometry = new THREE.PlaneGeometry(40, 200);
+
+        var material = new THREE.MeshBasicMaterial({
+          side: THREE.DoubleSide,
+          color: new THREE.Color().setHSL(e.midi % 48 / 48, 0.8, 0.6).getHex(),
+          opacity: 0.5, transparent: true
+        });
+
+        var wave = new THREE.Mesh(geometry, material);
+
+        wave.position.set((e.midi - 69) * -40, 100, 0);
+        wave.time = t;
+
+        this._scene.add(wave);
+        this._plaens.unshift(wave);
+      }, this);
+
+      while (this._maxPlaens <= this._plaens.length) {
+        this._scene.remove(this._plaens.pop());
+      }
+
+      this._plaens.forEach(function(wave) {
+        wave.position.z = (t - wave.time) * 0.05;
+      }, this);
+
+      this.camera.lookAt(this._scene.position);
+      this._renderer.render(this._scene, this.camera);
+    };
+
+    var isPlaying = false;
+
+    $("start").onclick = function(e) {
+      isPlaying = !isPlaying;
+
+      neu.reset();
+
+      if (isPlaying) {
+        start();
+        e.target.textContent = "Stop";
+      } else {
+        stop();
+        e.target.textContent = "Start";
+      }
+    };
+
+    // code
+    $("code").textContent = $("example").textContent;
     prettyPrint();
-  });
+  };
   </script>
 </body>
 </html>
