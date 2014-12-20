@@ -99,13 +99,7 @@ NeuSum.prototype.connect = function(to) {
 };
 
 NeuSum.prototype.disconnect = function() {
-  var context = this.context;
-  var inputs = this._inputs;
-
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    context.disconnect(inputs[i]);
-  }
-
+  this.context.disconnect(this._inputs);
   return this;
 };
 

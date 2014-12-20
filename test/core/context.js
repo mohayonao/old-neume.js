@@ -685,13 +685,30 @@ describe("neume.Context", function() {
   });
 
   describe("#disconnect", function() {
-    it("(from: any): self", function() {
+    it("(node: any): self", function() {
       var osc = context.createOscillator();
       var amp = context.createGain();
 
       context.connect(osc, amp.gain);
 
       context.disconnect(osc);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+    it("(node: Array<any>): self", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp.gain);
+
+      context.disconnect([ osc ]);
 
       assert.deepEqual(amp.toJSON(), {
         name: "GainNode",

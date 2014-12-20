@@ -237,13 +237,19 @@ NeuContext.prototype.connect = function(from, to) {
   return this;
 };
 
-NeuContext.prototype.disconnect = function(from) {
-  if (from && from.disconnect) {
-    from.disconnect();
-    if (from.$$outputs) {
-      from.$$outputs.forEach(function(to) {
-        return to.ondisconnected && to.ondisconnected(from);
-      });
+NeuContext.prototype.disconnect = function(node) {
+  if (node) {
+    if (typeof node.disconnect === "function") {
+      node.disconnect();
+      if (node.$$outputs) {
+        node.$$outputs.forEach(function(to) {
+          return to.ondisconnected && to.ondisconnected(node);
+        });
+      }
+    } else if (Array.isArray(node)) {
+      node.forEach(function(node) {
+        this.disconnect(node);
+      }, this);
     }
   }
   return this;
