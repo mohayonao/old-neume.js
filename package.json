@@ -7,7 +7,7 @@
     "es6-promise": "^2.0.0"
   },
   "devDependencies": {
-    "browserify": "^7.0.0",
+    "browserify": "^7.0.3",
     "coveralls": "^2.11.2",
     "espower-loader": "^0.10.0",
     "gulp": "^3.8.10",
@@ -17,13 +17,13 @@
     "gulp-mocha": "^2.0.0",
     "gulp-rename": "^1.2.0",
     "gulp-sourcemaps": "^1.2.8",
-    "gulp-uglify": "^1.0.1",
+    "gulp-uglify": "^1.0.2",
     "jshint-stylish": "^1.0.0",
     "power-assert": "^0.10.0",
-    "sinon": "^1.12.1",
+    "sinon": "^1.12.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
-    "web-audio-test-api": "^0.1.15"
+    "web-audio-test-api": "^0.1.16"
   },
   "keywords": [
     "audio",
