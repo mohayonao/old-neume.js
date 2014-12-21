@@ -288,14 +288,12 @@ describe("ugen/env", function() {
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, "<", 1, 0.1, 0, 0.1
-        ] });
+        ] }).on("end", function() {
+          throw new Error("NOT REACHED");
+        });
       });
 
-      var ended = 0;
-
-      synth.start(0).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -321,21 +319,20 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(ended === 0);
     });
     it("loopNode & releaseNode", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, "<", 1, 0.1, 0, 0.1, ">", 0, 0.5
-        ] });
+        ] }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.500);
+      synth.start(0).release(0.500);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -361,21 +358,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.200, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.100, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("release in the phase", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 10, ">", 0, 0.5
-        ] });
+        ] }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.500);
+      synth.start(0).release(0.500);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -401,21 +398,18 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.010, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.005, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("stop", function() {
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 1
-        ] });
+        ] }).on("end", function() {
+          throw new Error("NOT REACHED");
+        });
       });
 
-      var ended = 0;
-
-      synth.start(0).on("end", function(e) {
-        ended = e.playbackTime;
-      }).stop(0.500);
+      synth.start(0).stop(0.500);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -441,21 +435,17 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.500, 1e-2));
-
-      assert(ended === 0);
     });
     it("release after stop", function() {
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 10, ">", 0, 0.5
-        ] });
+        ] }).on("end", function() {
+          throw new Error("NOT REACHED");
+        });
       });
 
-      var ended = 0;
-
-      synth.start(0).on("end", function(e) {
-        ended = e.playbackTime;
-      }).stop(0.100).release(0.500).release(0.250);
+      synth.start(0).stop(0.100).release(0.500).release(0.250);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -481,21 +471,20 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.010, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.010, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.010, 1e-2));
-
-      assert(ended === 0);
     });
     it("curve:step", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "step" });
+        ], curve: "step" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -521,21 +510,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:hold", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "hold" });
+        ], curve: "hold" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -561,21 +550,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.250, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.250, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:lin", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "lin" });
+        ], curve: "lin" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -601,21 +590,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:exp", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "exp" });
+        ], curve: "exp" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -641,24 +630,24 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     // NOTE:
     // Tests below are approximate estimate.
     // We should check rendered curves actually.
     it("curve:sine", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "sine" });
+        ], curve: "sine" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -684,21 +673,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.072, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.036, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:welch", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "welch" });
+        ], curve: "welch" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -724,21 +713,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.032, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.016, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:squared", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "squared" });
+        ], curve: "squared" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -764,21 +753,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.100, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:cubic", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: "cubic" });
+        ], curve: "cubic" }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -804,21 +793,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.125, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.062, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:-4", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: -4 });
+        ], curve: -4 }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -844,21 +833,21 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.014, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.007, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
     it("curve:+4", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 0.1, 0.25, 0.2, 0.25, 0.15, 0, 0.5
-        ], curve: +4 });
+        ], curve: +4 }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      });
+      synth.start(0.050);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -884,22 +873,22 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.133, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.066, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
   });
 
   describe("$('adsr')", function() {
     it("works", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
-        return $("adsr", { a: 0.1, d: 0.2, s: 0.25, r: 0.5 });
+        return $("adsr", { a: 0.1, d: 0.2, s: 0.25, r: 0.5 }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.500);
+      synth.start(0.050).release(0.500);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -925,22 +914,22 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
   });
 
   describe("$('asr')", function() {
     it("works", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
-        return $("asr", { a: 0.3, s: 0.25, r: 0.5 });
+        return $("asr", { a: 0.3, s: 0.25, r: 0.5 }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.500);
+      synth.start(0.050).release(0.500);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -966,22 +955,22 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
   });
 
   describe("$('cutoff')", function() {
     it("works", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 1.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
-        return $("cutoff", { r: 0.5 });
+        return $("cutoff", { r: 0.5 }).on("end", spy);
       });
 
-      var ended = 0;
-
-      synth.start(0.050).on("end", function(e) {
-        ended = e.playbackTime;
-      }).release(0.500);
+      synth.start(0.050).release(0.500);
 
       neu.audioContext.$processTo("00:01.000");
 
@@ -1007,8 +996,7 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.200, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.100, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-
-      assert(closeTo(ended, 1.000, 1e-2));
+      assert(spy.calledOnce);
     });
   });
 

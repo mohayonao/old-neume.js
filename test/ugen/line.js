@@ -76,15 +76,17 @@ describe("ugen/line", function() {
   });
 
   describe("works", function() {
-    it("$('line')", function(done) {
+    it("$('line')", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 0.300, 1e-2));
+      });
       var synth = neu.Synth(function($) {
-        return $("line", { start: 880, end: 440, dur: 0.200 });
+        return $("line", { start: 880, end: 440, dur: 0.200 }).on("end", spy);
       });
 
-      synth.start(0.100).on("end", function(e) {
-        assert(closeTo(e.playbackTime, 0.300, 1e-2));
-        done();
-      });
+      synth.start(0.100);
 
       neu.audioContext.$processTo("00:00.500");
 
@@ -99,15 +101,17 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.350), 440, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440, 1e-2));
     });
-    it("$('xline')", function(done) {
+    it("$('xline')", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 0.300, 1e-2));
+      });
       var synth = neu.Synth(function($) {
-        return $("xline", { start: 880, end: 440, dur: 0.200 });
+        return $("xline", { start: 880, end: 440, dur: 0.200 }).on("end", spy);
       });
 
-      synth.start(0.100).on("end", function(e) {
-        assert(closeTo(e.playbackTime, 0.300, 1e-2));
-        done();
-      });
+      synth.start(0.100);
 
       neu.audioContext.$processTo("00:00.350");
 

@@ -85,7 +85,7 @@ describe("ugen/iter", function() {
           }
         };
         return $("iter", { iter: iter }).on("end", function() {
-          assert(!"NOT REACHED");
+          throw new Error("NOT REACHED");
         });
       });
 
@@ -111,7 +111,12 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.450) === 4);
       assert(outlet.gain.$valueAtTime(0.500) === 4);
     });
-    it("next // done", function(done) {
+    it("next // done", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 0.300, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         var iter = {
           count: 0,
@@ -122,10 +127,7 @@ describe("ugen/iter", function() {
             return { value: this.count++, done: false };
           }
         };
-        return $("iter", { iter: iter }).on("end", function(e) {
-          assert(e.playbackTime === 0.3);
-          done();
-        });
+        return $("iter", { iter: iter }).on("end", spy);
       });
 
       synth.start(0);
@@ -149,13 +151,16 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.400) === 2);
       assert(outlet.gain.$valueAtTime(0.450) === 2);
       assert(outlet.gain.$valueAtTime(0.500) === 2);
+      assert(spy.calledOnce);
     });
-    it("next // done when start", function(done) {
+    it("next // done when start", function() {
+      var spy = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 0.000, 1e-2));
+      });
       var synth = neu.Synth(function($) {
-        return $("iter").on("end", function(e) {
-          assert(e.playbackTime === 0.0);
-          done();
-        });
+        return $("iter").on("end", spy);
       });
 
       synth.start(0);
@@ -179,6 +184,7 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.400) === 0);
       assert(outlet.gain.$valueAtTime(0.450) === 0);
       assert(outlet.gain.$valueAtTime(0.500) === 0);
+      assert(spy.calledOnce);
     });
     it("setValue", function() {
       var synth = neu.Synth(function($) {
@@ -189,7 +195,7 @@ describe("ugen/iter", function() {
             }
           }
         }).on("end", function() {
-          assert(!"NOT REACHED");
+          throw new Error("NOT REACHED");
         });
       });
 

@@ -60,7 +60,11 @@ module.exports = function(neume, util) {
 
       schedId = context.sched(t1, function(t) {
         schedId = 0;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       });
     }
 

@@ -115,12 +115,16 @@ describe("ugen/buf", function() {
   });
 
   describe("works", function() {
-    it("start", function(done) {
+    it("start", function() {
+      var spy1 = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.type === "end");
+        //
+        assert(e.synth instanceof neume.Synth);
+      });
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
-        return $(buffer).on("end", function() {
-          done();
-        });
+        return $(buffer).on("end", spy1);
       });
 
       synth.start(0.100);
@@ -139,12 +143,13 @@ describe("ugen/buf", function() {
       assert(outlet.$stateAtTime(0.400) === "FINISHED");
       assert(outlet.$stateAtTime(0.450) === "FINISHED");
       assert(outlet.$stateAtTime(0.500) === "FINISHED");
+      assert(spy1.calledOnce);
     });
-    it("start/stop", function(done) {
+    it("start/stop", function() {
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
         return $(buffer).on("end", function() {
-          done();
+          throw new Error("NOT REACHED");
         });
       });
 

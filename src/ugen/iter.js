@@ -45,7 +45,11 @@ module.exports = function(neume, util) {
       var items = iterNext();
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       } else {
         param.setValueAtTime(util.finite(items.value), t);
       }
@@ -68,7 +72,11 @@ module.exports = function(neume, util) {
 
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       } else {
         param.update(util.finite(items.value), t);
       }

@@ -3,6 +3,7 @@
 var util = require("../util");
 var DB = require("../util/db");
 var neume = require("../namespace");
+var Emitter = require("../util/emitter");
 var Parser = require("./parser");
 
 require("./dollar");
@@ -13,6 +14,8 @@ var START = 1;
 var STOP = 2;
 
 function NeuSynth(context, func, args) {
+  Emitter.call(this);
+
   this.context = context;
   this.routes = [];
 
@@ -77,6 +80,8 @@ function NeuSynth(context, func, args) {
     }
   });
 }
+util.inherits(NeuSynth, Emitter);
+
 NeuSynth.$$name = "NeuSynth";
 
 NeuSynth.prototype.query = function(selector) {
@@ -243,49 +248,6 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
 
 NeuSynth.prototype.toAudioNode = function() {
   return this.context.toAudioNode(this.routes[0]);
-};
-
-NeuSynth.prototype.hasListeners = function(event) {
-  return this._db.all().reduce(function(a, b) {
-    return a || b.hasListeners(event);
-  }, false);
-};
-
-NeuSynth.prototype.listeners = function(event) {
-  var tmp = this._db.all().reduce(function(a, b) {
-    return a.concat(b.listeners(event));
-  }, []);
-
-  var listeners = [];
-
-  for (var i = 0, imax = tmp.length; i < imax; i++) {
-    if (listeners.indexOf(tmp[i]) === -1) {
-      listeners.push(tmp[i]);
-    }
-  }
-
-  return listeners;
-};
-
-NeuSynth.prototype.on = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.on(event, listener);
-  });
-  return this;
-};
-
-NeuSynth.prototype.once = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.once(event, listener);
-  });
-  return this;
-};
-
-NeuSynth.prototype.off = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.off(event, listener);
-  });
-  return this;
 };
 
 function getMethods(db) {
