@@ -119,8 +119,8 @@ describe("ugen/buf", function() {
       var spy1 = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.type === "end");
-        //
         assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 0.350, 1e-2));
       });
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
@@ -170,22 +170,6 @@ describe("ugen/buf", function() {
       assert(outlet.$stateAtTime(0.400) === "FINISHED");
       assert(outlet.$stateAtTime(0.450) === "FINISHED");
       assert(outlet.$stateAtTime(0.500) === "FINISHED");
-    });
-    it("with duration", function() {
-      var synth = neu.Synth(function($) {
-        var buffer = neu.Buffer(1, 11025, 44100);
-        return $(buffer, { offset: 5, dur: 10 });
-      });
-
-      var outlet = synth.toAudioNode().$inputs[0];
-      var spy = sinon.spy(outlet, "start");
-
-      synth.start(0.100);
-
-      neu.audioContext.$processTo("00:00.100");
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ 0.100, 5, 10 ]);
     });
   });
 

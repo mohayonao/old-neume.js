@@ -40,12 +40,14 @@ module.exports = function(neume, util) {
   function make(buffer, ugen, spec) {
     var context = ugen.context;
     var bufSrc = context.createBufferSource();
+    var duration = 0;
 
     buffer = context.toAudioBuffer(buffer);
 
     /* istanbul ignore else */
     if (buffer != null) {
       bufSrc.buffer = buffer;
+      duration = buffer.duration;
     }
     bufSrc.loop = !!util.defaults(spec.loop, false);
     bufSrc.loopStart = util.finite(util.defaults(spec.start, spec.loopStart, 0));
@@ -54,23 +56,13 @@ module.exports = function(neume, util) {
     bufSrc.playbackRate.value = 0;
     context.connect(util.defaults(spec.rate, spec.playbackRate, 1), bufSrc.playbackRate);
 
-    var offset = util.finite(util.defaults(spec.offset, 0));
-    var duration = context.toSeconds(util.defaults(spec.dur, spec.duration, null));
-    if (duration != null) {
-      duration = util.finite(duration);
-    }
-
     function start(t) {
-      if (duration != null) {
-        bufSrc.start(t, offset, duration);
-      } else {
-        bufSrc.start(t, offset);
-      }
+      bufSrc.start(t);
       bufSrc.onended = function() {
         ugen.emit("end", {
           type: "end",
           synth: ugen.synth,
-          playbackTime: context.currentTime
+          playbackTime: t + duration
         });
       };
     }
