@@ -23,7 +23,6 @@ function NeuContext(destination, duration) {
   this._scriptProcessor = null;
   this._audioBuses = [];
   this._processBufSize = C.PROCESS_BUF_SIZE;
-  this._inlet = null;
 
   this.connect(this.analyser, this.destination);
 
@@ -74,17 +73,9 @@ NeuContext.prototype.getAudioBus = function(index) {
 };
 
 NeuContext.prototype.reset = function() {
-  if (this._inlet) {
-    this._inlet.disconnect();
-  }
-
   this._audioBuses.splice(0).forEach(function(bus) {
     bus.toAudioNode().disconnect();
   }, this);
-
-  this._inlet = this._audioBuses[0] = this.getAudioBus(0);
-  this.connect(this._inlet, this.analyser);
-
   this.disconnect(this._scriptProcessor);
 
   this._events = [];
@@ -99,6 +90,7 @@ NeuContext.prototype.reset = function() {
 NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
+    this.connect(this.getAudioBus(0).outlet, this.analyser);
     if (this.audioContext instanceof neume.webaudio.OfflineAudioContext) {
       startRendering.call(this);
     } else {
