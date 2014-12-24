@@ -3,6 +3,9 @@
   "description": "Web Audio API library for developing browser music",
   "version": "0.7.1",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/mohayonao/neume.js/issues"
+  },
   "dependencies": {
     "es6-promise": "^2.0.0"
   },
@@ -25,6 +28,7 @@
     "vinyl-source-stream": "^1.0.0",
     "web-audio-test-api": "^0.1.16"
   },
+  "homepage": "http://mohayonao.github.io/neume.js/",
   "keywords": [
     "audio",
     "interactive",
@@ -34,13 +38,17 @@
     "web audio api"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohayonao/neume.js.git"
+  },
   "scripts": {
     "build": "gulp build",
     "code": "gulp code",
     "cover": "gulp cover",
     "jscs": "gulp jscs",
     "lint": "gulp lint",
-    "server": "python -m SimpleHTTPServer",
+    "start": "python -m SimpleHTTPServer",
     "test": "gulp test",
     "travis": "gulp travis"
   }
