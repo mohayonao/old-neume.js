@@ -1,4 +1,4 @@
-module.exports = function(neume) {
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -15,6 +15,11 @@ module.exports = function(neume) {
    *   |
    */
   neume.register("+", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  neume.register("array", function(ugen, spec, inputs) {
+    inputs = util.toArray(spec.value).concat(inputs);
     return make(ugen, spec, inputs);
   });
 
