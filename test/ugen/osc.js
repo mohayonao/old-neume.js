@@ -54,7 +54,7 @@ describe("ugen/osc", function() {
         inputs: [
           {
             name: "OscillatorNode",
-            type: "custom",
+            type: "square",
             frequency: {
               value: 440,
               inputs: []
@@ -82,7 +82,7 @@ describe("ugen/osc", function() {
         inputs: [
         {
           name: "OscillatorNode",
-          type: "custom",
+          type: "sawtooth",
           frequency: {
             value: 440,
             inputs: []
@@ -110,7 +110,7 @@ describe("ugen/osc", function() {
         inputs: [
           {
             name: "OscillatorNode",
-            type: "custom",
+            type: "triangle",
             frequency: {
               value: 440,
               inputs: []
@@ -256,7 +256,7 @@ describe("ugen/osc", function() {
         inputs: [
           {
             name: "OscillatorNode",
-            type: "custom",
+            type: "square",
             frequency: {
               value: 440,
               inputs: []
@@ -284,7 +284,7 @@ describe("ugen/osc", function() {
         inputs: [
           {
             name: "OscillatorNode",
-            type: "custom",
+            type: "sawtooth",
             frequency: {
               value: 440,
               inputs: []
@@ -312,7 +312,7 @@ describe("ugen/osc", function() {
         inputs: [
           {
             name: "OscillatorNode",
-            type: "custom",
+            type: "triangle",
             frequency: {
               value: 440,
               inputs: []
