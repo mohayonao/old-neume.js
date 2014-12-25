@@ -15,7 +15,6 @@ module.exports = function(neume, util) {
    *
    * methods:
    *   next(startTime: timevalue)
-   *   reset(startTime: timevalue)
    *
    * +-----------+     +-----------+
    * | inputs[0] | ... | inputs[N] |
@@ -55,12 +54,6 @@ module.exports = function(neume, util) {
       }
     }
 
-    function setValue(e, value) {
-      if (util.isIterator(value)) {
-        iter = value;
-      }
-    }
-
     function next(t) {
       if (state !== ITERATE) {
         return;
@@ -90,7 +83,6 @@ module.exports = function(neume, util) {
       outlet: outlet,
       start: start,
       methods: {
-        setValue: setValue,
         next: next
       }
     });

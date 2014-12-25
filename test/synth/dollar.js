@@ -32,7 +32,7 @@ describe("neume.SynthDollar", function() {
       var spy = this.spy(neume.UGen, "build");
 
       var synth = new neume.Synth(context, function($) {
-        return $(10);
+        return $("sin");
       }, []);
 
       assert(spy.calledOnce === true);

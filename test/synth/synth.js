@@ -5,7 +5,7 @@ var neume = require("../../src");
 neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/add"));
 neume.use(require("../../src/ugen/env"));
-neume.use(require("../../src/ugen/array"));
+neume.use(require("../../src/ugen/iter"));
 
 var NOP = function() {};
 
@@ -57,10 +57,10 @@ describe("neume.Synth", function() {
   describe("#methods", function() {
     it("\\getter: Array<string>", sinon.test(function() {
       var synth = new neume.Synth(context, function($) {
-        return $("boolean", $("array"));
+        return $("iter", $("env"));
       }, []);
 
-      assert.deepEqual(synth.methods, [ "at", "next", "prev", "setValue", "toggle" ]);
+      assert.deepEqual(synth.methods, [ "next", "release" ]);
     }));
   });
 
@@ -71,7 +71,7 @@ describe("neume.Synth", function() {
         a = $("sin");
         b = $("tri");
         c = $("sin");
-        d = $([ 1 ]);
+        d = $("iter");
         spy = sinon.spy(a, "on");
         return $("+", a, b, c, d);
       }, []);

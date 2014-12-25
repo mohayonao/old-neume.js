@@ -42,11 +42,11 @@ describe("neume.UGen", function() {
 
       assert(ugen instanceof neume.UGen);
     });
-    it("(synth: neume.Synth, key: number, spec: object, inputs: Array<any>): neume.UGen", function() {
-      var ugen = neume.UGen.build(synth, 100, {}, []);
+    it("(synth: neume.Synth, key: Float32Array, spec: object, inputs: Array<any>): neume.UGen", function() {
+      var ugen = neume.UGen.build(synth, new Float32Array(16), {}, []);
 
       assert(ugen instanceof neume.UGen);
-      assert(ugen.key === "number");
+      assert(ugen.key === "Float32Array");
     });
     it("(synth: neume.Synth, key: object, spec: object, inputs: Array<any>): neume.UGen", function() {
       var ugen = neume.UGen.build(synth, new Date(), {}, []);

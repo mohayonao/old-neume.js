@@ -186,49 +186,6 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.500) === 0);
       assert(spy.calledOnce);
     });
-    it("setValue", function() {
-      var synth = neu.Synth(function($) {
-        return $("iter", {
-          iter: {
-            next: function() {
-              return { value: 1, done: false };
-            }
-          }
-        }).on("end", function() {
-          throw new Error("NOT REACHED");
-        });
-      });
-
-      synth.start(0);
-
-      synth.setValue(0.100, {
-        count: 5,
-        next: function() {
-          return { value: this.count++, done: false };
-        }
-      });
-      synth.setValue(0.200, "not iterator");
-      synth.next(0.100);
-      synth.next(0.150);
-      synth.next(0.200);
-      synth.next(0.250);
-      synth.next(0.300);
-
-      neu.audioContext.$processTo("00:00.500");
-
-      var outlet = synth.toAudioNode().$inputs[0];
-      assert(outlet.gain.$valueAtTime(0.000) === 1);
-      assert(outlet.gain.$valueAtTime(0.050) === 1);
-      assert(outlet.gain.$valueAtTime(0.100) === 5);
-      assert(outlet.gain.$valueAtTime(0.150) === 6);
-      assert(outlet.gain.$valueAtTime(0.200) === 7);
-      assert(outlet.gain.$valueAtTime(0.250) === 8);
-      assert(outlet.gain.$valueAtTime(0.300) === 9);
-      assert(outlet.gain.$valueAtTime(0.350) === 9);
-      assert(outlet.gain.$valueAtTime(0.400) === 9);
-      assert(outlet.gain.$valueAtTime(0.450) === 9);
-      assert(outlet.gain.$valueAtTime(0.500) === 9);
-    });
   });
 
 });
