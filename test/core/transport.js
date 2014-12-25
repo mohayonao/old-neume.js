@@ -198,8 +198,86 @@ describe("neume.Transport", function() {
   });
 
   describe("#toSeconds", function() {
-    it("(): number", function() {
-      assert(transport.toSeconds("2hz") === 0.5);
+    it("(value: number): number", function() {
+      assert(transport.toSeconds(1) === 1);
+      assert(transport.toSeconds(2) === 2);
+      assert(transport.toSeconds(Infinity) === 0);
+    });
+    it("(value: { playbackTime: number }): number", function() {
+      var obj = { foo: "bar" };
+      assert(transport.toSeconds({ playbackTime: 2.5 }) === 2.5);
+      assert(transport.toSeconds(null) === null);
+      assert(transport.toSeconds(obj) === transport.toSeconds(obj));
+    });
+    it("(value: string): number // when milliseconds", function() {
+      assert(transport.toSeconds("500ms") === 0.5);
+      assert(transport.toSeconds("750ms") === 0.75);
+    });
+    it("(value: string): number // when frequency", function() {
+      assert(transport.toSeconds("10hz") === 0.1);
+      assert(transport.toSeconds("50hz") === 0.02);
+    });
+    it("(value: string): number // when ticks", function() {
+      transport.bpm = 120;
+      assert(closeTo(transport.toSeconds("640ticks"), 0.666, 1e-2));
+      assert(closeTo(transport.toSeconds("480ticks"), 0.500, 1e-2));
+      assert(closeTo(transport.toSeconds("240ticks"), 0.250, 1e-2));
+      transport.bpm = 240;
+      assert(closeTo(transport.toSeconds("640ticks"), 0.333, 1e-2));
+      assert(closeTo(transport.toSeconds("480ticks"), 0.250, 1e-2));
+      assert(closeTo(transport.toSeconds("240ticks"), 0.120, 1e-2));
+    });
+    it("(value: string): number // when note values", function() {
+      transport.bpm = 120;
+      assert(transport.toSeconds("0n") === transport.toSeconds("0ticks", 120));
+      assert(transport.toSeconds("4n") === transport.toSeconds("480ticks", 120));
+      assert(transport.toSeconds("8n") === transport.toSeconds("240ticks", 120));
+      assert(transport.toSeconds("16nd") === transport.toSeconds("180ticks", 120));
+      assert(transport.toSeconds("16nt") === transport.toSeconds("80ticks", 120));
+    });
+    it("(value: string): number // when bars/beats/units", function() {
+      transport.bpm = 120;
+      assert(transport.toSeconds("0.0.480") === transport.toSeconds("480ticks"));
+      assert(transport.toSeconds("0.1.000") === transport.toSeconds("480ticks"));
+      assert(transport.toSeconds("1.0.000") === transport.toSeconds("480ticks") * 4);
+    });
+    it("(value: string): number // when hours:minutes:seconds.milliseconds", function() {
+      assert(transport.toSeconds("00:00:01") === 1);
+      assert(transport.toSeconds("00:01:00") === 60);
+      assert(transport.toSeconds("01:00:00") === 3600);
+      assert(transport.toSeconds("00:00:00.5") === 0.5);
+      assert(transport.toSeconds("00:00:00.250") === 0.25);
+    });
+    it("(value: string): number // when samples", function() {
+      transport.bpm = 120;
+      assert(transport.toSeconds("44100samples") === 44100 / transport.sampleRate);
+      assert(transport.toSeconds("22050samples") === 22050 / transport.sampleRate);
+    });
+    it("(value: string): number // when now", function() {
+      assert(transport.toSeconds("now") === transport.currentTime);
+    });
+    it("(value: string): number // when string", function() {
+      assert(transport.toSeconds("0.5") === 0.5);
+      assert(transport.toSeconds("2.5") === 2.5);
+    });
+    it("(value: string): number // when relative", function() {
+      assert(transport.toSeconds("+250ms") === transport.currentTime + 0.250);
+      assert(transport.toSeconds("+500ms") === transport.currentTime + 0.500);
+    });
+    it("(value: string): number // when expression", function() {
+      assert(transport.toSeconds("500ms+2hz") === transport.toSeconds("500ms") + transport.toSeconds("2hz"));
+      assert(transport.toSeconds("500ms * (2hz + 4)") === transport.toSeconds("500ms") * (transport.toSeconds("2hz") + 4));
+
+      assert.throws(function() {
+        transport.toSeconds("2 ** 10");
+      }, EvalError);
+    });
+    it("(value: any): any // else", function() {
+      var a = {};
+
+      assert(transport.toSeconds(a) === a);
+      assert(transport.toSeconds(null) === null);
+      assert(transport.toSeconds() === undefined);
     });
   });
 
