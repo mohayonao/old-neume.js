@@ -63,42 +63,6 @@ describe("neume.AudioBus", function() {
     });
   });
 
-  describe("#fade", function() {
-    it("(): self", function() {
-      var bus = new neume.AudioBus(context);
-      var outlet = bus.toAudioNode();
-
-      bus.fade();
-
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.250), 0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.500), 0.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.750), 0.000, 1e-2));
-    });
-    it("(t: number|string, val: number, dur: number|string): self", function() {
-      var bus = new neume.AudioBus(context);
-      var outlet = bus.toAudioNode();
-
-      bus.fade(2, 0.5, 2);
-
-      assert(closeTo(outlet.gain.$valueAtTime(1.000), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.250), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.500), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(1.750), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.000), 1.000, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.250), 0.781, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.658, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.588, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.000), 0.550, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.250), 0.528, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.515, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.508, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.500, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(4.500), 0.500, 1e-2));
-      assert(closeTo(outlet.gain.$valueAtTime(5.000), 0.500, 1e-2));
-    });
-  });
-
   describe("#toAudioNode", function() {
     it("(): self", function() {
       var bus = new neume.AudioBus(context);
