@@ -130,6 +130,11 @@ NeuSynth.prototype.start = function(startTime) {
     this._scheds = this.scheds.splice(0).map(function(set) {
       return new neume.Sched(context, set[0], set[1]).start(startTime);
     }, this);
+
+    this.emit("start", {
+      type: "start",
+      playbackTime: startTime
+    });
   }, this);
 
   context.start(); // auto start(?)
@@ -163,6 +168,11 @@ NeuSynth.prototype.stop = function(startTime) {
 
     this._scheds.forEach(function(sched) {
       sched.stop(t0);
+    });
+
+    this.emit("stop", {
+      type: "stop",
+      playbackTime: startTime
     });
   }, this);
 

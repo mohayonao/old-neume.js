@@ -94,9 +94,10 @@ describe("neume.Synth", function() {
       assert(synth.start() === synth);
     });
     it("calls each ugen._unit.start(t) only once", sinon.test(function() {
+      var onstart = sinon.spy();
       var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
-      }, []);
+      }, []).on("start", onstart);
 
       var ugens = synth._db.all();
       ugens.forEach(function(ugen) {
@@ -130,6 +131,12 @@ describe("neume.Synth", function() {
       ugens.forEach(function(ugen) {
         assert(ugen._unit.start.calledTwice === false, "00:01.500");
       });
+
+      assert(onstart.calledOnce);
+      assert(onstart.calledWith({
+        type: "start",
+        playbackTime: 1.000
+      }));
     }));
   });
 
@@ -140,9 +147,10 @@ describe("neume.Synth", function() {
       assert(synth.stop() === synth);
     });
     it("calls each ugen._unit.stop(t) only once with calling start first", sinon.test(function() {
+      var onstop = sinon.spy();
       var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
-      }, []);
+      }, []).on("stop", onstop);
 
       var ugens = synth._db.all();
       ugens.forEach(function(ugen) {
@@ -184,6 +192,12 @@ describe("neume.Synth", function() {
       });
 
       audioContext.$processTo("00:02.250");
+
+      assert(onstop.calledOnce);
+      assert(onstop.calledWith({
+        type: "stop",
+        playbackTime: 2.000
+      }));
     }));
   });
 
