@@ -285,13 +285,6 @@ describe("neume.Context", function() {
     });
   });
 
-  describe("#reset", function() {
-    it("(): self", function() {
-      assert(context.reset() === context);
-      assert(context.reset() === context);
-    });
-  });
-
   describe("#start", function() {
     it("(): self", function() {
       assert(context.start() === context);
@@ -301,8 +294,17 @@ describe("neume.Context", function() {
 
   describe("#stop", function() {
     it("(): self", function() {
+      assert(context.start() === context);
       assert(context.stop() === context);
       assert(context.stop() === context);
+    });
+  });
+
+  describe("#reset", function() {
+    it("(): self", function() {
+      assert(context.start() === context);
+      assert(context.reset() === context);
+      assert(context.reset() === context);
     });
   });
 
