@@ -11,8 +11,16 @@ var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
 var INIT = 0, START = 1, STOP = 2;
 
 function NeuDC(context, value) {
+  value = util.finite(value);
+
+  context.$$neuDC = context.$$neuDC || {};
+  if (context.$$neuDC[value]) {
+    return context.$$neuDC[value];
+  }
+  context.$$neuDC[value] = this;
+
   neume.Component.call(this, context);
-  this._value = util.finite(value);
+  this._value = value;
   this._bufSrc = null;
   this._state = INIT;
 }
@@ -24,23 +32,28 @@ NeuDC.prototype.toAudioNode = function() {
   if (this.outlet === null) {
     var context = this.context;
     var value = this._value;
-    var buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
+    var buf, bufSrc, gain;
 
-    buf.getChannelData(0).set(value ? filled1 : filled0);
+    if (value === 0 || value === 1) {
+      buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
+      buf.getChannelData(0).set(value ? filled1 : filled0);
 
-    this._bufSrc = context.createBufferSource();
-    this._bufSrc.buffer = buf;
-    this._bufSrc.loop = true;
-    this._bufSrc.start(0);
-    this._state = START;
+      bufSrc = context.createBufferSource();
+      bufSrc.buffer = buf;
+      bufSrc.loop = true;
+      bufSrc.start(0);
 
-    if (value !== 0 && value !== 1) {
-      var gain = context.createGain();
-      gain.gain.value = value;
-      this._bufSrc.connect(gain);
-      this.outlet = gain;
+      this._bufSrc = bufSrc;
+      this._state = START;
+      this.outlet = bufSrc;
     } else {
-      this.outlet = this._bufSrc;
+      bufSrc = new NeuDC(context, 1).toAudioNode();
+
+      gain = context.createGain();
+      gain.gain.value = value;
+      bufSrc.connect(gain);
+
+      this.outlet = gain;
     }
   }
   return this.outlet;

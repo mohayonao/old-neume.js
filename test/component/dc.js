@@ -15,6 +15,14 @@ describe("neume.DC", function() {
 
       assert(a instanceof neume.DC);
     });
+    it("context cache", function() {
+      var a = new neume.DC(context, 220);
+      var b = new neume.DC(context, 440);
+      var c = new neume.DC(context, 220);
+
+      assert(a !== b);
+      assert(a === c);
+    });
   });
 
   describe("#toAudioNode", function() {
