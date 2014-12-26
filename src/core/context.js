@@ -20,6 +20,8 @@ function NeuContext(destination, duration) {
   this._nodes = [];
   this._audioBuses = [];
 
+  this.$$neuDC = null;
+
   this.connect(this.analyser, this.destination);
 
   Object.defineProperties(this, {
@@ -120,6 +122,14 @@ NeuContext.prototype.reset = function() {
 };
 
 NeuContext.prototype.dispose = function() {
+  if (this.$$neuDC) {
+    var neuDC = this.$$neuDC;
+    var t = this.currentTime;
+    Object.keys(neuDC).forEach(function(value) {
+      neuDC[value].stop(t);
+    });
+    this.$$neuDC = null;
+  }
   this._nodes.splice(0).forEach(function(node) {
     node.disconnect();
   });
