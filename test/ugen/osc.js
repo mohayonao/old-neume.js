@@ -447,9 +447,9 @@ describe("ugen/osc", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      neu.audioContext.$processTo("00:00.300");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:00.300");
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");

@@ -44,18 +44,6 @@ function NeuTransport(context, duration) {
 }
 NeuTransport.$$name = "NeuTransport";
 
-NeuTransport.prototype.reset = function() {
-  this.context.disconnect(this._scriptProcessor);
-
-  this._events = [];
-  this._nextTicks = [];
-  this._state = INIT;
-  this._currentTime = 0;
-  this._scriptProcessor = null;
-
-  return this;
-};
-
 NeuTransport.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
@@ -73,6 +61,18 @@ NeuTransport.prototype.stop = function() {
     this._state = STOP;
     this.reset();
   }
+  return this;
+};
+
+NeuTransport.prototype.reset = function() {
+  this.context.disconnect(this._scriptProcessor);
+
+  this._events = [];
+  this._nextTicks = [];
+  this._state = INIT;
+  this._currentTime = 0;
+  this._scriptProcessor = null;
+
   return this;
 };
 

@@ -56,13 +56,6 @@ describe("neume.Transport", function() {
     });
   });
 
-  describe("#reset", function() {
-    it("(): self", function() {
-      assert(transport.reset() === transport);
-      assert(transport.reset() === transport);
-    });
-  });
-
   describe("#start", function() {
     it("(): self", function() {
       assert(transport.start() === transport);
@@ -75,6 +68,13 @@ describe("neume.Transport", function() {
       assert(transport.start() === transport);
       assert(transport.stop() === transport);
       assert(transport.stop() === transport);
+    });
+  });
+
+  describe("#reset", function() {
+    it("(): self", function() {
+      assert(transport.reset() === transport);
+      assert(transport.reset() === transport);
     });
   });
 

@@ -150,10 +150,8 @@ NeuSynth.prototype.stop = function(startTime) {
     this._stateString = "FINISHED";
 
     context.nextTick(function() {
-      this.routes.forEach(function(node) {
-        context.disconnect(node);
-      });
-    }, this);
+      context.dispose();
+    });
 
     this._db.all().forEach(function(ugen) {
       ugen.stop(t0);

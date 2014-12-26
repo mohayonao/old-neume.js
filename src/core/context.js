@@ -17,6 +17,7 @@ function NeuContext(destination, duration) {
   this.analyser = this.audioContext.createAnalyser();
 
   this._transport = new neume.Transport(this, duration);
+  this._nodes = [];
   this._audioBuses = [];
 
   this.connect(this.analyser, this.destination);
@@ -43,18 +44,45 @@ function NeuContext(destination, duration) {
 }
 NeuContext.$$name = "NeuContext";
 
-Object.keys(neume.webaudio.AudioContext.prototype).forEach(function(key) {
-  var desc = Object.getOwnPropertyDescriptor(neume.webaudio.AudioContext.prototype, key);
+[
+  "createBuffer",
+  "decodeAudioData",
+  "createPeriodicWave",
+  "startRendering",
+].forEach(function(methodName) {
+  var method = neume.webaudio.AudioContext.prototype[methodName];
 
-  /* istanbul ignore next */
-  if (typeof desc.value !== "function") {
-    return;
-  }
-
-  var method = neume.webaudio.AudioContext.prototype[key];
-
-  NeuContext.prototype[key] = function() {
+  NeuContext.prototype[methodName] = function() {
     return method.apply(this.audioContext, arguments);
+  };
+});
+
+[
+  "createBufferSource",
+  "createMediaElementSource",
+  "createMediaStreamSource",
+  "createMediaStreamDestination",
+  "createGain",
+  "createDelay",
+  "createBiquadFilter",
+  "createWaveShaper",
+  "createPanner",
+  "createConvolver",
+  "createDynamicsCompressor",
+  "createAnalyser",
+  "createScriptProcessor",
+  "createOscillator",
+  "createChannelSplitter",
+  "createChannelMerger",
+].forEach(function(methodName) {
+  var method = neume.webaudio.AudioContext.prototype[methodName];
+
+  NeuContext.prototype[methodName] = function() {
+    var node = method.apply(this.audioContext, arguments);
+
+    this._nodes.push(node);
+
+    return node;
   };
 });
 
@@ -84,13 +112,17 @@ NeuContext.prototype.stop = function() {
 };
 
 NeuContext.prototype.reset = function() {
+  this.dispose();
+  this._audioBuses = [];
   this._transport.reset();
-
-  this._audioBuses.splice(0).forEach(function(bus) {
-    bus.toAudioNode().disconnect();
-  }, this);
   this._state = INIT;
+  return this;
+};
 
+NeuContext.prototype.dispose = function() {
+  this._nodes.splice(0).forEach(function(node) {
+    node.disconnect();
+  });
   return this;
 };
 

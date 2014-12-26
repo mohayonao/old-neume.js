@@ -10,6 +10,7 @@ function NeuSynthContext(context) {
   this.audioContext = context.audioContext;
   this.sampleRate = context.sampleRate;
   this._context = context;
+  this._nodes = [];
 }
 util.inherits(NeuSynthContext, neume.Context);
 

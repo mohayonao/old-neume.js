@@ -308,6 +308,49 @@ describe("neume.Context", function() {
     });
   });
 
+  describe("#dispose", function() {
+    it("(): self", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+
+      assert(context.dispose() === context);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
+  });
+
   describe("#sched", function() {
     it("(time: number, callback: !function, context: any): 0", function() {
       assert(context.sched(10, "INVALID") === 0);

@@ -295,9 +295,9 @@ describe("ugen/env", function() {
 
       synth.start(0);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -334,9 +334,9 @@ describe("ugen/env", function() {
 
       synth.start(0).release(0.500);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -374,9 +374,9 @@ describe("ugen/env", function() {
 
       synth.start(0).release(0.500);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.005, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.010, 1e-2));
@@ -411,9 +411,9 @@ describe("ugen/env", function() {
 
       synth.start(0).stop(0.500);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.100, 1e-2));
@@ -447,9 +447,9 @@ describe("ugen/env", function() {
 
       synth.start(0).stop(0.100).release(0.500).release(0.250);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.005, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.010, 1e-2));
@@ -486,9 +486,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -526,9 +526,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.000, 1e-2));
@@ -566,9 +566,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -606,9 +606,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.001, 1e-2));
@@ -649,9 +649,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -689,9 +689,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -729,9 +729,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -769,9 +769,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -809,9 +809,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -849,9 +849,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -890,9 +890,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050).release(0.500);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -931,9 +931,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050).release(0.500);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.041, 1e-2));
@@ -972,9 +972,9 @@ describe("ugen/env", function() {
 
       synth.start(0.050).release(0.500);
 
-      neu.audioContext.$processTo("00:01.000");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      neu.audioContext.$processTo("00:01.000");
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
