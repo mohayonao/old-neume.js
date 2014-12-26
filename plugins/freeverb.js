@@ -28,13 +28,6 @@
 
     var room = new neume.Component(context, util.defaults(spec.room, 0.5)).mul(0.28).add(0.7);
     var damp = new neume.Component(context, util.defaults(spec.damp, 0.20)).mul(0.5);
-    var mix = util.defaults(spec.mix, 0.33);
-    var inlet = context.createGain();
-
-    var dryNode = new neume.Sum(context, inputs);
-    var wetNode;
-
-    dryNode.connect(inlet);
 
     var lbfc = [
       createLBCF(context, 1557 / 44100, room, damp),
@@ -55,7 +48,7 @@
     ];
 
     lbfc.forEach(function(lbfc) {
-      context.connect(inlet, lbfc.inlet);
+      context.connect(inputs, lbfc.inlet);
       context.connect(lbfc.outlet, ap[0].inlet);
     });
 
@@ -63,9 +56,7 @@
     context.connect(ap[1].outlet, ap[2].inlet);
     context.connect(ap[2].outlet, ap[3].inlet);
 
-    wetNode = ap[3].outlet;
-
-    outlet = new neume.DryWet(context, dryNode, wetNode, mix);
+    outlet = ap[3].outlet;
 
     return new neume.Unit({
       outlet: outlet
