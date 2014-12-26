@@ -249,30 +249,30 @@ describe("neume.SynthContext", function() {
   });
 
   describe("#start", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       var spy = sinon.spy(neuContext, "start");
 
       assert(synContext.start() === synContext);
       assert(spy.calledOnce);
-    });
+    }));
   });
 
   describe("#stop", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       var spy = sinon.spy(neuContext, "stop");
 
       assert(synContext.stop() === synContext);
       assert(spy.calledOnce);
-    });
+    }));
   });
 
   describe("#reset", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       var spy = sinon.spy(neuContext, "reset");
 
       assert(synContext.reset() === synContext);
       assert(spy.calledOnce);
-    });
+    }));
   });
 
   describe("#sched", function() {

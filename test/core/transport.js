@@ -10,7 +10,9 @@ describe("neume.Transport", function() {
   beforeEach(function() {
     audioContext = new global.AudioContext();
     context = new neume.Context(audioContext.destination);
-    transport = new neume.Transport(context);
+    transport = new neume.Transport(context, {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("constructor", function() {
@@ -57,37 +59,44 @@ describe("neume.Transport", function() {
   });
 
   describe("#start", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       assert(transport.start() === transport);
       assert(transport.start() === transport);
-    });
+    }));
   });
 
   describe("#stop", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       assert(transport.start() === transport);
       assert(transport.stop() === transport);
       assert(transport.stop() === transport);
-    });
+    }));
   });
 
   describe("#reset", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       assert(transport.reset() === transport);
       assert(transport.reset() === transport);
-    });
+    }));
   });
 
   describe("#sched", function() {
     it("(time: number, callback: !function, context: any): 0", function() {
       assert(transport.sched(10, "INVALID") === 0);
     });
-    it("(time: number, callback: function, context: any): number // works", function() {
-      var passed = 0;
+    it("(time: number, callback: function, context: any): number // works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var passed = [];
 
       var pass = function(i) {
-        return function() {
-          passed = i;
+        return function(e) {
+          passed.push([ i, e ]);
         };
       };
 
@@ -98,29 +107,36 @@ describe("neume.Transport", function() {
       transport.sched(0.400, pass(4));
       transport.sched(0.300, pass(3));
 
-      assert(passed === 0, "00:00.000");
+      assert(passed.length === 0, "00:00.000");
 
-      audioContext.$processTo("00:00.100");
-      assert(passed === 1, "00:00.100");
+      tick(100);
+      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      audioContext.$processTo("00:00.200");
-      assert(passed === 2, "00:00.200");
+      tick(100);
+      assert.deepEqual(passed[1], [ 2, 0.2 ], "00:00.200");
 
-      audioContext.$processTo("00:00.310");
-      assert(passed === 3, "00:00.310");
+      tick(350);
+      assert.deepEqual(passed, [
+        [ 1, 0.1 ],
+        [ 2, 0.2 ],
+        [ 3, 0.3 ],
+        [ 4, 0.4 ],
+        [ 5, 0.5 ],
+      ], "00:00.550");
+    }));
+    it("same time order", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
 
-      audioContext.$processTo("00:00.400");
-      assert(passed === 4, "00:00.400");
-
-      audioContext.$processTo("00:00.500");
-      assert(passed === 5, "00:00.500");
-    });
-    it("same time order", function() {
       var passed = [];
 
       var pass = function(i) {
-        return function() {
-          passed.push(i);
+        return function(e) {
+          passed.push([ i, e ]);
         };
       };
 
@@ -131,24 +147,37 @@ describe("neume.Transport", function() {
       transport.sched(0.100, pass(4));
       transport.sched(0.100, pass(5));
 
-      assert.deepEqual(passed, [], "00:00.000");
+      assert(passed.length === 0, "00:00.000");
 
-      audioContext.$processTo("00:00.100");
-      assert.deepEqual(passed, [ 1, 2, 3, 4, 5 ], "00:00.100");
-    });
+      tick(100);
+      assert.deepEqual(passed, [
+        [ 1, 0.1 ],
+        [ 2, 0.1 ],
+        [ 3, 0.1 ],
+        [ 4, 0.1 ],
+        [ 5, 0.1 ],
+      ], "00:00.100");
+    }));
   });
 
   describe("#unsched", function() {
     it("(id: !number): 0", function() {
       assert(transport.unsched("INVALID") === 0);
     });
-    it("(id: number): number", function() {
-      var passed = 0;
+    it("(id: number): number", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var passed = [];
       var schedIds = [];
 
       var pass = function(i) {
-        return function() {
-          passed = i;
+        return function(e) {
+          passed.push([ i, e ]);
         };
       };
 
@@ -161,27 +190,33 @@ describe("neume.Transport", function() {
 
       transport.unsched(schedIds[2]);
 
-      assert(passed === 0, "00:00.000");
+      assert(passed.length === 0, "00:00.000");
 
-      audioContext.$processTo("00:00.100");
-      assert(passed === 1, "00:00.100");
+      tick(100);
+      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      audioContext.$processTo("00:00.200");
-      assert(passed === 1, "00:00.200"); // removed callback
+      tick(100);
+      assert.deepEqual(passed[1], undefined, "00:00.200");
 
-      audioContext.$processTo("00:00.310");
-      assert(passed === 3, "00:00.310");
-
-      audioContext.$processTo("00:00.400");
-      assert(passed === 4, "00:00.400");
-
-      audioContext.$processTo("00:00.500");
-      assert(passed === 5, "00:00.500");
-    });
+      tick(350);
+      assert.deepEqual(passed, [
+        [ 1, 0.1 ],
+        [ 3, 0.3 ],
+        [ 4, 0.4 ],
+        [ 5, 0.5 ],
+      ], "00:00.550");
+    }));
   });
 
   describe("#nextTick", function() {
-    it("(callback: function, context: any): self", function() {
+    it("(callback: function, context: any): self", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var passed = 0;
 
       transport.start();
@@ -192,9 +227,9 @@ describe("neume.Transport", function() {
 
       assert(passed === 0);
 
-      audioContext.$process(1024 / audioContext.sampleRate);
+      tick(50);
       assert(passed === 1);
-    });
+    }));
   });
 
   describe("#toSeconds", function() {
@@ -284,7 +319,7 @@ describe("neume.Transport", function() {
   describe("offline rendering", function() {
     it("works", function() {
       var audioContext = new global.OfflineAudioContext(2, 44100 * 0.5, 44100);
-      var context = new neume.Context(audioContext.destination, 2);
+      var context = new neume.Context(audioContext.destination, { duration: 2 });
       var passed = [ ];
 
       var pass = function(i) {

@@ -8,7 +8,9 @@ require("./transport");
 
 var INIT = 0, START = 1, STOP = 2;
 
-function NeuContext(destination, duration) {
+function NeuContext(destination, spec) {
+  spec = spec || /* istanbul ignore next */ {};
+
   this.context = this;
   this.destination = destination;
   this.audioContext = destination.context;
@@ -16,7 +18,7 @@ function NeuContext(destination, duration) {
   this.listener = this.audioContext.listener;
   this.analyser = this.audioContext.createAnalyser();
 
-  this._transport = new neume.Transport(this, duration);
+  this._transport = new neume.Transport(this, spec);
   this._nodes = [];
   this._audioBuses = [];
 

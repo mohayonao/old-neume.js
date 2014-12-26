@@ -8,7 +8,9 @@ describe("neume.Sched", function() {
   var context = null;
 
   beforeEach(function() {
-    context = new neume.Context(new global.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination, {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("constructor", function() {
@@ -18,22 +20,29 @@ describe("neume.Sched", function() {
   });
 
   describe("#start", function() {
-    it("(startTime: timevalue): neume.Sched", function() {
+    it("(startTime: timevalue): neume.Sched", sinon.test(function() {
       var sched = new neume.Sched(context, 0, NOP);
 
       assert(sched.start() === sched);
-    });
+    }));
   });
 
   describe("#stop", function() {
-    it("(startTime: timevalue): neume.Sched", function() {
+    it("(startTime: timevalue): neume.Sched", sinon.test(function() {
       var sched = new neume.Sched(context, 0, NOP);
 
       assert(sched.stop() === sched);
-    });
+    }));
   });
 
-  it("works", function() {
+  it("works", sinon.test(function() {
+    var tick = function(t) {
+      for (var i = 0; i < t / 50; i++) {
+        this.clock.tick(50);
+        context.audioContext.$process(0.05);
+      }
+    }.bind(this);
+
     var start = null, passed = null, stop = null;
 
     var iter = {
@@ -71,14 +80,22 @@ describe("neume.Sched", function() {
     sched.start(0.100);
     sched.stop(0.375);
 
-    var audioContext = context.audioContext;
+    tick(50);
+    assert(start === null, "00:00.050");
+    assert(passed === null, "00:00.050");
+    assert(stop === null, "00:00.050");
 
-    audioContext.$processTo("00:00.100");
+    tick(50);
     assert(start === null, "00:00.100");
     assert(passed === null, "00:00.100");
     assert(stop === null, "00:00.100");
 
-    audioContext.$processTo("00:00.200");
+    tick(50);
+    assert(start === null, "00:00.150");
+    assert(passed === null, "00:00.150");
+    assert(stop === null, "00:00.150");
+
+    tick(50);
     assert(start !== null, "00:00.200");
     assert(start.count === 0, "00:00.200");
     assert(start.done === false, "00:00.200");
@@ -86,26 +103,26 @@ describe("neume.Sched", function() {
     assert(passed === null, "00:00.200");
     assert(stop === null, "00:00.200");
 
-    audioContext.$processTo("00:00.250");
+    tick(50);
     assert(passed !== null, "00:00.250");
     assert(passed.count === 1, "00:00.250");
     assert(passed.done === false, "00:00.250");
     assert(closeTo(passed.playbackTime, 0.250, 1e-6), "00:00.250");
     assert(stop === null, "00:00.250");
 
-    audioContext.$processTo("00:00.305");
-    assert(passed.count === 2, "00:00.305");
-    assert(passed.done === false, "00:00.305");
-    assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.305");
-    assert(stop === null, "00:00.305");
+    tick(50);
+    assert(passed.count === 2, "00:00.300");
+    assert(passed.done === false, "00:00.300");
+    assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.300");
+    assert(stop === null, "00:00.300");
 
-    audioContext.$processTo("00:00.350");
+    tick(50);
     assert(passed.count === 3, "00:00.350");
     assert(passed.done === false, "00:00.350");
     assert(closeTo(passed.playbackTime, 0.350, 1e-6), "00:00.350");
     assert(stop === null, "00:00.350");
 
-    audioContext.$processTo("00:00.400");
+    tick(50);
     assert(passed.count === 3, "00:00.400");
     assert(passed.done === false, "00:00.400");
     assert(closeTo(passed.playbackTime, 0.350, 1e-6), "00:00.400");
@@ -113,8 +130,15 @@ describe("neume.Sched", function() {
     assert(stop.count === 4, "00:00.400");
     assert(stop.done === false, "00:00.400");
     assert(stop.playbackTime === 0.375, "00:00.400");
-  });
-  it("works: autostop", function() {
+  }));
+  it("works: autostop", sinon.test(function() {
+    var tick = function(t) {
+      for (var i = 0; i < t / 50; i++) {
+        this.clock.tick(50);
+        context.audioContext.$process(0.05);
+      }
+    }.bind(this);
+
     var start = null, passed = null, stop = null;
 
     var iter = {
@@ -153,14 +177,22 @@ describe("neume.Sched", function() {
     sched.start(0.100);
     sched.stop(0.375);
 
-    var audioContext = context.audioContext;
-
-    audioContext.$processTo("00:00.100");
+    tick(50);
     assert(start === null, "00:00.100");
     assert(passed === null, "00:00.100");
     assert(stop === null, "00:00.100");
 
-    audioContext.$processTo("00:00.200");
+    tick(50);
+    assert(start === null, "00:00.100");
+    assert(passed === null, "00:00.100");
+    assert(stop === null, "00:00.100");
+
+    tick(50);
+    assert(start === null, "00:00.100");
+    assert(passed === null, "00:00.100");
+    assert(stop === null, "00:00.100");
+
+    tick(50);
     assert(start !== null, "00:00.200");
     assert(start.count === 0, "00:00.250");
     assert(start.done === false, "00:00.250");
@@ -168,20 +200,20 @@ describe("neume.Sched", function() {
     assert(passed === null, "00:00.200");
     assert(stop === null, "00:00.200");
 
-    audioContext.$processTo("00:00.250");
+    tick(50);
     assert(passed !== null, "00:00.250");
     assert(passed.count === 1, "00:00.250");
     assert(passed.done === false, "00:00.250");
     assert(closeTo(passed.playbackTime, 0.250, 1e-6), "00:00.250");
     assert(stop === null, "00:00.250");
 
-    audioContext.$processTo("00:00.305");
-    assert(passed.count === 2, "00:00.305");
-    assert(passed.done === false, "00:00.305");
-    assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.305");
-    assert(stop === null, "00:00.305");
+    tick(50);
+    assert(passed.count === 2, "00:00.300");
+    assert(passed.done === false, "00:00.300");
+    assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.300");
+    assert(stop === null, "00:00.300");
 
-    audioContext.$processTo("00:00.350");
+    tick(50);
     assert(passed.count === 2, "00:00.350");
     assert(passed.done === false, "00:00.350");
     assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.305");
@@ -189,6 +221,6 @@ describe("neume.Sched", function() {
     assert(stop.count === 3, "00:00.350");
     assert(stop.done === true, "00:00.350");
     assert(stop.playbackTime === 0.350, "00:00.350");
-  });
+  }));
 
 });

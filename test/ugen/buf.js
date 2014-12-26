@@ -8,7 +8,9 @@ describe("ugen/buf", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -115,7 +117,14 @@ describe("ugen/buf", function() {
   });
 
   describe("works", function() {
-    it("start", function() {
+    it("start", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy1 = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.type === "end");
@@ -131,7 +140,8 @@ describe("ugen/buf", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:00.500");
+      tick(500);
+
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -144,8 +154,15 @@ describe("ugen/buf", function() {
       assert(outlet.$stateAtTime(0.450) === "FINISHED");
       assert(outlet.$stateAtTime(0.500) === "FINISHED");
       assert(spy1.calledOnce);
-    });
-    it("start/stop", function() {
+    }));
+    it("start/stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
         return $(buffer).on("end", function() {
@@ -158,7 +175,8 @@ describe("ugen/buf", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:00.300");
+      tick(500);
+
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -170,7 +188,7 @@ describe("ugen/buf", function() {
       assert(outlet.$stateAtTime(0.400) === "FINISHED");
       assert(outlet.$stateAtTime(0.450) === "FINISHED");
       assert(outlet.$stateAtTime(0.500) === "FINISHED");
-    });
+    }));
   });
 
   describe("parameters", function() {

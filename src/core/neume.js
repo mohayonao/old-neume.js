@@ -101,7 +101,9 @@ function NEU(context) {
   });
 }
 
-neume.impl = function(destination) {
+neume.impl = function(destination, spec) {
+  spec = spec || /* istanbulg ignore next */ {};
+
   if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
   } else if (typeof destination === "undefined") {
@@ -111,7 +113,7 @@ neume.impl = function(destination) {
     throw new TypeError("neume(): Illegal arguments");
   }
 
-  var context = new neume.Context(destination, Infinity);
+  var context = new neume.Context(destination, spec);
 
   return Object.defineProperties(
     new NEU(context), {
@@ -125,7 +127,9 @@ neume.impl = function(destination) {
             audioContext.oncomplete = function(e) {
               resolve(new neume.Buffer(context, e.renderedBuffer));
             };
-            func(new NEU(new neume.Context(audioContext.destination, duration)));
+            func(new NEU(new neume.Context(audioContext.destination, {
+              duration: duration
+            })));
             audioContext.startRendering();
           });
         }

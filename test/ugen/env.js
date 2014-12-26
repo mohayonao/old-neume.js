@@ -9,7 +9,9 @@ describe("ugen/env", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -284,7 +286,14 @@ describe("ugen/env", function() {
   });
 
   describe("works", function() {
-    it("loopNode", function() {
+    it("loopNode", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, "<", 1, 0.1, 0, 0.1
@@ -297,7 +306,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -319,8 +329,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
-    });
-    it("loopNode & releaseNode", function() {
+    }));
+    it("loopNode & releaseNode", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -336,7 +353,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -359,8 +377,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.100, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("release in the phase", function() {
+    }));
+    it("release in the phase", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -376,7 +401,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.005, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.010, 1e-2));
@@ -399,8 +425,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.005, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("stop", function() {
+    }));
+    it("stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 1
@@ -413,7 +446,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.100, 1e-2));
@@ -435,8 +469,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.500, 1e-2));
-    });
-    it("release after stop", function() {
+    }));
+    it("release after stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         return $("env", { table: [
           0, 1, 10, ">", 0, 0.5
@@ -449,7 +490,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.005, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.010, 1e-2));
@@ -471,8 +513,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.900), 0.010, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.010, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.010, 1e-2));
-    });
-    it("curve:step", function() {
+    }));
+    it("curve:step", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -488,7 +537,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -511,8 +561,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:hold", function() {
+    }));
+    it("curve:hold", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -528,7 +585,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.000, 1e-2));
@@ -551,8 +609,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.250, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:lin", function() {
+    }));
+    it("curve:lin", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -568,7 +633,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -591,8 +657,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:exp", function() {
+    }));
+    it("curve:exp", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -608,7 +681,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.001, 1e-2));
@@ -631,11 +705,18 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
+    }));
     // NOTE:
     // Tests below are approximate estimate.
     // We should check rendered curves actually.
-    it("curve:sine", function() {
+    it("curve:sine", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -651,7 +732,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -674,8 +756,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.036, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:welch", function() {
+    }));
+    it("curve:welch", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -691,7 +780,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -714,8 +804,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.016, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:squared", function() {
+    }));
+    it("curve:squared", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -731,7 +828,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -754,8 +852,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.050, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:cubic", function() {
+    }));
+    it("curve:cubic", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -771,7 +876,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -794,8 +900,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.062, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:-4", function() {
+    }));
+    it("curve:-4", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -811,7 +924,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -834,8 +948,15 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.007, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
-    it("curve:+4", function() {
+    }));
+    it("curve:+4", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -851,7 +972,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -874,11 +996,18 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.066, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
+    }));
   });
 
   describe("$('adsr')", function() {
-    it("works", function() {
+    it("works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -892,7 +1021,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.500, 1e-2));
@@ -915,11 +1045,18 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
+    }));
   });
 
   describe("$('asr')", function() {
-    it("works", function() {
+    it("works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -933,7 +1070,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 0.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 0.041, 1e-2));
@@ -956,11 +1094,18 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.025, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
+    }));
   });
 
   describe("$('cutoff')", function() {
-    it("works", function() {
+    it("works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -974,7 +1119,8 @@ describe("ugen/env", function() {
 
       var outlet = synth.toAudioNode().$inputs[0];
 
-      neu.audioContext.$processTo("00:01.000");
+      tick(1000);
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 1.000, 1e-2));
@@ -997,7 +1143,7 @@ describe("ugen/env", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.950), 0.100, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
       assert(spy.calledOnce);
-    });
+    }));
   });
 
 });

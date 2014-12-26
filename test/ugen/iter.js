@@ -9,7 +9,9 @@ describe("ugen/iter", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -76,7 +78,14 @@ describe("ugen/iter", function() {
   });
 
   describe("works", function() {
-    it("next", function() {
+    it("next", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         var iter = {
           count: 0,
@@ -96,7 +105,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      neu.audioContext.$processTo("00:00.500");
+      tick(500);
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -110,8 +119,15 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.400) === 4);
       assert(outlet.gain.$valueAtTime(0.450) === 4);
       assert(outlet.gain.$valueAtTime(0.500) === 4);
-    });
-    it("next // done", function() {
+    }));
+    it("next // done", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -137,7 +153,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      neu.audioContext.$processTo("00:00.500");
+      tick(500);
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -152,8 +168,15 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.450) === 2);
       assert(outlet.gain.$valueAtTime(0.500) === 2);
       assert(spy.calledOnce);
-    });
-    it("next // done when start", function() {
+    }));
+    it("next // done when start", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -170,7 +193,7 @@ describe("ugen/iter", function() {
       synth.next(0.300);
       synth.next(0.400);
 
-      neu.audioContext.$processTo("00:00.500");
+      tick(500);
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(outlet.gain.$valueAtTime(0.000) === 0);
@@ -185,7 +208,7 @@ describe("ugen/iter", function() {
       assert(outlet.gain.$valueAtTime(0.450) === 0);
       assert(outlet.gain.$valueAtTime(0.500) === 0);
       assert(spy.calledOnce);
-    });
+    }));
   });
 
 });

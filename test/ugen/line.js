@@ -9,7 +9,9 @@ describe("ugen/line", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -76,7 +78,14 @@ describe("ugen/line", function() {
   });
 
   describe("works", function() {
-    it("$('line')", function() {
+    it("$('line')", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -88,7 +97,7 @@ describe("ugen/line", function() {
 
       synth.start(0.100);
 
-      neu.audioContext.$processTo("00:00.500");
+      tick(500);
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 880, 1e-2));
@@ -100,8 +109,15 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.300), 440, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.350), 440, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440, 1e-2));
-    });
-    it("$('xline')", function() {
+    }));
+    it("$('xline')", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -113,7 +129,7 @@ describe("ugen/line", function() {
 
       synth.start(0.100);
 
-      neu.audioContext.$processTo("00:00.350");
+      tick(500);
 
       var outlet = synth.toAudioNode().$inputs[0];
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 880.000, 1e-2));
@@ -131,8 +147,15 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.350), 440.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.375), 440.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440.000, 1e-2));
-    });
-    it("stop", function() {
+    }));
+    it("stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         return $("line", { start: 880, end: 440, dur: 0.200 });
       });
@@ -142,8 +165,8 @@ describe("ugen/line", function() {
       });
       synth.stop(0.200);
 
-      neu.audioContext.$processTo("00:00.500");
-    });
+      tick(500);
+    }));
   });
 
 });

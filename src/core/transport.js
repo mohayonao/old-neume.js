@@ -9,18 +9,24 @@ var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
 
-function NeuTransport(context, duration) {
+require("./timer");
+
+function NeuTransport(context, spec) {
+  spec = spec || /* istanbul ignore next */ {};
+
   this.context = context;
   this.audioContext = context.audioContext;
   this.sampleRate = context.sampleRate;
 
   this._bpm = 120;
-  this._processBufSize = C.PROCESS_BUF_SIZE;
   this._events = [];
   this._nextTicks = [];
   this._state = INIT;
   this._currentTime = 0;
-  this._scriptProcessor = null;
+
+  this._duration = util.defaults(spec.duration, Infinity);
+  this._scheduleInterval = util.defaults(spec.scheduleInterval, 0.025);
+  this._scheduleAheadTime = util.defaults(spec.scheduleAheadTime, 0.1);
 
   Object.defineProperties(this, {
     currentTime: {
@@ -39,8 +45,6 @@ function NeuTransport(context, duration) {
       enumerable: true
     },
   });
-
-  this._duration = duration;
 }
 NeuTransport.$$name = "NeuTransport";
 
@@ -65,36 +69,36 @@ NeuTransport.prototype.stop = function() {
 };
 
 NeuTransport.prototype.reset = function() {
-  this.context.disconnect(this._scriptProcessor);
-
+  if (this._timer) {
+    this._timer.stop();
+    this._timer = null;
+  }
   this._events = [];
   this._nextTicks = [];
   this._state = INIT;
   this._currentTime = 0;
-  this._scriptProcessor = null;
 
   return this;
 };
 
 function startRendering() {
-  this._currentTimeIncr = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
-  onaudioprocess.call(this, { playbackTime: 0 });
+  var t0 = 0;
+  var t1 = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
+
+  onaudioprocess(this, t0, t1);
 }
 
 function startAudioTimer() {
+  var _this = this;
   var context = this.audioContext;
-  var scriptProcessor = context.createScriptProcessor(this._processBufSize, 1, 1);
-  var bufferSource = context.createBufferSource();
+  var scheduleAheadTime = this._scheduleAheadTime;
 
-  this._currentTimeIncr = this._processBufSize / context.sampleRate;
-  this._scriptProcessor = scriptProcessor;
-  scriptProcessor.onaudioprocess = onaudioprocess.bind(this);
+  this._timer = new neume.Timer(function() {
+    var t0 = context.currentTime;
+    var t1 = t0 + scheduleAheadTime;
 
-  // this is needed for iOS Safari
-  bufferSource.start(0);
-  bufferSource.connect(scriptProcessor);
-
-  scriptProcessor.connect(context.destination);
+    onaudioprocess(_this, t0, t1);
+  }, this._scheduleInterval * 1000).start();
 }
 
 NeuTransport.prototype.sched = function(time, callback, context) {
@@ -221,25 +225,25 @@ function note2sec(num, note, bpm) {
   return num === 0 ? 0 : ticks2sec((4 / num) * 480 * acc, bpm);
 }
 
-function onaudioprocess(e) {
+function onaudioprocess(_this, t0, t1) {
   // Safari 7.0.6 does not support e.playbackTime
-  var currentTime = e.playbackTime || /* istanbul ignore next */ this.audioContext.currentTime;
-  var nextCurrentTime = currentTime + this._currentTimeIncr;
-  var events = this._events;
+  var events = _this._events;
 
-  this._currentTime = currentTime;
+  _this._currentTime = t0;
 
-  this._nextTicks.splice(0).forEach(function(callback) {
-    callback(currentTime);
+  _this._nextTicks.splice(0).forEach(function(callback) {
+    callback(t0);
   });
 
-  while (events.length && events[0].time <= nextCurrentTime) {
+  while (events.length && events[0].time <= t1) {
     var event = events.shift();
 
-    this._currentTime = Math.max(this._currentTime, event.time);
+    _this._currentTime = Math.max(_this._currentTime, event.time);
 
     event.callback.call(event.context, event.time);
   }
+
+  _this._currentTime = t0;
 }
 
 module.exports = neume.Transport = NeuTransport;
