@@ -24,7 +24,7 @@ function NeuSynth(context, func, args) {
   this.scheds = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
-  var result = func.apply(null, [ $.builder ].concat(args));
+  var result = func.apply(this, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.isOutput) {
     this.routes[0] = result;

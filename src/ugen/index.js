@@ -8,6 +8,7 @@ module.exports = function(neume) {
   neume.use(require("./comp"));
   neume.use(require("./conv"));
   neume.use(require("./delay"));
+  neume.use(require("./drywet"));
   neume.use(require("./env"));
   neume.use(require("./inout"));
   neume.use(require("./iter"));
