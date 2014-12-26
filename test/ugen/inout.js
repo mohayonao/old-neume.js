@@ -15,7 +15,7 @@ describe("ugen/inout", function() {
   describe("$(in)", function() {
     it("graph", function() {
       var synth = neu.Synth(function($) {
-        return $("in", 1);
+        return $("in", { bus: 1 });
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
