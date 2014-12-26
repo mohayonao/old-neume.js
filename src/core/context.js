@@ -91,7 +91,7 @@ NeuContext.$$name = "NeuContext";
 NeuContext.prototype.getAudioBus = function(index) {
   index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
-    this._audioBuses[index] = new neume.AudioBus(this);
+    this._audioBuses[index] = new neume.AudioBus(this, index);
   }
   return this._audioBuses[index];
 };
@@ -193,8 +193,6 @@ NeuContext.prototype.connect = function(from, to) {
       if (from) {
         from.connect(to);
       }
-    } else if (to instanceof neume.AudioBus) {
-      this.connect(from, to.toAudioNode());
     }
     if (to.onconnected) {
       to.onconnected(from);
@@ -207,11 +205,6 @@ NeuContext.prototype.disconnect = function(node) {
   if (node) {
     if (typeof node.disconnect === "function") {
       node.disconnect();
-      if (node.$$outputs) {
-        node.$$outputs.forEach(function(to) {
-          return to.ondisconnected && to.ondisconnected(node);
-        });
-      }
     } else if (Array.isArray(node)) {
       node.forEach(function(node) {
         this.disconnect(node);

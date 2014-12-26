@@ -11,20 +11,28 @@ describe("neume.AudioBus", function() {
 
   describe("constructor", function() {
     it("(context: neume.Context)", function() {
-      var bus = new neume.AudioBus(context);
+      var bus = new neume.AudioBus(context, 0);
 
       assert(bus instanceof neume.AudioBus);
     });
   });
 
+  describe("#index", function() {
+    it("\\getter: number", function() {
+      var bus = new neume.AudioBus(context, 1);
+
+      assert(bus.index === 1);
+    });
+  });
+
   describe("#maxNodes", function() {
     it("\\getter: number", function() {
-      var bus = new neume.AudioBus(context);
+      var bus = new neume.AudioBus(context, 0);
 
       assert(typeof bus.maxNodes === "number");
     });
     it("\\setter: number", function() {
-      var bus = new neume.AudioBus(context);
+      var bus = new neume.AudioBus(context, 0);
 
       bus.maxNodes = 2;
       assert(bus.maxNodes === 2);
@@ -33,92 +41,68 @@ describe("neume.AudioBus", function() {
       assert(bus.maxNodes === 0);
     });
     it("works", function() {
-      var delay1 = context.createDelay();
-      var delay2 = context.createDelay();
-      var delay3 = context.createDelay();
-      var bus = new neume.AudioBus(context);
-
-      sinon.spy(delay1, "disconnect");
-      sinon.spy(delay2, "disconnect");
-      sinon.spy(delay3, "disconnect");
+      var synth1 = { routes: [], stop: sinon.spy() };
+      var synth2 = { routes: [], stop: sinon.spy() };
+      var synth3 = { routes: [], stop: sinon.spy() };
+      var bus = new neume.AudioBus(context, 0);
 
       bus.maxNodes = 2;
 
-      context.connect(delay1, bus);
-      context.connect(delay2, bus);
-      context.connect(delay3, bus);
+      bus.append(synth1);
+      bus.append(synth2);
+      bus.append(synth3);
 
-      assert.deepEqual(bus.nodes, [ delay2, delay3 ]);
-      assert(delay1.disconnect.callCount === 1);
-      assert(delay2.disconnect.callCount === 0);
-      assert(delay3.disconnect.callCount === 0);
+      assert.deepEqual(bus.nodes, [ synth2, synth3 ]);
+      assert(synth1.stop.callCount === 1);
+      assert(synth2.stop.callCount === 0);
+      assert(synth3.stop.callCount === 0);
     });
   });
 
   describe("#nodes", function() {
-    it("\\getter: Array<object>", function() {
-      var bus = new neume.AudioBus(context);
+    it("\\getter: neume.Synth[]", function() {
+      var bus = new neume.AudioBus(context, 0);
 
       assert(Array.isArray(bus.nodes));
     });
   });
 
+  describe("#append", function() {
+    it("(synth: neume.Synth): self", function() {
+      var synth1 = { routes: [] };
+      var synth2 = { routes: [] };
+
+      var bus = new neume.AudioBus(context, 0);
+
+      bus.append(synth1);
+      bus.append(synth2);
+
+      assert.deepEqual(bus.nodes, [ synth1, synth2 ]);
+    });
+  });
+
+  describe("#remove", function() {
+    it("(synth: neume.Synth): self", function() {
+      var synth1 = { routes: [] };
+      var synth2 = { routes: [] };
+      var synth3 = { routes: [] };
+
+      var bus = new neume.AudioBus(context, 0);
+
+      bus.append(synth1);
+      bus.append(synth2);
+      bus.remove(synth1);
+      bus.remove(synth3);
+
+      assert.deepEqual(bus.nodes, [ synth2 ]);
+    });
+  });
+
   describe("#toAudioNode", function() {
-    it("(): self", function() {
-      var bus = new neume.AudioBus(context);
+    it("(): AudioNode", function() {
+      var bus = new neume.AudioBus(context, 0);
 
       assert(bus.toAudioNode() instanceof global.AudioNode);
-      assert(bus.toAudioNode() === bus.toAudioNode());
-    });
-  });
-
-  describe("#connect", function() {
-    it("(to: AudioNode): self", function() {
-      var toNode = context.createDelay();
-      var bus = new neume.AudioBus(context);
-
-      assert(bus.connect(toNode) === bus);
-      assert.deepEqual(toNode.toJSON(), {
-        name: "DelayNode",
-        delayTime: {
-          value: 0,
-          inputs: []
-        },
-        inputs: [ bus.toAudioNode().toJSON() ]
-      });
-    });
-  });
-
-  describe("#disconnect", function() {
-    it("(): self", function() {
-      var toNode = context.createDelay();
-      var bus = new neume.AudioBus(context);
-
-      assert(bus.disconnect() === bus);
-    });
-  });
-
-  describe("#onconnected", function() {
-    it("(from: AudioNode): void", function() {
-      var fromNode = context.createDelay();
-      var bus = new neume.AudioBus(context);
-
-      context.connect(fromNode, bus);
-      context.connect(fromNode, bus);
-
-      assert.deepEqual(bus.nodes, [ fromNode ]);
-    });
-  });
-
-  describe("#ondisconnected", function() {
-    it("(from: AudioNode): void", function() {
-      var fromNode = context.createDelay();
-      var bus = new neume.AudioBus(context);
-
-      context.connect(fromNode, bus);
-      context.disconnect(fromNode);
-
-      assert.deepEqual(bus.nodes, []);
     });
   });
 

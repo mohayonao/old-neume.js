@@ -687,29 +687,6 @@ describe("neume.Context", function() {
         inputs: []
       });
     });
-    it("AudioNode -> AudioBus", function() {
-      var node = context.createDelay();
-
-      context.connect(node, context.getAudioBus(0));
-
-      assert.deepEqual(context.getAudioBus(0).toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
     it("invalid -> invalid", function() {
       assert.doesNotThrow(function() {
         context.connect({}, {});
@@ -769,19 +746,6 @@ describe("neume.Context", function() {
         context.disconnect({});
         context.disconnect(null);
       });
-    });
-    it("ondisconnected", function() {
-      var from = context.createOscillator();
-      var to = context.createGain();
-
-      from.$$outputs = [ to ];
-      to.ondisconnected = sinon.spy();
-
-      context.connect(from, to);
-      context.disconnect(from);
-
-      assert(to.ondisconnected.callCount === 1);
-      assert(to.ondisconnected.calledWith(from));
     });
   });
 

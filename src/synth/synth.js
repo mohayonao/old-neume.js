@@ -112,9 +112,9 @@ NeuSynth.prototype.start = function(startTime) {
   context.sched(startTime, function() {
     this._stateString = "PLAYING";
 
-    this.routes.forEach(function(node, index) {
-      this.connect(node, this.getAudioBus(index));
-    }, context);
+    this.routes.forEach(function(_, index) {
+      context.getAudioBus(index).append(this);
+    }, this);
 
     this._db.all().forEach(function(ugen) {
       ugen.start(startTime);
@@ -148,6 +148,10 @@ NeuSynth.prototype.stop = function(startTime) {
 
   context.sched(startTime, function(t0) {
     this._stateString = "FINISHED";
+
+    this.routes.forEach(function(_, index) {
+      context.getAudioBus(index).remove(this);
+    });
 
     context.nextTick(function() {
       context.dispose();

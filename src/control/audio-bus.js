@@ -4,8 +4,9 @@ var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
 
-function NeuAudioBus(context) {
+function NeuAudioBus(context, index) {
   this.context = context;
+  this.index = index;
   this.outlet = context.createGain();
 
   this._maxNodes = C.DEFAULT_MAX_NODES_OF_BUS;
@@ -30,52 +31,30 @@ function NeuAudioBus(context) {
 
 NeuAudioBus.$$name = "NeuAudioBus";
 
+NeuAudioBus.prototype.append = function(synth) {
+  this.context.connect(synth.routes[this.index], this.outlet);
+
+  this._inputs.push(synth);
+
+  if (this._maxNodes < this._inputs.length) {
+    this._inputs.shift().stop();
+  }
+
+  return this;
+};
+
+NeuAudioBus.prototype.remove = function(synth) {
+  var index = this._inputs.indexOf(synth);
+
+  if (index !== -1) {
+    this._inputs.splice(index, 1);
+  }
+
+  return this;
+};
+
 NeuAudioBus.prototype.toAudioNode = function() {
   return this.outlet;
-};
-
-NeuAudioBus.prototype.connect = function(to) {
-  this.context.connect(this.outlet, to);
-  return this;
-};
-
-NeuAudioBus.prototype.disconnect = function() {
-  return this;
-};
-
-NeuAudioBus.prototype.onconnected = function(from) {
-  var index = this._inputs.indexOf(from);
-
-  if (index !== -1) {
-    this._inputs.splice(index, 1);
-  }
-  this._inputs.push(from);
-
-  while (this._maxNodes < this._inputs.length) {
-    this.context.disconnect(this._inputs.shift());
-  }
-
-  from.$$outputs = from.$$outputs || [];
-  if (from.$$outputs.indexOf(this) === -1) {
-    from.$$outputs.push(this);
-  }
-};
-
-NeuAudioBus.prototype.ondisconnected = function(from) {
-  var index = this._inputs.indexOf(from);
-
-  if (index !== -1) {
-    this._inputs.splice(index, 1);
-  }
-
-  /* istanbul ignore else */
-  if (from.$$outputs) {
-    index = from.$$outputs.indexOf(this);
-    /* istanbul ignore else */
-    if (index !== -1) {
-      from.$$outputs.splice(index, 1);
-    }
-  }
 };
 
 module.exports = neume.AudioBus = NeuAudioBus;
