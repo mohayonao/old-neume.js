@@ -7,16 +7,15 @@ var Emitter = require("../util/emitter");
 var Parser = require("./parser");
 
 require("./dollar");
+require("./context");
 
 var EMPTY_DB = new DB();
-var INIT = 0;
-var START = 1;
-var STOP = 2;
+var INIT = 0, START = 1, STOP = 2;
 
 function NeuSynth(context, func, args) {
   Emitter.call(this);
 
-  this.context = context;
+  this.context = new neume.SynthContext(context);
   this.routes = [];
 
   var $ = new neume.SynthDollar(this);
@@ -66,12 +65,6 @@ function NeuSynth(context, func, args) {
   }, this);
 
   Object.defineProperties(this, {
-    currentTime: {
-      get: function() {
-        return this.context.currentTime;
-      },
-      enumerable: true
-    },
     state: {
       get: function() {
         return this._stateString;

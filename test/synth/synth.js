@@ -42,15 +42,7 @@ describe("neume.Synth", function() {
     it("\\getter: neume.Context", function() {
       var synth = new neume.Synth(context, NOP, []);
 
-      assert(synth.context instanceof neume.Context);
-    });
-  });
-
-  describe("#currentTime", function() {
-    it("\\getter: number", function() {
-      var synth = new neume.Synth(context, NOP, []);
-
-      assert(synth.currentTime === context.currentTime);
+      assert(synth.context instanceof neume.SynthContext);
     });
   });
 
