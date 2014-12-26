@@ -103,6 +103,23 @@ describe("neume.DC", function() {
     });
   });
 
+  describe("#stop", function() {
+    it("(): self", function() {
+      var toNode = context.createGain();
+      var a = new neume.DC(context, 0);
+
+      assert(a.connect(toNode) === a);
+      assert(a._bufSrc.$state === "PLAYING");
+
+      assert(a.stop() === a);
+      assert(a._bufSrc.$state === "FINISHED");
+
+      assert.doesNotThrow(function() {
+        a.stop();
+      });
+    });
+  });
+
   describe("#valueOf", function() {
     it("(): number", function() {
       assert(new neume.DC(context, 0).valueOf() === 0);
