@@ -251,8 +251,12 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
   return this;
 };
 
-NeuSynth.prototype.toAudioNode = function() {
-  return this.context.toAudioNode(this.routes[0]);
+NeuSynth.prototype.toAudioNode = function(index) {
+  index = util.int(index);
+  if (this.routes[index]) {
+    return this.context.toAudioNode(this.routes[index]);
+  }
+  return null;
 };
 
 function getMethods(db) {

@@ -2,6 +2,8 @@
 
 var neume = require("../../src");
 
+var NOP = function() {};
+
 describe("neume.AudioBus", function() {
   var context = null;
 
@@ -41,9 +43,9 @@ describe("neume.AudioBus", function() {
       assert(bus.maxNodes === 0);
     });
     it("works", function() {
-      var synth1 = { routes: [], stop: sinon.spy() };
-      var synth2 = { routes: [], stop: sinon.spy() };
-      var synth3 = { routes: [], stop: sinon.spy() };
+      var synth1 = { toAudioNode: NOP, stop: sinon.spy() };
+      var synth2 = { toAudioNode: NOP, stop: sinon.spy() };
+      var synth3 = { toAudioNode: NOP, stop: sinon.spy() };
       var bus = new neume.AudioBus(context, 0);
 
       bus.maxNodes = 2;
@@ -69,8 +71,8 @@ describe("neume.AudioBus", function() {
 
   describe("#append", function() {
     it("(synth: neume.Synth): self", function() {
-      var synth1 = { routes: [] };
-      var synth2 = { routes: [] };
+      var synth1 = { toAudioNode: NOP };
+      var synth2 = { toAudioNode: NOP };
 
       var bus = new neume.AudioBus(context, 0);
 
@@ -83,9 +85,9 @@ describe("neume.AudioBus", function() {
 
   describe("#remove", function() {
     it("(synth: neume.Synth): self", function() {
-      var synth1 = { routes: [] };
-      var synth2 = { routes: [] };
-      var synth3 = { routes: [] };
+      var synth1 = { toAudioNode: NOP };
+      var synth2 = { toAudioNode: NOP };
+      var synth3 = { toAudioNode: NOP };
 
       var bus = new neume.AudioBus(context, 0);
 

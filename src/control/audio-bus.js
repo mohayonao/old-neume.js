@@ -32,7 +32,7 @@ function NeuAudioBus(context, index) {
 NeuAudioBus.$$name = "NeuAudioBus";
 
 NeuAudioBus.prototype.append = function(synth) {
-  this.context.connect(synth.routes[this.index], this.outlet);
+  this.context.connect(synth.toAudioNode(this.index), this.outlet);
 
   this._inputs.push(synth);
 

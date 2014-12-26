@@ -6,6 +6,7 @@ neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/add"));
 neume.use(require("../../src/ugen/env"));
 neume.use(require("../../src/ugen/iter"));
+neume.use(require("../../src/ugen/inout"));
 
 var NOP = function() {};
 
@@ -347,6 +348,22 @@ describe("neume.Synth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(4.500), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(5.000), 0.500, 1e-2));
+    });
+  });
+
+  describe("#toAudioNode", function() {
+    it("(index: number): AudioNode", function() {
+      var synth = new neume.Synth(context, function($) {
+        $("sin").$("out", { bus: 1 });
+        return $("sin");
+      });
+
+      assert(synth.toAudioNode(0) instanceof global.AudioNode);
+      assert(synth.toAudioNode(1) instanceof global.AudioNode);
+      assert(synth.toAudioNode(2) === null);
+      assert(synth.toAudioNode(0) === synth.toAudioNode(0));
+      assert(synth.toAudioNode(1) === synth.toAudioNode(1));
+      assert(synth.toAudioNode(0) !== synth.toAudioNode(1));
     });
   });
 
