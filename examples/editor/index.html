@@ -54,6 +54,7 @@
 
     document.getElementById("run").addEventListener("click", function() {
       neu.reset();
+      neu.start();
       eval.call(null, editor.getValue());
     }, false);
 

@@ -227,13 +227,13 @@
     $("start").onclick = function(e) {
       isPlaying = !isPlaying;
 
-      neu.reset();
-
       if (isPlaying) {
+        neu.start();
         start();
         e.target.textContent = "Stop";
       } else {
         stop();
+        neu.stop();
         e.target.textContent = "Start";
       }
     };
