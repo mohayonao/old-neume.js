@@ -29,13 +29,13 @@ if (typeof global.window === "undefined") {
   })();
 } else {
   NeuTimer = (function() {
-    var timerSource = (function(onmessage, postMessage) {
-      var timerId = 0;
-      onmessage = function(e) {
+    var timerSource = (function() {
+      var _this = this, timerId = 0;
+      this.onmessage = function(e) {
         clearInterval(timerId);
         if (e.data > 0) {
           timerId = setInterval(function() {
-            postMessage(0);
+            _this.postMessage(0);
           }, e.data);
         }
       };
