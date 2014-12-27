@@ -1,7 +1,7 @@
 {
   "name": "neume.js",
   "description": "Web Audio API library for developing browser music",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "bugs": {
     "url": "https://github.com/mohayonao/neume.js/issues"
