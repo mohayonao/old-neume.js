@@ -1,8 +1,6 @@
 module.exports = function(neume, util) {
   "use strict";
 
-  var KVSKEY = "@neume:osc";
-
   /**
    * $("osc", {
    *   type: string|PeriodicWave = "sin",
@@ -48,11 +46,10 @@ module.exports = function(neume, util) {
   };
 
   neume.register("osc", function(ugen, spec, inputs) {
-    var context = ugen.context;
     var type = spec.type;
 
     if (!isPeriodicWave(type)) {
-      type = type2wave(context, WAVE_TYPES[type] || "sine");
+      type = WAVE_TYPES[type] || "sine";
     }
 
     return make(type, ugen, spec, inputs);
@@ -71,7 +68,7 @@ module.exports = function(neume, util) {
   Object.keys(WAVE_TYPES).forEach(function(name) {
     var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(type2wave(ugen.context, type), ugen, spec, inputs);
+      return make(type, ugen, spec, inputs);
     });
   });
 
@@ -133,54 +130,5 @@ module.exports = function(neume, util) {
   function isPeriodicWave(wave) {
     return wave instanceof neume.webaudio.PeriodicWave;
   }
-
-  function type2wave(context, type) {
-    return neume.KVS.get(KVSKEY + type, context);
-  }
-
-  neume.KVS.set(KVSKEY + "sine", "sine");
-
-  neume.KVS.set(KVSKEY + "square", function(context) {
-    var real = new Float32Array(4096);
-    var imag = new Float32Array(4096);
-
-    for (var i = 1; i < 4096; i++) {
-      if (i % 2 === 1) {
-        imag[i] = 1 / i;
-      }
-    }
-
-    return context.createPeriodicWave(real, imag);
-  });
-
-  neume.KVS.set(KVSKEY + "sawtooth", function(context) {
-    var real = new Float32Array(4096);
-    var imag = new Float32Array(4096);
-
-    for (var i = 1; i < 4096; i++) {
-      imag[i] = 1 / i;
-      if (i % 2 === 0) {
-        imag[i] *= -1;
-      }
-    }
-
-    return context.createPeriodicWave(real, imag);
-  });
-
-  neume.KVS.set(KVSKEY + "triangle", function(context) {
-    var real = new Float32Array(4096);
-    var imag = new Float32Array(4096);
-
-    for (var i = 1, imax = imag.length; i < imax; i++) {
-      if (i % 2) {
-        imag[i] = 1 / (i * i);
-        if (i % 4 === 3) {
-          imag[i] *= -1;
-        }
-      }
-    }
-
-    return context.createPeriodicWave(real, imag);
-  });
 
 };

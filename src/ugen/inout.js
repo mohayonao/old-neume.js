@@ -5,29 +5,22 @@ module.exports = function(neume, util) {
 
   /**
   * $("in", {
+  *   bus: number = 0,
   *   mul: signal = 1,
   *   add: signal = 0,
-  * }, ...bus: number)
+  * })
   *
-  *  +-------------+     +-------------+
-  *  | AudioBus[0] | ... | AudioBus[0] |
-  *  +-------------+     +-------------+
-  *   |                    |
-  *   +--------------------+
+  *  +---------------+
+  *  | AudioBus[bus] |
+  *  +---------------+
   *   |
   */
-  neume.register("in", function(ugen, spec, inputs) {
+  neume.register("in", function(ugen, spec) {
     var context = ugen.context;
-    var outlet = null;
-
-    inputs = inputs.filter(util.isFinite).map(function(index) {
-      return getAudioBus(context, index);
-    });
-
-    outlet = new neume.Sum(context, inputs);
+    var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
 
     return new neume.Unit({
-      outlet: outlet
+      outlet: context.getAudioBus(index)
     });
   });
 
@@ -59,10 +52,4 @@ module.exports = function(neume, util) {
       isOutput: true
     });
   });
-
-  function getAudioBus(context, index) {
-    index = util.clip(util.int(util.defaults(index, 0)), 0, AUDIO_BUS_CHANNELS);
-
-    return context.getAudioBus(index);
-  }
 };

@@ -11,13 +11,15 @@
     #start { margin:10px 0 }
     #canvas { width:100%;height:240px;background:black }
     #code { padding:0;margin:0;background:white;border:none }
+    #app .btn { width:100px }
   </style>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="./visualizer.js"></script>
   <script src="../build/neume.js"></script>
-  <script>_.mixin(neume._.exports());</script>
+  <script>
+  _.mixin(neume._.exports());
+  </script>
 </head>
 <body>
   <div class="container">
@@ -27,7 +29,7 @@
     </div>
     <canvas id="canvas"></canvas>
     <div id="app">
-      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+      <button id="start" class="btn btn-default">Start</button>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -45,7 +47,7 @@
   var visualizer = null;
   var sines = [];
 
-  var root, chord;
+  var chord;
 
   function Sine($, freq, mod, amp) {
     return $("sin", { freq: $("@freq", freq), detune: _.rand2(10) })
@@ -54,10 +56,10 @@
   }
 
   function FBDelay($) {
-    return $("in", 1)
+    return $("in", { bus: 1 })
     .$("delay", {
-      delay: $("sin", { freq: 0.1, mul: 0.00125, add: 0.125 }),
-      feedback: $("sin", { freq: 0.05, mul: 0.15, add: 0.75 })
+      delay: $("sin", { freq: 6, mul: 1e-4, add: 0.25 }),
+      feedback: $("sin", { freq: 0.25, mul: 0.15, add: 0.75 })
     });
   }
 
@@ -66,16 +68,16 @@
   function start() {
     var iter = {
       next: function() {
-        return { value: _.sample([ 2.5, 5, 10, 15, 20, 25 ]), done: false };
+        return { value: _.sample([ 2.5, 5, 10, 15, 20, 25, 30, 40 ]), done: false };
       }
     };
     var delay = neu.Synth(FBDelay);
     var timer = neu.Sched(iter, function(e) {
-      compose();
+      chord = compose(e.count);
 
-      sines = _.range(7).map(function() {
-        var freq = _.midicps(root + _.sample(chord) + _.sample([ 0, 12, 24, 36 ]));
-        var mod = _.exprand(0.01, 500.0);
+      sines = _.range(11).map(function(i) {
+        var freq = _.midicps(_.sample(chord) + Math.floor(i / chord.length) * 12);
+        var mod = _.exprand(0.01, 24.0);
         var amp = _.exprand(0.01, 0.075);
 
         return neu.Synth(Sine, freq, mod, amp)
@@ -96,137 +98,87 @@
     });
   }
 
-  function compose() {
-    if (_.coin(0.75)) {
-      root = 36 + _.sample([ 0, 0, 0, 5, 7, 7 ]);
-      chord = [ 0, 4, 5, 7, 11, 12 ];
-    } else {
-      root = 36 + _.sample([ 2, 4, 4, 6, 6, 6 ]);
-      chord = [ 0, 3, 5, 7, 11, 12 ];
-    }
+  function compose(index) {
+    return [
+      [ 48, 60, 62, 67 ],
+      [ 48, 58, 62, 67 ],
+      [ 41, 57, 60, 65 ],
+      [ 41, 56, 60, 65 ],
+    ][index % 4];
   }
   </script>
 
   <script>
-  $(function() {
+  window.onload = function() {
     "use strict";
 
-    var WaveVisualizer = (function() {
-      var X = 0, Y = 1;
+    var $ = document.getElementById.bind(document);
 
-      function WaveVisualizer(analyser, spec) {
-        this.width  = spec.width;
-        this.height = spec.height;
+    var canvas = $("canvas");
 
-        this._state = "init";
-        this._canvas = spec.canvas;
-        this._canvas.width  = this.width;
-        this._canvas.height = this.height;
-        this._context = this._canvas.getContext("2d");
-        this._context.fillStyle   = "rgba(0, 0, 0, 0.4)";
-        this._context.strokeStyle = "#fff";
-        this._context.lineWidth = 0.5;
-        this._index = 0;
-
-        this.fps = 20;
-      }
-
-      WaveVisualizer.prototype.start = function() {
-        if (this._state !== "start") {
-          this._state = "start";
-          this._prevT = Date.now();
-          requestAnimationFrame(this.render.bind(this));
-        }
-        return this;
-      };
-
-      WaveVisualizer.prototype.stop = function() {
-        if (this._state === "start") {
-          this._state = "stop";
-        }
-        return this;
-      };
-
-      WaveVisualizer.prototype.render = function() {
-        var t = Date.now();
-        var dt = (t - this._prevT) * 0.001;
-
-        if (1 / this.fps < dt) {
-          this._prevT = t;
-          this._render(t);
-        }
-
-        if (this._state === "start") {
-          requestAnimationFrame(this.render.bind(this));
-        }
-      };
-
-      WaveVisualizer.prototype._render = function() {
-        var sine = sines[this._index++ % sines.length];
-
-        if (!sine) {
-          return;
-        }
-
-        var freq = sine.freq.value * 0.0125;
-        var mod = sine.mod.value * 20;
-        var amp = sine.amp.value * 10;
-
-        var context = this._context;
-
-        var w = this.width;
-        var h = this.height;
-
-        freq = Math.round(freq) * 2 * Math.PI;
-        mod = Math.round(mod) * 2 * Math.PI;
-        amp *= this._index % 2 ? -1 : +1;
-
-        context.fillRect(0, 0, w, h);
-
-        context.beginPath();
-        context.moveTo(0, h * 0.5);
-        for (var i = 1; i < w; i += 2) {
-          var p = i / w;
-          var v = Math.sin(freq * p) * Math.sin(mod * p) * amp;
-          var x = Math.round(p * w);
-          var y = Math.round(h * (1 - v) * 0.5);
-
-          context.lineTo(x, y);
-        }
-        context.lineTo(w, h * 0.5);
-        context.stroke();
-      };
-
-      return WaveVisualizer;
-    })();
-
-    var canvas = document.getElementById("canvas");
-
-    visualizer = new WaveVisualizer(neu.analyser, {
-      canvas: canvas, width: $(canvas).width(), height: 240
+    visualizer = new Visualizer(canvas, function() {
+      this.context.fillStyle   = "rgba(0, 0, 0, 0.075)";
+      this.context.strokeStyle = "#ccc";
+      this.context.lineWidth = 0.5;
+      this._index = 0;
     });
 
-    var vue = new Vue({
-      el: "#app",
-      data: {
-        isPlaying: false
-      },
-      methods: {
-        toggle: function() {
-          neu.reset();
-          this.isPlaying = !this.isPlaying;
-          if (this.isPlaying) {
-            start(this.$data.score);
-          } else {
-            stop();
-          }
-        }
-      }
-    });
+    visualizer.render = function() {
+      var sine = sines[this._index++ % sines.length];
 
-    $("#code").text($("#example").text());
+      if (!sine) {
+        return;
+      }
+
+      var freq = sine.freq.value * 0.0125;
+      var mod = sine.mod.value * 20;
+      var amp = sine.amp.value * 10;
+
+      var context = this.context;
+
+      var w = this.width;
+      var h = this.height;
+
+      freq = Math.round(freq) * 2 * Math.PI;
+      mod = Math.round(mod) * 2 * Math.PI;
+      amp *= this._index % 2 ? -1 : +1;
+
+      context.fillRect(0, 0, w, h);
+
+      context.beginPath();
+      context.moveTo(0, h * 0.5);
+      for (var i = 1; i < w; i += 2) {
+        var p = i / w;
+        var v = Math.sin(freq * p) * Math.sin(mod * p) * amp;
+        var x = Math.round(p * w);
+        var y = Math.round(h * (1 - v) * 0.5);
+
+        context.lineTo(x, y);
+      }
+      context.lineTo(w, h * 0.5);
+      context.stroke();
+    };
+
+    var isPlaying = false;
+
+    $("start").onclick = function(e) {
+      isPlaying = !isPlaying;
+
+      neu.reset();
+
+      if (isPlaying) {
+        start();
+        e.target.textContent = "Stop";
+      } else {
+        stop();
+        e.target.textContent = "Start";
+      }
+    };
+
+    // code
+    $("code").textContent = $("example").textContent;
     prettyPrint();
-  });
+  };
   </script>
 </body>
 </html>

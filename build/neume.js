@@ -11,7 +11,7 @@ if (typeof window !== "undefined") {
 
 module.exports = neume;
 
-},{"./src/":19,"./src/ugen/":39}],2:[function(require,module,exports){
+},{"./src/":20,"./src/ugen/":39}],2:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -55,7 +55,7 @@ NeuComponent.prototype.disconnect = function() {
 
 module.exports = neume.Component = NeuComponent;
 
-},{"../namespace":20,"../util":55,"../util/emitter":53}],3:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"../util/emitter":52}],3:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
@@ -66,10 +66,21 @@ require("./component");
 
 var filled0 = new FilledFloat32Array(C.DC_BUF_SIZE, 0);
 var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
+var INIT = 0, START = 1, STOP = 2;
 
 function NeuDC(context, value) {
+  value = util.finite(value);
+
+  context.$$neuDC = context.$$neuDC || {};
+  if (context.$$neuDC[value]) {
+    return context.$$neuDC[value];
+  }
+  context.$$neuDC[value] = this;
+
   neume.Component.call(this, context);
-  this._value = util.finite(value);
+  this._value = value;
+  this._bufSrc = null;
+  this._state = INIT;
 }
 util.inherits(NeuDC, neume.Component);
 
@@ -77,7 +88,31 @@ NeuDC.$$name = "NeuDC";
 
 NeuDC.prototype.toAudioNode = function() {
   if (this.outlet === null) {
-    this.outlet = createDCNode(this.context, this._value);
+    var context = this.context;
+    var value = this._value;
+    var buf, bufSrc, gain;
+
+    if (value === 0 || value === 1) {
+      buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
+      buf.getChannelData(0).set(value ? filled1 : filled0);
+
+      bufSrc = context.createBufferSource();
+      bufSrc.buffer = buf;
+      bufSrc.loop = true;
+      bufSrc.start(0);
+
+      this._bufSrc = bufSrc;
+      this._state = START;
+      this.outlet = bufSrc;
+    } else {
+      bufSrc = new NeuDC(context, 1).toAudioNode();
+
+      gain = context.createGain();
+      gain.gain.value = value;
+      bufSrc.connect(gain);
+
+      this.outlet = gain;
+    }
   }
   return this.outlet;
 };
@@ -92,7 +127,16 @@ NeuDC.prototype.connect = function(to) {
 };
 
 NeuDC.prototype.disconnect = function() {
+  this.stop(this.context.currentTime);
   this.context.disconnect(this.outlet);
+  return this;
+};
+
+NeuDC.prototype.stop = function(t) {
+  if (this._state === START) {
+    this._bufSrc.stop(util.finite(t));
+    this._state = STOP;
+  }
   return this;
 };
 
@@ -110,154 +154,16 @@ function FilledFloat32Array(size, value) {
   return result;
 }
 
-function createDCNode(context, value) {
-  var node = null;
-  var buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
-  var bufSrc = (node = context.createBufferSource());
-
-  buf.getChannelData(0).set(value === 0 ? filled0 : filled1);
-
-  bufSrc.buffer = buf;
-  bufSrc.loop = true;
-  bufSrc.start(0);
-
-  if (value !== 0 && value !== 1) {
-    node = context.createGain();
-    node.gain.value = util.finite(value);
-    context.connect(bufSrc, node);
-  }
-
-  return node;
-}
-
 module.exports = neume.DC = NeuDC;
 
-},{"../const":9,"../namespace":20,"../util":55,"./component":2}],4:[function(require,module,exports){
-"use strict";
-
-var C = require("../const");
-var util = require("../util");
-var neume = require("../namespace");
-
-require("./component");
-
-var WS_CURVE_SIZE = C.WS_CURVE_SIZE;
-var curveWet = new Float32Array(WS_CURVE_SIZE);
-var curveDry = new Float32Array(WS_CURVE_SIZE);
-
-(function() {
-  var halfSize = WS_CURVE_SIZE >> 1;
-
-  for (var i = 0; i < halfSize; i++) {
-    curveWet[i] = 0;
-    curveDry[i] = 1;
-    curveWet[i + halfSize] = Math.sin(i / halfSize * Math.PI * 0.5);
-    curveDry[i + halfSize] = Math.cos(i / halfSize * Math.PI * 0.5);
-  }
-})();
-
-function NeuDryWet(context, dryIn, wetIn, mixIn) {
-  neume.Component.call(this, context);
-
-  mixIn = mixIn.valueOf();
-
-  if (typeof mixIn === "number") {
-    if (mixIn === 0) {
-      return new neume.Component(context, dryIn);
-    }
-    if (mixIn === 1) {
-      return new neume.Component(context, wetIn);
-    }
-  }
-
-  this._dryIn = dryIn;
-  this._wetIn = wetIn;
-  this._mixIn = mixIn;
-}
-util.inherits(NeuDryWet, neume.Component);
-
-NeuDryWet.$$name = "NeuDryWet";
-
-NeuDryWet.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    var context = this.context;
-    var outlet;
-
-    if (typeof this._mixIn === "number") {
-      outlet = createMixNodeWithNumber(context, this._dryIn, this._wetIn, this._mixIn);
-    } else {
-      outlet = createMixNodeWithNode(context, this._dryIn, this._wetIn, this._mixIn);
-    }
-
-    this.outlet = context.toAudioNode(outlet);
-    this._dryIn = null;
-    this._wetIn = null;
-    this._mixIn = null;
-  }
-  return this.outlet;
-};
-
-NeuDryWet.prototype.connect = function(to) {
-  this.context.connect(this.toAudioNode(), to);
-  return this;
-};
-
-function createMixNodeWithNumber(context, dryIn, wetIn, mix) {
-  mix = util.clip(util.finite(mix), 0, 1);
-
-  var wetNode = context.createGain();
-  var dryNode = context.createGain();
-  var mixNode = context.createGain();
-
-  wetNode.gain.value = mix;
-  dryNode.gain.value = 1 - mix;
-
-  context.connect(dryIn, dryNode);
-  context.connect(wetIn, wetNode);
-  context.connect(wetNode, mixNode);
-  context.connect(dryNode, mixNode);
-
-  return mixNode;
-}
-
-function createMixNodeWithNode(context, dryIn, wetIn, mixIn) {
-  var wetNode = context.createGain();
-  var dryNode = context.createGain();
-  var mixNode = context.createGain();
-  var wsWet = context.createWaveShaper();
-  var wsDry = context.createWaveShaper();
-
-  wsWet.curve = curveWet;
-  wsDry.curve = curveDry;
-
-  context.connect(mixIn, wsWet);
-  context.connect(mixIn, wsDry);
-
-  wetNode.gain.value = 0;
-  dryNode.gain.value = 0;
-
-  context.connect(wsWet, wetNode.gain);
-  context.connect(wsDry, dryNode.gain);
-
-  context.connect(dryIn, dryNode);
-  context.connect(wetIn, wetNode);
-  context.connect(wetNode, mixNode);
-  context.connect(dryNode, mixNode);
-
-  return mixNode;
-}
-
-module.exports = neume.DryWet = NeuDryWet;
-
-},{"../const":9,"../namespace":20,"../util":55,"./component":2}],5:[function(require,module,exports){
+},{"../const":8,"../namespace":21,"../util":54,"./component":2}],4:[function(require,module,exports){
 require("./component");
 require("./dc");
-require("./drywet");
 require("./mul");
 require("./param");
 require("./sum");
 
-},{"./component":2,"./dc":3,"./drywet":4,"./mul":6,"./param":7,"./sum":8}],6:[function(require,module,exports){
+},{"./component":2,"./dc":3,"./mul":5,"./param":6,"./sum":7}],5:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -322,7 +228,7 @@ NeuMul.prototype.disconnect = function() {
 
 module.exports = neume.Mul = NeuMul;
 
-},{"../namespace":20,"../util":55,"./component":2}],7:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./component":2}],6:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -671,7 +577,7 @@ function calcValueCurve(v, t, t0, t1, curve) {
 
 module.exports = neume.Param = NeuParam;
 
-},{"../namespace":20,"../util":55,"./component":2}],8:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./component":2}],7:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -773,19 +679,13 @@ NeuSum.prototype.connect = function(to) {
 };
 
 NeuSum.prototype.disconnect = function() {
-  var context = this.context;
-  var inputs = this._inputs;
-
-  for (var i = 0, imax = inputs.length; i < imax; i++) {
-    context.disconnect(inputs[i]);
-  }
-
+  this.context.disconnect(this._inputs);
   return this;
 };
 
 module.exports = neume.Sum = NeuSum;
 
-},{"../namespace":20,"../util":55,"./component":2}],9:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./component":2}],8:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -798,15 +698,16 @@ module.exports = {
   DEFAULT_MAX_NODES_OF_BUS: 64,
 };
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
 
-function NeuAudioBus(context) {
+function NeuAudioBus(context, index) {
   this.context = context;
+  this.index = index;
   this.outlet = context.createGain();
 
   this._maxNodes = C.DEFAULT_MAX_NODES_OF_BUS;
@@ -831,18 +732,24 @@ function NeuAudioBus(context) {
 
 NeuAudioBus.$$name = "NeuAudioBus";
 
-NeuAudioBus.prototype.fade = function(t, val, dur) {
-  t = util.finite(this.context.toSeconds(t)) || this.context.currentTime;
-  val = util.finite(val);
-  dur = util.finite(this.context.toSeconds(dur));
+NeuAudioBus.prototype.append = function(synth) {
+  this.context.connect(synth.toAudioNode(this.index), this.outlet);
 
-  var v0 = this.outlet.gain.value;
-  var v1 = val;
-  var vT = v0 + (v1 - v0) * 0.99;
-  var tC = -Math.max(1e-6, dur) / Math.log((vT - v1) / (v0 - v1));
+  this._inputs.push(synth);
 
-  this.outlet.gain.setTargetAtTime(v1, t, tC);
-  this.outlet.gain.setValueAtTime(v1, t + dur);
+  if (this._maxNodes < this._inputs.length) {
+    this._inputs.shift().stop();
+  }
+
+  return this;
+};
+
+NeuAudioBus.prototype.remove = function(synth) {
+  var index = this._inputs.indexOf(synth);
+
+  if (index !== -1) {
+    this._inputs.splice(index, 1);
+  }
 
   return this;
 };
@@ -851,53 +758,9 @@ NeuAudioBus.prototype.toAudioNode = function() {
   return this.outlet;
 };
 
-NeuAudioBus.prototype.connect = function(to) {
-  this.context.connect(this.outlet, to);
-  return this;
-};
-
-NeuAudioBus.prototype.disconnect = function() {
-  return this;
-};
-
-NeuAudioBus.prototype.onconnected = function(from) {
-  var index = this._inputs.indexOf(from);
-
-  if (index !== -1) {
-    this._inputs.splice(index, 1);
-  }
-  this._inputs.push(from);
-
-  while (this._maxNodes < this._inputs.length) {
-    this.context.disconnect(this._inputs.shift());
-  }
-
-  from.$$outputs = from.$$outputs || [];
-  if (from.$$outputs.indexOf(this) === -1) {
-    from.$$outputs.push(this);
-  }
-};
-
-NeuAudioBus.prototype.ondisconnected = function(from) {
-  var index = this._inputs.indexOf(from);
-
-  if (index !== -1) {
-    this._inputs.splice(index, 1);
-  }
-
-  /* istanbul ignore else */
-  if (from.$$outputs) {
-    index = from.$$outputs.indexOf(this);
-    /* istanbul ignore else */
-    if (index !== -1) {
-      from.$$outputs.splice(index, 1);
-    }
-  }
-};
-
 module.exports = neume.AudioBus = NeuAudioBus;
 
-},{"../const":9,"../namespace":20,"../util":55}],11:[function(require,module,exports){
+},{"../const":8,"../namespace":21,"../util":54}],10:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1193,14 +1056,14 @@ function resample1(data, size) {
 
 module.exports = neume.Buffer = NeuBuffer;
 
-},{"../namespace":20,"../util":55,"../util/fft":54}],12:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"../util/fft":53}],11:[function(require,module,exports){
 require("./audio-bus");
 require("./buffer");
 require("./interval");
 require("./sched");
 require("./timeout");
 
-},{"./audio-bus":10,"./buffer":11,"./interval":13,"./sched":14,"./timeout":15}],13:[function(require,module,exports){
+},{"./audio-bus":9,"./buffer":10,"./interval":12,"./sched":13,"./timeout":14}],12:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1226,7 +1089,7 @@ NeuInterval.$$name = "NeuInterval";
 
 module.exports = neume.Interval = NeuInterval;
 
-},{"../namespace":20,"../util":55,"./sched":14}],14:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./sched":13}],13:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1345,7 +1208,7 @@ function emit(_this, t0, done) {
 
 module.exports = neume.Sched = NeuSched;
 
-},{"../namespace":20,"../util":55,"../util/emitter":53}],15:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"../util/emitter":52}],14:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1370,21 +1233,20 @@ NeuTimeout.$$name = "NeuTimeout";
 
 module.exports = neume.Timeout = NeuTimeout;
 
-},{"../namespace":20,"../util":55,"./sched":14}],16:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./sched":13}],15:[function(require,module,exports){
 "use strict";
 
 var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
-var toSeconds = require("../util/toSeconds");
 
-var INIT = 0;
-var START = 1;
-var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
+require("./transport");
 
-var schedId = 1;
+var INIT = 0, START = 1, STOP = 2;
 
-function NeuContext(destination, duration) {
+function NeuContext(destination, spec) {
+  spec = spec || /* istanbul ignore next */ {};
+
   this.context = this;
   this.destination = destination;
   this.audioContext = destination.context;
@@ -1392,167 +1254,136 @@ function NeuContext(destination, duration) {
   this.listener = this.audioContext.listener;
   this.analyser = this.audioContext.createAnalyser();
 
-  this._bpm = 120;
-  this._scriptProcessor = null;
+  this._transport = new neume.Transport(this, spec);
+  this._nodes = [];
   this._audioBuses = [];
-  this._processBufSize = C.PROCESS_BUF_SIZE;
-  this._inlet = null;
+
+  this.$$neuDC = null;
 
   this.connect(this.analyser, this.destination);
 
   Object.defineProperties(this, {
     currentTime: {
       get: function() {
-        return this._currentTime || this.audioContext.currentTime;
+        return this._transport.currentTime;
       },
       enumerable: true
     },
     bpm: {
       get: function() {
-        return this._bpm;
+        return this._transport.bpm;
       },
       set: function(value) {
-        this._bpm = Math.max(1e-6, util.finite(value));
+        this._transport.bpm = value;
       },
       enumerable: true
     },
   });
 
-  this._duration = duration;
   this.reset();
 }
 NeuContext.$$name = "NeuContext";
 
-Object.keys(neume.webaudio.AudioContext.prototype).forEach(function(key) {
-  var desc = Object.getOwnPropertyDescriptor(neume.webaudio.AudioContext.prototype, key);
+[
+  "createBuffer",
+  "decodeAudioData",
+  "createPeriodicWave",
+  "startRendering",
+].forEach(function(methodName) {
+  var method = neume.webaudio.AudioContext.prototype[methodName];
 
-  /* istanbul ignore next */
-  if (typeof desc.value !== "function") {
-    return;
-  }
-
-  var method = neume.webaudio.AudioContext.prototype[key];
-
-  NeuContext.prototype[key] = function() {
+  NeuContext.prototype[methodName] = function() {
     return method.apply(this.audioContext, arguments);
+  };
+});
+
+[
+  "createBufferSource",
+  "createMediaElementSource",
+  "createMediaStreamSource",
+  "createMediaStreamDestination",
+  "createGain",
+  "createDelay",
+  "createBiquadFilter",
+  "createWaveShaper",
+  "createPanner",
+  "createConvolver",
+  "createDynamicsCompressor",
+  "createAnalyser",
+  "createScriptProcessor",
+  "createOscillator",
+  "createChannelSplitter",
+  "createChannelMerger",
+].forEach(function(methodName) {
+  var method = neume.webaudio.AudioContext.prototype[methodName];
+
+  NeuContext.prototype[methodName] = function() {
+    var node = method.apply(this.audioContext, arguments);
+
+    this._nodes.push(node);
+
+    return node;
   };
 });
 
 NeuContext.prototype.getAudioBus = function(index) {
   index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
   if (!this._audioBuses[index]) {
-    this._audioBuses[index] = new neume.AudioBus(this);
+    this._audioBuses[index] = new neume.AudioBus(this, index);
   }
   return this._audioBuses[index];
-};
-
-NeuContext.prototype.reset = function() {
-  if (this._inlet) {
-    this._inlet.disconnect();
-  }
-
-  this._audioBuses.splice(0).forEach(function(bus) {
-    bus.toAudioNode().disconnect();
-  }, this);
-
-  this._inlet = this._audioBuses[0] = this.getAudioBus(0);
-  this.connect(this._inlet, this.analyser);
-
-  this.disconnect(this._scriptProcessor);
-
-  this._events = [];
-  this._nextTicks = [];
-  this._state = INIT;
-  this._currentTime = 0;
-  this._scriptProcessor = null;
-
-  return this;
 };
 
 NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
-    if (this.audioContext instanceof neume.webaudio.OfflineAudioContext) {
-      startRendering.call(this);
-    } else {
-      startAudioTimer.call(this);
-    }
+    this._transport.start();
+    this.connect(this.getAudioBus(0).outlet, this.analyser);
   }
   return this;
 };
-
-function startRendering() {
-  this._currentTimeIncr = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
-  onaudioprocess.call(this, { playbackTime: 0 });
-}
-
-function startAudioTimer() {
-  var context = this.audioContext;
-  var scriptProcessor = context.createScriptProcessor(this._processBufSize, 1, 1);
-  var bufferSource = context.createBufferSource();
-
-  this._currentTimeIncr = this._processBufSize / context.sampleRate;
-  this._scriptProcessor = scriptProcessor;
-  scriptProcessor.onaudioprocess = onaudioprocess.bind(this);
-
-  // this is needed for iOS Safari
-  bufferSource.start(0);
-  this.connect(bufferSource, scriptProcessor);
-
-  this.connect(scriptProcessor, context.destination);
-}
 
 NeuContext.prototype.stop = function() {
+  if (this._state === START) {
+    this._state = STOP;
+    this._transport.stop();
+  }
   return this;
 };
 
-NeuContext.prototype.sched = function(time, callback, ctx) {
-  time = util.finite(time);
+NeuContext.prototype.reset = function() {
+  this.dispose();
+  this._audioBuses = [];
+  this._transport.reset();
+  this._state = INIT;
+  return this;
+};
 
-  if (typeof callback !== "function") {
-    return 0;
+NeuContext.prototype.dispose = function() {
+  if (this.$$neuDC) {
+    var neuDC = this.$$neuDC;
+    var t = this.currentTime;
+    Object.keys(neuDC).forEach(function(value) {
+      neuDC[value].stop(t);
+    });
+    this.$$neuDC = null;
   }
+  this._nodes.splice(0).forEach(function(node) {
+    node.disconnect();
+  });
+  return this;
+};
 
-  var events = this._events;
-  var event = {
-    id: schedId++,
-    time: time,
-    callback: callback,
-    context: ctx || this
-  };
-
-  if (events.length === 0 || events[events.length - 1].time <= time) {
-    events.push(event);
-  } else {
-    for (var i = 0, imax = events.length; i < imax; i++) {
-      if (time < events[i].time) {
-        events.splice(i, 0, event);
-        break;
-      }
-    }
-  }
-
-  return event.id;
+NeuContext.prototype.sched = function(time, callback, context) {
+  return this._transport.sched(time, callback, context);
 };
 
 NeuContext.prototype.unsched = function(id) {
-  id = util.finite(id);
-
-  if (id !== 0) {
-    var events = this._events;
-    for (var i = 0, imax = events.length; i < imax; i++) {
-      if (id === events[i].id) {
-        events.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  return id;
+  return this._transport.unsched(id);
 };
 
-NeuContext.prototype.nextTick = function(callback, ctx) {
-  this._nextTicks.push(callback.bind(ctx || this));
+NeuContext.prototype.nextTick = function(callback, context) {
+  this._transport.nextTick(callback, context);
   return this;
 };
 
@@ -1600,8 +1431,6 @@ NeuContext.prototype.connect = function(from, to) {
       if (from) {
         from.connect(to);
       }
-    } else if (to instanceof neume.AudioBus) {
-      this.connect(from, to.toAudioNode());
     }
     if (to.onconnected) {
       to.onconnected(from);
@@ -1610,46 +1439,26 @@ NeuContext.prototype.connect = function(from, to) {
   return this;
 };
 
-NeuContext.prototype.disconnect = function(from) {
-  if (from && from.disconnect) {
-    from.disconnect();
-    if (from.$$outputs) {
-      from.$$outputs.forEach(function(to) {
-        return to.ondisconnected && to.ondisconnected(from);
-      });
+NeuContext.prototype.disconnect = function(node) {
+  if (node) {
+    if (typeof node.disconnect === "function") {
+      node.disconnect();
+    } else if (Array.isArray(node)) {
+      node.forEach(function(node) {
+        this.disconnect(node);
+      }, this);
     }
   }
   return this;
 };
 
 NeuContext.prototype.toSeconds = function(value) {
-  return toSeconds(value, this._bpm, this.sampleRate, this.currentTime);
+  return this._transport.toSeconds(value);
 };
-
-function onaudioprocess(e) {
-  // Safari 7.0.6 does not support e.playbackTime
-  var currentTime = e.playbackTime || /* istanbul ignore next */ this.audioContext.currentTime;
-  var nextCurrentTime = currentTime + this._currentTimeIncr;
-  var events = this._events;
-
-  this._currentTime = currentTime;
-
-  this._nextTicks.splice(0).forEach(function(callback) {
-    callback(currentTime);
-  });
-
-  while (events.length && events[0].time <= nextCurrentTime) {
-    var event = events.shift();
-
-    this._currentTime = Math.max(this._currentTime, event.time);
-
-    event.callback.call(event.context, event.time);
-  }
-}
 
 module.exports = neume.Context = NeuContext;
 
-},{"../const":9,"../namespace":20,"../util":55,"../util/toSeconds":57}],17:[function(require,module,exports){
+},{"../const":8,"../namespace":21,"../util":54,"./transport":19}],16:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1754,7 +1563,9 @@ function NEU(context) {
   });
 }
 
-neume.impl = function(destination) {
+neume.impl = function(destination, spec) {
+  spec = spec || /* istanbulg ignore next */ {};
+
   if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
   } else if (typeof destination === "undefined") {
@@ -1764,7 +1575,7 @@ neume.impl = function(destination) {
     throw new TypeError("neume(): Illegal arguments");
   }
 
-  var context = new neume.Context(destination, Infinity);
+  var context = new neume.Context(destination, spec);
 
   return Object.defineProperties(
     new NEU(context), {
@@ -1778,7 +1589,9 @@ neume.impl = function(destination) {
             audioContext.oncomplete = function(e) {
               resolve(new neume.Buffer(context, e.renderedBuffer));
             };
-            func(new NEU(new neume.Context(audioContext.destination, duration)));
+            func(new NEU(new neume.Context(audioContext.destination, {
+              duration: duration
+            })));
             audioContext.startRendering();
           });
         }
@@ -1836,7 +1649,7 @@ neume.use.used = [];
 module.exports = neume;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../component":5,"../const":9,"../control":12,"../namespace":20,"../synth":22,"../util":55,"../util/db":52,"../util/emitter":53,"../util/fft":54,"../util/kvs":56,"../util/underscore":58,"./context":16,"./shim":18}],18:[function(require,module,exports){
+},{"../component":4,"../const":8,"../control":11,"../namespace":21,"../synth":24,"../util":54,"../util/db":51,"../util/emitter":52,"../util/fft":53,"../util/kvs":55,"../util/underscore":56,"./context":15,"./shim":17}],17:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 (function() {
@@ -1878,21 +1691,408 @@ module.exports = neume;
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
+(function (global){
+"use strict";
+
+var neume = require("../namespace");
+
+var NeuTimer;
+
+/* istanbul ignore else */
+if (typeof global.window === "undefined") {
+  NeuTimer = (function() {
+    function NodeNeuTimer(callback, interval) {
+      this.callback = callback;
+      this.interval = interval;
+      this._timerId = 0;
+    }
+    NodeNeuTimer.$$name = "NeuTimer";
+
+    NodeNeuTimer.prototype.start = function() {
+      clearInterval(this._timerId);
+      this._timerId = setInterval(this.callback, this.interval);
+      return this;
+    };
+
+    NodeNeuTimer.prototype.stop = function() {
+      this._timerId = clearInterval(this._timerId)|0;
+      return this;
+    };
+
+    return NodeNeuTimer;
+  })();
+} else {
+  NeuTimer = (function() {
+    var timerSource = (function(onmessage, postMessage) {
+      var timerId = 0;
+      onmessage = function(e) {
+        clearInterval(timerId);
+        if (e.data > 0) {
+          timerId = setInterval(function() {
+            postMessage(0);
+          }, e.data);
+        }
+      };
+    }).toString().trim().match(
+      /^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/
+    )[1];
+
+    var timerJS = global.URL.createObjectURL(
+      new global.Blob([ timerSource ], { type: "text/javascript" })
+    );
+
+    function WorkerNeuTimer(callback, interval) {
+      this.callback = callback;
+      this.interval = interval;
+      this._worker = new global.Worker(timerJS);
+      this._worker.onmessage = function() {
+        callback();
+      };
+    }
+    WorkerNeuTimer.$$name = "NeuTimer";
+
+    WorkerNeuTimer.prototype.start = function() {
+      this._worker.postMessage(this.interval);
+      return this;
+    };
+
+    WorkerNeuTimer.prototype.stop = function() {
+      this._worker.postMessage(0);
+      return this;
+    };
+
+    return WorkerNeuTimer;
+  })();
+}
+
+
+module.exports = neume.Timer = NeuTimer;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../namespace":21}],19:[function(require,module,exports){
+"use strict";
+
+var C = require("../const");
+var util = require("../util");
+var neume = require("../namespace");
+
+var INIT = 0, START = 1, STOP = 2;
+var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
+
+var schedId = 1;
+
+require("./timer");
+
+function NeuTransport(context, spec) {
+  spec = spec || /* istanbul ignore next */ {};
+
+  this.context = context;
+  this.audioContext = context.audioContext;
+  this.sampleRate = context.sampleRate;
+
+  this._bpm = 120;
+  this._events = [];
+  this._nextTicks = [];
+  this._state = INIT;
+  this._currentTime = 0;
+
+  this._duration = util.defaults(spec.duration, Infinity);
+  this._scheduleInterval = util.defaults(spec.scheduleInterval, 0.025);
+  this._scheduleAheadTime = util.defaults(spec.scheduleAheadTime, 0.1);
+
+  Object.defineProperties(this, {
+    currentTime: {
+      get: function() {
+        return this._currentTime || this.audioContext.currentTime;
+      },
+      enumerable: true
+    },
+    bpm: {
+      get: function() {
+        return this._bpm;
+      },
+      set: function(value) {
+        this._bpm = Math.max(1e-6, util.finite(value));
+      },
+      enumerable: true
+    },
+  });
+}
+NeuTransport.$$name = "NeuTransport";
+
+NeuTransport.prototype.start = function() {
+  if (this._state === INIT) {
+    this._state = START;
+    if (this.audioContext instanceof neume.webaudio.OfflineAudioContext) {
+      startRendering.call(this);
+    } else {
+      startAudioTimer.call(this);
+    }
+  }
+  return this;
+};
+
+NeuTransport.prototype.stop = function() {
+  if (this._state === START) {
+    this._state = STOP;
+    this.reset();
+  }
+  return this;
+};
+
+NeuTransport.prototype.reset = function() {
+  if (this._timer) {
+    this._timer.stop();
+    this._timer = null;
+  }
+  this._events = [];
+  this._nextTicks = [];
+  this._state = INIT;
+  this._currentTime = 0;
+
+  return this;
+};
+
+function startRendering() {
+  var t0 = 0;
+  var t1 = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
+
+  onaudioprocess(this, t0, t1);
+}
+
+function startAudioTimer() {
+  var _this = this;
+  var context = this.audioContext;
+  var scheduleAheadTime = this._scheduleAheadTime;
+
+  this._timer = new neume.Timer(function() {
+    var t0 = context.currentTime;
+    var t1 = t0 + scheduleAheadTime;
+
+    onaudioprocess(_this, t0, t1);
+  }, this._scheduleInterval * 1000).start();
+}
+
+NeuTransport.prototype.sched = function(time, callback, context) {
+  if (typeof callback !== "function") {
+    return 0;
+  }
+
+  time = util.finite(time);
+
+  var events = this._events;
+  var event = {
+    id: schedId++,
+    time: time,
+    callback: callback,
+    context: context || this
+  };
+
+  if (events.length === 0 || events[events.length - 1].time <= time) {
+    events.push(event);
+  } else {
+    for (var i = 0, imax = events.length; i < imax; i++) {
+      if (time < events[i].time) {
+        events.splice(i, 0, event);
+        break;
+      }
+    }
+  }
+
+  return event.id;
+};
+
+NeuTransport.prototype.unsched = function(id) {
+  id = util.finite(id);
+
+  if (id !== 0) {
+    var events = this._events;
+    for (var i = 0, imax = events.length; i < imax; i++) {
+      if (id === events[i].id) {
+        events.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  return id;
+};
+
+NeuTransport.prototype.nextTick = function(callback, context) {
+  this._nextTicks.push(callback.bind(context || this));
+  return this;
+};
+
+NeuTransport.prototype.toSeconds = function(value) {
+  if (typeof value === "number") {
+    return util.finite(value);
+  }
+
+  if (value && typeof value.playbackTime === "number") {
+    return util.finite(value.playbackTime);
+  }
+
+  if (typeof value === "string") {
+    var m, offset = 0, time = 0;
+
+    if (value.charAt(0) === "+") {
+      offset = this.currentTime;
+      value = value.slice(1);
+    }
+
+    var components = value.split(/[\(\)\-\+\/\*]/);
+
+    if (components.length > 1) {
+      var oringalTime = value;
+      var expr = value;
+
+      for (var i = 0, imax = components.length; i < imax; i++) {
+        var symb = components[i].trim();
+        if (symb !== "") {
+          expr = expr.replace(symb, this.toSeconds(symb));
+        }
+      }
+
+      try {
+        time = eval(expr); // jshint ignore:line
+      } catch (e) {
+        throw new EvalError("Invalid Time Value Syntax: " + oringalTime);
+      }
+
+    } else if (value === "now") {
+      return this.currentTime;
+    } else if ((m = /^(\d+)ms$/.exec(value)) !== null) {
+      time = +m[1] * 0.001;
+    } else if ((m = /^(\d+(?:\.\d+)?)hz$/.exec(value)) !== null) {
+      time = util.finite(1 / +m[1]);
+    } else if ((m = /^(\d+)ticks$/.exec(value)) !== null) {
+      time = ticks2sec(+m[1], this._bpm);
+    } else if ((m = /^(\d+)(n[td]?)$/.exec(value)) !== null) {
+      time = note2sec(+m[1], m[2], this._bpm);
+    } else if ((m = /^(\d+)\.(\d+)\.(\d+)$/.exec(value)) !== null) {
+      time = ticks2sec((+m[1] * 4 + (+m[2])) * 480 + (+m[3]), this._bpm);
+    } else if ((m = /^(\d\d):(\d\d):(\d\d)(?:\.(\d+))?$/.exec(value)) !== null) {
+      time = ((+m[1] * 3600) + (+m[2] * 60) + (+m[3]) + (((m[4] || "") + "000").substr(0, 3) * 0.001));
+    } else if ((m = /^(\d+)samples$/.exec(value)) !== null) {
+      time = (+m[1] / this.sampleRate);
+    } else {
+      time = util.finite(+value);
+    }
+
+    return time + offset;
+  }
+
+  return value;
+};
+
+function ticks2sec(ticks, bpm) {
+  return 60 / bpm * (ticks / 480);
+}
+
+function note2sec(num, note, bpm) {
+  var acc = {
+    nt: 2 / 3,
+    nd: 3 / 2,
+  }[note] || 1;
+  return num === 0 ? 0 : ticks2sec((4 / num) * 480 * acc, bpm);
+}
+
+function onaudioprocess(_this, t0, t1) {
+  // Safari 7.0.6 does not support e.playbackTime
+  var events = _this._events;
+
+  _this._currentTime = t0;
+
+  _this._nextTicks.splice(0).forEach(function(callback) {
+    callback(t0);
+  });
+
+  while (events.length && events[0].time <= t1) {
+    var event = events.shift();
+
+    _this._currentTime = Math.max(_this._currentTime, event.time);
+
+    event.callback.call(event.context, event.time);
+  }
+
+  _this._currentTime = t0;
+}
+
+module.exports = neume.Transport = NeuTransport;
+
+},{"../const":8,"../namespace":21,"../util":54,"./timer":18}],20:[function(require,module,exports){
 module.exports = require("./core/neume");
 
-},{"./core/neume":17}],20:[function(require,module,exports){
+},{"./core/neume":16}],21:[function(require,module,exports){
 "use strict";
 
 function neume() {
   return neume.impl.apply(null, arguments);
 }
 
-neume.version = "0.7.1";
+neume.version = "0.8.0";
 
 module.exports = neume;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
+"use strict";
+
+var util = require("../util");
+var neume = require("../namespace");
+
+require("../core/context");
+
+function NeuSynthContext(context) {
+  this.context = this;
+  this.audioContext = context.audioContext;
+  this.sampleRate = context.sampleRate;
+  this._context = context;
+  this._nodes = [];
+}
+util.inherits(NeuSynthContext, neume.Context);
+
+NeuSynthContext.$$name = "NeuSynthContext";
+
+NeuSynthContext.prototype.start = function() {
+  this._context.start();
+  return this;
+};
+
+NeuSynthContext.prototype.stop = function() {
+  this._context.stop();
+  return this;
+};
+
+NeuSynthContext.prototype.reset = function() {
+  this._context.reset();
+  return this;
+};
+
+NeuSynthContext.prototype.sched = function(time, callback, context) {
+  return this._context.sched(time, callback, context);
+};
+
+NeuSynthContext.prototype.unsched = function(id) {
+  return this._context.unsched(id);
+};
+
+NeuSynthContext.prototype.nextTick = function(callback, context) {
+  this._context.nextTick(callback, context);
+  return this;
+};
+
+NeuSynthContext.prototype.getAudioBus = function(index) {
+  return this._context.getAudioBus(index);
+};
+
+NeuSynthContext.prototype.toSeconds = function(value) {
+  return this._context.toSeconds(value);
+};
+
+module.exports = neume.SynthContext = NeuSynthContext;
+
+},{"../core/context":15,"../namespace":21,"../util":54}],23:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -1966,6 +2166,8 @@ function NeuSynthDollar(synth) {
     });
   };
 
+  builder.inputs = [];
+
   this.db = db;
   this.builder = builder;
 }
@@ -2012,13 +2214,13 @@ function validateParam(name) {
 
 module.exports = neume.SynthDollar = NeuSynthDollar;
 
-},{"../component/param":7,"../namespace":20,"../util":55,"./ugen":26,"./ugen-promise":25}],22:[function(require,module,exports){
+},{"../component/param":6,"../namespace":21,"../util":54,"./ugen":28,"./ugen-promise":27}],24:[function(require,module,exports){
 require("./dollar");
 require("./synth");
 require("./ugen");
 require("./unit");
 
-},{"./dollar":21,"./synth":24,"./ugen":26,"./unit":27}],23:[function(require,module,exports){
+},{"./dollar":23,"./synth":26,"./ugen":28,"./unit":29}],25:[function(require,module,exports){
 "use strict";
 
 var reUGenName = /^([a-zA-Z](-?[a-zA-Z0-9]+)*!?\??~?|[-+*\/%<=>!?&|]+~?)/;
@@ -2061,23 +2263,25 @@ module.exports = {
   parse: parse
 };
 
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
 var DB = require("../util/db");
 var neume = require("../namespace");
+var Emitter = require("../util/emitter");
 var Parser = require("./parser");
 
 require("./dollar");
+require("./context");
 
 var EMPTY_DB = new DB();
-var INIT = 0;
-var START = 1;
-var STOP = 2;
+var INIT = 0, START = 1, STOP = 2;
 
 function NeuSynth(context, func, args) {
-  this.context = context;
+  Emitter.call(this);
+
+  this.context = new neume.SynthContext(context);
   this.routes = [];
 
   var $ = new neume.SynthDollar(this);
@@ -2086,7 +2290,7 @@ function NeuSynth(context, func, args) {
   this.scheds = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
-  var result = func.apply(null, [ $.builder ].concat(args));
+  var result = func.apply(this, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.isOutput) {
     this.routes[0] = result;
@@ -2127,12 +2331,6 @@ function NeuSynth(context, func, args) {
   }, this);
 
   Object.defineProperties(this, {
-    currentTime: {
-      get: function() {
-        return this.context.currentTime;
-      },
-      enumerable: true
-    },
     state: {
       get: function() {
         return this._stateString;
@@ -2141,6 +2339,8 @@ function NeuSynth(context, func, args) {
     }
   });
 }
+util.inherits(NeuSynth, Emitter);
+
 NeuSynth.$$name = "NeuSynth";
 
 NeuSynth.prototype.query = function(selector) {
@@ -2178,9 +2378,9 @@ NeuSynth.prototype.start = function(startTime) {
   context.sched(startTime, function() {
     this._stateString = "PLAYING";
 
-    this.routes.forEach(function(node, index) {
-      this.connect(node, this.getAudioBus(index));
-    }, context);
+    this.routes.forEach(function(_, index) {
+      context.getAudioBus(index).append(this);
+    }, this);
 
     this._db.all().forEach(function(ugen) {
       ugen.start(startTime);
@@ -2189,6 +2389,11 @@ NeuSynth.prototype.start = function(startTime) {
     this._scheds = this.scheds.splice(0).map(function(set) {
       return new neume.Sched(context, set[0], set[1]).start(startTime);
     }, this);
+
+    this.emit("start", {
+      type: "start",
+      playbackTime: startTime
+    });
   }, this);
 
   context.start(); // auto start(?)
@@ -2210,11 +2415,13 @@ NeuSynth.prototype.stop = function(startTime) {
   context.sched(startTime, function(t0) {
     this._stateString = "FINISHED";
 
+    this.routes.forEach(function(_, index) {
+      context.getAudioBus(index).remove(this);
+    });
+
     context.nextTick(function() {
-      this.routes.forEach(function(node) {
-        context.disconnect(node);
-      });
-    }, this);
+      context.dispose();
+    });
 
     this._db.all().forEach(function(ugen) {
       ugen.stop(t0);
@@ -2222,6 +2429,11 @@ NeuSynth.prototype.stop = function(startTime) {
 
     this._scheds.forEach(function(sched) {
       sched.stop(t0);
+    });
+
+    this.emit("stop", {
+      type: "stop",
+      playbackTime: startTime
     });
   }, this);
 
@@ -2305,51 +2517,12 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
   return this;
 };
 
-NeuSynth.prototype.toAudioNode = function() {
-  return this.context.toAudioNode(this.routes[0]);
-};
-
-NeuSynth.prototype.hasListeners = function(event) {
-  return this._db.all().reduce(function(a, b) {
-    return a || b.hasListeners(event);
-  }, false);
-};
-
-NeuSynth.prototype.listeners = function(event) {
-  var tmp = this._db.all().reduce(function(a, b) {
-    return a.concat(b.listeners(event));
-  }, []);
-
-  var listeners = [];
-
-  for (var i = 0, imax = tmp.length; i < imax; i++) {
-    if (listeners.indexOf(tmp[i]) === -1) {
-      listeners.push(tmp[i]);
-    }
+NeuSynth.prototype.toAudioNode = function(index) {
+  index = util.int(index);
+  if (this.routes[index]) {
+    return this.context.toAudioNode(this.routes[index]);
   }
-
-  return listeners;
-};
-
-NeuSynth.prototype.on = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.on(event, listener);
-  });
-  return this;
-};
-
-NeuSynth.prototype.once = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.once(event, listener);
-  });
-  return this;
-};
-
-NeuSynth.prototype.off = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.off(event, listener);
-  });
-  return this;
+  return null;
 };
 
 function getMethods(db) {
@@ -2366,7 +2539,7 @@ function getMethods(db) {
 
 module.exports = neume.Synth = NeuSynth;
 
-},{"../namespace":20,"../util":55,"../util/db":52,"./dollar":21,"./parser":23}],25:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"../util/db":51,"../util/emitter":52,"./context":22,"./dollar":23,"./parser":25}],27:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2415,7 +2588,7 @@ NeuUGenPromise.prototype.onconnected = function(from) {
 
 module.exports = neume.UGenPromise = NeuUGenPromise;
 
-},{"../namespace":20,"../util":55,"./ugen":26}],26:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./ugen":28}],28:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2439,7 +2612,10 @@ function NeuUGen(synth, key, spec, inputs) {
   this.id = parsed.id;
   this.outlet = null;
 
-  if (hasClass(this, "bypass")) {
+  if (hasClass(this, "mute")) {
+    this._unit = new neume.Unit({});
+    this._node = this.context.createGain();
+  } else if (hasClass(this, "bypass")) {
     this._unit = NeuUGen.registered["+"](this, {}, inputs);
     this._node = this._unit.outlet;
   } else {
@@ -2555,11 +2731,7 @@ NeuUGen.prototype.sched = function(schedIter, callback) {
 
 NeuUGen.prototype.toAudioNode = function() {
   if (this.outlet === null) {
-    if (hasClass(this, "mute")) {
-      this.outlet = this.context.createGain();
-    } else {
-      this.outlet = this.context.toAudioNode(this._node);
-    }
+    this.outlet = this.context.toAudioNode(this._node);
   }
   return this.outlet;
 };
@@ -2602,7 +2774,7 @@ function hasClass(_this, className) {
 
 module.exports = neume.UGen = NeuUGen;
 
-},{"../namespace":20,"../util":55,"../util/emitter":53,"./parser":23}],27:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"../util/emitter":52,"./parser":25}],29:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -2635,8 +2807,8 @@ NeuUnit.prototype.stop = function(t) {
 
 module.exports = neume.Unit = NeuUnit;
 
-},{"../namespace":20,"../util":55}],28:[function(require,module,exports){
-module.exports = function(neume) {
+},{"../namespace":21,"../util":54}],30:[function(require,module,exports){
+module.exports = function(neume, util) {
   "use strict";
 
   /**
@@ -2656,6 +2828,11 @@ module.exports = function(neume) {
     return make(ugen, spec, inputs);
   });
 
+  neume.register("array", function(ugen, spec, inputs) {
+    inputs = util.toArray(spec.value).concat(inputs);
+    return make(ugen, spec, inputs);
+  });
+
   function make(ugen, spec, inputs) {
     return new neume.Unit({
       outlet: new neume.Sum(ugen.context, inputs)
@@ -2664,99 +2841,7 @@ module.exports = function(neume) {
 
 };
 
-},{}],29:[function(require,module,exports){
-module.exports = function(neume, util) {
-  "use strict";
-
-  /**
-   * $(Array<number>, {
-   *   clip: string = "clip",
-   *   curve: string|number = "step",
-   *   lag: timevalue = 0,
-   *   mul: signal = 1,
-   *   add: signal = 0,
-   * }, ...inputs: signal)
-   *
-   * methods:
-   *   setValue(startTime: timevalue, value: Array<number>)
-   *   at(startTime: timevalue, index: number)
-   *   next(startTime: timevalue)
-   *   prev(startTime: timevalue)
-   *
-   * +-----------+     +-----------+
-   * | inputs[0] | ... | inputs[N] |
-   * +-----------+     +-----------+
-   *   |                 |
-   *   +-----------------+
-   *   |
-   * +----------+
-   * | GainNode |
-   * | - gain: <--- Array<number>
-   * +----------+
-   *   |
-   */
-  neume.register("array", function(ugen, spec, inputs) {
-    return make(ugen, spec, inputs);
-  });
-
-  function make(ugen, spec, inputs) {
-    var context = ugen.context;
-
-    var index = 0;
-    var data = spec.value;
-    var mode = {
-      clip: neume._.clipAt,
-      wrap: neume._.wrapAt,
-      fold: neume._.foldAt,
-    }[spec.clip || spec.mode] || /* istanbul ignore next*/ neume._.clipAt;
-
-    if (!Array.isArray(data) || data.length === 0)  {
-      data = [ 0 ];
-    }
-
-    var param = new neume.Param(context, util.finite(data[0]), spec);
-    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
-
-    function setValue(t, value) {
-      if (Array.isArray(value)) {
-        data = value;
-      }
-    }
-
-    function at(t, value) {
-      update(util.int(value), t);
-    }
-
-    function next(t) {
-      update(index + 1, t);
-    }
-
-    function prev(t) {
-      update(index - 1, t);
-    }
-
-    function update(nextIndex, startTime) {
-      var value = mode(data, nextIndex);
-
-      param.update(value, util.finite(context.toSeconds(startTime)));
-
-      index = nextIndex;
-    }
-
-    return new neume.Unit({
-      outlet: outlet,
-      methods: {
-        setValue: setValue,
-        at: at,
-        next: next,
-        prev: prev
-      }
-    });
-  }
-
-};
-
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
@@ -2824,7 +2909,7 @@ module.exports = function(neume) {
 
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -2915,75 +3000,6 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],32:[function(require,module,exports){
-module.exports = function(neume, util) {
-  "use strict";
-
-  /**
-   * $(boolean, {
-   *   true: number = 1,
-   *   false: number = 0,
-   *   curve: string|number = "step",
-   *   lag: timevalue = 0,
-   *   mul: signal = 1,
-   *   add: signal = 0,
-   * }, ...inputs: signal)
-   *
-   * methods:
-   *   setValue(startTime: timevalue, value: boolean)
-   *   toggle(startTime: timevalue)
-   *
-   * +-----------+     +-----------+
-   * | inputs[0] | ... | inputs[N] |
-   * +-----------+     +-----------+
-   *   |                 |
-   *   +-----------------+
-   *   |
-   * +----------+
-   * | GainNode |
-   * | - gain: <--- value ? trueVal : falseVal
-   * +----------+
-   *   |
-   */
-  neume.register("boolean", function(ugen, spec, inputs) {
-    return make(ugen, spec, inputs);
-  });
-
-  function make(ugen, spec, inputs) {
-    var context = ugen.context;
-
-    var data = !!spec.value;
-    var trueVal = util.finite(util.defaults(spec.true, 1));
-    var falseVal = util.finite(util.defaults(spec.false, 0));
-    var param = new neume.Param(context, data ? trueVal : falseVal, spec);
-    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
-
-    function setValue(t, value) {
-      if (typeof value === "boolean") {
-        update(value, t);
-      }
-    }
-
-    function toggle(t) {
-      update(!data, t);
-    }
-
-    function update(value, startTime) {
-      param.update(value ? trueVal : falseVal, util.finite(context.toSeconds(startTime)));
-      data = value;
-    }
-
-    return new neume.Unit({
-      outlet: outlet,
-      methods: {
-        setValue: setValue,
-        toggle: toggle
-      }
-    });
-  }
-
-};
-
 },{}],33:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
@@ -3027,12 +3043,14 @@ module.exports = function(neume, util) {
   function make(buffer, ugen, spec) {
     var context = ugen.context;
     var bufSrc = context.createBufferSource();
+    var duration = 0;
 
     buffer = context.toAudioBuffer(buffer);
 
     /* istanbul ignore else */
     if (buffer != null) {
       bufSrc.buffer = buffer;
+      duration = buffer.duration;
     }
     bufSrc.loop = !!util.defaults(spec.loop, false);
     bufSrc.loopStart = util.finite(util.defaults(spec.start, spec.loopStart, 0));
@@ -3041,24 +3059,19 @@ module.exports = function(neume, util) {
     bufSrc.playbackRate.value = 0;
     context.connect(util.defaults(spec.rate, spec.playbackRate, 1), bufSrc.playbackRate);
 
-    var offset = util.finite(util.defaults(spec.offset, 0));
-    var duration = context.toSeconds(util.defaults(spec.dur, spec.duration, null));
-    if (duration != null) {
-      duration = util.finite(duration);
-    }
-
     function start(t) {
-      if (duration != null) {
-        bufSrc.start(t, offset, duration);
-      } else {
-        bufSrc.start(t, offset);
-      }
+      bufSrc.start(t);
       bufSrc.onended = function() {
-        ugen.emit("end", { type: "end", playbackTime: context.currentTime }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t + duration
+        });
       };
     }
 
     function stop(t) {
+      bufSrc.onended = null;
       bufSrc.stop(t);
     }
 
@@ -3271,6 +3284,148 @@ module.exports = function(neume, util) {
 };
 
 },{}],37:[function(require,module,exports){
+module.exports = function(neume, util) {
+  "use strict";
+
+  var WS_CURVE_SIZE = neume.WS_CURVE_SIZE;
+  var KVSKEY = "@neume:drywet:";
+
+  /*
+   * $("drywet", {
+   *   mix: signal = 0,
+   *   efx: function = null,
+   *   args: any[] = [],
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * }, ...inputs: signal)
+   *
+   * +-----------+     +-----------+  +-----+
+   * | inputs[0] | ... | inputs[N] |  | mix |
+   * +-----------+     +-----------+  +-----+
+   *   |                 |               |
+   *   +-----------------+               |
+   *   |                                 |
+   *   |    +----------------------------+
+   *   |    |                            |
+   *   |  +-------------------+  +-------------------+
+   *   |  | WaveShaperNode    |  | WaveShaperNode    |
+   *   |  | - curve: dryCurve |  | - curve: wetCurve |
+   *   |  +-------------------+  +-------------------+
+   *   |           |                 |
+   *   +------------------+          |
+   *   |           |      |          |
+   *   |           |   +-----+       |
+   *   |           |   | efx |       |
+   *   |           |   +-----+       |
+   *   |           |      |          |
+   * +----------+  |   +----------+  |
+   * | GainNode |  |   | GainNode |  |
+   * | - gain: <---+   | - gain: <---+
+   * +----------+      +----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   */
+  neume.register("drywet", function(ugen, spec, inputs) {
+    return make(ugen, spec, inputs);
+  });
+
+  function make(ugen, spec, inputs) {
+    var context = ugen.context;
+
+    var mix = util.defaults(spec.mix, 0);
+    var efx = util.defaults(spec.efx, spec.wet, null);
+    var args = util.defaults(spec.args, []);
+    var dry = inputs;
+    var wet = null;
+
+    if (typeof efx === "function") {
+      var $ = ugen.synth.builder;
+      var builder = function() {
+        return $.apply(null, arguments);
+      };
+      builder.timeout = $.timeout;
+      builder.interval = $.interval;
+      builder.stop = $.stop;
+      builder.inputs = inputs;
+
+      wet = efx.apply(ugen.synth, [ builder ].concat(args));
+    }
+
+    var outlet;
+
+    if (wet == null || typeof mix === "number") {
+      outlet = makeWithNumber(context, dry, wet, mix);
+    } else {
+      outlet = makeWithNode(context, dry, wet, mix);
+    }
+
+    return new neume.Unit({
+      outlet: outlet
+    });
+  }
+
+  function makeWithNumber(context, dry, wet, mix) {
+    mix = util.clip(util.finite(mix), -1, +1);
+
+    if (mix === -1 || wet == null) {
+      return new neume.Sum(context, dry);
+    }
+    if (mix === +1) {
+      return new neume.Sum(context, wet);
+    }
+
+    mix = (mix + 1) * 0.25 * Math.PI;
+
+    var dryGain = context.createGain();
+    var wetGain = context.createGain();
+
+    dryGain.gain.value = Math.cos(mix);
+    wetGain.gain.value = Math.sin(mix);
+
+    context.connect(dry, dryGain);
+    context.connect(wet, wetGain);
+
+    return new neume.Sum(context, [ dryGain, wetGain ]);
+  }
+
+  function makeWithNode(context, dry, wet, mix) {
+    var dryGain = context.createGain();
+    var wetGain = context.createGain();
+    var dryWS = context.createWaveShaper();
+    var wetWS = context.createWaveShaper();
+    var curve = neume.KVS.get(KVSKEY + "curve");
+
+    dryWS.curve = curve.dry;
+    wetWS.curve = curve.wet;
+
+    dryGain.gain.value = 0;
+    wetGain.gain.value = 0;
+
+    context.connect(mix, dryWS);
+    context.connect(mix, wetWS);
+    context.connect(dryWS, dryGain.gain);
+    context.connect(wetWS, wetGain.gain);
+    context.connect(dry, dryGain);
+    context.connect(wet, wetGain);
+
+    return new neume.Sum(context, [ dryGain, wetGain ]);
+  }
+
+  neume.KVS.set(KVSKEY + "curve", function() {
+    var curveDry = new Float32Array(WS_CURVE_SIZE);
+    var curveWet = new Float32Array(WS_CURVE_SIZE);
+
+    for (var i = 0; i < WS_CURVE_SIZE; i++) {
+      curveDry[i] = Math.cos((i / WS_CURVE_SIZE) * Math.PI * 0.5);
+      curveWet[i] = Math.sin((i / WS_CURVE_SIZE) * Math.PI * 0.5);
+    }
+
+    return { dry: curveDry, wet: curveWet };
+  });
+};
+
+},{}],38:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3623,7 +3778,11 @@ module.exports = function(neume, util) {
       if (env.index === env.length) {
         schedId = context.sched(t1, function(t) {
           schedId = 0;
-          ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+          ugen.emit("end", {
+            type: "end",
+            synth: ugen.synth,
+            playbackTime: t
+          });
         });
       } else if (env.index !== env.releaseNode) {
         schedId = context.sched(t1, resume);
@@ -3652,92 +3811,19 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],38:[function(require,module,exports){
-module.exports = function(neume, util) {
-  "use strict";
-
-  /* istanbul ignore next */
-  var NOP = function() {};
-
-  /**
-   * $(function, {
-   *   curve: string|number = "step",
-   *   lag: timevalue = 0,
-   *   mul: signal = 1,
-   *   add: signal = 0,
-   * }, ...inputs: signal)
-   *
-   * methods:
-   *   setValue(startTime: timevalue, value: ({ playbackTime: number, count: number })->number)
-   *   execute(startTime: timevalue)
-   *
-   * +-----------+     +-----------+
-   * | inputs[0] | ... | inputs[N] |
-   * +-----------+     +-----------+
-   *   |                 |
-   *   +-----------------+
-   *   |
-   * +----------+
-   * | GainNode |
-   * | - gain: <--- evaluated value
-   * +----------+
-   *   |
-   */
-  neume.register("function", function(ugen, spec, inputs) {
-    return make(ugen, spec, inputs);
-  });
-
-  function make(ugen, spec, inputs) {
-    var context = ugen.context;
-
-    var data = typeof spec.value === "function" ? spec.value : /* istanbul ignore next */ NOP;
-    var count = 0;
-    var param = new neume.Param(context, util.finite(data(0, count++)), spec);
-    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
-
-    function setValue(t, value) {
-      if (typeof value === "function") {
-        data = value;
-      }
-    }
-
-    function evaluate(t) {
-      t = util.finite(context.toSeconds(t));
-
-      var value = data({
-        playbackTime: t,
-        count: count++
-      });
-
-      param.update(value, t);
-    }
-
-    return new neume.Unit({
-      outlet: outlet,
-      methods: {
-        setValue: setValue,
-        evaluate: evaluate
-      }
-    });
-  }
-
-};
-
 },{}],39:[function(require,module,exports){
 module.exports = function(neume) {
   "use strict";
 
   neume.use(require("./add"));
-  neume.use(require("./array"));
   neume.use(require("./audio-node"));
   neume.use(require("./biquad"));
-  neume.use(require("./boolean"));
   neume.use(require("./buf"));
   neume.use(require("./comp"));
   neume.use(require("./conv"));
   neume.use(require("./delay"));
+  neume.use(require("./drywet"));
   neume.use(require("./env"));
-  neume.use(require("./function"));
   neume.use(require("./inout"));
   neume.use(require("./iter"));
   neume.use(require("./lfpulse"));
@@ -3745,7 +3831,6 @@ module.exports = function(neume) {
   neume.use(require("./mono"));
   neume.use(require("./mul"));
   neume.use(require("./noise"));
-  neume.use(require("./number"));
   neume.use(require("./object"));
   neume.use(require("./osc"));
   neume.use(require("./pan2"));
@@ -3753,7 +3838,7 @@ module.exports = function(neume) {
 
 };
 
-},{"./add":28,"./array":29,"./audio-node":30,"./biquad":31,"./boolean":32,"./buf":33,"./comp":34,"./conv":35,"./delay":36,"./env":37,"./function":38,"./inout":40,"./iter":41,"./lfpulse":42,"./line":43,"./mono":44,"./mul":45,"./noise":46,"./number":47,"./object":48,"./osc":49,"./pan2":50,"./shaper":51}],40:[function(require,module,exports){
+},{"./add":30,"./audio-node":31,"./biquad":32,"./buf":33,"./comp":34,"./conv":35,"./delay":36,"./drywet":37,"./env":38,"./inout":40,"./iter":41,"./lfpulse":42,"./line":43,"./mono":44,"./mul":45,"./noise":46,"./object":47,"./osc":48,"./pan2":49,"./shaper":50}],40:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -3761,29 +3846,22 @@ module.exports = function(neume, util) {
 
   /**
   * $("in", {
+  *   bus: number = 0,
   *   mul: signal = 1,
   *   add: signal = 0,
-  * }, ...bus: number)
+  * })
   *
-  *  +-------------+     +-------------+
-  *  | AudioBus[0] | ... | AudioBus[0] |
-  *  +-------------+     +-------------+
-  *   |                    |
-  *   +--------------------+
+  *  +---------------+
+  *  | AudioBus[bus] |
+  *  +---------------+
   *   |
   */
-  neume.register("in", function(ugen, spec, inputs) {
+  neume.register("in", function(ugen, spec) {
     var context = ugen.context;
-    var outlet = null;
-
-    inputs = inputs.filter(util.isFinite).map(function(index) {
-      return getAudioBus(context, index);
-    });
-
-    outlet = new neume.Sum(context, inputs);
+    var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
 
     return new neume.Unit({
-      outlet: outlet
+      outlet: context.getAudioBus(index)
     });
   });
 
@@ -3815,12 +3893,6 @@ module.exports = function(neume, util) {
       isOutput: true
     });
   });
-
-  function getAudioBus(context, index) {
-    index = util.clip(util.int(util.defaults(index, 0)), 0, AUDIO_BUS_CHANNELS);
-
-    return context.getAudioBus(index);
-  }
 };
 
 },{}],41:[function(require,module,exports){
@@ -3841,7 +3913,6 @@ module.exports = function(neume, util) {
    *
    * methods:
    *   next(startTime: timevalue)
-   *   reset(startTime: timevalue)
    *
    * +-----------+     +-----------+
    * | inputs[0] | ... | inputs[N] |
@@ -3871,15 +3942,13 @@ module.exports = function(neume, util) {
       var items = iterNext();
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       } else {
         param.setValueAtTime(util.finite(items.value), t);
-      }
-    }
-
-    function setValue(e, value) {
-      if (util.isIterator(value)) {
-        iter = value;
       }
     }
 
@@ -3894,7 +3963,11 @@ module.exports = function(neume, util) {
 
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       } else {
         param.update(util.finite(items.value), t);
       }
@@ -3908,7 +3981,6 @@ module.exports = function(neume, util) {
       outlet: outlet,
       start: start,
       methods: {
-        setValue: setValue,
         next: next
       }
     });
@@ -4135,7 +4207,11 @@ module.exports = function(neume, util) {
 
       schedId = context.sched(t1, function(t) {
         schedId = 0;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       });
     }
 
@@ -4422,63 +4498,6 @@ module.exports = function(neume, util) {
   "use strict";
 
   /**
-   * $(number, {
-   *   curve: string|number = "step",
-   *   lag: timevalue = 0,
-   *   mul: signal = 1,
-   *   add: signal = 0,
-   * }, ...inputs: signal)
-   *
-   * methods:
-   *   setValue(startTime: timevalue, value: number)
-   *
-   * +-----------+     +-----------+
-   * | inputs[0] | ... | inputs[N] |
-   * +-----------+     +-----------+
-   *   |                 |
-   *   +-----------------+
-   *   |
-   * +----------+
-   * | GainNode |
-   * | - gain: <--- number
-   * +----------+
-   *   |
-   */
-  neume.register("number", function(ugen, spec, inputs) {
-    return make(ugen, spec, inputs);
-  });
-
-  function make(ugen, spec, inputs) {
-    var context = ugen.context;
-
-    var param = new neume.Param(context, util.finite(spec.value), spec);
-    var outlet = inputs.length ? param.toAudioNode(inputs) : param;
-
-    function setValue(t, value) {
-      if (util.isFinite(value)) {
-        update(value, t);
-      }
-    }
-
-    function update(value, startTime) {
-      param.update(value, util.finite(context.toSeconds(startTime)));
-    }
-
-    return new neume.Unit({
-      outlet: outlet,
-      methods: {
-        setValue: setValue
-      }
-    });
-  }
-
-};
-
-},{}],48:[function(require,module,exports){
-module.exports = function(neume, util) {
-  "use strict";
-
-  /**
   * $(object, {
   *   key: string|number = "",
   *   curve: string|number = "step",
@@ -4567,11 +4586,9 @@ module.exports = function(neume, util) {
   }
 };
 
-},{}],49:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
-
-  var KVSKEY = "@neume:osc";
 
   /**
    * $("osc", {
@@ -4618,11 +4635,10 @@ module.exports = function(neume, util) {
   };
 
   neume.register("osc", function(ugen, spec, inputs) {
-    var context = ugen.context;
     var type = spec.type;
 
     if (!isPeriodicWave(type)) {
-      type = type2wave(context, WAVE_TYPES[type] || "sine");
+      type = WAVE_TYPES[type] || "sine";
     }
 
     return make(type, ugen, spec, inputs);
@@ -4641,7 +4657,7 @@ module.exports = function(neume, util) {
   Object.keys(WAVE_TYPES).forEach(function(name) {
     var type = WAVE_TYPES[name];
     neume.register(name, function(ugen, spec, inputs) {
-      return make(type2wave(ugen.context, type), ugen, spec, inputs);
+      return make(type, ugen, spec, inputs);
     });
   });
 
@@ -4704,58 +4720,9 @@ module.exports = function(neume, util) {
     return wave instanceof neume.webaudio.PeriodicWave;
   }
 
-  function type2wave(context, type) {
-    return neume.KVS.get(KVSKEY + type, context);
-  }
-
-  neume.KVS.set(KVSKEY + "sine", "sine");
-
-  neume.KVS.set(KVSKEY + "square", function(context) {
-    var real = new Float32Array(4096);
-    var imag = new Float32Array(4096);
-
-    for (var i = 1; i < 4096; i++) {
-      if (i % 2 === 1) {
-        imag[i] = 1 / i;
-      }
-    }
-
-    return context.createPeriodicWave(real, imag);
-  });
-
-  neume.KVS.set(KVSKEY + "sawtooth", function(context) {
-    var real = new Float32Array(4096);
-    var imag = new Float32Array(4096);
-
-    for (var i = 1; i < 4096; i++) {
-      imag[i] = 1 / i;
-      if (i % 2 === 0) {
-        imag[i] *= -1;
-      }
-    }
-
-    return context.createPeriodicWave(real, imag);
-  });
-
-  neume.KVS.set(KVSKEY + "triangle", function(context) {
-    var real = new Float32Array(4096);
-    var imag = new Float32Array(4096);
-
-    for (var i = 1, imax = imag.length; i < imax; i++) {
-      if (i % 2) {
-        imag[i] = 1 / (i * i);
-        if (i % 4 === 3) {
-          imag[i] *= -1;
-        }
-      }
-    }
-
-    return context.createPeriodicWave(real, imag);
-  });
-
 };
 
-},{}],50:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4860,7 +4827,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function(neume, util) {
   "use strict";
 
@@ -4972,7 +4939,7 @@ module.exports = function(neume, util) {
 
 };
 
-},{}],52:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 
 function DB() {
@@ -5020,7 +4987,7 @@ DB.prototype.find = function(parsed) {
 
 module.exports = DB;
 
-},{}],53:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 
 function Emitter() {
@@ -5087,7 +5054,7 @@ Emitter.prototype.emit = function(event, payload, ctx) {
 
 module.exports = Emitter;
 
-},{}],54:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -5233,7 +5200,7 @@ module.exports = {
   inverse: inverse,
 };
 
-},{"../util":55}],55:[function(require,module,exports){
+},{"../util":54}],54:[function(require,module,exports){
 "use strict";
 
 var util = {};
@@ -5258,9 +5225,9 @@ util.toArray = function(value) {
 };
 
 util.flatten = function(list) {
-  return list.reduce(function(a, b) {
+  return Array.isArray(list) ? list.reduce(function(a, b) {
     return a.concat(Array.isArray(b) ? util.flatten(b) : b);
-  }, []);
+  }, []) : [ list ];
 };
 
 util.definePropertyIfNotExists = function(obj, prop, descriptor) {
@@ -5366,7 +5333,7 @@ util.inherits = function(ctor, superCtor) {
 
 module.exports = util;
 
-},{}],56:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 
 var util = require("../util");
@@ -5403,88 +5370,7 @@ module.exports = {
   }
 };
 
-},{"../util":55}],57:[function(require,module,exports){
-"use strict";
-
-var util = require("../util");
-
-function toSeconds(value, bpm, sampleRate, currentTime) {
-  if (typeof value === "number") {
-    return util.finite(value);
-  }
-
-  if (value && typeof value.playbackTime === "number") {
-    return util.finite(value.playbackTime);
-  }
-
-  if (typeof value === "string") {
-    var m, offset = 0, time = 0;
-
-    if (value.charAt(0) === "+") {
-      offset = currentTime;
-      value = value.slice(1);
-    }
-
-    var components = value.split(/[\(\)\-\+\/\*]/);
-
-    if (components.length > 1) {
-      var oringalTime = value;
-      var expr = value;
-
-      for (var i = 0, imax = components.length; i < imax; i++) {
-        var symb = components[i].trim();
-        if (symb !== "") {
-          expr = expr.replace(symb, toSeconds(symb, bpm, sampleRate, currentTime));
-        }
-      }
-
-      try {
-        time = eval(expr); // jshint ignore:line
-      } catch (e) {
-        throw new EvalError("Invalid Time Value Syntax: " + oringalTime);
-      }
-
-    } else if (value === "now") {
-      return currentTime;
-    } else if ((m = /^(\d+)ms$/.exec(value)) !== null) {
-      time = +m[1] * 0.001;
-    } else if ((m = /^(\d+(?:\.\d+)?)hz$/.exec(value)) !== null) {
-      time = util.finite(1 / +m[1]);
-    } else if ((m = /^(\d+)ticks$/.exec(value)) !== null) {
-      time = ticks2sec(+m[1], bpm);
-    } else if ((m = /^(\d+)(n[td]?)$/.exec(value)) !== null) {
-      time = note2sec(+m[1], m[2], bpm);
-    } else if ((m = /^(\d+)\.(\d+)\.(\d+)$/.exec(value)) !== null) {
-      time = ticks2sec((+m[1] * 4 + (+m[2])) * 480 + (+m[3]), bpm);
-    } else if ((m = /^(\d\d):(\d\d):(\d\d)(?:\.(\d+))?$/.exec(value)) !== null) {
-      time = ((+m[1] * 3600) + (+m[2] * 60) + (+m[3]) + (((m[4] || "") + "000").substr(0, 3) * 0.001));
-    } else if ((m = /^(\d+)samples$/.exec(value)) !== null) {
-      time = (+m[1] / sampleRate);
-    } else {
-      time = util.finite(+value);
-    }
-
-    return time + offset;
-  }
-
-  return value;
-}
-
-function ticks2sec(ticks, bpm) {
-  return 60 / bpm * (ticks / 480);
-}
-
-function note2sec(num, note, bpm) {
-  var acc = {
-    nt: 2 / 3,
-    nd: 3 / 2,
-  }[note] || 1;
-  return num === 0 ? 0 : ticks2sec((4 / num) * 480 * acc, bpm);
-}
-
-module.exports = toSeconds;
-
-},{"../util":55}],58:[function(require,module,exports){
+},{"../util":54}],56:[function(require,module,exports){
 "use strict";
 
 var util = require("./");
@@ -5612,4 +5498,4 @@ _.foldAt = function(list, index) {
 
 module.exports = _;
 
-},{"./":55}]},{},[1]);
+},{"./":54}]},{},[1]);

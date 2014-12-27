@@ -22,9 +22,9 @@ util.toArray = function(value) {
 };
 
 util.flatten = function(list) {
-  return list.reduce(function(a, b) {
+  return Array.isArray(list) ? list.reduce(function(a, b) {
     return a.concat(Array.isArray(b) ? util.flatten(b) : b);
-  }, []);
+  }, []) : [ list ];
 };
 
 util.definePropertyIfNotExists = function(obj, prop, descriptor) {

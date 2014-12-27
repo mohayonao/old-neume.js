@@ -8,23 +8,18 @@
   <link rel="stylesheet" href=//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
   <style>
     body { font-family:"Source Sans Pro",sans-serif }
-    .pattern {
-      font-family:"Courier New",monospace;margin-top:10px;
-      user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;
-    }
-    .pattern li:nth-child(4n+2) { margin-left: 6px }
-    .pattern li:nth-child(16n+2) { margin-left: 10px }
-    #start { margin: 10px 0 }
     #canvas { width:100%;height:240px;background:black }
     #code { padding:0;margin:0;background:white;border:none }
+    #app { margin: 10px 0 }
+    #app .btn { width:100px }
   </style>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//mohayonao.github.io/gretro/build/gretro.min.js"></script>
   <script src="../build/neume.js"></script>
-  <script>_.mixin(neume._.exports());</script>
+  <script>
+  _.mixin(neume._.exports());
+  </script>
 </head>
 <body>
   <div class="container">
@@ -34,13 +29,10 @@
     </div>
     <canvas id="canvas"></canvas>
     <div id="app">
-      <div class="pattern">
-        <ul class="list-inline" v-repeat="score">
-          <li style="width:40px">{{ $root.$data.caption[$index] }}</li>
-          <li v-repeat="$data" v-on="click: $data.checked = 1 - $data.checked">{{ $data.checked ? 'O' : '-' }}</li>
-        </ul>
-      </div>
-      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+      <button id="start" class="btn btn-default">Start</button>
+      <button id="clear" class="btn btn-default">Clear</button>
+      <button id="random" class="btn btn-default">Random</button>
+      <button id="tweet" class="btn btn-default">Tweet</button>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -55,210 +47,301 @@
   <script id="example">
   var neu = neume();
 
-  var visualizer = null; // gretro: http://mohayonao.github.io/gretro/
-
-  // create a PeriodicWave from the array
-  var famiconTriangle = neu.Buffer.from([
-    +0.000, +0.125, +0.250, +0.375, +0.500, +0.625, +0.750, +0.875,
-    +0.875, +0.750, +0.625, +0.500, +0.375, +0.250, +0.125, +0.000,
-    -0.125, -0.250, -0.375, -0.500, -0.625, -0.750, -0.875, -1.000,
-    -1.000, -0.875, -0.750, -0.625, -0.500, -0.375, -0.250, -0.125 ]).resample(4096, false).toPeriodicWave();
-
-  // define synth
-  function Seq1($, freq) {
-    return $("+", [ 0.99, 1.01 ].map(function(rate) {
-      return $(famiconTriangle, { freq: freq * rate });
-    }))
-    .$("xline", { start: 0.05, dur: "8n" }).on("end", $.stop);
-  }
-
-  function Seq2($, freq) {
-    var out = $("tri", { freq: $("xline", { start: freq * 2, end: freq * 0.5, dur: "4nd" }) })
-    .$("sin", { freq: freq * 7 })
-    .$("xline", { start: 0.05, dur: "4nd" }).on("end", $.stop)
-
-    return $("+", [ out, $("delay", { delay: "16nt", feedback: 0.5 }, out.mul(0.25)) ]);
-  }
-
-  function HiHat($, amp) {
-    return $("white")
-    .$("hpf", { freq: 8000, Q: 25 })
-    .$("xline", { start: amp * 0.005, dur: 0.050 }).on("end", $.stop);
-  }
-
-  function Snare($, dur) {
-    return $("pink")
-    .$("lpf", { freq: 2400, Q: 10 })
-    .$("xline", { start: 0.1, dur: dur * 0.1 }).on("end", $.stop);
-  }
-
-  function Bass($) {
-    return $("+",
-      $("tri", { freq: 80, mul: 2 }).$("clip", { mul: 0.4 }),
-      $("pink", { mul: 0.05 })
-    )
-    .$("lpf", { freq: 180, Q: 4 })
-    .$("xline", { start: 0.4, dur: 0.100 }).on("end", $.stop);
-  }
-
-  var instruments = [
-    { func: Seq1 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
-    { func: Seq2 , arg: [ 880, 440, 1760, 220, 1760, 660, 1760, 660 ] },
-    { func: HiHat, arg: [ 4, 1, 2, 1 ] },
-    { func: Snare, arg: [ 8, 2, 6, 4 ] },
-    { func: Bass , arg: [] },
+  var visualizer = null;
+  var sheets = null;
+  var chords = [
+    [ 88, 71, 69, 67, 60 ],
+    [ 88, 71, 69, 66, 60 ],
+    [ 86, 71, 67, 66, 59 ],
+    [ 88, 71, 67, 64, 59 ],
   ];
 
-  var players = [];
+  var famiCurve = new Float32Array(_.range(64).map(function(x) {
+    return ((x >> 3) / 4) - 1;
+  }));
 
-  function start(score) {
-    var timer = neu.Interval("16n", function(e) {
-      var index = e.count % 32;
+  var synthDefs = [];
 
-      instruments.forEach(function(instrument, i) {
-        if (score[i][index].checked) {
-          var arg = _.wrapAt(instrument.arg, index);
+  synthDefs[0] = function($, beat, bar, index) {
+    var freq = _(chords).chain().wrapAt(bar).at(index).midicps().value();
+    return $("tri", { freq: freq })
+    .$("shaper", { curve: famiCurve })
+    .$("line", { start: 0.125, dur: "16n" }).on("end", $.stop)
+    .$("out", { bus: 1 });
+  };
+  synthDefs[1] = synthDefs[0];
+  synthDefs[2] = synthDefs[0];
+  synthDefs[3] = synthDefs[0];
+  synthDefs[4] = synthDefs[0];
+  synthDefs[5] = function($, beat) {
+    var amp = _.wrapAt([ 0.1, 0.075, 0.15, 0.05 ], beat);
+    return $("white")
+    .$("hpf", { freq: 12000, Q: 4 })
+    .$("xline", { start: amp, dur: "32n" }).on("end", $.stop)
+    .$("out", { bus: 2 });
+  };
+  synthDefs[6] = function($, beat) {
+    var amp = _.wrapAt([ 0.3, 0.1, 0.2, 0.2 ], beat);
+    var dur = _.wrapAt([ "2n", "8n", "4n", "8n" ], beat);
+    return $("pink")
+    .$("shaper", { curve: 1, mul: 0.075 })
+    .$("lpf", { freq: 2800, Q: 8.5 })
+    .$("xline", { start: amp, dur: dur }).on("end", $.stop)
+    .$("out", { bus: 2 });
+  };
+  synthDefs[7] = function($, beat) {
+    return $([
+      $("square", { freq: $("xline", { start: 60, end: 25, dur: "32n" }) }),
+      $("pink"),
+    ])
+    .$("clip")
+    .$("sin", { freq: 240 })
+    .$("lpf", { freq: 1000, Q: 0.5 })
+    .$("xline", { start: 0.15, dur: "8n" }).on("end", $.stop)
+    .$("out", { bus: 2 });
+  };
 
-          neu.Synth(instrument.func, arg).start(e.playbackTime);
+  var master = null;
+  var timer = null;
+
+  function start() {
+    master = neu.Synth(function($) {
+      return $([
+        $("in", { bus: 1 }).mul(0.125)
+        .$("delay", { delay: "8nd", feedback: 0.25 })
+        .$("+", $("in", { bus: 1 })).mul(0.75),
+        $("in", { bus: 2 })
+      ])
+      .$("comp", { thresh: -18, knee: 10.5, ratio: 2.5, a: 0.05, r: 1.25 });
+    }).start();
+
+    timer = neu.Interval("16n", function(e) {
+      var beat = (e.count % 32);
+      var bar  = (e.count / 32)|0;
+
+      sheets[beat].forEach(function(flag, index, list) {
+        if (list[index]) {
+          neu.Synth(synthDefs[index], beat, bar, index).start(e.playbackTime);
         }
       });
-    });
 
-    players = [ timer, visualizer ];
-
-    players.forEach(function(player) {
-      player.start();
-    });
+      visualizer.animate(function() {
+        this.selected = beat;
+        this.draw((32 + beat - 1) % 32);
+        this.draw(beat);
+      });
+    }).start("+0.1");
   }
 
   function stop() {
-    players.forEach(function(player) {
-      player.stop();
+    master.stop();
+    timer.stop();
+    visualizer.animate(function() {
+      this.selected = -1;
+      this.refresh();
     });
   }
   </script>
 
   <script>
-  $(function() {
+  window.onload = function() {
     "use strict";
-    var WaveVisualizer = (function() {
-      function WaveVisualizer(analyser, spec) {
-        this.width  = spec.width;
-        this.height = spec.height;
 
-        this._analyser = analyser
-        this._analyser.fftSize = 512;
-        this._state = "init";
-        this._timeData = new Uint8Array(analyser.frequencyBinCount);
-        this._canvas   = spec.canvas;
-        this._canvas.width  = spec.width;
-        this._canvas.height = spec.height;
-        this._context = this._canvas.getContext("2d");
-        this._context.fillStyle = "rgb(0, 0, 32)";
-        this._context.fillRect(0, 0, spec.width, spec.height);
-        this._context.fillStyle = "rgba(0, 0, 32, 0.075)";
-        this._drawX = 0;
+    var $ = document.getElementById.bind(document);
+    var canvas = $("canvas");
+
+    var Visualizer = (function() {
+      function Visualizer(canvas) {
+        this.canvas = canvas;
+        this.width  = canvas.width  = canvas.offsetWidth;
+        this.height = canvas.height = canvas.offsetHeight;
+        this.context = canvas.getContext("2d");
+        this.dx = this.width / 32;
+        this.dy = this.height / 8;
+        this.r = Math.round(Math.min(this.dx * 0.35, 10));
+        this.selected = -1;
+        this._lock = false;
       }
 
-      WaveVisualizer.prototype.start = function() {
-        if (this._state !== "start") {
-          this._state = "start";
-          requestAnimationFrame(this.render.bind(this));
+      Visualizer.prototype.refresh = function() {
+        this.animate(function() {
+          for (var i = 0; i < 32; i++) {
+            this.draw(i);
+          }
+        });
+      };
+
+      Visualizer.prototype.animate = function(fn) {
+        var _this = this;
+        if (!this._lock) {
+          this._lock = true;
+          requestAnimationFrame(function() {
+            fn.call(_this);
+            _this._lock = false;
+          });
         }
         return this;
       };
 
-      WaveVisualizer.prototype.stop = function() {
-        if (this._state === "start") {
-          this._state = "stop";
-        }
-        return this;
-      };
+      Visualizer.prototype.draw = function(index) {
+        var sx = Math.floor(this.dx * index);
+        var sy = 0;
+        var sw = Math.ceil(this.dx);
+        var sh = this.height;
 
-      WaveVisualizer.prototype.render = function(t) {
-        this._analyser.getByteTimeDomainData(this._timeData);
-        this._context.fillRect(0, 0, this.width, this.height);
+        this.context.fillStyle = (index === this.selected) ? "#333" : "#000";
+        this.context.fillRect(sx, sy, sw, sh);
 
-        var imageData = this._context.getImageData(0, 0, this.width, this.height);
-        var grCanvas = new gretro.Canvas(this.width, this.height, imageData.data);
+        var imageData = this.context.getImageData(sx, sy, sw, sh);
+        var grCanvas = new gretro.Canvas(sw, sh, imageData.data);
 
-        this._render(t, grCanvas);
+        var x = Math.round(this.dx * 0.5);
+        var y;
+        var r = this.r;
 
-        this._context.putImageData(imageData, 0, 0);
+        grCanvas.stroke(7);
+        grCanvas.line(x, 0, x, sh);
 
-        if (this._state === "start") {
-          requestAnimationFrame(this.render.bind(this));
-        }
-      };
+        for (var i = 0; i < 8; i++) {
+          y = Math.round(this.dy * i + this.dy * 0.5);
 
-      WaveVisualizer.prototype._render = function(t, grCanvas) {
-        var data = this._timeData;
-        var tile = ((t * 0.005)|0) % 16;
+          grCanvas.line(0, y, sw, y);
 
-        grCanvas.noStroke().fill([ 4, 13, tile ]);
-
-        for (var i = 0, imax = data.length; i < imax; i += 4) {
-          var x = this._drawX;
-          var y = this.height * 0.5;
-          var w = 8;
-          var h = ((data[i] / 256) - 0.5) * 8 * this.height;
-
-          grCanvas.rect(x, y, w, -h);
-
-          this._drawX += w;
-          if (this.width <= this._drawX) {
-            this._drawX = 0;
+          if (sheets[index][i]) {
+            grCanvas.fill([ 1, 13, 14 - (i * 2) ]).circle(x, y, r);
           }
         }
+
+        this.context.putImageData(imageData, sx, sy);
+
+        return this;
       };
 
-      return WaveVisualizer;
+      return Visualizer;
     })();
 
-    var canvas = document.getElementById("canvas");
+    visualizer = new Visualizer(canvas);
 
-    visualizer = new WaveVisualizer(neu.analyser, {
-      canvas: canvas, width: $(canvas).width(), height: 240
-    });
+    var isPlaying = false;
 
-    var vue = new Vue({
-      el: "#app",
-      data: {
-        isPlaying: false,
-        caption: [ "Seq1", "Seq2", "HH", "SD", "BD" ],
-        score: _.map([
-          [ 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
-            0, 1, 0, 0,  1, 0, 1, 0,  0, 0, 1, 0,  1, 0, 1, 1, ],
-          [ 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,
-            1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, ],
-          [ 1, 1, 1, 1,  1, 1, 1, 1,  1, 0, 1, 0,  1, 1, 1, 0,
-            1, 1, 1, 1,  1, 1, 1, 1,  1, 0, 1, 0,  1, 1, 1, 0, ],
-          [ 0, 0, 0, 0,  1, 0, 0, 1,  0, 0, 0, 0,  1, 0, 0, 0,
-            0, 0, 0, 0,  1, 0, 0, 1,  0, 0, 1, 0,  0, 0, 1, 0, ],
-          [ 1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1,  0, 0, 0, 0,
-            1, 0, 0, 0,  0, 0, 1, 0,  0, 1, 0, 0,  1, 0, 0, 0, ],
-        ], function(pattern) {
-          return _.extend({}, _.map(pattern, function(checked) {
-            return { checked: checked };
-          }));
-        })
-      },
-      methods: {
-        toggle: function() {
-          neu.reset();
-          this.isPlaying = !this.isPlaying;
-          if (this.isPlaying) {
-            start(this.$data.score);
+    $("start").onclick = function(e) {
+      isPlaying = !isPlaying;
+
+      neu.reset();
+
+      if (isPlaying) {
+        start();
+        e.target.textContent = "Stop";
+      } else {
+        stop();
+        e.target.textContent = "Start";
+      }
+    };
+
+    $("random").onclick = function() {
+      randomCompose();
+      visualizer.refresh();
+    };
+
+    $("clear").onclick = function() {
+      sheets = _.range(32).map(function() {
+        return [ 0, 0, 0, 0, 0, 0, 0, 0 ];
+      });
+      visualizer.refresh();
+    };
+
+    $("tweet").onclick = function() {
+      var hash = sheets.map(function(sheet) {
+        return ("00" + sheet.reduce(function(a, b, i) {
+          return a + (b << i);
+        }, 0).toString(16)).substr(-2);
+      }).join("");
+
+      var baseurl = location.protocol + "//" + location.host + location.pathname;
+
+      location.replace(baseurl + "#" + hash);
+
+      var queryString = _.map({
+        text: document.title,
+        url: location.href
+      }, function(v, k) {
+        return k + "=" + encodeURIComponent(v);
+      }).join("&");
+      var features = _.map({
+        width: 550,
+        height: 420,
+        left: Math.round(screen.width - 550) * 0.5,
+        top: Math.round(screen.height - 420) * 0.5,
+      }, function(v, k) {
+        return k + "=" + v;
+      }).join(",");
+
+      window.open("https://twitter.com/intent/tweet?" + queryString, "intent", features);
+
+    };
+
+    $("canvas").onclick = function(e) {
+      var x = e.pageX - e.target.offsetLeft;
+      var y = e.pageY - e.target.offsetTop;
+      var ix = Math.floor(x / e.target.offsetWidth * 32);
+      var iy = Math.floor(y / e.target.offsetHeight * 8);
+
+      sheets[ix][iy] = 1 - sheets[ix][iy];
+
+      visualizer.draw(ix);
+    };
+
+    var wrapAtCoin = function(list, index) {
+      return _.coin(_.wrapAt(list, index)) ? 1 : 0;
+    };
+
+    function randomCompose() {
+      sheets = _.range(32).map(function(i) {
+        var sheet = [ 0, 0, 0, 0, 0, 0, 0, 0 ];
+
+        if (wrapAtCoin([ 0.975, 0.7, 0.9, 0.7 ], i)) {
+          sheet[5] = wrapAtCoin([ 0.8, 0.4, 0.6, 0.4, 0.8, 0.4, 0.6, 0.6 ], i);
+          sheet[6] = wrapAtCoin([ 0.2, 0.2, 0.5, 0.4, 0.8, 0.2, 0.5, 0.4 ], i);
+          sheet[7] = wrapAtCoin([ 0.8, 0.2, 0.4, 0.3, 0.4, 0.3, 0.6, 0.4 ], i);
+
+          if (wrapAtCoin([ 0.75, 0.1, 0.25, 0.05 ], i)) {
+            _.range(5).forEach(function(j) {
+              sheet[j] = _.coin(0.5) ? 1 : 0;
+            });
           } else {
-            stop();
+            if (_.coin(0.75)) {
+              sheet[_.sample(_.range(5))] = 1;
+            }
           }
         }
-      }
-    });
 
-    $("#code").text($("#example").text());
+        return sheet;
+      });
+
+      sheets[0][5] = 1;
+      sheets[0][7] = 1;
+    }
+
+    function load(hash) {
+      sheets = _.range(32).map(function(i) {
+        return _.range(8).map(_.partial(function(num, index) {
+          return num & (1 << index) ? 1 : 0;
+        }, +("0x" + hash.substr(i * 2, 2))));
+      });
+    }
+
+    if (/^[0-9a-f]{64}$/.test(location.hash.substr(1))) {
+      load(location.hash.substr(1));
+    } else {
+      randomCompose();
+    }
+
+    visualizer.refresh();
+
+    // code
+    $("code").textContent = $("example").textContent;
     prettyPrint();
-  });
+  };
   </script>
 </body>
 </html>

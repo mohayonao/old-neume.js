@@ -9,7 +9,9 @@ describe("ugen/lfpulse", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -201,7 +203,14 @@ describe("ugen/lfpulse", function() {
   });
 
   describe("works", function() {
-    it("start/stop", function() {
+    it("start/stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         return $("lfpulse");
       });
@@ -209,16 +218,16 @@ describe("ugen/lfpulse", function() {
       synth.start(0.100);
       synth.stop(0.200);
 
-      neu.audioContext.$processTo("00:00.300");
-
       var outlet = synth.toAudioNode().$inputs[0].$inputs[0];
+
+      tick(300);
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
       assert(outlet.$stateAtTime(0.150) === "PLAYING");
       assert(outlet.$stateAtTime(0.200) === "FINISHED");
       assert(outlet.$stateAtTime(0.250) === "FINISHED");
-    });
+    }));
   });
 
 });

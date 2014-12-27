@@ -21,7 +21,10 @@ function NeuUGen(synth, key, spec, inputs) {
   this.id = parsed.id;
   this.outlet = null;
 
-  if (hasClass(this, "bypass")) {
+  if (hasClass(this, "mute")) {
+    this._unit = new neume.Unit({});
+    this._node = this.context.createGain();
+  } else if (hasClass(this, "bypass")) {
     this._unit = NeuUGen.registered["+"](this, {}, inputs);
     this._node = this._unit.outlet;
   } else {
@@ -137,11 +140,7 @@ NeuUGen.prototype.sched = function(schedIter, callback) {
 
 NeuUGen.prototype.toAudioNode = function() {
   if (this.outlet === null) {
-    if (hasClass(this, "mute")) {
-      this.outlet = this.context.createGain();
-    } else {
-      this.outlet = this.context.toAudioNode(this._node);
-    }
+    this.outlet = this.context.toAudioNode(this._node);
   }
   return this.outlet;
 };

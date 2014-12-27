@@ -1,4 +1,4 @@
-t90 l16 $ o4
+t90 l16 r16 $ o4
 rea<c>beb<dc8e8>g+8<e8 >aea<c>beb<dc8>a8r4
 <rece>a<c>egf8a8<d8f8 fd>b<d>gbdfe8g8<c8e8
 ec>a<c>f8<d8d>bgbe8<c8 c>afad8b8<c8r8r4
@@ -16,7 +16,7 @@ g+8<b8g+8e8rea<c>beb<d c>a<ced>b<dfecegfedc
 >b<cdefdg+dbdcafd>b<d >g+b<c>aeabg+aece>a4<
 ;
 
-t90 l16 $ o3
+t90 l16 r16 $ o3
 a8<a4g+8aea<c>beb<d c8>a8g+8e8aea<c>beb<d
 c8>a8<c8>a8<d>afadf>a<c >b8<d8g8b8bgegce>gb
 a8<c8df>b<d>g8b8<ce>a<c >f8d8g<gfgcg<ced>g<df

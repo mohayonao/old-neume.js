@@ -10,12 +10,14 @@
 
 ## Examples
 
+  - [8bit-sequencer](http://mohayonao.github.io/neume.js/examples/8bit-sequencer.html)
+    - simple sequencer
   - [mml-piano](http://mohayonao.github.io/neume.js/examples/mml-piano.html)
     - toy piano with Music Macro Language
   - [sine-storm](http://mohayonao.github.io/neume.js/examples/sine-storm.html)
     - sine wave drone
-  - [8bit-sequencer](http://mohayonao.github.io/neume.js/examples/8bit-sequencer.html)
-    - simple rhythm sequencer
+  - [buffer-work](http://mohayonao.github.io/neume.js/examples/buffer-work.html)
+    - sliced audio buffer rhythm machine
   - other weird demonstrations
     - [6chars drum](http://the.mohayonao.com/6chars/)
     - [scalable mario](http://the.mohayonao.com/scalable-mario/)

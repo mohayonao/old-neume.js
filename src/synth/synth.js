@@ -3,17 +3,19 @@
 var util = require("../util");
 var DB = require("../util/db");
 var neume = require("../namespace");
+var Emitter = require("../util/emitter");
 var Parser = require("./parser");
 
 require("./dollar");
+require("./context");
 
 var EMPTY_DB = new DB();
-var INIT = 0;
-var START = 1;
-var STOP = 2;
+var INIT = 0, START = 1, STOP = 2;
 
 function NeuSynth(context, func, args) {
-  this.context = context;
+  Emitter.call(this);
+
+  this.context = new neume.SynthContext(context);
   this.routes = [];
 
   var $ = new neume.SynthDollar(this);
@@ -22,7 +24,7 @@ function NeuSynth(context, func, args) {
   this.scheds = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
-  var result = func.apply(null, [ $.builder ].concat(args));
+  var result = func.apply(this, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.isOutput) {
     this.routes[0] = result;
@@ -63,12 +65,6 @@ function NeuSynth(context, func, args) {
   }, this);
 
   Object.defineProperties(this, {
-    currentTime: {
-      get: function() {
-        return this.context.currentTime;
-      },
-      enumerable: true
-    },
     state: {
       get: function() {
         return this._stateString;
@@ -77,6 +73,8 @@ function NeuSynth(context, func, args) {
     }
   });
 }
+util.inherits(NeuSynth, Emitter);
+
 NeuSynth.$$name = "NeuSynth";
 
 NeuSynth.prototype.query = function(selector) {
@@ -114,9 +112,9 @@ NeuSynth.prototype.start = function(startTime) {
   context.sched(startTime, function() {
     this._stateString = "PLAYING";
 
-    this.routes.forEach(function(node, index) {
-      this.connect(node, this.getAudioBus(index));
-    }, context);
+    this.routes.forEach(function(_, index) {
+      context.getAudioBus(index).append(this);
+    }, this);
 
     this._db.all().forEach(function(ugen) {
       ugen.start(startTime);
@@ -125,6 +123,11 @@ NeuSynth.prototype.start = function(startTime) {
     this._scheds = this.scheds.splice(0).map(function(set) {
       return new neume.Sched(context, set[0], set[1]).start(startTime);
     }, this);
+
+    this.emit("start", {
+      type: "start",
+      playbackTime: startTime
+    });
   }, this);
 
   context.start(); // auto start(?)
@@ -146,11 +149,13 @@ NeuSynth.prototype.stop = function(startTime) {
   context.sched(startTime, function(t0) {
     this._stateString = "FINISHED";
 
+    this.routes.forEach(function(_, index) {
+      context.getAudioBus(index).remove(this);
+    });
+
     context.nextTick(function() {
-      this.routes.forEach(function(node) {
-        context.disconnect(node);
-      });
-    }, this);
+      context.dispose();
+    });
 
     this._db.all().forEach(function(ugen) {
       ugen.stop(t0);
@@ -158,6 +163,11 @@ NeuSynth.prototype.stop = function(startTime) {
 
     this._scheds.forEach(function(sched) {
       sched.stop(t0);
+    });
+
+    this.emit("stop", {
+      type: "stop",
+      playbackTime: startTime
     });
   }, this);
 
@@ -241,51 +251,12 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
   return this;
 };
 
-NeuSynth.prototype.toAudioNode = function() {
-  return this.context.toAudioNode(this.routes[0]);
-};
-
-NeuSynth.prototype.hasListeners = function(event) {
-  return this._db.all().reduce(function(a, b) {
-    return a || b.hasListeners(event);
-  }, false);
-};
-
-NeuSynth.prototype.listeners = function(event) {
-  var tmp = this._db.all().reduce(function(a, b) {
-    return a.concat(b.listeners(event));
-  }, []);
-
-  var listeners = [];
-
-  for (var i = 0, imax = tmp.length; i < imax; i++) {
-    if (listeners.indexOf(tmp[i]) === -1) {
-      listeners.push(tmp[i]);
-    }
+NeuSynth.prototype.toAudioNode = function(index) {
+  index = util.int(index);
+  if (this.routes[index]) {
+    return this.context.toAudioNode(this.routes[index]);
   }
-
-  return listeners;
-};
-
-NeuSynth.prototype.on = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.on(event, listener);
-  });
-  return this;
-};
-
-NeuSynth.prototype.once = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.once(event, listener);
-  });
-  return this;
-};
-
-NeuSynth.prototype.off = function(event, listener) {
-  this._db.all().forEach(function(ugen) {
-    ugen.off(event, listener);
-  });
-  return this;
+  return null;
 };
 
 function getMethods(db) {

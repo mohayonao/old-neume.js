@@ -8,7 +8,9 @@ describe("neume.Context", function() {
 
   beforeEach(function() {
     audioContext = new global.AudioContext();
-    context = new neume.Context(audioContext.destination);
+    context = new neume.Context(audioContext.destination, {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("constructor", function() {
@@ -285,24 +287,69 @@ describe("neume.Context", function() {
     });
   });
 
-  describe("#reset", function() {
-    it("(): self", function() {
-      assert(context.reset() === context);
-      assert(context.reset() === context);
-    });
-  });
-
   describe("#start", function() {
-    it("(): self", function() {
+    it("(): self", sinon.test(function() {
       assert(context.start() === context);
       assert(context.start() === context);
-    });
+    }));
   });
 
   describe("#stop", function() {
+    it("(): self", sinon.test(function() {
+      assert(context.start() === context);
+      assert(context.stop() === context);
+      assert(context.stop() === context);
+    }));
+  });
+
+  describe("#reset", function() {
+    it("(): self", sinon.test(function() {
+      assert(context.start() === context);
+      assert(context.reset() === context);
+      assert(context.reset() === context);
+    }));
+  });
+
+  describe("#dispose", function() {
     it("(): self", function() {
-      assert(context.stop() === context);
-      assert(context.stop() === context);
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "OscillatorNode",
+            type: "sine",
+            frequency: {
+              value: 440,
+              inputs: []
+            },
+            detune: {
+              value: 0,
+              inputs: []
+            },
+            inputs: []
+          }
+        ]
+      });
+
+      assert(context.dispose() === context);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
     });
   });
 
@@ -310,12 +357,19 @@ describe("neume.Context", function() {
     it("(time: number, callback: !function, context: any): 0", function() {
       assert(context.sched(10, "INVALID") === 0);
     });
-    it("(time: number, callback: function, context: any): number // works", function() {
-      var passed = 0;
+    it("(time: number, callback: function, context: any): number // works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var passed = [];
 
       var pass = function(i) {
-        return function() {
-          passed = i;
+        return function(e) {
+          passed.push([ i, e ]);
         };
       };
 
@@ -326,29 +380,36 @@ describe("neume.Context", function() {
       context.sched(0.400, pass(4));
       context.sched(0.300, pass(3));
 
-      assert(passed === 0, "00:00.000");
+      assert(passed.length === 0, "00:00.000");
 
-      audioContext.$processTo("00:00.100");
-      assert(passed === 1, "00:00.100");
+      tick(100);
+      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      audioContext.$processTo("00:00.200");
-      assert(passed === 2, "00:00.200");
+      tick(100);
+      assert.deepEqual(passed[1], [ 2, 0.2 ], "00:00.200");
 
-      audioContext.$processTo("00:00.310");
-      assert(passed === 3, "00:00.310");
+      tick(350);
+      assert.deepEqual(passed, [
+        [ 1, 0.1 ],
+        [ 2, 0.2 ],
+        [ 3, 0.3 ],
+        [ 4, 0.4 ],
+        [ 5, 0.5 ],
+      ], "00:00.550");
+    }));
+    it("same time order", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
 
-      audioContext.$processTo("00:00.400");
-      assert(passed === 4, "00:00.400");
-
-      audioContext.$processTo("00:00.500");
-      assert(passed === 5, "00:00.500");
-    });
-    it("same time order", function() {
       var passed = [];
 
       var pass = function(i) {
-        return function() {
-          passed.push(i);
+        return function(e) {
+          passed.push([ i, e ]);
         };
       };
 
@@ -359,24 +420,37 @@ describe("neume.Context", function() {
       context.sched(0.100, pass(4));
       context.sched(0.100, pass(5));
 
-      assert.deepEqual(passed, [], "00:00.000");
+      assert(passed.length === 0, "00:00.000");
 
-      audioContext.$processTo("00:00.100");
-      assert.deepEqual(passed, [ 1, 2, 3, 4, 5 ], "00:00.100");
-    });
+      tick(100);
+      assert.deepEqual(passed, [
+        [ 1, 0.1 ],
+        [ 2, 0.1 ],
+        [ 3, 0.1 ],
+        [ 4, 0.1 ],
+        [ 5, 0.1 ],
+      ], "00:00.100");
+    }));
   });
 
   describe("#unsched", function() {
     it("(id: !number): 0", function() {
       assert(context.unsched("INVALID") === 0);
     });
-    it("(id: number): number", function() {
-      var passed = 0;
+    it("(id: number): number", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var passed = [];
       var schedIds = [];
 
       var pass = function(i) {
-        return function() {
-          passed = i;
+        return function(e) {
+          passed.push([ i, e ]);
         };
       };
 
@@ -389,27 +463,33 @@ describe("neume.Context", function() {
 
       context.unsched(schedIds[2]);
 
-      assert(passed === 0, "00:00.000");
+      assert(passed.length === 0, "00:00.000");
 
-      audioContext.$processTo("00:00.100");
-      assert(passed === 1, "00:00.100");
+      tick(100);
+      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      audioContext.$processTo("00:00.200");
-      assert(passed === 1, "00:00.200"); // removed callback
+      tick(100);
+      assert.deepEqual(passed[1], undefined, "00:00.200");
 
-      audioContext.$processTo("00:00.310");
-      assert(passed === 3, "00:00.310");
-
-      audioContext.$processTo("00:00.400");
-      assert(passed === 4, "00:00.400");
-
-      audioContext.$processTo("00:00.500");
-      assert(passed === 5, "00:00.500");
-    });
+      tick(350);
+      assert.deepEqual(passed, [
+        [ 1, 0.1 ],
+        [ 3, 0.3 ],
+        [ 4, 0.4 ],
+        [ 5, 0.5 ],
+      ], "00:00.550");
+    }));
   });
 
   describe("#nextTick", function() {
-    it("(callback: function, context: any): self", function() {
+    it("(callback: function, context: any): self", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var passed = 0;
 
       context.context.start();
@@ -420,9 +500,9 @@ describe("neume.Context", function() {
 
       assert(passed === 0);
 
-      audioContext.$process(1024 / audioContext.sampleRate);
+      tick(50);
       assert(passed === 1);
-    });
+    }));
   });
 
   describe("#toAudioNode", function() {
@@ -642,29 +722,6 @@ describe("neume.Context", function() {
         inputs: []
       });
     });
-    it("AudioNode -> AudioBus", function() {
-      var node = context.createDelay();
-
-      context.connect(node, context.getAudioBus(0));
-
-      assert.deepEqual(context.getAudioBus(0).toAudioNode().toJSON(), {
-        name: "GainNode",
-        gain: {
-          value: 1,
-          inputs: []
-        },
-        inputs: [
-          {
-            name: "DelayNode",
-            delayTime: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
-      });
-    });
     it("invalid -> invalid", function() {
       assert.doesNotThrow(function() {
         context.connect({}, {});
@@ -685,7 +742,7 @@ describe("neume.Context", function() {
   });
 
   describe("#disconnect", function() {
-    it("(from: any): self", function() {
+    it("(node: any): self", function() {
       var osc = context.createOscillator();
       var amp = context.createGain();
 
@@ -702,24 +759,28 @@ describe("neume.Context", function() {
         inputs: []
       });
     });
+    it("(node: Array<any>): self", function() {
+      var osc = context.createOscillator();
+      var amp = context.createGain();
+
+      context.connect(osc, amp.gain);
+
+      context.disconnect([ osc ]);
+
+      assert.deepEqual(amp.toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: []
+      });
+    });
     it("invalid", function() {
       assert.doesNotThrow(function() {
         context.disconnect({});
         context.disconnect(null);
       });
-    });
-    it("ondisconnected", function() {
-      var from = context.createOscillator();
-      var to = context.createGain();
-
-      from.$$outputs = [ to ];
-      to.ondisconnected = sinon.spy();
-
-      context.connect(from, to);
-      context.disconnect(from);
-
-      assert(to.ondisconnected.callCount === 1);
-      assert(to.ondisconnected.calledWith(from));
     });
   });
 
@@ -732,7 +793,7 @@ describe("neume.Context", function() {
   describe("offline rendering", function() {
     it("works", function() {
       var audioContext = new global.OfflineAudioContext(2, 44100 * 0.5, 44100);
-      var context = new neume.Context(audioContext.destination, 2);
+      var context = new neume.Context(audioContext.destination, { duration: 2 });
       var passed = [ ];
 
       var pass = function(i) {

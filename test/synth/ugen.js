@@ -16,7 +16,9 @@ describe("neume.UGen", function() {
   var synth = null;
 
   beforeEach(function() {
-    context = new neume.Context(new global.AudioContext().destination);
+    context = new neume.Context(new global.AudioContext().destination, {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
     synth = new neume.Synth(context, NOP, []);
   });
 
@@ -42,11 +44,11 @@ describe("neume.UGen", function() {
 
       assert(ugen instanceof neume.UGen);
     });
-    it("(synth: neume.Synth, key: number, spec: object, inputs: Array<any>): neume.UGen", function() {
-      var ugen = neume.UGen.build(synth, 100, {}, []);
+    it("(synth: neume.Synth, key: Float32Array, spec: object, inputs: Array<any>): neume.UGen", function() {
+      var ugen = neume.UGen.build(synth, new Float32Array(16), {}, []);
 
       assert(ugen instanceof neume.UGen);
-      assert(ugen.key === "number");
+      assert(ugen.key === "Float32Array");
     });
     it("(synth: neume.Synth, key: object, spec: object, inputs: Array<any>): neume.UGen", function() {
       var ugen = neume.UGen.build(synth, new Date(), {}, []);
@@ -178,7 +180,14 @@ describe("neume.UGen", function() {
   });
 
   describe("#trig", function() {
-    it("(startTime: timevalue): self", function() {
+    it("(startTime: timevalue): self", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var ugen = neume.UGen.build(synth, "sin.trig", {}, []);
       var spy = sinon.spy(ugen._unit, "start");
 
@@ -187,14 +196,13 @@ describe("neume.UGen", function() {
 
       context.start();
 
-      context.audioContext.$processTo("00:00.050");
+      tick(50);
       assert(!spy.called);
 
-      context.audioContext.$processTo("00:00.100");
-
+      tick(50);
       assert(spy.calledOnce);
       assert(spy.calledWith(0.1));
-    });
+    }));
   });
 
   describe("#sched", function() {

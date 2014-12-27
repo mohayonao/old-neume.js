@@ -8,7 +8,9 @@ describe("ugen/buf", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -115,19 +117,31 @@ describe("ugen/buf", function() {
   });
 
   describe("works", function() {
-    it("start", function(done) {
+    it("start", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var spy1 = sinon.spy(function(e) {
+        assert(this instanceof neume.UGen);
+        assert(e.type === "end");
+        assert(e.synth instanceof neume.Synth);
+        assert(closeTo(e.playbackTime, 0.350, 1e-2));
+      });
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
-        return $(buffer).on("end", function() {
-          done();
-        });
+        return $(buffer).on("end", spy1);
       });
 
       synth.start(0.100);
 
-      neu.audioContext.$processTo("00:00.500");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      tick(500);
+
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -139,21 +153,30 @@ describe("ugen/buf", function() {
       assert(outlet.$stateAtTime(0.400) === "FINISHED");
       assert(outlet.$stateAtTime(0.450) === "FINISHED");
       assert(outlet.$stateAtTime(0.500) === "FINISHED");
-    });
-    it("start/stop", function(done) {
+      assert(spy1.calledOnce);
+    }));
+    it("start/stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
         return $(buffer).on("end", function() {
-          done();
+          throw new Error("NOT REACHED");
         });
       });
 
       synth.start(0.100);
       synth.stop(0.200);
 
-      neu.audioContext.$processTo("00:00.300");
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      tick(500);
+
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
@@ -165,23 +188,7 @@ describe("ugen/buf", function() {
       assert(outlet.$stateAtTime(0.400) === "FINISHED");
       assert(outlet.$stateAtTime(0.450) === "FINISHED");
       assert(outlet.$stateAtTime(0.500) === "FINISHED");
-    });
-    it("with duration", function() {
-      var synth = neu.Synth(function($) {
-        var buffer = neu.Buffer(1, 11025, 44100);
-        return $(buffer, { offset: 5, dur: 10 });
-      });
-
-      var outlet = synth.toAudioNode().$inputs[0];
-      var spy = sinon.spy(outlet, "start");
-
-      synth.start(0.100);
-
-      neu.audioContext.$processTo("00:00.100");
-
-      assert(spy.calledOnce === true);
-      assert.deepEqual(spy.firstCall.args, [ 0.100, 5, 10 ]);
-    });
+    }));
   });
 
   describe("parameters", function() {

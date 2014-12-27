@@ -71,6 +71,8 @@ function NeuSynthDollar(synth) {
     });
   };
 
+  builder.inputs = [];
+
   this.db = db;
   this.builder = builder;
 }

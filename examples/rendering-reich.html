@@ -11,17 +11,19 @@
     #start { margin:10px 0 }
     #canvas { width:100%;height:240px;background:black }
     #code { padding:0;margin:0;background:white;border:none }
+    #app .btn { width:100px }
   </style>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.5/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
   <script src="//cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
+  <script src="./visualizer.js"></script>
   <script src="../build/neume.js"></script>
   <script src="../plugins/pluck.js"></script>
   <script src="../plugins/freeverb.js"></script>
-  <script>_.mixin(neume._.exports());</script>
+  <script>
+  _.mixin(neume._.exports());
+  </script>
 </head>
 <body>
   <div class="container">
@@ -31,7 +33,7 @@
     </div>
     <canvas id="canvas"></canvas>
     <div id="app">
-      <button id="start" v-on="click: toggle" class="btn btn-default">{{ isPlaying ? 'Stop' : 'Start' }}</button>
+      <button id="start" class="btn btn-default">Start</button>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -53,7 +55,7 @@
   var rates = [ 300/300, 299/300 ];
 
   function Pluck($, freq) {
-    return $("+", [ 0.999, 1.001 ].map(function(rate) {
+    return $([ 0.999, 1.001 ].map(function(rate) {
       return $("pluck", { freq: freq * rate })
     }).concat($("pink").$("line", { dur: 0.025, mul: 0.7 })))
     .$("adsr", { a: 0, d: 0.1, s: 0.6, r: 0.2, curve: "exp", mul: 0.15 }).release("+0.01").on("end", $.stop)
@@ -66,8 +68,13 @@
   }
 
   function Destination($) {
-    return $("in", 1)
-    .$("freeverb", { room: 0.75, damp: 0.65, mix: 0.33 })
+    return $("in", { bus: 1 })
+    .$("drywet", {
+      mix: -0.5,
+      efx: function($) {
+        return $("freeverb", { room: 0.75, damp: 0.65 }, $.inputs);
+      }
+    })
     .$("lpf", { freq: 1800 })
     .$("comp", { ratio: 9, thresh: -2 })
     .$("out", { bus: 0 });
@@ -106,132 +113,88 @@
   </script>
 
   <script>
-  $(function() {
+  window.onload = function() {
     "use strict";
 
-    var WaveVisualizer = (function() {
-      function WaveVisualizer(analyser, spec) {
-        this._analyser = analyser;
+    var $ = document.getElementById.bind(document);
 
-        this.canvas = spec.canvas;
-        this.width  = this.canvas.width  = spec.width;
-        this.height = this.canvas.height = spec.height;
-        this.context = this.canvas.getContext("2d");
+    var canvas = $("canvas");
 
-        this._startTime = 0;
-        this._fps = 60;
-      }
-
-      WaveVisualizer.prototype.start = function() {
-        if (this._state !== "start") {
-          this._state = "start";
-
-          var w = this.width  / score.length;
-          var h = this.height / rates.length;
-
-          this._sched = rates.map(function(rate, i) {
-            return {
-              index: 0,
-              rate : rate,
-              time : 0,
-              r: Math.min(w, h) * 0.45,
-              y: h * i + h * 0.5,
-              w: w,
-              h: h
-            };
-          });
-
-          this._startTime = Date.now();
-          this._prevT     = this._startTime;
-
-          requestAnimationFrame(this.render.bind(this));
-        }
-        return this;
-      };
-
-      WaveVisualizer.prototype.stop = function() {
-        if (this._state === "start") {
-          this._state = "stop";
-        }
-        return this;
-      };
-
-      WaveVisualizer.prototype.render = function() {
-        var t = Date.now();
-        var dt = (t - this._prevT) * 0.001;
-
-        if (1 / this._fps < dt) {
-          this._prevT = t;
-          this._render(t);
-        }
-
-        if (this._state === "start") {
-          requestAnimationFrame(this.render.bind(this));
-        }
-      };
-
-      WaveVisualizer.prototype._render = function(t) {
-        this.context.save();
-
-        this.context.fillStyle = "rgba(0, 0, 0, 0.1)";
-        this.context.fillRect(0, 0, this.width, this.height);
-
-        var sched = this._sched;
-
-        while (sched[0].time < t) {
-          var s = sched.shift();
-          var x = s.w * 2 * (score[s.index % score.length] >> 1) + s.w;
-          var y = s.y;
-          var r = s.r;
-
-          this.context.fillStyle = "white";
-          this.context.beginPath();
-          this.context.arc(x|0, y|0, r|0, 0, 2 * Math.PI, true);
-          this.context.fill();
-
-          s.index += 1;
-          s.time = this._startTime + (250 * s.rate) * s.index;
-
-          if (sched[0].time < s.time) {
-            sched.push(s);
-          } else {
-            sched.unshift(s);
-          }
-        }
-
-        this.context.restore();
-      };
-
-      return WaveVisualizer;
-    })();
-
-    var canvas = document.getElementById("canvas");
-
-    visualizer = new WaveVisualizer(neu.analyser, {
-      canvas: canvas, width: $(canvas).width(), height: 240
+    visualizer = new Visualizer(canvas, function() {
+      this._startTime = 0;
     });
 
-    var vue = new Vue({
-      el: "#app",
-      data: {
-        isPlaying: false,
-      },
-      methods: {
-        toggle: function() {
-          neu.reset();
-          this.isPlaying = !this.isPlaying;
-          if (this.isPlaying) {
-            start();
-          } else {
-            stop();
-          }
+    visualizer.onstart = function() {
+      var w = this.width  / score.length;
+      var h = this.height / rates.length;
+
+      this._sched = rates.map(function(rate, i) {
+        return {
+          index: 0,
+          rate : rate,
+          time : 0,
+          r: Math.min(w, h) * 0.45,
+          y: h * i + h * 0.5,
+          w: w,
+          h: h
+        };
+      });
+
+      this._startTime = Date.now();
+    };
+
+    visualizer.render = function(t) {
+      this.context.save();
+
+      this.context.fillStyle = "rgba(0, 0, 0, 0.1)";
+      this.context.fillRect(0, 0, this.width, this.height);
+
+      var sched = this._sched;
+
+      while (sched[0].time < t) {
+        var s = sched.shift();
+        var x = s.w * 2 * (score[s.index % score.length] >> 1) + s.w;
+        var y = s.y;
+        var r = s.r;
+
+        this.context.fillStyle = "white";
+        this.context.beginPath();
+        this.context.arc(x|0, y|0, r|0, 0, 2 * Math.PI, true);
+        this.context.fill();
+
+        s.index += 1;
+        s.time = this._startTime + (250 * s.rate) * s.index;
+
+        if (sched[0].time < s.time) {
+          sched.push(s);
+        } else {
+          sched.unshift(s);
         }
       }
-    });
 
-    $("#code").text($("#example").text());
+      this.context.restore();
+    };
+
+    var isPlaying = false;
+
+    $("start").onclick = function(e) {
+      isPlaying = !isPlaying;
+
+      neu.reset();
+
+      if (isPlaying) {
+        start();
+        e.target.textContent = "Stop";
+      } else {
+        stop();
+        e.target.textContent = "Start";
+      }
+    };
+
+    // code
+    $("code").textContent = $("example").textContent;
     prettyPrint();
-  });
+  };
   </script>
 </body>
 </html>

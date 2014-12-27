@@ -9,7 +9,9 @@ describe("ugen/object", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("graph", function() {
@@ -132,7 +134,14 @@ describe("ugen/object", function() {
   });
 
   describe("works", function() {
-    it("object", function() {
+    it("object", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var obj = { foo: 0 };
       var synth = neu.Synth(function($) {
         return $(obj, { key: "foo", interval: 0.1 });
@@ -145,14 +154,21 @@ describe("ugen/object", function() {
       assert(outlet.gain.$valueAtTime(0.000) === 0);
 
       obj.foo = 1;
-      neu.audioContext.$processTo("00:00.100");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
 
       obj.foo = 2;
-      neu.audioContext.$processTo("00:00.200");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.200) === 2);
-    });
-    it("function", function() {
+    }));
+    it("function", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var obj = { foo: function() {
         return this.count;
       }, count: 0 };
@@ -167,14 +183,21 @@ describe("ugen/object", function() {
       assert(outlet.gain.$valueAtTime(0.000) === 0);
 
       obj.count = 1;
-      neu.audioContext.$processTo("00:00.100");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
 
       obj.count = 2;
-      neu.audioContext.$processTo("00:00.200");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.200) === 2);
-    });
-    it("Float32Array", function() {
+    }));
+    it("Float32Array", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var f32 = new Float32Array(16);
       var synth = neu.Synth(function($) {
         return $(f32, { key: 1, interval: 0.1 });
@@ -187,14 +210,21 @@ describe("ugen/object", function() {
       assert(outlet.gain.$valueAtTime(0.000) === 0);
 
       f32[1] = 1;
-      neu.audioContext.$processTo("00:00.100");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
 
       f32[1] = 2;
-      neu.audioContext.$processTo("00:00.200");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.200) === 2);
-    });
-    it("stop", function() {
+    }));
+    it("stop", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var obj = { foo: 0 };
       var synth = neu.Synth(function($) {
         return $(obj, { key: "foo", interval: 0.1 });
@@ -208,13 +238,13 @@ describe("ugen/object", function() {
       assert(outlet.gain.$valueAtTime(0.000) === 0);
 
       obj.foo = 1;
-      neu.audioContext.$processTo("00:00.100");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.100) === 1);
 
       obj.foo = 2;
-      neu.audioContext.$processTo("00:00.200");
+      tick(100);
       assert(outlet.gain.$valueAtTime(0.200) === 1);
-    });
+    }));
   });
 
 });

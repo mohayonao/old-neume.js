@@ -12,7 +12,9 @@ describe("neume.SynthDollar", function() {
 
   beforeEach(function() {
     audioContext = new global.AudioContext();
-    context = new neume.Context(audioContext.destination);
+    context = new neume.Context(audioContext.destination, {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("$", function() {
@@ -32,7 +34,7 @@ describe("neume.SynthDollar", function() {
       var spy = this.spy(neume.UGen, "build");
 
       var synth = new neume.Synth(context, function($) {
-        return $(10);
+        return $("sin");
       }, []);
 
       assert(spy.calledOnce === true);
@@ -301,7 +303,14 @@ describe("neume.SynthDollar", function() {
     });
 
     describe(".timeout", function() {
-      it("(timeout: number, ...callbacks: Array<function>): void", function() {
+      it("(timeout: number, ...callbacks: Array<function>): void", sinon.test(function() {
+        var tick = function(t) {
+          for (var i = 0; i < t / 50; i++) {
+            this.clock.tick(50);
+            context.audioContext.$process(0.05);
+          }
+        }.bind(this);
+
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           return $("sin")
@@ -321,16 +330,26 @@ describe("neume.SynthDollar", function() {
         synth.start(0.010);
         synth.stop(0.100);
 
-        audioContext.$processTo("00:00.200");
+        tick(500);
 
-        assert.deepEqual(passed, [
-          [ "fizz", 0.040, 1 ],
-          [ "buzz", 0.060000000000000005, 1 ],
-        ]);
-      });
+        assert(passed.length === 2);
+        assert(passed[0][0] === "fizz");
+        assert(closeTo(passed[0][1], 0.04, 1e-2));
+        assert(passed[0][2] === 1);
+        assert(passed[1][0] === "buzz");
+        assert(closeTo(passed[1][1], 0.06, 1e-2));
+        assert(passed[1][2] === 1);
+      }));
     });
     describe(".interval", function() {
-      it("(interval: number, ...callbacks: Array<function>): void", function() {
+      it("(interval: number, ...callbacks: Array<function>): void", sinon.test(function() {
+        var tick = function(t) {
+          for (var i = 0; i < t / 50; i++) {
+            this.clock.tick(50);
+            context.audioContext.$process(0.05);
+          }
+        }.bind(this);
+
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           return $("sin")
@@ -347,16 +366,30 @@ describe("neume.SynthDollar", function() {
         synth.start(0.010);
         synth.stop(0.100);
 
-        audioContext.$processTo("00:00.200");
+        tick(500);
 
-        assert.deepEqual(passed, [
-          [ "fizz", 0.04, 1 ],
-          [ "buzz", 0.060000000000000005, 1 ],
-          [ "fizz", 0.07, 2 ],
-          [ "fizz", 0.1, 3 ]
-        ]);
-      });
-      it("works", function() {
+        assert(passed.length === 4);
+        assert(passed[0][0] === "fizz");
+        assert(closeTo(passed[0][1], 0.04, 1e-2));
+        assert(passed[0][2] === 1);
+        assert(passed[1][0] === "buzz");
+        assert(closeTo(passed[1][1], 0.06, 1e-2));
+        assert(passed[1][2] === 1);
+        assert(passed[2][0] === "fizz");
+        assert(closeTo(passed[2][1], 0.07, 1e-2));
+        assert(passed[2][2] === 2);
+        assert(passed[3][0] === "fizz");
+        assert(closeTo(passed[3][1], 0.10, 1e-2));
+        assert(passed[3][2] === 3);
+      }));
+      it("works", sinon.test(function() {
+        var tick = function(t) {
+          for (var i = 0; i < t / 50; i++) {
+            this.clock.tick(50);
+            context.audioContext.$process(0.05);
+          }
+        }.bind(this);
+
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           return $("sin")
@@ -369,18 +402,30 @@ describe("neume.SynthDollar", function() {
         synth.start(0.010);
         synth.stop(0.200);
 
-        audioContext.$processTo("00:00.500");
+        tick(500);
 
-        assert.deepEqual(passed, [
-          [ "fizz", 0.0725, 1 ],
-          [ "fizz", 0.1350, 2 ],
-          [ "fizz", 0.1975, 3 ]
-        ]);
-      });
+        assert(passed.length === 3);
+        assert(passed[0][0] === "fizz");
+        assert(closeTo(passed[0][1], 0.0725, 1e-2));
+        assert(passed[0][2] === 1);
+        assert(passed[1][0] === "fizz");
+        assert(closeTo(passed[1][1], 0.1350, 1e-2));
+        assert(passed[1][2] === 2);
+        assert(passed[2][0] === "fizz");
+        assert(closeTo(passed[2][1], 0.1975, 1e-2));
+        assert(passed[2][2] === 3);
+      }));
     });
   });
   describe(".stop", function() {
-    it("(t: number|string): void", function() {
+    it("(t: number|string): void", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = new neume.Synth(context, function($) {
         $.stop("+0.100");
       }, []);
@@ -389,11 +434,11 @@ describe("neume.SynthDollar", function() {
 
       synth.start(0.100);
 
-      audioContext.$processTo("00:00.500");
+      tick(500);
 
       assert(spy.calledOnce);
       assert(spy.calledWith(0.100));
-    });
+    }));
   });
 
 });

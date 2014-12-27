@@ -5,7 +5,8 @@ var neume = require("../../src");
 neume.use(require("../../src/ugen/osc"));
 neume.use(require("../../src/ugen/add"));
 neume.use(require("../../src/ugen/env"));
-neume.use(require("../../src/ugen/array"));
+neume.use(require("../../src/ugen/iter"));
+neume.use(require("../../src/ugen/inout"));
 
 var NOP = function() {};
 
@@ -15,7 +16,9 @@ describe("neume.Synth", function() {
 
   beforeEach(function() {
     audioContext = new global.AudioContext();
-    context = new neume.Context(audioContext.destination);
+    context = new neume.Context(audioContext.destination, {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("constructor", function() {
@@ -42,25 +45,17 @@ describe("neume.Synth", function() {
     it("\\getter: neume.Context", function() {
       var synth = new neume.Synth(context, NOP, []);
 
-      assert(synth.context instanceof neume.Context);
-    });
-  });
-
-  describe("#currentTime", function() {
-    it("\\getter: number", function() {
-      var synth = new neume.Synth(context, NOP, []);
-
-      assert(synth.currentTime === context.currentTime);
+      assert(synth.context instanceof neume.SynthContext);
     });
   });
 
   describe("#methods", function() {
     it("\\getter: Array<string>", sinon.test(function() {
       var synth = new neume.Synth(context, function($) {
-        return $("boolean", $("array"));
+        return $("iter", $("env"));
       }, []);
 
-      assert.deepEqual(synth.methods, [ "at", "next", "prev", "setValue", "toggle" ]);
+      assert.deepEqual(synth.methods, [ "next", "release" ]);
     }));
   });
 
@@ -71,7 +66,7 @@ describe("neume.Synth", function() {
         a = $("sin");
         b = $("tri");
         c = $("sin");
-        d = $([ 1 ]);
+        d = $("iter");
         spy = sinon.spy(a, "on");
         return $("+", a, b, c, d);
       }, []);
@@ -88,15 +83,23 @@ describe("neume.Synth", function() {
   });
 
   describe("#start", function() {
-    it("([startTime: timevalue]): self", function() {
+    it("([startTime: timevalue]): self", sinon.test(function() {
       var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.start() === synth);
-    });
+    }));
     it("calls each ugen._unit.start(t) only once", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var onstart = sinon.spy();
       var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
-      }, []);
+      }, []).on("start", onstart);
 
       var ugens = synth._db.all();
       ugens.forEach(function(ugen) {
@@ -111,13 +114,13 @@ describe("neume.Synth", function() {
       synth.start(1.000);
       synth.start(1.250);
 
-      audioContext.$processTo("00:00.500");
+      tick(500);
       assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.start.called === false, "00:00.500");
       });
 
-      audioContext.$processTo("00:01.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.start.called === true, "00:01.000");
@@ -125,24 +128,38 @@ describe("neume.Synth", function() {
         assert.deepEqual(ugen._unit.start.firstCall.args, [ 1 ]);
       });
 
-      audioContext.$processTo("00:01.500");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.500");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.start.calledTwice === false, "00:01.500");
       });
+
+      assert(onstart.calledOnce);
+      assert(onstart.calledWith({
+        type: "start",
+        playbackTime: 1.000
+      }));
     }));
   });
 
   describe("#stop", function() {
-    it("([startTime: timevalue]): self", function() {
+    it("([startTime: timevalue]): self", sinon.test(function() {
       var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.stop() === synth);
-    });
+    }));
     it("calls each ugen._unit.stop(t) only once with calling start first", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
+      var onstop = sinon.spy();
       var synth = new neume.Synth(context, function($) {
         return $("+", $("sin"), $("sin"), $("sin"));
-      }, []);
+      }, []).on("stop", onstop);
 
       var ugens = synth._db.all();
       ugens.forEach(function(ugen) {
@@ -158,32 +175,38 @@ describe("neume.Synth", function() {
       synth.start(1.000);
       synth.stop(2.000);
 
-      audioContext.$processTo("00:00.500");
+      tick(500);
       assert(synth.state === "SCHEDULED", "00:00.500");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.stop.called === false, "00:00.500");
       });
 
-      audioContext.$processTo("00:01.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.000");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.stop.called === false, "00:01.000");
       });
 
-      audioContext.$processTo("00:01.500");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.500");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.stop.called === false, "00:01.500");
       });
 
-      audioContext.$processTo("00:02.000");
+      tick(500);
       assert(synth.state === "FINISHED", "00:02.000");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.stop.calledOnce === true, "00:02.000");
         assert.deepEqual(ugen._unit.stop.firstCall.args, [ 2 ]);
       });
 
-      audioContext.$processTo("00:02.250");
+      tick(500);
+
+      assert(onstop.calledOnce);
+      assert(onstop.calledWith({
+        type: "stop",
+        playbackTime: 2.000
+      }));
     }));
   });
 
@@ -207,12 +230,19 @@ describe("neume.Synth", function() {
   });
 
   describe("#fadeIn", function() {
-    it("([startTime: timevalue, duration: timevalue]): self", function() {
+    it("([startTime: timevalue, duration: timevalue]): self", sinon.test(function() {
       var synth = new neume.Synth(context, NOP, []);
 
       assert(synth.fadeIn() === synth);
-    });
-    it("works", function() {
+    }));
+    it("works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);
@@ -222,16 +252,16 @@ describe("neume.Synth", function() {
       synth.fadeIn(1.000, 2);
       synth.fadeIn(1.250, 5);
 
-      audioContext.$processTo("00:00.500");
+      tick(500);
       assert(synth.state === "SCHEDULED", "00:00.500");
 
-      audioContext.$processTo("00:01.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.000");
 
-      audioContext.$processTo("00:01.500");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.500");
 
-      audioContext.$processTo("00:02.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:02.000");
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
@@ -243,18 +273,25 @@ describe("neume.Synth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(2.500), 0.750, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(2.750), 0.875, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(3.000), 1.000, 1e-2));
-    });
+    }));
   });
 
   describe("#fadeOut", function() {
-    it("([startTime: timevalue, duration: timevalue]): self", function() {
+    it("([startTime: timevalue, duration: timevalue]): self", sinon.test(function() {
       var synth = new neume.Synth(context, NOP, []);
 
       synth.start();
 
       assert(synth.fadeOut() === synth);
-    });
-    it("works", function() {
+    }));
+    it("works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);
@@ -265,29 +302,29 @@ describe("neume.Synth", function() {
       synth.start(1.000);
       synth.fadeOut(2.000, 2);
 
-      audioContext.$processTo("00:00.500");
+      tick(500);
       assert(synth.state === "SCHEDULED", "00:00.500");
 
-      audioContext.$processTo("00:01.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.000");
 
-      audioContext.$processTo("00:01.500");
+      tick(500);
       assert(synth.state === "PLAYING", "00:01.500");
 
-      audioContext.$processTo("00:02.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:02.000");
 
-      audioContext.$processTo("00:02.500");
+      tick(500);
       assert(synth.state === "PLAYING", "00:02.500");
 
-      audioContext.$processTo("00:03.000");
+      tick(500);
       assert(synth.state === "PLAYING", "00:03.000");
 
-      audioContext.$processTo("00:03.500");
+      tick(500);
       assert(synth.state === "PLAYING", "00:03.500");
 
-      audioContext.$processTo("00:04.000");
-      assert(synth.state === "FINISHED", "00:04.000");
+      tick(550);
+      assert(synth.state === "FINISHED", "00:04.050");
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.250), 1.000, 1e-2));
@@ -302,18 +339,25 @@ describe("neume.Synth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(3.500), 0.250, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(3.750), 0.125, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.000, 1e-2));
-    });
+    }));
   });
 
   describe("#fade", function() {
-    it("([startTime: timevalue, value: number, duration: timevalue]): self", function() {
+    it("([startTime: timevalue, value: number, duration: timevalue]): self", sinon.test(function() {
       var synth = new neume.Synth(context, NOP, []);
 
       synth.start();
 
       assert(synth.fade() === synth);
-    });
-    it("works", function() {
+    }));
+    it("works", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          context.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = new neume.Synth(context, function($) {
         return $("sin");
       }, []);
@@ -324,7 +368,7 @@ describe("neume.Synth", function() {
       synth.start(1.000);
       synth.fade(2.000, 0.5, 2);
 
-      audioContext.$processTo("00:02.000");
+      tick(2000);
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 1.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(1.250), 1.000, 1e-2));
@@ -341,93 +385,22 @@ describe("neume.Synth", function() {
       assert(closeTo(outlet.gain.$valueAtTime(4.000), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(4.500), 0.500, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(5.000), 0.500, 1e-2));
-    });
+    }));
   });
 
-  describe("#hasListeners", function() {
-    it("(event: string): boolean", function() {
+  describe("#toAudioNode", function() {
+    it("(index: number): AudioNode", function() {
       var synth = new neume.Synth(context, function($) {
-        return $("+", $("sin"), $("saw"));
+        $("sin").$("out", { bus: 1 });
+        return $("sin");
       });
 
-      synth.query("sin").on("foo", it);
-      synth.query("saw").on("foo", it).on("bar", it);
-
-      assert(synth.hasListeners("foo") === true);
-      assert(synth.hasListeners("bar") === true);
-      assert(synth.hasListeners("baz") === false);
-    });
-  });
-
-  describe("#listeners", function() {
-    it("(event: string): Array<function>", function() {
-      var synth = new neume.Synth(context, function($) {
-        return $("+", $("sin"), $("saw"));
-      });
-
-      synth.query("sin").on("foo", it);
-      synth.query("saw").on("foo", it).on("bar", describe);
-
-      assert.deepEqual(synth.listeners("foo"), [ it ]);
-      assert.deepEqual(synth.listeners("bar"), [ describe ]);
-      assert.deepEqual(synth.listeners("bax"), []);
-    });
-  });
-
-  describe("#on", function() {
-    it("(event: string, listener:function): self", function() {
-      var spy1, spy2;
-      var synth = new neume.Synth(context, function($) {
-        var a = $("sin"), b = $("saw");
-        spy1 = sinon.spy(a, "on");
-        spy2 = sinon.spy(b, "on");
-        return $("+", a, b);
-      });
-
-      assert(synth.on("foo", it) === synth);
-
-      assert(spy1.calledOnce);
-      assert(spy1.calledWith("foo", it));
-      assert(spy2.calledOnce);
-      assert(spy2.calledWith("foo", it));
-    });
-  });
-
-  describe("#once", function() {
-    it("(event: string, listener:function): self", function() {
-      var spy1, spy2;
-      var synth = new neume.Synth(context, function($) {
-        var a = $("sin"), b = $("saw");
-        spy1 = sinon.spy(a, "once");
-        spy2 = sinon.spy(b, "once");
-        return $("+", a, b);
-      });
-
-      assert(synth.once("foo", it) === synth);
-
-      assert(spy1.calledOnce);
-      assert(spy1.calledWith("foo", it));
-      assert(spy2.calledOnce);
-      assert(spy2.calledWith("foo", it));
-    });
-  });
-
-  describe("#off", function() {
-    it("(event: string, listener:function): self", function() {
-      var spy1, spy2;
-      var synth = new neume.Synth(context, function($) {
-        var a = $("sin"), b = $("saw");
-        spy1 = sinon.spy(a, "off");
-        spy2 = sinon.spy(b, "off");
-        return $("+", a, b);
-      });
-
-      assert(synth.off("foo", it) === synth);
-
-      assert(spy1.calledOnce);
-      assert(spy1.calledWith("foo", it));
-      assert(spy2.calledOnce);
-      assert(spy2.calledWith("foo", it));
+      assert(synth.toAudioNode(0) instanceof global.AudioNode);
+      assert(synth.toAudioNode(1) instanceof global.AudioNode);
+      assert(synth.toAudioNode(2) === null);
+      assert(synth.toAudioNode(0) === synth.toAudioNode(0));
+      assert(synth.toAudioNode(1) === synth.toAudioNode(1));
+      assert(synth.toAudioNode(0) !== synth.toAudioNode(1));
     });
   });
 

@@ -15,7 +15,6 @@ module.exports = function(neume, util) {
    *
    * methods:
    *   next(startTime: timevalue)
-   *   reset(startTime: timevalue)
    *
    * +-----------+     +-----------+
    * | inputs[0] | ... | inputs[N] |
@@ -45,15 +44,13 @@ module.exports = function(neume, util) {
       var items = iterNext();
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       } else {
         param.setValueAtTime(util.finite(items.value), t);
-      }
-    }
-
-    function setValue(e, value) {
-      if (util.isIterator(value)) {
-        iter = value;
       }
     }
 
@@ -68,7 +65,11 @@ module.exports = function(neume, util) {
 
       if (items.done) {
         state = FINISHED;
-        ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+        ugen.emit("end", {
+          type: "end",
+          synth: ugen.synth,
+          playbackTime: t
+        });
       } else {
         param.update(util.finite(items.value), t);
       }
@@ -82,7 +83,6 @@ module.exports = function(neume, util) {
       outlet: outlet,
       start: start,
       methods: {
-        setValue: setValue,
         next: next
       }
     });

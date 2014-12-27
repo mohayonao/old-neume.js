@@ -15,6 +15,14 @@ describe("neume.DC", function() {
 
       assert(a instanceof neume.DC);
     });
+    it("context cache", function() {
+      var a = new neume.DC(context, 220);
+      var b = new neume.DC(context, 440);
+      var c = new neume.DC(context, 220);
+
+      assert(a !== b);
+      assert(a === c);
+    });
   });
 
   describe("#toAudioNode", function() {
@@ -99,6 +107,23 @@ describe("neume.DC", function() {
           inputs: []
         },
         inputs: []
+      });
+    });
+  });
+
+  describe("#stop", function() {
+    it("(): self", function() {
+      var toNode = context.createGain();
+      var a = new neume.DC(context, 0);
+
+      assert(a.connect(toNode) === a);
+      assert(a._bufSrc.$state === "PLAYING");
+
+      assert(a.stop() === a);
+      assert(a._bufSrc.$state === "FINISHED");
+
+      assert.doesNotThrow(function() {
+        a.stop();
       });
     });
   });

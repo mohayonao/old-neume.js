@@ -9,13 +9,15 @@ describe("ugen/inout", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume(new global.AudioContext(), {
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    });
   });
 
   describe("$(in)", function() {
     it("graph", function() {
       var synth = neu.Synth(function($) {
-        return $("in", 1);
+        return $("in", { bus: 1 });
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -40,14 +42,21 @@ describe("ugen/inout", function() {
   });
 
   describe("$(out)", function() {
-    it("graph", function() {
+    it("graph", sinon.test(function() {
+      var tick = function(t) {
+        for (var i = 0; i < t / 50; i++) {
+          this.clock.tick(50);
+          neu.audioContext.$process(0.05);
+        }
+      }.bind(this);
+
       var synth = neu.Synth(function($) {
         return $("out", { bus: 1 }, $("osc"));
       });
 
       synth.start(0);
 
-      neu.context.audioContext.$processTo("00:00.010");
+      tick(50);
 
       assert.deepEqual(synth.context.getAudioBus(1).toAudioNode().toJSON(), {
         name: "GainNode",
@@ -80,7 +89,7 @@ describe("ugen/inout", function() {
           }
         ]
       });
-    });
+    }));
   });
 
 });

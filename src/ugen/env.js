@@ -350,7 +350,11 @@ module.exports = function(neume, util) {
       if (env.index === env.length) {
         schedId = context.sched(t1, function(t) {
           schedId = 0;
-          ugen.emit("end", { type: "end", playbackTime: t }, ugen.synth);
+          ugen.emit("end", {
+            type: "end",
+            synth: ugen.synth,
+            playbackTime: t
+          });
         });
       } else if (env.index !== env.releaseNode) {
         schedId = context.sched(t1, resume);

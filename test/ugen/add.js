@@ -72,6 +72,26 @@ describe("ugen/add", function() {
         inputs: [ oscillator(1), oscillator(2), oscillator(3) ]
       });
     });
+    it("$([ $('sin'), $('sin') ])", function() {
+      var synth = neu.Synth(function($) {
+        return $([ $("sin", { freq: 1 }), $("sin", { freq: 2 }), $("sin", { freq: 3 }) ]);
+      });
+
+      function oscillator(freq) {
+        var node = neu.context.createOscillator();
+        node.frequency.value = freq;
+        return node.toJSON();
+      }
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [ oscillator(1), oscillator(2), oscillator(3) ]
+      });
+    });
   });
 
 });
