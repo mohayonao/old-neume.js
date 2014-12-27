@@ -6,7 +6,7 @@ var neume = require("../namespace");
 
 require("./transport");
 
-var INIT = 0, START = 1, STOP = 2;
+var INIT = 0, START = 1;
 
 function NeuContext(destination, spec) {
   spec = spec || /* istanbul ignore next */ {};
@@ -109,7 +109,7 @@ NeuContext.prototype.start = function() {
 
 NeuContext.prototype.stop = function() {
   if (this._state === START) {
-    this._state = STOP;
+    this.reset();
     this._transport.stop();
   }
   return this;

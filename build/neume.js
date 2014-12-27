@@ -1345,7 +1345,7 @@ NeuContext.prototype.start = function() {
 
 NeuContext.prototype.stop = function() {
   if (this._state === START) {
-    this._state = STOP;
+    this.reset();
     this._transport.stop();
   }
   return this;
@@ -1576,6 +1576,20 @@ neume.impl = function(destination, spec) {
   }
 
   var context = new neume.Context(destination, spec);
+  var autoPlayFunction = null;
+
+  /* istanbul ignore next */
+  if (global.navigator && /iPhone|iPad|iPod/.test(global.navigator.userAgent)) {
+    if (context.audioContext.currentTime === 0) {
+      autoPlayFunction = function() {
+        var bufSrc = context.audioContext.createBufferSource();
+        bufSrc.start(0);
+        bufSrc.stop(0);
+        bufSrc.connect(context.audioContext.destination);
+        bufSrc.disconnect();
+      };
+    }
+  }
 
   return Object.defineProperties(
     new NEU(context), {
@@ -1598,6 +1612,11 @@ neume.impl = function(destination, spec) {
       },
       start: {
         value: function() {
+          /* istanbul ignore next */
+          if (autoPlayFunction) {
+            autoPlayFunction();
+            autoPlayFunction = null;
+          }
           context.start();
           return this;
         },
@@ -2031,7 +2050,7 @@ function neume() {
   return neume.impl.apply(null, arguments);
 }
 
-neume.version = "0.8.1";
+neume.version = "0.8.2";
 
 module.exports = neume;
 

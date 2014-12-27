@@ -66,7 +66,9 @@ Here is boilerplate html in order to play a sine wave metronome in neume.js. →
       if (timer) {
         timer.stop();
         timer = null;
+        neu.stop();
       } else {
+        neu.start();
         timer = neu.Interval("4n", function(e) {
           var freq = [ 880, 440, 440, 440 ][e.count % 4];
           var dur = [ 0.5, 0.125, 0.125, 0.125 ][e.count % 4];
