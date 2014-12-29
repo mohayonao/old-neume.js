@@ -53,6 +53,18 @@ describe("neume.Synth", function() {
     }));
   });
 
+  describe("#hasClass", function() {
+    it("(className: string): boolean", function() {
+      var synth = new neume.Synth(context, function($) {
+        return $([ $("sin.foo"), $("sin.bar") ]);
+      }, []);
+
+      assert(synth.hasClass("foo") === true);
+      assert(synth.hasClass("bar") === true);
+      assert(synth.hasClass("baz") === false);
+    });
+  });
+
   describe("#query", function() {
     it("(selector: string): Array<neume.UGen>", function() {
       var a, b, c, d, spy;

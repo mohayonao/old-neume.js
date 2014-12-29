@@ -26,8 +26,7 @@ function NeuUGenPromise(synth, id) {
     },
   });
 
-  this.classes = [];
-
+  this._classes = {};
   this._outlet = null;
   this._resolved = false;
   this._to = [];

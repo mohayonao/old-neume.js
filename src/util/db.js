@@ -27,9 +27,9 @@ DB.prototype.find = function(parsed) {
   }
 
   if (parsed.classes) {
-    parsed.classes.forEach(function(cls) {
+    parsed.classes.forEach(function(className) {
       result = result.filter(function(obj) {
-        return obj.classes.indexOf(cls) !== -1;
+        return obj.hasClass && obj.hasClass(className);
       });
     });
   }

@@ -16,13 +16,11 @@ describe("neume.UGen", function() {
   });
 
   describe("constructor", function() {
-    it("(synth: neume.Synth, key: string, spec: object, inputs: Array<any>)", function() {
+    it("(synth: neume.Synth, key: string, spec: object, inputs: any[])", function() {
       var ugen = neume.UGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
 
       assert(ugen instanceof neume.UGen);
       assert(ugen instanceof neume.Emitter);
-      assert(ugen.id === "ugen0");
-      assert.deepEqual(ugen.classes, [ "kr", "lfo" ]);
     });
     it("throw an error if given invalid key", function() {
       assert.throws(function() {
@@ -95,15 +93,26 @@ describe("neume.UGen", function() {
     });
   });
 
-  describe("#classes", function() {
+  describe("#class", function() {
     it("\\getter", function() {
       var ugen;
 
       ugen = neume.UGen.build(synth, "sin.foo.bar", {}, []);
-      assert.deepEqual(ugen.classes, [ "foo", "bar" ]);
+      assert(ugen.class === "bar foo");
 
       ugen = neume.UGen.build(synth, "sin.foo.bar", { class: "baz qux" }, []);
-      assert.deepEqual(ugen.classes, [ "foo", "bar", "baz", "qux" ]);
+      assert(ugen.class === "bar baz foo qux");
+    });
+  });
+
+  describe("#hasClass", function() {
+    it("(className: string): boolean", function() {
+      var ugen;
+
+      ugen = neume.UGen.build(synth, "sin.foo.bar", {}, []);
+
+      assert(ugen.hasClass("bar") === true);
+      assert(ugen.hasClass("baz") === false);
     });
   });
 

@@ -15,6 +15,17 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
+  var listOfClass = parsed.classes;
+  var classes = {};
+
+  if (typeof spec.class === "string" && spec.class.trim()) {
+    listOfClass = listOfClass.concat(spec.class.split(/\s+/));
+  }
+
+  listOfClass.forEach(function(className) {
+    classes[className] = true;
+  });
+
   Object.defineProperties(this, {
     context: {
       value: synth.context,
@@ -32,18 +43,18 @@ function NeuUGen(synth, key, spec, inputs) {
       value: util.defaults(spec.id, parsed.id),
       enumerable: true
     },
+    class: {
+      value: Object.keys(classes).sort().join(" "),
+      enumerable: true
+    },
   });
 
-  this.classes = parsed.classes;
+  this._classes = classes;
 
-  if (typeof spec.class === "string" && spec.class.trim()) {
-    this.classes = this.classes.concat(spec.class.split(/\s+/));
-  }
-
-  if (hasClass(this, "mute")) {
+  if (this.hasClass("mute")) {
     this._unit = new neume.Unit({});
     this._node = this.context.createGain();
-  } else if (hasClass(this, "bypass")) {
+  } else if (this.hasClass("bypass")) {
     this._unit = NeuUGen.registered["+"](this, {}, inputs);
     this._node = this._unit.outlet;
   } else {
@@ -104,6 +115,10 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.hasClass = function(className) {
+  return !!this._classes[className];
+};
+
 NeuUGen.prototype.$ = function() {
   var args = util.toArray(arguments);
   var key = args.shift();
@@ -122,7 +137,7 @@ NeuUGen.prototype.add = function(value) {
 };
 
 NeuUGen.prototype.start = function(startTime) {
-  if (!hasClass(this, "trig")) {
+  if (!this.hasClass("trig")) {
     this._unit.start(startTime);
   }
   return this;
@@ -214,10 +229,6 @@ function mul(context, a, b) {
 
 function add(context, a, b) {
   return new neume.Sum(context, [ a, b ]);
-}
-
-function hasClass(_this, className) {
-  return _this.classes.indexOf(className) !== -1;
 }
 
 module.exports = neume.UGen = NeuUGen;

@@ -74,11 +74,17 @@ util.inherits(NeuSynth, Emitter);
 
 NeuSynth.$$name = "NeuSynth";
 
+NeuSynth.prototype.hasClass = function(className) {
+  return this._db.all().some(function(ugen) {
+    return ugen.hasClass(className);
+  });
+};
+
 NeuSynth.prototype.query = function(selector) {
   var array = this._db.find(Parser.parse(selector));
 
   [
-    "on", "once", "off", "trig"
+    "on", "once", "off", "hasClass", "trig"
   ].concat(this.methods).forEach(function(methodName) {
     array[methodName] = function() {
       var args = util.toArray(arguments);
