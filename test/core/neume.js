@@ -48,11 +48,6 @@ describe("neume", function() {
       assert(neume.version === pkg.version);
     });
   });
-  describe(".PROCESS_BUF_SIZE", function() {
-    it("\\getter: number", function() {
-      assert(typeof neume.PROCESS_BUF_SIZE === "number");
-    });
-  });
 
   describe("neu", function() {
     var neu = null;

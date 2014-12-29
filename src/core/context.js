@@ -4,7 +4,6 @@ var neume = require("../namespace");
 
 require("./transport");
 
-var C = require("../const");
 var util = require("../util");
 
 var INIT = 0, START = 1;
@@ -114,7 +113,7 @@ NeuContext.$$name = "NeuContext";
 });
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
+  index = Math.max(0, util.int(index));
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new neume.AudioBus(this, index);
   }
