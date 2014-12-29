@@ -42,13 +42,13 @@ NeuMul.prototype.mul = function(value) {
 };
 
 NeuMul.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.createGain();
-    this.outlet.gain.value = 0;
-    this.context.connect(this._a, this.outlet);
-    this.context.connect(this._b, this.outlet.gain);
+  if (this._outlet === null) {
+    this._outlet = this.context.createGain();
+    this._outlet.gain.value = 0;
+    this.context.connect(this._a, this._outlet);
+    this.context.connect(this._b, this._outlet.gain);
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuMul.prototype.connect = function(to) {
@@ -57,7 +57,7 @@ NeuMul.prototype.connect = function(to) {
 };
 
 NeuMul.prototype.disconnect = function() {
-  this.context.disconnect(this.outlet);
+  this.context.disconnect(this._outlet);
   return this;
 };
 

@@ -37,7 +37,7 @@ NeuDC.$$name = "NeuDC";
 NeuDC.prototype.toAudioNode = function() {
   var value = this._value;
 
-  if (this.outlet === null && value !== 0) {
+  if (this._outlet === null && value !== 0) {
     var context = this.context;
     var buf, bufSrc, gain;
 
@@ -52,7 +52,7 @@ NeuDC.prototype.toAudioNode = function() {
 
       this._bufSrc = bufSrc;
       this._state = START;
-      this.outlet = bufSrc;
+      this._outlet = bufSrc;
     } else {
       bufSrc = new NeuDC(context, 1).toAudioNode();
 
@@ -60,10 +60,10 @@ NeuDC.prototype.toAudioNode = function() {
       gain.gain.value = value;
       bufSrc.connect(gain);
 
-      this.outlet = gain;
+      this._outlet = gain;
     }
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuDC.prototype.connect = function(to) {
@@ -77,7 +77,7 @@ NeuDC.prototype.connect = function(to) {
 
 NeuDC.prototype.disconnect = function() {
   this.stop(this.context.currentTime);
-  this.context.disconnect(this.outlet);
+  this.context.disconnect(this._outlet);
   return this;
 };
 

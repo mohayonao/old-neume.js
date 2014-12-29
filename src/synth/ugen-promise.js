@@ -12,8 +12,8 @@ function NeuUGenPromise(synth, id) {
   this.key = "";
   this.classes = [];
   this.id = id;
-  this.outlet = null;
 
+  this._outlet = null;
   this._resolved = false;
   this._to = [];
   this._from = [];

@@ -55,7 +55,7 @@ NeuSum.prototype.add = function(value) {
 };
 
 NeuSum.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
+  if (this._outlet === null) {
     var context = this.context;
     var nodes = this._nodes;
 
@@ -71,10 +71,10 @@ NeuSum.prototype.toAudioNode = function() {
       context.connect(this._number, sumNode);
     }
 
-    this.outlet = sumNode;
+    this._outlet = sumNode;
   }
 
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuSum.prototype.connect = function(to) {

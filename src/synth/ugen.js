@@ -20,7 +20,6 @@ function NeuUGen(synth, key, spec, inputs) {
   this.key = parsed.key;
   this.classes = parsed.classes;
   this.id = util.defaults(spec.id, parsed.id);
-  this.outlet = null;
 
   if (typeof spec.class === "string" && spec.class.trim()) {
     this.classes = this.classes.concat(spec.class.split(/\s+/));
@@ -56,6 +55,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 
+  this._outlet = null;
   this._scheds = [];
 }
 util.inherits(NeuUGen, Emitter);
@@ -163,10 +163,10 @@ NeuUGen.prototype.sched = function(schedIter, callback) {
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.toAudioNode(this._node);
+  if (this._outlet === null) {
+    this._outlet = this.context.toAudioNode(this._node);
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuUGen.prototype.connect = function(to) {

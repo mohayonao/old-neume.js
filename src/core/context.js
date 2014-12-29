@@ -103,7 +103,7 @@ NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
     this._transport.start();
-    this.connect(this.getAudioBus(0).outlet, this.analyser);
+    this.connect(this.getAudioBus(0).toAudioNode(), this.analyser);
   }
   return this;
 };

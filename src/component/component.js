@@ -8,7 +8,7 @@ var Emitter = require("../util/emitter");
 function NeuComponent(context, node) {
   Emitter.call(this);
   this.context = context;
-  this.outlet = null;
+  this._outlet = null;
   this._node = util.defaults(node, null);
 }
 util.inherits(NeuComponent, Emitter);
@@ -24,10 +24,10 @@ NeuComponent.prototype.add = function(value) {
 };
 
 NeuComponent.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.toAudioNode(util.defaults(this._node, this));
+  if (this._outlet === null) {
+    this._outlet = this.context.toAudioNode(util.defaults(this._node, this));
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuComponent.prototype.connect = function(to) {

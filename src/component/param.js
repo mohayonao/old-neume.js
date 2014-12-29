@@ -268,18 +268,18 @@ function terminateAudioParamScheduling(_this, startValue, startTime) {
 NeuParam.prototype.toAudioNode = function(input) {
   var context = this.context;
 
-  if (this.outlet == null) {
-    this.outlet = context.createGain();
-    this.outlet.gain.value = this._value;
-    this._params.push(this.outlet.gain);
+  if (this._outlet == null) {
+    this._outlet = context.createGain();
+    this._outlet.gain.value = this._value;
+    this._params.push(this._outlet.gain);
     if (input) {
-      context.connect(input, this.outlet);
+      context.connect(input, this._outlet);
     } else {
-      context.connect(new neume.DC(context, 1), this.outlet);
+      context.connect(new neume.DC(context, 1), this._outlet);
     }
   }
 
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuParam.prototype.connect = function(to) {
@@ -293,7 +293,7 @@ NeuParam.prototype.connect = function(to) {
 };
 
 NeuParam.prototype.disconnect = function() {
-  this.context.disconnect(this.outlet);
+  this.context.disconnect(this._outlet);
   return this;
 };
 

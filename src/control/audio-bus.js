@@ -8,8 +8,8 @@ var util = require("../util");
 function NeuAudioBus(context, index) {
   this.context = context;
   this.index = index;
-  this.outlet = context.createGain();
 
+  this._outlet = context.createGain();
   this._maxNodes = C.DEFAULT_MAX_NODES_OF_BUS;
   this._inputs = [];
 
@@ -33,7 +33,7 @@ function NeuAudioBus(context, index) {
 NeuAudioBus.$$name = "NeuAudioBus";
 
 NeuAudioBus.prototype.append = function(synth) {
-  this.context.connect(synth.toAudioNode(this.index), this.outlet);
+  this.context.connect(synth.toAudioNode(this.index), this._outlet);
 
   this._inputs.push(synth);
 
@@ -55,7 +55,7 @@ NeuAudioBus.prototype.remove = function(synth) {
 };
 
 NeuAudioBus.prototype.toAudioNode = function() {
-  return this.outlet;
+  return this._outlet;
 };
 
 module.exports = neume.AudioBus = NeuAudioBus;
