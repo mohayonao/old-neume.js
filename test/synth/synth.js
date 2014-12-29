@@ -346,6 +346,30 @@ describe("neume.Synth", function() {
     });
   });
 
+  describe("#_dispatchNode", function() {
+    it("(node: signal, index: number)", function() {
+      var synth = new neume.Synth(context, function($) {
+        $("sin", { freq: 220 }).$("out", { bus: 0 });
+        $("sin", { freq: 660 }).$("out", { bus: 0 });
+      });
+
+      // This method is ignored when not constructor.
+      synth._dispatchNode(context.createBufferSource());
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          OSCILLATOR("sine", 220),
+          OSCILLATOR("sine", 660),
+        ]
+      });
+    });
+  });
+
   describe("method bindings", function() {
     it("works", function() {
       var synth = new neume.Synth(context, function($) {
