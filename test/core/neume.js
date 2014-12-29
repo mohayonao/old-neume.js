@@ -2,7 +2,6 @@
 
 var neume = require("../../src");
 var pkg = require("../../package.json");
-var NOP = function() {};
 
 describe("neume", function() {
   var audioContext = null;

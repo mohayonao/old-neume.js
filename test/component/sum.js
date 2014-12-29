@@ -60,7 +60,7 @@ describe("neume.Sum", function() {
 
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-      assert.deepEqual(sum.toAudioNode().toJSON(), DC(0));
+      assert.deepEqual(sum.toAudioNode().toJSON(), BUFSRC(128));
       assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
     it("(): AudioNode // when [ 1 ]", function() {
@@ -68,7 +68,7 @@ describe("neume.Sum", function() {
 
       assert(sum.toAudioNode() instanceof global.AudioNode);
       assert(sum.toAudioNode() === sum.toAudioNode());
-      assert.deepEqual(sum.toAudioNode().toJSON(), DC(1));
+      assert.deepEqual(sum.toAudioNode().toJSON(), BUFSRC(128));
       assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 1);
     });
     it("(): AudioNode // when [ node ]", function() {
@@ -108,10 +108,11 @@ describe("neume.Sum", function() {
               value: b.value,
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
+      assert(sum.toAudioNode().$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("(): AudioNode // when [ node, node ]", function() {
       var a = context.createOscillator();
@@ -143,7 +144,7 @@ describe("neume.Sum", function() {
           value: a.valueOf() + b.valueOf() + c.valueOf(),
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [ BUFSRC(128) ]
       });
       assert(sum.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
@@ -168,10 +169,11 @@ describe("neume.Sum", function() {
               value: a.valueOf(),
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
+      assert(sum.toAudioNode().$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
   });
 
@@ -187,8 +189,9 @@ describe("neume.Sum", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(0) ]
+        inputs: [ BUFSRC(128) ]
       });
+      assert(toNode.$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("(to: AudioNode): self // when [ 0 ]", function() {
       var toNode = context.createGain();
@@ -202,7 +205,7 @@ describe("neume.Sum", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(0) ]
+        inputs: [ BUFSRC(128) ]
       });
       assert(toNode.$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
@@ -230,7 +233,7 @@ describe("neume.Sum", function() {
               value: b.value,
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           },
           {
             name: "GainNode",
@@ -238,10 +241,12 @@ describe("neume.Sum", function() {
               value: c.valueOf() + d.valueOf(),
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
+      assert(sum.toAudioNode().$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
+      assert(sum.toAudioNode().$inputs[2].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("(to: AudioParam): self // when []", function() {
       var toNode = context.createGain();
@@ -329,12 +334,13 @@ describe("neume.Sum", function() {
                 value: c.valueOf() + d.valueOf(),
                 inputs: []
               },
-              inputs: [ DC(1) ]
+              inputs: [ BUFSRC(128) ]
             }
           ]
         },
         inputs: []
       });
+      assert(sum.toAudioNode().$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("(to: AudioParam): self // when [ node, param, +/-0 ]", function() {
       var toNode = context.createGain();
@@ -374,12 +380,13 @@ describe("neume.Sum", function() {
                 value: c.value,
                 inputs: []
               },
-              inputs: [ DC(1) ]
+              inputs: [ BUFSRC(128) ]
             }
           ]
         },
         inputs: []
       });
+      assert(sum.toAudioNode().$inputs[1].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
   });
 

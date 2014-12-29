@@ -33,10 +33,11 @@ describe("ugen/line", function() {
               value: 1,
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
+      assert(synth.toAudioNode().$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("$('line', $('sin'))", function() {
       var synth = neu.Synth(function($) {
@@ -56,21 +57,7 @@ describe("ugen/line", function() {
               value: 1,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });
@@ -78,14 +65,7 @@ describe("ugen/line", function() {
   });
 
   describe("works", function() {
-    it("$('line')", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("$('line')", function() {
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -95,11 +75,14 @@ describe("ugen/line", function() {
         return $("line", { start: 880, end: 440, dur: 0.200 }).on("end", spy);
       });
 
-      synth.start(0.100);
-
-      tick(500);
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      useTimer(neu.context, function(tick) {
+        synth.start(0.100);
+
+        tick(500);
+      });
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 880, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 880, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 880, 1e-2));
@@ -109,15 +92,8 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.300), 440, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.350), 440, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440, 1e-2));
-    }));
-    it("$('xline')", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    });
+    it("$('xline')", function() {
       var spy = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.synth instanceof neume.Synth);
@@ -127,11 +103,14 @@ describe("ugen/line", function() {
         return $("xline", { start: 880, end: 440, dur: 0.200 }).on("end", spy);
       });
 
-      synth.start(0.100);
-
-      tick(500);
-
       var outlet = synth.toAudioNode().$inputs[0];
+
+      useTimer(neu.context, function(tick) {
+        synth.start(0.100);
+
+        tick(500);
+      });
+
       assert(closeTo(outlet.gain.$valueAtTime(0.000), 880.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.050), 880.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.100), 880.000, 1e-2));
@@ -147,26 +126,21 @@ describe("ugen/line", function() {
       assert(closeTo(outlet.gain.$valueAtTime(0.350), 440.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.375), 440.000, 1e-2));
       assert(closeTo(outlet.gain.$valueAtTime(0.400), 440.000, 1e-2));
-    }));
-    it("stop", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    });
+    it("stop", function() {
       var synth = neu.Synth(function($) {
-        return $("line", { start: 880, end: 440, dur: 0.200 });
+        return $("line", { dur: 0.200 }).on("end", function() {
+          assert(!"NOT REACHED");
+        });
       });
 
-      synth.start(0.100).on("end", function() {
-        assert(!"NOT REACHED");
-      });
-      synth.stop(0.200);
+      useTimer(neu.context, function(tick) {
+        synth.start(0.100);
+        synth.stop(0.200);
 
-      tick(500);
-    }));
+        tick(500);
+      });
+    });
   });
 
 });

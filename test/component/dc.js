@@ -31,7 +31,7 @@ describe("neume.DC", function() {
 
       assert(a.toAudioNode() instanceof global.AudioNode);
       assert(a.toAudioNode() === a.toAudioNode());
-      assert.deepEqual(a.toAudioNode().toJSON(), DC(0));
+      assert.deepEqual(a.toAudioNode().toJSON(), BUFSRC(128));
       assert(a.toAudioNode().buffer.getChannelData(0)[0] === 0);
     });
     it("(): AudioNode // when 1", function() {
@@ -39,7 +39,7 @@ describe("neume.DC", function() {
 
       assert(a.toAudioNode() instanceof global.AudioNode);
       assert(a.toAudioNode() === a.toAudioNode());
-      assert.deepEqual(a.toAudioNode().toJSON(), DC(1));
+      assert.deepEqual(a.toAudioNode().toJSON(), BUFSRC(128));
       assert(a.toAudioNode().buffer.getChannelData(0)[0] === 1);
     });
     it("(): AudioNode // else", function() {
@@ -54,7 +54,7 @@ describe("neume.DC", function() {
           value: n,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [ BUFSRC(128) ]
       });
       assert(a.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });

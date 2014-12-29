@@ -42,21 +42,16 @@ describe("ugen/inout", function() {
   });
 
   describe("$(out)", function() {
-    it("graph", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("graph", function() {
       var synth = neu.Synth(function($) {
         return $("out", { bus: 1 }, $("osc"));
       });
 
-      synth.start(0);
+      useTimer(neu.context, function(tick) {
+        synth.start(0);
 
-      tick(50);
+        tick(50);
+      });
 
       assert.deepEqual(synth.context.getAudioBus(1).toAudioNode().toJSON(), {
         name: "GainNode",
@@ -71,25 +66,11 @@ describe("ugen/inout", function() {
               value: 1,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });
-    }));
+    });
   });
 
 });

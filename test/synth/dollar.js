@@ -2,9 +2,7 @@
 
 var neume = require("../../src");
 
-neume.use(require("../../src/ugen/osc"));
-
-var NOP = function() {};
+neume.use(require("../../src/ugen"));
 
 describe("neume.SynthDollar", function() {
   var audioContext = null;
@@ -66,21 +64,7 @@ describe("neume.SynthDollar", function() {
             value: 1,
             inputs: []
           },
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 220,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+          inputs: [ OSCILLATOR("sine", 220) ]
         });
       });
       it("graph: inputs", function() {
@@ -101,21 +85,7 @@ describe("neume.SynthDollar", function() {
                 value: 0.25,
                 inputs: []
               },
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sine",
-                  frequency: {
-                    value: 440,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
+              inputs: [ OSCILLATOR("sine", 440) ]
             }
           ]
         });
@@ -138,10 +108,11 @@ describe("neume.SynthDollar", function() {
                 value: 1000,
                 inputs: []
               },
-              inputs: [ DC(1) ]
+              inputs: [ BUFSRC(128) ]
             }
           ]
         });
+        assert(synth.toAudioNode().$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
       });
       it("invalidName -> throw an error", function() {
         var func = function($) {
@@ -202,35 +173,9 @@ describe("neume.SynthDollar", function() {
                 value: 0,
                 inputs: []
               },
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sine",
-                  frequency: {
-                    value: 440,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
+              inputs: [ OSCILLATOR("sine", 440) ]
             },
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
+            OSCILLATOR("sine", 440)
           ]
         });
       });
@@ -303,14 +248,7 @@ describe("neume.SynthDollar", function() {
     });
 
     describe(".timeout", function() {
-      it("(timeout: number, ...callbacks: Array<function>): void", sinon.test(function() {
-        var tick = function(t) {
-          for (var i = 0; i < t / 50; i++) {
-            this.clock.tick(50);
-            context.audioContext.$process(0.05);
-          }
-        }.bind(this);
-
+      it("(timeout: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           return $("sin")
@@ -327,10 +265,12 @@ describe("neume.SynthDollar", function() {
           });
         }, []);
 
-        synth.start(0.010);
-        synth.stop(0.100);
+        useTimer(context, function(tick) {
+          synth.start(0.010);
+          synth.stop(0.100);
 
-        tick(500);
+          tick(500);
+        });
 
         assert(passed.length === 2);
         assert(passed[0][0] === "fizz");
@@ -339,17 +279,10 @@ describe("neume.SynthDollar", function() {
         assert(passed[1][0] === "buzz");
         assert(closeTo(passed[1][1], 0.06, 1e-2));
         assert(passed[1][2] === 1);
-      }));
+      });
     });
     describe(".interval", function() {
-      it("(interval: number, ...callbacks: Array<function>): void", sinon.test(function() {
-        var tick = function(t) {
-          for (var i = 0; i < t / 50; i++) {
-            this.clock.tick(50);
-            context.audioContext.$process(0.05);
-          }
-        }.bind(this);
-
+      it("(interval: number, ...callbacks: Array<function>): void", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           return $("sin")
@@ -363,10 +296,12 @@ describe("neume.SynthDollar", function() {
           });
         }, []);
 
-        synth.start(0.010);
-        synth.stop(0.100);
+        useTimer(context, function(tick) {
+          synth.start(0.010);
+          synth.stop(0.100);
 
-        tick(500);
+          tick(500);
+        });
 
         assert(passed.length === 4);
         assert(passed[0][0] === "fizz");
@@ -381,15 +316,8 @@ describe("neume.SynthDollar", function() {
         assert(passed[3][0] === "fizz");
         assert(closeTo(passed[3][1], 0.10, 1e-2));
         assert(passed[3][2] === 3);
-      }));
-      it("works", sinon.test(function() {
-        var tick = function(t) {
-          for (var i = 0; i < t / 50; i++) {
-            this.clock.tick(50);
-            context.audioContext.$process(0.05);
-          }
-        }.bind(this);
-
+      });
+      it("works", function() {
         var passed = [];
         var synth = new neume.Synth(context, function($) {
           return $("sin")
@@ -399,10 +327,12 @@ describe("neume.SynthDollar", function() {
           });
         }, []);
 
-        synth.start(0.010);
-        synth.stop(0.200);
+        useTimer(context, function(tick) {
+          synth.start(0.010);
+          synth.stop(0.200);
 
-        tick(500);
+          tick(500);
+        });
 
         assert(passed.length === 3);
         assert(passed[0][0] === "fizz");
@@ -414,31 +344,26 @@ describe("neume.SynthDollar", function() {
         assert(passed[2][0] === "fizz");
         assert(closeTo(passed[2][1], 0.1975, 1e-2));
         assert(passed[2][2] === 3);
-      }));
+      });
     });
   });
   describe(".stop", function() {
-    it("(t: number|string): void", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(t: number|string): void", function() {
       var synth = new neume.Synth(context, function($) {
         $.stop("+0.100");
       }, []);
 
       var spy = sinon.spy(synth, "stop");
 
-      synth.start(0.100);
+      useTimer(context, function(tick) {
+        synth.start(0.100);
 
-      tick(500);
+        tick(500);
+      });
 
       assert(spy.calledOnce);
       assert(spy.calledWith(0.100));
-    }));
+    });
   });
 
 });

@@ -25,8 +25,9 @@ describe("ugen/drywet", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(0) ]
+        inputs: [ BUFSRC(128) ]
       });
+      assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("$('drywet', { mix: -1 })", function() {
       var synth = neu.Synth(function($) {
@@ -42,21 +43,7 @@ describe("ugen/drywet", function() {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ OSCILLATOR("sine", 440) ]
       });
     });
     it("$('drywet', { mix: +1 })", function() {
@@ -93,21 +80,7 @@ describe("ugen/drywet", function() {
               value: 0,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });
@@ -133,21 +106,7 @@ describe("ugen/drywet", function() {
               value: 0.7071067811865475,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           },
           {
             name: "GainNode",
@@ -175,21 +134,7 @@ describe("ugen/drywet", function() {
                   value: 0,
                   inputs: []
                 },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 440,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 440) ]
               }
             ]
           }
@@ -220,39 +165,11 @@ describe("ugen/drywet", function() {
               {
                 name: "WaveShaperNode",
                 oversample: "none",
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 1,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 1) ]
               }
             ]
           },
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+          inputs: [ OSCILLATOR("sine", 440) ]
         },
         {
           name: "GainNode",
@@ -262,21 +179,7 @@ describe("ugen/drywet", function() {
               {
                 name: "WaveShaperNode",
                 oversample: "none",
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 1,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 1) ]
               }
             ]
           },
@@ -300,21 +203,7 @@ describe("ugen/drywet", function() {
                 value: 0,
                 inputs: []
               },
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sine",
-                  frequency: {
-                    value: 440,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
+              inputs: [ OSCILLATOR("sine", 440) ]
             }
           ]
         }

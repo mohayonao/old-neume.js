@@ -30,17 +30,35 @@ require("web-audio-test-api");
 global.assert = require("power-assert");
 global.sinon = require("sinon");
 
+global.useTimer = function(context, fn) {
+  var ms = 50;
+  var audioContext = context.audioContext;
+  var clock = sinon.useFakeTimers();
+
+  fn.call(this, function(tick) {
+    var n = Math.ceil(tick / ms);
+    for (var i = 0; i < n; i++) {
+      clock.tick(ms);
+      audioContext.$process(ms / 1000);
+    }
+  });
+
+  clock.restore();
+};
+
 global.closeTo = function(actual, expected, delta) {
   return Math.abs(actual - expected) <= delta;
 };
 
-global.DC = function(/* value */) {
+global.NOP = function() {};
+
+global.BUFSRC = function(length) {
   return {
     name: "AudioBufferSourceNode",
     buffer: {
       name: "AudioBuffer",
-      length: 128,
-      duration: 0.0029024943310657597,
+      length: length,
+      duration: length / 44100,
       sampleRate: 44100,
       numberOfChannels: 1
     },
@@ -51,6 +69,22 @@ global.DC = function(/* value */) {
     loop: true,
     loopStart: 0,
     loopEnd: 0,
+    inputs: []
+  };
+};
+
+global.OSCILLATOR = function(type, freq) {
+  return {
+    name: "OscillatorNode",
+    type: type,
+    frequency: {
+      value: freq,
+      inputs: []
+    },
+    detune: {
+      value: 0,
+      inputs: []
+    },
     inputs: []
   };
 };
