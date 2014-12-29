@@ -42,7 +42,6 @@ function NeuSynth(context, func, args) {
   this._connected = false;
   this._db = this.routes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
-  this._stateString = "UNSCHEDULED";
   this._param = param;
   this._scheds = null;
 
@@ -63,15 +62,6 @@ function NeuSynth(context, func, args) {
       }
     });
   }, this);
-
-  Object.defineProperties(this, {
-    state: {
-      get: function() {
-        return this._stateString;
-      },
-      enumerable: true
-    }
-  });
 }
 util.inherits(NeuSynth, Emitter);
 
@@ -107,11 +97,8 @@ NeuSynth.prototype.start = function(startTime) {
   startTime = util.finite(startTime);
 
   this._state = START;
-  this._stateString = "SCHEDULED";
 
   context.sched(startTime, function() {
-    this._stateString = "PLAYING";
-
     this.routes.forEach(function(_, index) {
       context.getAudioBus(index).append(this);
     }, this);
@@ -147,8 +134,6 @@ NeuSynth.prototype.stop = function(startTime) {
   this._state = STOP;
 
   context.sched(startTime, function(t0) {
-    this._stateString = "FINISHED";
-
     this.routes.forEach(function(_, index) {
       context.getAudioBus(index).remove(this);
     });

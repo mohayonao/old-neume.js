@@ -66,7 +66,6 @@ describe("neume.Sched", function() {
     useTimer(context, function(tick) {
       context.start();
 
-      assert(sched.state === "UNSCHEDULED", "00:00.000");
       assert(start === null);
       assert(passed === null);
       assert(stop === null);
@@ -158,7 +157,6 @@ describe("neume.Sched", function() {
     useTimer(context, function(tick) {
       context.start();
 
-      assert(sched.state === "UNSCHEDULED", "00:00.000");
       assert(start === null);
       assert(passed === null);
       assert(stop === null);

@@ -19,21 +19,6 @@ function NeuSched(context, schedIter, callback) {
   this._state = STATE_INIT;
   this._count = 0;
 
-  Object.defineProperties(this, {
-    state: {
-      get: function() {
-        return [
-          "UNSCHEDULED",
-          "SCHEDULED",
-          "PLAYING",
-          "PLAYING",
-          "FINISHED"
-        ][this._state];
-      },
-      enumerable: true
-    },
-  });
-
   this.on("start", callback).on("sched", callback).on("stop", callback);
 }
 util.inherits(NeuSched, Emitter);

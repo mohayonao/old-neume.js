@@ -47,7 +47,6 @@ describe("neume.Interval", function() {
     useTimer(context, function(tick) {
       context.start();
 
-      assert(sched.state === "UNSCHEDULED", "00:00.000");
       assert(passed === null);
 
       sched.stop(0.100);
@@ -56,44 +55,36 @@ describe("neume.Interval", function() {
       sched.stop(0.390);
 
       tick(50);
-      assert(sched.state === "SCHEDULED", "00:00.050");
       assert(passed === null, "00:00.050");
 
       tick(50);
-      assert(sched.state === "SCHEDULED", "00:00.100");
       assert(passed === null, "00:00.100");
 
       tick(50);
-      assert(sched.state === "SCHEDULED", "00:00.150");
       assert(passed === null, "00:00.150");
 
       tick(50);
-      assert(sched.state === "PLAYING", "00:00.200");
       assert(passed.count === 0, "00:00.200");
       assert(passed.done === false, "00:00.200");
       assert(closeTo(passed.playbackTime, 0.200, 1e-6), "00:00.200");
 
       tick(50);
-      assert(sched.state === "PLAYING", "00:00.250");
       assert(passed !== null, "00:00.250");
       assert(passed.count === 1, "00:00.250");
       assert(passed.done === false, "00:00.250");
       assert(closeTo(passed.playbackTime, 0.250, 1e-6), "00:00.250");
 
       tick(50);
-      assert(sched.state === "PLAYING", "00:00.300");
       assert(passed.count === 2, "00:00.300");
       assert(passed.done === false, "00:00.300");
       assert(closeTo(passed.playbackTime, 0.300, 1e-6), "00:00.300");
 
       tick(50);
-      assert(sched.state === "PLAYING", "00:00.350");
       assert(passed.count === 3, "00:00.350");
       assert(passed.done === false, "00:00.350");
       assert(closeTo(passed.playbackTime, 0.350, 1e-6), "00:00.350");
 
       tick(50);
-      assert(sched.state === "FINISHED", "00:00.400");
       assert(passed.count === 3, "00:00.400");
       assert(passed.done === false, "00:00.350");
       assert(closeTo(passed.playbackTime, 0.350, 1e-6), "00:00.400");

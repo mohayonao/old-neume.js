@@ -93,7 +93,6 @@ describe("neume.Synth", function() {
         sinon.spy(ugen._unit, "start");
       });
 
-      assert(synth.state === "UNSCHEDULED", "00:00.000");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.start.called === false, "00:00.000");
       });
@@ -103,13 +102,11 @@ describe("neume.Synth", function() {
         synth.start(1.250);
 
         tick(500);
-        assert(synth.state === "SCHEDULED", "00:00.500");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.start.called === false, "00:00.500");
         });
 
         tick(500);
-        assert(synth.state === "PLAYING", "00:01.000");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.start.called === true, "00:01.000");
           assert(ugen._unit.start.calledOnce === true, "00:01.000");
@@ -117,7 +114,6 @@ describe("neume.Synth", function() {
         });
 
         tick(500);
-        assert(synth.state === "PLAYING", "00:01.500");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.start.calledTwice === false, "00:01.500");
         });
@@ -148,7 +144,6 @@ describe("neume.Synth", function() {
         sinon.spy(ugen._unit, "stop");
       });
 
-      assert(synth.state === "UNSCHEDULED", "00:00.000");
       ugens.forEach(function(ugen) {
         assert(ugen._unit.stop.called === false, "00:00.000");
       });
@@ -159,25 +154,21 @@ describe("neume.Synth", function() {
         synth.stop(2.000);
 
         tick(500);
-        assert(synth.state === "SCHEDULED", "00:00.500");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.stop.called === false, "00:00.500");
         });
 
         tick(500);
-        assert(synth.state === "PLAYING", "00:01.000");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.stop.called === false, "00:01.000");
         });
 
         tick(500);
-        assert(synth.state === "PLAYING", "00:01.500");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.stop.called === false, "00:01.500");
         });
 
         tick(500);
-        assert(synth.state === "FINISHED", "00:02.000");
         ugens.forEach(function(ugen) {
           assert(ugen._unit.stop.calledOnce === true, "00:02.000");
           assert.deepEqual(ugen._unit.stop.firstCall.args, [ 2 ]);
@@ -232,17 +223,7 @@ describe("neume.Synth", function() {
         synth.fadeIn(1.000, 2);
         synth.fadeIn(1.250, 5);
 
-        tick(500);
-        assert(synth.state === "SCHEDULED", "00:00.500");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:01.000");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:01.500");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:02.000");
+        tick(5000);
       });
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 0.000, 1e-2));
@@ -277,29 +258,7 @@ describe("neume.Synth", function() {
         synth.start(1.000);
         synth.fadeOut(2.000, 2);
 
-        tick(500);
-        assert(synth.state === "SCHEDULED", "00:00.500");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:01.000");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:01.500");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:02.000");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:02.500");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:03.000");
-
-        tick(500);
-        assert(synth.state === "PLAYING", "00:03.500");
-
-        tick(550);
-        assert(synth.state === "FINISHED", "00:04.050");
+        tick(5000);
       });
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 1.000, 1e-2));
@@ -338,7 +297,7 @@ describe("neume.Synth", function() {
         synth.start(1.000);
         synth.fade(2.000, 0.5, 2);
 
-        tick(2000);
+        tick(5000);
       });
 
       assert(closeTo(outlet.gain.$valueAtTime(1.000), 1.000, 1e-2));

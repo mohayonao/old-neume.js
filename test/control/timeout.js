@@ -48,7 +48,6 @@ describe("neume.Timeout", function() {
     useTimer(context, function(tick) {
       context.start();
 
-      assert(sched.state === "UNSCHEDULED", "00:00.000");
       assert(passed === null);
 
       sched.stop(0.100);
@@ -57,23 +56,18 @@ describe("neume.Timeout", function() {
       sched.stop(0.400);
 
       tick(50);
-      assert(sched.state === "SCHEDULED", "00:00.050");
       assert(passed === null, "00:00.050");
 
       tick(50);
-      assert(sched.state === "SCHEDULED", "00:00.100");
       assert(passed === null, "00:00.100");
 
       tick(50);
-      assert(sched.state === "SCHEDULED", "00:00.150");
       assert(passed === null, "00:00.150");
 
       tick(50);
-      assert(sched.state === "PLAYING", "00:00.200");
       assert(passed === null, "00:00.200");
 
       tick(50);
-      assert(sched.state === "FINISHED", "00:00.250");
       assert(passed !== null, "00:00.250");
       assert(passed.count === 1, "00:00.250");
       assert(passed.done === true, "00:00.250");
