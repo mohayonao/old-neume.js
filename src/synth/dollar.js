@@ -18,7 +18,7 @@ function NeuSynthDollar(synth) {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isPlainObject(args[0]) ? args.shift() : {};
-    var inputs = util.flatten(args);
+    var inputs = args;
     var ugen, promise;
 
     if (typeof key === "string") {
