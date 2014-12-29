@@ -16,13 +16,20 @@ var INIT = 0, START = 1, STOP = 2;
 function NeuSynth(context, func, args) {
   Emitter.call(this);
 
-  this.context = new neume.SynthContext(context);
-  this.routes = [];
+  context = new neume.SynthContext(context);
+
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
 
   var $ = new neume.SynthDollar(this);
 
   this.builder = $.builder;
   this.scheds = [];
+  this.routes = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
   var result = func.apply(this, [ $.builder ].concat(args));
@@ -40,7 +47,6 @@ function NeuSynth(context, func, args) {
     return gain;
   });
 
-  this._connected = false;
   this._db = this.routes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._param = param;

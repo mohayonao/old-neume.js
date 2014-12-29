@@ -7,9 +7,20 @@ require("../core/context");
 var util = require("../util");
 
 function NeuSynthContext(context) {
-  this.context = this;
-  this.audioContext = context.audioContext;
-  this.sampleRate = context.sampleRate;
+  Object.defineProperties(this, {
+    context: {
+      value: this,
+      enumerable: true
+    },
+    audioContext: {
+      value: context.audioContext,
+      enumerable: true
+    },
+    sampleRate: {
+      value: context.sampleRate,
+      enumerable: true
+    },
+  });
   this._context = context;
   this._nodes = [];
 }

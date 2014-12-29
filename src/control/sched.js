@@ -14,7 +14,12 @@ var STATE_DONE = 4;
 function NeuSched(context, schedIter, callback) {
   Emitter.call(this);
 
-  this.context = context;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
 
   this._schedIter = schedIter;
   this._state = STATE_INIT;

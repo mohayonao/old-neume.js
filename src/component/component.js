@@ -7,7 +7,12 @@ var Emitter = require("../util/emitter");
 
 function NeuComponent(context, node) {
   Emitter.call(this);
-  this.context = context;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
   this._outlet = null;
   this._node = util.defaults(node, null);
 }

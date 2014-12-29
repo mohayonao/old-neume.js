@@ -15,11 +15,26 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
-  this.context = synth.context;
-  this.synth = synth;
-  this.key = parsed.key;
+  Object.defineProperties(this, {
+    context: {
+      value: synth.context,
+      enumerable: true
+    },
+    synth: {
+      value: synth,
+      enumerable: true
+    },
+    key: {
+      value: parsed.key,
+      enumerable: true
+    },
+    id: {
+      value: util.defaults(spec.id, parsed.id),
+      enumerable: true
+    },
+  });
+
   this.classes = parsed.classes;
-  this.id = util.defaults(spec.id, parsed.id);
 
   if (typeof spec.class === "string" && spec.class.trim()) {
     this.classes = this.classes.concat(spec.class.split(/\s+/));

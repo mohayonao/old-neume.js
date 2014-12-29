@@ -12,12 +12,34 @@ var INIT = 0, START = 1;
 function NeuContext(destination, spec) {
   spec = spec || /* istanbul ignore next */ {};
 
-  this.context = this;
-  this.destination = destination;
-  this.audioContext = destination.context;
-  this.sampleRate = this.audioContext.sampleRate;
-  this.listener = this.audioContext.listener;
-  this.analyser = this.audioContext.createAnalyser();
+  var audioContext = destination.context;
+
+  Object.defineProperties(this, {
+    context: {
+      value: this,
+      enumerable: true
+    },
+    audioContext: {
+      value: audioContext,
+      enumerable: true
+    },
+    destination: {
+      value: destination,
+      enumerable: true
+    },
+    sampleRate: {
+      value: audioContext.sampleRate,
+      enumerable: true
+    },
+    listener: {
+      value: audioContext.listener,
+      enumerable: true
+    },
+    analyser: {
+      value: audioContext.createAnalyser(),
+      enumerable: true
+    },
+  });
 
   this._transport = new neume.Transport(this, spec);
   this._nodes = [];

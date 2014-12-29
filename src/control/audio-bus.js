@@ -6,27 +6,36 @@ var C = require("../const");
 var util = require("../util");
 
 function NeuAudioBus(context, index) {
-  this.context = context;
-  this.index = index;
+  index = util.finite(index)|0;
 
   this._outlet = context.createGain();
   this._maxNodes = C.DEFAULT_MAX_NODES_OF_BUS;
   this._inputs = [];
 
   Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    index: {
+      value: index,
+      enumerable: true
+    },
     maxNodes: {
       set: function(value) {
         this._maxNodes = Math.max(0, util.int(value));
       },
       get: function() {
         return this._maxNodes;
-      }
+      },
+      enumerable: true
     },
     nodes: {
       get: function() {
         return this._inputs.slice();
-      }
-    }
+      },
+      enumerable: true
+    },
   });
 }
 
