@@ -52,11 +52,11 @@ function NeuSynth(context, func, args) {
   this._param = param;
   this._scheds = null;
 
-  this.methods = getMethods(this._db);
-
-  this.methods.filter(function(methodName) {
+  var methods = getMethods(this._db).filter(function(methodName) {
     return !this.hasOwnProperty(methodName);
-  }, this).forEach(function(methodName) {
+  }, this).sort();
+
+  methods.forEach(function(methodName) {
     Object.defineProperty(this, methodName, {
       value: function() {
         var args = util.toArray(arguments);
@@ -66,9 +66,19 @@ function NeuSynth(context, func, args) {
           }
         });
         return this;
-      }
+      },
+      enumerable: false
     });
   }, this);
+
+  Object.defineProperties(this, {
+    methods: {
+      get: function() {
+        return methods.slice();
+      },
+      enumerable: true
+    }
+  });
 }
 util.inherits(NeuSynth, Emitter);
 
