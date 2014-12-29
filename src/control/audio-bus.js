@@ -1,8 +1,9 @@
 "use strict";
 
+var neume = require("../namespace");
+
 var C = require("../const");
 var util = require("../util");
-var neume = require("../namespace");
 
 function NeuAudioBus(context, index) {
   this.context = context;

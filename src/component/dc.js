@@ -1,9 +1,10 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
+
+var util = require("../util");
 
 var FILLED1 = (function() {
   var result = new Float32Array(128);

@@ -1,9 +1,10 @@
 "use strict";
 
+var neume = require("../namespace");
+
 require("./shim");
 
 var util = require("../util");
-var neume = require("../namespace");
 
 neume.webaudio = global;
 neume.util = util;

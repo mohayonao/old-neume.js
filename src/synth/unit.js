@@ -1,7 +1,8 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var INIT = 0, START = 1, STOP = 2;
 
 function NeuUnit(spec) {

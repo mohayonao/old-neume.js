@@ -1,7 +1,8 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var Emitter = require("../util/emitter");
 
 var STATE_INIT = 0;

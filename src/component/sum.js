@@ -1,9 +1,10 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
+
+var util = require("../util");
 
 function NeuSum(context, inputs) {
   neume.Component.call(this, context);

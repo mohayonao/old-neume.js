@@ -1,13 +1,14 @@
 "use strict";
 
-var util = require("../util");
-var DB = require("../util/db");
 var neume = require("../namespace");
-var Emitter = require("../util/emitter");
-var Parser = require("./parser");
 
 require("./dollar");
 require("./context");
+
+var util = require("../util");
+var DB = require("../util/db");
+var Emitter = require("../util/emitter");
+var Parser = require("./parser");
 
 var EMPTY_DB = new DB();
 var INIT = 0, START = 1, STOP = 2;

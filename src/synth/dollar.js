@@ -1,11 +1,12 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("../component/param");
 require("./ugen");
 require("./ugen-promise");
+
+var util = require("../util");
 
 function NeuSynthDollar(synth) {
   var db = new neume.DB();

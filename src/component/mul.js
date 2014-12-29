@@ -1,9 +1,10 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
+
+var util = require("../util");
 
 function NeuMul(context, a, b) {
   a = a.valueOf();

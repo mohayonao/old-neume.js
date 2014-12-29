@@ -1,10 +1,11 @@
 "use strict";
 
-var C = require("../const");
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./transport");
+
+var C = require("../const");
+var util = require("../util");
 
 var INIT = 0, START = 1;
 

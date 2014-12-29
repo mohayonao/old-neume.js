@@ -1,9 +1,10 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./ugen");
+
+var util = require("../util");
 
 function NeuUGenPromise(synth, id) {
   this.context = synth.context;

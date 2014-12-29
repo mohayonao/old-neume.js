@@ -1,15 +1,16 @@
 "use strict";
 
+var neume = require("../namespace");
+
+require("./timer");
+
 var C = require("../const");
 var util = require("../util");
-var neume = require("../namespace");
 
 var INIT = 0, START = 1, STOP = 2;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
-
-require("./timer");
 
 function NeuTransport(context, spec) {
   spec = spec || /* istanbul ignore next */ {};

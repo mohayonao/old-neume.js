@@ -1,7 +1,8 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var FFT = require("../util/fft");
 
 function NeuBuffer(context, buffer) {
