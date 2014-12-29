@@ -175,6 +175,12 @@ neume.impl = function(destination, spec) {
         },
         enumerable: true
       },
+      master: {
+        get: function() {
+          return context.getAudioBus(0).toAudioNode();
+        },
+        enumerable: true
+      },
       analyser: {
         value: context.analyser,
         enumerable: true

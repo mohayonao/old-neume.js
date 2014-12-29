@@ -106,6 +106,11 @@ describe("neume", function() {
         assert(spy.calledOnce);
       }));
     });
+    describe(".master", function() {
+      it("\\getter: GainNode", function() {
+        assert(neu.master instanceof global.GainNode);
+      });
+    });
     describe(".analyser", function() {
       it("\\getter: AnalyserNode", function() {
         assert(neu.analyser instanceof global.AnalyserNode);
