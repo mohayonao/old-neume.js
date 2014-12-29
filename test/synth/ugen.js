@@ -83,6 +83,30 @@ describe("neume.UGen", function() {
     });
   });
 
+  describe("#id", function() {
+    it("\\getter", function() {
+      var ugen;
+
+      ugen = neume.UGen.build(synth, "sin#foo", {}, []);
+      assert(ugen.id === "foo");
+
+      ugen = neume.UGen.build(synth, "sin#foo", { id: "bar" }, []);
+      assert(ugen.id === "bar");
+    });
+  });
+
+  describe("#classes", function() {
+    it("\\getter", function() {
+      var ugen;
+
+      ugen = neume.UGen.build(synth, "sin.foo.bar", {}, []);
+      assert.deepEqual(ugen.classes, [ "foo", "bar" ]);
+
+      ugen = neume.UGen.build(synth, "sin.foo.bar", { class: "baz qux" }, []);
+      assert.deepEqual(ugen.classes, [ "foo", "bar", "baz", "qux" ]);
+    });
+  });
+
   describe("#$", function() {
     it("(key:string): neume.UGen", sinon.test(function() {
       var spy = this.spy(synth, "builder");

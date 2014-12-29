@@ -19,8 +19,12 @@ function NeuUGen(synth, key, spec, inputs) {
   this.synth = synth;
   this.key = parsed.key;
   this.classes = parsed.classes;
-  this.id = parsed.id;
+  this.id = util.defaults(spec.id, parsed.id);
   this.outlet = null;
+
+  if (typeof spec.class === "string" && spec.class.trim()) {
+    this.classes = this.classes.concat(spec.class.split(/\s+/));
+  }
 
   if (hasClass(this, "mute")) {
     this._unit = new neume.Unit({});
