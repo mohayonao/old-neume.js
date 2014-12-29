@@ -42,8 +42,8 @@ describe("neume.SynthDollar", function() {
         var params = {};
 
         var synth = new neume.Synth(context, function($) {
-          params.freq = $("@freq", 440);
-          params.amp1 = $("@amp", 0.25);
+          params.freq = $("@freq", { value: 440 });
+          params.amp1 = $("@amp", { value: 0.25 });
           params.amp2 = $("@amp");
         }, []);
 
@@ -55,7 +55,7 @@ describe("neume.SynthDollar", function() {
       });
       it("graph: param", function() {
         var synth = new neume.Synth(context, function($) {
-          return $("sin", { freq: $("@freq", 220) });
+          return $("sin", { freq: $("@freq", { value: 220 }) });
         }, []);
 
         assert(synth.toAudioNode().toJSON(), {
@@ -69,7 +69,7 @@ describe("neume.SynthDollar", function() {
       });
       it("graph: inputs", function() {
         var synth = new neume.Synth(context, function($) {
-          return $("sin").$("@amp", 0.25);
+          return $("sin").$("@amp", { value: 0.25 });
         }, []);
 
         assert(synth.toAudioNode().toJSON(), {
@@ -92,7 +92,7 @@ describe("neume.SynthDollar", function() {
       });
       it("graph: standalone", function() {
         var synth = new neume.Synth(context, function($) {
-          return $("@param", 1000);
+          return $("@param", { value: 1000 });
         }, []);
 
         assert(synth.toAudioNode().toJSON(), {

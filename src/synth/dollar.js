@@ -23,7 +23,7 @@ function NeuSynthDollar(synth) {
     if (typeof key === "string") {
       if (key.charAt(0) === "@") {
         key = key.substr(1);
-        return atParam(key, spec, inputs.pop(), inputs);
+        return atParam(key, spec, inputs);
       }
       if (key.charAt(0) === "#") {
         key = key.substr(1);
@@ -80,15 +80,14 @@ function NeuSynthDollar(synth) {
 function createParamBuilder(synth) {
   var params = {};
 
-  return function(name, spec, defaultValue, inputs) {
+  return function(name, spec, inputs) {
     if (params.hasOwnProperty(name)) {
       return params[name];
     }
-    validateParam(name, defaultValue);
+    validateParam(name);
 
-    defaultValue = util.finite(util.defaults(defaultValue, 0));
-
-    var param = new neume.Param(synth.context, defaultValue, spec);
+    var value = util.finite(util.defaults(spec.value, 0));
+    var param = new neume.Param(synth.context, value, spec);
 
     Object.defineProperty(synth, name, {
       value: param, enumerable: true
