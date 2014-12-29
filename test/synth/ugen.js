@@ -370,9 +370,8 @@ describe("neume.UGen", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ BUFSRC(128) ]
+        inputs: []
       });
-      assert(node.$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("return a * b", function() {
       var node = context.createGain();

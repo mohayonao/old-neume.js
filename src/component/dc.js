@@ -1,13 +1,18 @@
 "use strict";
 
-var C = require("../const");
 var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
 
-var filled0 = new FilledFloat32Array(C.DC_BUF_SIZE, 0);
-var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
+var FILLED1 = (function() {
+  var result = new Float32Array(128);
+  for (var i = 0, imax = result.length; i < imax; i++) {
+    result[i] = 1;
+  }
+  return result;
+})();
+
 var INIT = 0, START = 1, STOP = 2;
 
 function NeuDC(context, value) {
@@ -29,14 +34,15 @@ util.inherits(NeuDC, neume.Component);
 NeuDC.$$name = "NeuDC";
 
 NeuDC.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
+  var value = this._value;
+
+  if (this.outlet === null && value !== 0) {
     var context = this.context;
-    var value = this._value;
     var buf, bufSrc, gain;
 
-    if (value === 0 || value === 1) {
-      buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
-      buf.getChannelData(0).set(value ? filled1 : filled0);
+    if (value === 1) {
+      buf = context.createBuffer(1, FILLED1.length, context.sampleRate);
+      buf.getChannelData(0).set(FILLED1);
 
       bufSrc = context.createBufferSource();
       bufSrc.buffer = buf;
@@ -85,15 +91,5 @@ NeuDC.prototype.stop = function(t) {
 NeuDC.prototype.valueOf = function() {
   return this._value;
 };
-
-function FilledFloat32Array(size, value) {
-  var result = new Float32Array(size);
-
-  for (var i = 0; i < size; i++) {
-    result[i] = value;
-  }
-
-  return result;
-}
 
 module.exports = neume.DC = NeuDC;

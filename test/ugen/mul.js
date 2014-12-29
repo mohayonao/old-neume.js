@@ -39,9 +39,8 @@ describe("ugen/mul", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ BUFSRC(128) ]
+        inputs: []
       });
-      assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("$('*', $('sin'), 1)", function() {
       var synth = neu.Synth(function($) {

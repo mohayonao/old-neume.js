@@ -58,10 +58,7 @@ describe("neume.Sum", function() {
     it("(): AudioNode // when []", function() {
       var sum = new neume.Sum(context, []);
 
-      assert(sum.toAudioNode() instanceof global.AudioNode);
-      assert(sum.toAudioNode() === sum.toAudioNode());
-      assert.deepEqual(sum.toAudioNode().toJSON(), BUFSRC(128));
-      assert(sum.toAudioNode().buffer.getChannelData(0)[0] === 0);
+      assert(sum.toAudioNode() === null);
     });
     it("(): AudioNode // when [ 1 ]", function() {
       var sum = new neume.Sum(context, [ 1 ]);
@@ -189,9 +186,8 @@ describe("neume.Sum", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ BUFSRC(128) ]
+        inputs: []
       });
-      assert(toNode.$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("(to: AudioNode): self // when [ 0 ]", function() {
       var toNode = context.createGain();
@@ -205,9 +201,8 @@ describe("neume.Sum", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ BUFSRC(128) ]
+        inputs: []
       });
-      assert(toNode.$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
 
     it("(to: AudioNode): self // when [ node, param, number, dc ]", function() {
