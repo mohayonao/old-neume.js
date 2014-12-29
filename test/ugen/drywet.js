@@ -31,7 +31,7 @@ describe("ugen/drywet", function() {
     it("$('drywet', { mix: -1 })", function() {
       var synth = neu.Synth(function($) {
         return $("sin")
-        .$("drywet", { mix: -1, efx: function($, cutoff) {
+        .$("drywet", { mix: -1, patch: function($, cutoff) {
           return $("lpf", { freq: cutoff }, $.inputs);
         }, args: [ 1200 ] });
       });
@@ -48,7 +48,7 @@ describe("ugen/drywet", function() {
     it("$('drywet', { mix: +1 })", function() {
       var synth = neu.Synth(function($) {
         return $("sin")
-        .$("drywet", { mix: +1, efx: function($, cutoff) {
+        .$("drywet", { mix: +1, patch: function($, cutoff) {
           return $("lpf", { freq: cutoff }, $.inputs);
         }, args: [ 1200 ] });
       });
@@ -87,7 +87,7 @@ describe("ugen/drywet", function() {
     it("$('drywet', { mix: 0 })", function() {
       var synth = neu.Synth(function($) {
         return $("sin")
-        .$("drywet", { mix: 0, efx: function($, cutoff) {
+        .$("drywet", { mix: 0, patch: function($, cutoff) {
           return $("lpf", { freq: cutoff }, $.inputs);
         }, args: [ 1200 ] });
       });
@@ -144,7 +144,7 @@ describe("ugen/drywet", function() {
   it("$('drywet', { mix: node })", function() {
     var synth = neu.Synth(function($) {
       return $("sin")
-      .$("drywet", { mix: $("sin", { freq: 1 }), efx: function($, cutoff) {
+      .$("drywet", { mix: $("sin", { freq: 1 }), patch: function($, cutoff) {
         return $("lpf", { freq: cutoff }, $.inputs);
       }, args: [ 1200 ] });
     });

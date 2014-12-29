@@ -7,7 +7,7 @@ module.exports = function(neume, util) {
   /*
    * $("drywet", {
    *   mix: signal = 0,
-   *   efx: function = null,
+   *   patch: function = null,
    *   args: any[] = [],
    *   mul: signal = 1,
    *   add: signal = 0,
@@ -48,7 +48,7 @@ module.exports = function(neume, util) {
     var context = ugen.context;
 
     var mix = util.defaults(spec.mix, 0);
-    var efx = util.defaults(spec.efx, spec.wet, null);
+    var efx = util.defaults(spec.patch, spec.efx, spec.wet, null);
     var args = util.defaults(spec.args, []);
     var dry = inputs;
     var wet = null;
