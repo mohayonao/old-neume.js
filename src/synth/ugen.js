@@ -180,15 +180,17 @@ NeuUGen.prototype.trig = function(startTime) {
 };
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
-  if (util.isIterator(schedIter) && typeof callback === "function") {
-    var synth = this.synth;
-    synth.scheds.push([ schedIter, function(e) {
-      if (e.type === "start" || (e.type === "stop" && !e.done)) {
-        return;
-      }
-      callback.call(synth, e);
-    } ]);
-  }
+  var _this = this;
+
+  this.synth._dispatchSched(schedIter, function(e) {
+    if (e.type === "start" || (e.type === "stop" && !e.done)) {
+      return;
+    }
+    e = Object.create(e);
+    e.synth = _this.synth;
+    callback.call(_this, e);
+  });
+
   return this;
 };
 

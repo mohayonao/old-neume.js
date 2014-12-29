@@ -253,11 +253,13 @@ describe("neume.SynthDollar", function() {
         var synth = new neume.Synth(context, function($) {
           return $("sin")
           .sched($.timeout(0.030), function(e) {
-            assert(this instanceof neume.Synth);
+            assert(this instanceof neume.UGen);
+            assert(e.synth === synth);
             passed.push([ "fizz", e.playbackTime, e.count ]);
           })
           .sched($.timeout(0.050), function(e) {
-            assert(this instanceof neume.Synth);
+            assert(this instanceof neume.UGen);
+            assert(e.synth === synth);
             passed.push([ "buzz", e.playbackTime, e.count ]);
           })
           .sched($.timeout(0.150), function(e) {
@@ -287,11 +289,13 @@ describe("neume.SynthDollar", function() {
         var synth = new neume.Synth(context, function($) {
           return $("sin")
           .sched($.interval(0.030), function(e) {
-            assert(this instanceof neume.Synth);
+            assert(this instanceof neume.UGen);
+            assert(e.synth === synth);
             passed.push([ "fizz", e.playbackTime, e.count ]);
           })
           .sched($.interval(0.050), function(e) {
-            assert(this instanceof neume.Synth);
+            assert(this instanceof neume.UGen);
+            assert(e.synth === synth);
             passed.push([ "buzz", e.playbackTime, e.count ]);
           });
         }, []);
@@ -322,7 +326,8 @@ describe("neume.SynthDollar", function() {
         var synth = new neume.Synth(context, function($) {
           return $("sin")
           .sched($.interval("32n"), function(e) {
-            assert(this instanceof neume.Synth);
+            assert(this instanceof neume.UGen);
+            assert(e.synth === synth);
             passed.push([ "fizz", e.playbackTime, e.count ]);
           });
         }, []);

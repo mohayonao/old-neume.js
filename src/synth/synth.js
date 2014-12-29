@@ -28,8 +28,8 @@ function NeuSynth(context, func, args) {
   var $ = new neume.SynthDollar(this);
 
   this.builder = $.builder;
-  this.scheds = [];
 
+  this.__scheds = [];
   this.__nodes = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
@@ -49,10 +49,14 @@ function NeuSynth(context, func, args) {
   });
   this.__nodes = null;
 
+  this._scheds = this.__scheds.map(function(set) {
+    return new neume.Sched(context, set[0], set[1]);
+  });
+  this.__scheds = null;
+
   this._db = this._nodes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
   this._param = param;
-  this._scheds = null;
 
   var methods = getMethods(this._db).filter(function(methodName) {
     return !this.hasOwnProperty(methodName);
@@ -132,9 +136,9 @@ NeuSynth.prototype.start = function(startTime) {
       ugen.start(startTime);
     });
 
-    this._scheds = this.scheds.splice(0).map(function(set) {
-      return new neume.Sched(context, set[0], set[1]).start(startTime);
-    }, this);
+    this._scheds.forEach(function(sched) {
+      sched.start(startTime);
+    });
 
     this.emit("start", {
       type: "start",
@@ -276,6 +280,12 @@ NeuSynth.prototype._dispatchNode = function(node, index) {
       this.__nodes[index] = [];
     }
     this.__nodes[index].push(node);
+  }
+};
+
+NeuSynth.prototype._dispatchSched = function(schedIter, callback) {
+  if (this.__scheds && util.isIterator(schedIter) && typeof callback === "function") {
+    this.__scheds.push([ schedIter, callback ]);
   }
 };
 
