@@ -127,17 +127,13 @@ NeuSynth.prototype.start = function(startTime) {
 
   this._state = START;
 
-  context.sched(startTime, function() {
+  context.sched(startTime, function(t0) {
     this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).append(this);
     }, this);
 
-    this._db.all().forEach(function(ugen) {
-      ugen.start(startTime);
-    });
-
-    this._scheds.forEach(function(sched) {
-      sched.start(startTime);
+    this._db.all().concat(this._scheds).forEach(function(item) {
+      item.start(t0);
     });
 
     this.emit("start", {
@@ -151,18 +147,18 @@ NeuSynth.prototype.start = function(startTime) {
   return this;
 };
 
-NeuSynth.prototype.stop = function(startTime) {
+NeuSynth.prototype.stop = function(stopTime) {
   if (this._state !== START) {
     return this;
   }
 
   var context = this.context;
-  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
-  startTime = util.finite(startTime);
+  stopTime = util.defaults(context.toSeconds(stopTime), context.currentTime);
+  stopTime = util.finite(stopTime);
 
   this._state = STOP;
 
-  context.sched(startTime, function(t0) {
+  context.sched(stopTime, function(t0) {
     this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).remove(this);
     });
@@ -171,17 +167,13 @@ NeuSynth.prototype.stop = function(startTime) {
       context.dispose();
     });
 
-    this._db.all().forEach(function(ugen) {
-      ugen.stop(t0);
-    });
-
-    this._scheds.forEach(function(sched) {
-      sched.stop(t0);
+    this._db.all().concat(this._scheds).forEach(function(item) {
+      item.stop(t0);
     });
 
     this.emit("stop", {
       type: "stop",
-      playbackTime: startTime
+      playbackTime: t0
     });
   }, this);
 
