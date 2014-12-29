@@ -44,6 +44,8 @@ module.exports = function(neume) {
     var context = ugen.context;
     var outlet = spec.value;
 
+    var gain = null;
+
     Object.keys(spec).forEach(function(name) {
       if (typeof outlet[name] !== "undefined") {
         if (outlet[name] instanceof neume.webaudio.AudioParam) {
@@ -53,9 +55,19 @@ module.exports = function(neume) {
         }
       }
     });
+    if (inputs.length) {
+      if (outlet.numberOfInputs) {
+        context.connect(inputs, outlet);
+      } else {
+        gain = context.createGain();
 
-    if (outlet.numberOfInputs) {
-      context.connect(inputs, outlet);
+        gain.gain.value = 0;
+
+        context.connect(inputs, gain);
+        context.connect(outlet, gain.gain);
+
+        outlet = gain;
+      }
     }
 
     return new neume.Unit({

@@ -97,7 +97,7 @@ describe("ugen/audio-node", function() {
     });
     it("$(OscillatorNode, $('sin'))", function() {
       var synth = neu.Synth(function($) {
-        return $(neu.context.createOscillator(), $("sin"));
+        return $(neu.context.createOscillator(), $("sin", { freq: 220 }));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -106,7 +106,44 @@ describe("ugen/audio-node", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ OSCILLATOR("sine", 440) ]
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sine",
+                  frequency: {
+                    value: 440,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 220,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
+          }
+        ]
       });
     });
   });

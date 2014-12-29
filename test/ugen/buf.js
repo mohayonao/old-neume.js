@@ -3,6 +3,7 @@
 var neume = require("../../src");
 
 neume.use(require("../../src/ugen/buf"));
+neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/buf", function() {
   var neu = null;
@@ -110,6 +111,49 @@ describe("ugen/buf", function() {
             loopStart: 0,
             loopEnd: 0,
             inputs: []
+          }
+        ]
+      });
+    });
+    it("$('buf', $('sin'))", function() {
+      var synth = neu.Synth(function($) {
+        var buffer = neu.context.createBuffer(2, 16, 44100);
+        return $("buf", { buffer: buffer }, $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "AudioBufferSourceNode",
+                  buffer: {
+                    name: "AudioBuffer",
+                    sampleRate: 44100,
+                    length: 16,
+                    duration: 0.00036281179138321996,
+                    numberOfChannels: 2
+                  },
+                  playbackRate: {
+                    value: 1,
+                    inputs: []
+                  },
+                  loop: false,
+                  loopStart: 0,
+                  loopEnd: 0,
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });

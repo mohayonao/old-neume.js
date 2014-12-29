@@ -3,6 +3,7 @@
 var neume = require("../../src");
 
 neume.use(require("../../src/ugen/noise"));
+neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/noise", function() {
   var neu = null;
@@ -125,24 +126,66 @@ describe("ugen/noise", function() {
           inputs: []
         },
         inputs: [
-        {
-          name: "AudioBufferSourceNode",
-          buffer: {
-            name: "AudioBuffer",
-            length: 44100 * 4,
-            duration: 4,
-            sampleRate: 44100,
-            numberOfChannels: 1
-          },
-          playbackRate: {
-            value: 1,
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 44100 * 4,
+              duration: 4,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: true,
+            loopStart: 0,
+            loopEnd: 0,
             inputs: []
-          },
-          loop: true,
-          loopStart: 0,
-          loopEnd: 0,
+          }
+        ]
+      });
+    });
+    it("$('white', $('sin'))", function() {
+      var synth = neu.Synth(function($) {
+        return $("white", $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
           inputs: []
-        }
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "AudioBufferSourceNode",
+                  buffer: {
+                    name: "AudioBuffer",
+                    length: 44100 * 4,
+                    duration: 4,
+                    sampleRate: 44100,
+                    numberOfChannels: 1
+                  },
+                  playbackRate: {
+                    value: 1,
+                    inputs: []
+                  },
+                  loop: true,
+                  loopStart: 0,
+                  loopEnd: 0,
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [ OSCILLATOR("sine", 440) ]
+          }
         ]
       });
     });

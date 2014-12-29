@@ -73,58 +73,50 @@ module.exports = function(neume, util) {
   });
 
   function make(wave, ugen, spec, inputs) {
-    var elem = inputs.length ?
-      hasInputs(wave, ugen, spec, inputs) : noInputs(wave, ugen, spec);
-    var outlet = elem.outlet;
-    var ctrl = elem.ctrl;
-
-    return new neume.Unit({
-      outlet: outlet,
-      start: function(t) {
-        ctrl.start(t);
-      },
-      stop: function(t) {
-        ctrl.stop(t);
-      }
-    });
-  }
-
-  function noInputs(wave, ugen, spec) {
-    var osc = createOscillator(ugen.context, wave, spec, 440);
-    return { outlet: osc, ctrl: osc };
-  }
-
-  function hasInputs(wave, ugen, spec, inputs) {
     var context = ugen.context;
+    var outlet = null;
 
-    var osc = createOscillator(context, wave, spec, 2);
-    var gain = ugen.context.createGain();
-
-    gain.gain.value = 0;
-    context.connect(osc, gain.gain);
-    context.connect(inputs, gain);
-
-    return { outlet: gain, ctrl: osc };
-  }
-
-  function createOscillator(context, type, spec, defaultFreq) {
     var osc = context.createOscillator();
+    var gain = null;
 
-    if (isPeriodicWave(type)) {
-      osc.setPeriodicWave(type);
-    } else {
-      osc.type = type;
-    }
-    osc.frequency.value = 0;
-    osc.detune.value = 0;
-
+    var defaultFreq = inputs.length ? 2 : 440;
     var frequency = util.defaults(spec.freq, spec.frequency, defaultFreq);
     var detune = util.defaults(spec.dt, spec.detune, 0);
+
+    if (isPeriodicWave(wave)) {
+      osc.setPeriodicWave(wave);
+    } else {
+      osc.type = wave;
+    }
+
+    osc.frequency.value = 0;
+    osc.detune.value = 0;
 
     context.connect(frequency, osc.frequency);
     context.connect(detune, osc.detune);
 
-    return osc;
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(osc, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = osc;
+    }
+
+    return new neume.Unit({
+      outlet: outlet,
+      start: function(t) {
+        osc.start(t);
+      },
+      stop: function(t) {
+        osc.stop(t);
+      }
+    });
   }
 
   function isPeriodicWave(wave) {
