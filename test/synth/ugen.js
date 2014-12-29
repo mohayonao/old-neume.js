@@ -172,6 +172,33 @@ describe("neume.UGen", function() {
     });
   });
 
+  describe("#patch", function() {
+    it("(patcher: function, ...args: any)", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+
+      var patched = ugen.patch(function($) {
+        return $("delay", $.inputs);
+      });
+
+      assert.deepEqual(patched.toAudioNode().toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: [ OSCILLATOR("sine", 440) ]
+      });
+    });
+    it("(patcher: !function)", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+
+      var patched = ugen.patch();
+
+      assert(ugen !== patched);
+      assert.deepEqual(patched.toAudioNode().toJSON(), OSCILLATOR("sine", 440));
+    });
+  });
+
   describe("#trig", function() {
     it("(startTime: timevalue): self", function() {
       var ugen = neume.UGen.build(synth, "sin.trig", {}, []);

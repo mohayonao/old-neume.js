@@ -113,6 +113,25 @@ NeuUGen.prototype.stop = function(startTime) {
   return this;
 };
 
+NeuUGen.prototype.patch = function(patcher) {
+  var args = util.toArray(arguments).slice(1);
+  var $ = this.synth.builder;
+
+  if (typeof patcher === "function") {
+    var builder = function() {
+      return $.apply(null, arguments);
+    };
+    builder.timeout = $.timeout;
+    builder.interval = $.interval;
+    builder.stop = $.stop;
+    builder.inputs = [ this ];
+
+    return patcher.apply(this.synth, [ builder ].concat(args));
+  }
+
+  return $("+", this);
+};
+
 NeuUGen.prototype.trig = function(startTime) {
   var context = this.context;
 
