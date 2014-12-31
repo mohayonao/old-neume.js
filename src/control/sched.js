@@ -1,7 +1,8 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var Emitter = require("../util/emitter");
 
 var STATE_INIT = 0;
@@ -13,26 +14,16 @@ var STATE_DONE = 4;
 function NeuSched(context, schedIter, callback) {
   Emitter.call(this);
 
-  this.context = context;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
 
   this._schedIter = schedIter;
   this._state = STATE_INIT;
   this._count = 0;
-
-  Object.defineProperties(this, {
-    state: {
-      get: function() {
-        return [
-          "UNSCHEDULED",
-          "SCHEDULED",
-          "PLAYING",
-          "PLAYING",
-          "FINISHED"
-        ][this._state];
-      },
-      enumerable: true
-    },
-  });
 
   this.on("start", callback).on("sched", callback).on("stop", callback);
 }

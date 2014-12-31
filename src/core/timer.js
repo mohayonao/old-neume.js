@@ -8,15 +8,15 @@ var NeuTimer;
 if (typeof global.window === "undefined") {
   NeuTimer = (function() {
     function NodeNeuTimer(callback, interval) {
-      this.callback = callback;
-      this.interval = interval;
+      this._callback = callback;
+      this._interval = interval;
       this._timerId = 0;
     }
     NodeNeuTimer.$$name = "NeuTimer";
 
     NodeNeuTimer.prototype.start = function() {
       clearInterval(this._timerId);
-      this._timerId = setInterval(this.callback, this.interval);
+      this._timerId = setInterval(this._callback, this._interval);
       return this;
     };
 
@@ -29,36 +29,22 @@ if (typeof global.window === "undefined") {
   })();
 } else {
   NeuTimer = (function() {
-    var timerSource = (function() {
-      var _this = this, timerId = 0;
-      this.onmessage = function(e) {
-        clearInterval(timerId);
-        if (e.data > 0) {
-          timerId = setInterval(function() {
-            _this.postMessage(0);
-          }, e.data);
-        }
-      };
-    }).toString().trim().match(
-      /^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/
-    )[1];
-
     var timerJS = global.URL.createObjectURL(
-      new global.Blob([ timerSource ], { type: "text/javascript" })
+      new global.Blob([
+        "var t=0;onmessage=function(e){clearInterval(t);if(e.data)t=setInterval(function(){postMessage(0)},e.data)}"
+      ], { type: "text/javascript" })
     );
 
     function WorkerNeuTimer(callback, interval) {
-      this.callback = callback;
-      this.interval = interval;
+      this._callback = callback;
+      this._interval = interval;
       this._worker = new global.Worker(timerJS);
-      this._worker.onmessage = function() {
-        callback();
-      };
+      this._worker.onmessage = callback;
     }
     WorkerNeuTimer.$$name = "NeuTimer";
 
     WorkerNeuTimer.prototype.start = function() {
-      this._worker.postMessage(this.interval);
+      this._worker.postMessage(this._interval);
       return this;
     };
 

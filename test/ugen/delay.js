@@ -54,21 +54,7 @@ describe("ugen/delay", function() {
               value: 0,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });
@@ -127,19 +113,7 @@ describe("ugen/delay", function() {
               inputs: []
             },
             inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              },
+              OSCILLATOR("sine", 440),
               {
                 name: "GainNode",
                 gain: {

@@ -48,28 +48,14 @@ describe("ugen/mono", function() {
           inputs: []
         },
         inputs: [
-        {
-          name: "GainNode",
-          gain: {
-            value: 1,
-            inputs: []
-          },
-          inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
+            name: "GainNode",
+            gain: {
+              value: 1,
               inputs: []
             },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
-          ]
-        }
         ]
       });
     });

@@ -1,7 +1,8 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var Emitter = require("../util/emitter");
 var Parser = require("./parser");
 
@@ -14,17 +15,46 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
-  this.context = synth.context;
-  this.synth = synth;
-  this.key = parsed.key;
-  this.classes = parsed.classes;
-  this.id = parsed.id;
-  this.outlet = null;
+  var listOfClass = parsed.classes;
+  var classes = {};
 
-  if (hasClass(this, "mute")) {
+  if (typeof spec.class === "string" && spec.class.trim()) {
+    listOfClass = listOfClass.concat(spec.class.split(/\s+/));
+  }
+
+  listOfClass.forEach(function(className) {
+    classes[className] = true;
+  });
+
+  Object.defineProperties(this, {
+    context: {
+      value: synth.context,
+      enumerable: true
+    },
+    synth: {
+      value: synth,
+      enumerable: true
+    },
+    key: {
+      value: parsed.key,
+      enumerable: true
+    },
+    id: {
+      value: util.defaults(spec.id, parsed.id),
+      enumerable: true
+    },
+    class: {
+      value: Object.keys(classes).sort().join(" "),
+      enumerable: true
+    },
+  });
+
+  this._classes = classes;
+
+  if (this.hasClass("mute")) {
     this._unit = new neume.Unit({});
     this._node = this.context.createGain();
-  } else if (hasClass(this, "bypass")) {
+  } else if (this.hasClass("bypass")) {
     this._unit = NeuUGen.registered["+"](this, {}, inputs);
     this._node = this._unit.outlet;
   } else {
@@ -51,6 +81,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 
+  this._outlet = null;
   this._scheds = [];
 }
 util.inherits(NeuUGen, Emitter);
@@ -84,6 +115,10 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.hasClass = function(className) {
+  return !!this._classes[className];
+};
+
 NeuUGen.prototype.$ = function() {
   var args = util.toArray(arguments);
   var key = args.shift();
@@ -102,7 +137,7 @@ NeuUGen.prototype.add = function(value) {
 };
 
 NeuUGen.prototype.start = function(startTime) {
-  if (!hasClass(this, "trig")) {
+  if (!this.hasClass("trig")) {
     this._unit.start(startTime);
   }
   return this;
@@ -111,6 +146,25 @@ NeuUGen.prototype.start = function(startTime) {
 NeuUGen.prototype.stop = function(startTime) {
   this._unit.stop(startTime);
   return this;
+};
+
+NeuUGen.prototype.patch = function(patcher) {
+  var args = util.toArray(arguments).slice(1);
+  var $ = this.synth.builder;
+
+  if (typeof patcher === "function") {
+    var builder = function() {
+      return $.apply(null, arguments);
+    };
+    builder.timeout = $.timeout;
+    builder.interval = $.interval;
+    builder.stop = $.stop;
+    builder.inputs = [ this ];
+
+    return patcher.apply(this.synth, [ builder ].concat(args));
+  }
+
+  return $("+", this);
 };
 
 NeuUGen.prototype.trig = function(startTime) {
@@ -126,23 +180,25 @@ NeuUGen.prototype.trig = function(startTime) {
 };
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
-  if (util.isIterator(schedIter) && typeof callback === "function") {
-    var synth = this.synth;
-    synth.scheds.push([ schedIter, function(e) {
-      if (e.type === "start" || (e.type === "stop" && !e.done)) {
-        return;
-      }
-      callback.call(synth, e);
-    } ]);
-  }
+  var _this = this;
+
+  this.synth._dispatchSched(schedIter, function(e) {
+    if (e.type === "start" || (e.type === "stop" && !e.done)) {
+      return;
+    }
+    e = Object.create(e);
+    e.synth = _this.synth;
+    callback.call(_this, e);
+  });
+
   return this;
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.toAudioNode(this._node);
+  if (this._outlet === null) {
+    this._outlet = this.context.toAudioNode(this._node);
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuUGen.prototype.connect = function(to) {
@@ -175,10 +231,6 @@ function mul(context, a, b) {
 
 function add(context, a, b) {
   return new neume.Sum(context, [ a, b ]);
-}
-
-function hasClass(_this, className) {
-  return _this.classes.indexOf(className) !== -1;
 }
 
 module.exports = neume.UGen = NeuUGen;

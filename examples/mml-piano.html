@@ -84,14 +84,14 @@
     })).mul(0.75)
     .$("shaper", { curve: 0.75 })
     .$("lpf", { freq: $("line", { start: freq * 3, end: freq * 0.75, dur: 3.5 }), Q: 6 })
-    .$("xline", { start: 0.75, end: 0.01, dur: dur * 5 }).on("end", $.stop)
+    .$("xline", { start: 0.5, end: 0.01, dur: dur * 5 }).on("end", $.stop)
     .$("out", { bus: 1 });
   }
 
   function Master($) {
     return $("in", { bus: 1 })
     .$("drywet", {
-      mix: $("@mix", -0.25),
+      mix: $("@mix", { value: -0.25 }),
       efx: function($) {
         return $("conv", { buf: IRData }, $.inputs);
       }

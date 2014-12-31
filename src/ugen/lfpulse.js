@@ -42,37 +42,35 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var elem = inputs.length ? hasInputs(ugen, spec, inputs) : noInputs(ugen, spec);
-    var outlet = elem.outlet;
-    var ctrl = elem.ctrl;
+    var context = ugen.context;
+    var outlet = null;
+
+    var defaultFreq = inputs.length ? 2 : 440;
+    var pulse = createPulseOscillator(context, spec, defaultFreq);
+    var gain = null;
+
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(pulse.outlet, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = pulse.outlet;
+    }
 
     return new neume.Unit({
       outlet: outlet,
       start: function(t) {
-        ctrl.start(t);
+        pulse.ctrl.start(t);
       },
       stop: function(t) {
-        ctrl.stop(t);
+        pulse.ctrl.stop(t);
       }
     });
-  }
-
-  function noInputs(ugen, spec) {
-    var pulse = createPulseOscillator(ugen.context, spec, 440);
-    return { outlet: pulse.outlet, ctrl: pulse.ctrl };
-  }
-
-  function hasInputs(ugen, spec, inputs) {
-    var context = ugen.context;
-
-    var pulse = createPulseOscillator(context, spec, 2);
-    var gain = ugen.context.createGain();
-
-    gain.gain.value = 0;
-    context.connect(pulse.outlet, gain.gain);
-    context.connect(inputs, gain);
-
-    return { outlet: gain, ctrl: pulse.ctrl };
   }
 
   function createPulseOscillator(context, spec, defaultFreq) {

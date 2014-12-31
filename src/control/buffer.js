@@ -1,23 +1,45 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var FFT = require("../util/fft");
 
 function NeuBuffer(context, buffer) {
-  this.context = context;
-  this.sampleRate = buffer.sampleRate;
-  this.length = buffer.length;
-  this.duration = buffer.duration;
-  this.numberOfChannels = buffer.numberOfChannels;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    sampleRate: {
+      value: buffer.sampleRate,
+      enumerable: true
+    },
+    length: {
+      value: buffer.length,
+      enumerable: true
+    },
+    duration: {
+      value: buffer.duration,
+      enumerable: true
+    },
+    numberOfChannels: {
+      value: buffer.numberOfChannels,
+      enumerable: true
+    },
+  });
+
+  function getChannelData(ch) {
+    return function() {
+      return buffer.getChannelData(ch);
+    };
+  }
+
+  for (var i = 0; i < buffer.numberOfChannels; i++) {
+    Object.defineProperty(this, i, { get: getChannelData(i) });
+  }
 
   this._buffer = buffer;
-
-  for (var i = 0; i < this._buffer.numberOfChannels; i++) {
-    Object.defineProperty(this, i, {
-      value: this._buffer.getChannelData(i)
-    });
-  }
 }
 NeuBuffer.$$name = "NeuBuffer";
 

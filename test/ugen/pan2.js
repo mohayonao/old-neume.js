@@ -34,21 +34,7 @@ describe("ugen/pan2", function() {
                   value: Math.cos(0.5 * Math.PI * 0.5),
                   inputs: []
                 },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 440,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 440) ]
               },
               {
                 name: "GainNode",
@@ -56,21 +42,7 @@ describe("ugen/pan2", function() {
                   value: Math.sin(0.5 * Math.PI * 0.5),
                   inputs: []
                 },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 440,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 440) ]
               }
             ]
           }
@@ -100,39 +72,11 @@ describe("ugen/pan2", function() {
                     {
                       name: "WaveShaperNode",
                       oversample: "none",
-                      inputs: [
-                        {
-                          name: "OscillatorNode",
-                          type: "sine",
-                          frequency: {
-                            value: 1,
-                            inputs: []
-                          },
-                          detune: {
-                            value: 0,
-                            inputs: []
-                          },
-                          inputs: []
-                        }
-                      ]
+                      inputs: [ OSCILLATOR("sine", 1) ]
                     }
                   ]
                 },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 440,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 440) ]
               },
               {
                 name: "GainNode",
@@ -142,39 +86,11 @@ describe("ugen/pan2", function() {
                     {
                       name: "WaveShaperNode",
                       oversample: "none",
-                      inputs: [
-                        {
-                          name: "OscillatorNode",
-                          type: "sine",
-                          frequency: {
-                            value: 1,
-                            inputs: []
-                          },
-                          detune: {
-                            value: 0,
-                            inputs: []
-                          },
-                          inputs: []
-                        }
-                      ]
+                      inputs: [ OSCILLATOR("sine", 1) ]
                     }
                   ]
                 },
-                inputs: [
-                  {
-                    name: "OscillatorNode",
-                    type: "sine",
-                    frequency: {
-                      value: 440,
-                      inputs: []
-                    },
-                    detune: {
-                      value: 0,
-                      inputs: []
-                    },
-                    inputs: []
-                  }
-                ]
+                inputs: [ OSCILLATOR("sine", 440) ]
               }
             ]
           }

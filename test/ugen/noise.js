@@ -3,6 +3,7 @@
 var neume = require("../../src");
 
 neume.use(require("../../src/ugen/noise"));
+neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/noise", function() {
   var neu = null;
@@ -125,54 +126,92 @@ describe("ugen/noise", function() {
           inputs: []
         },
         inputs: [
-        {
-          name: "AudioBufferSourceNode",
-          buffer: {
-            name: "AudioBuffer",
-            length: 44100 * 4,
-            duration: 4,
-            sampleRate: 44100,
-            numberOfChannels: 1
-          },
-          playbackRate: {
-            value: 1,
+          {
+            name: "AudioBufferSourceNode",
+            buffer: {
+              name: "AudioBuffer",
+              length: 44100 * 4,
+              duration: 4,
+              sampleRate: 44100,
+              numberOfChannels: 1
+            },
+            playbackRate: {
+              value: 1,
+              inputs: []
+            },
+            loop: true,
+            loopStart: 0,
+            loopEnd: 0,
             inputs: []
-          },
-          loop: true,
-          loopStart: 0,
-          loopEnd: 0,
+          }
+        ]
+      });
+    });
+    it("$('white', $('sin'))", function() {
+      var synth = neu.Synth(function($) {
+        return $("white", $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
           inputs: []
-        }
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "AudioBufferSourceNode",
+                  buffer: {
+                    name: "AudioBuffer",
+                    length: 44100 * 4,
+                    duration: 4,
+                    sampleRate: 44100,
+                    numberOfChannels: 1
+                  },
+                  playbackRate: {
+                    value: 1,
+                    inputs: []
+                  },
+                  loop: true,
+                  loopStart: 0,
+                  loopEnd: 0,
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [ OSCILLATOR("sine", 440) ]
+          }
         ]
       });
     });
   });
   describe("works", function() {
-    it("start/stop", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("start/stop", function() {
       var synth = neu.Synth(function($) {
         return $("white");
       });
 
-      synth.start(0.100);
-      synth.stop(0.200);
-
       var outlet = synth.toAudioNode().$inputs[0];
 
-      tick(300);
+      useTimer(neu.context, function(tick) {
+        synth.start(0.100);
+        synth.stop(0.200);
+
+        tick(300);
+      });
+
       assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
       assert(outlet.$stateAtTime(0.100) === "PLAYING");
       assert(outlet.$stateAtTime(0.150) === "PLAYING");
       assert(outlet.$stateAtTime(0.200) === "FINISHED");
       assert(outlet.$stateAtTime(0.250) === "FINISHED");
-    }));
+    });
   });
 
 });

@@ -2,14 +2,7 @@
 
 var neume = require("../../src");
 
-require("../../src/ugen/osc");
-require("../../src/ugen/add");
-require("../../src/ugen/mul");
-require("../../src/ugen/env");
-require("../../src/ugen/delay");
-
-var util = neume.util;
-var NOP = function() {};
+neume.use(require("../../src/ugen"));
 
 describe("neume.UGen", function() {
   var context = null;
@@ -23,13 +16,11 @@ describe("neume.UGen", function() {
   });
 
   describe("constructor", function() {
-    it("(synth: neume.Synth, key: string, spec: object, inputs: Array<any>)", function() {
+    it("(synth: neume.Synth, key: string, spec: object, inputs: any[])", function() {
       var ugen = neume.UGen.build(synth, "sin.kr.lfo#ugen0", {}, []);
 
       assert(ugen instanceof neume.UGen);
       assert(ugen instanceof neume.Emitter);
-      assert(ugen.id === "ugen0");
-      assert.deepEqual(ugen.classes, [ "kr", "lfo" ]);
     });
     it("throw an error if given invalid key", function() {
       assert.throws(function() {
@@ -87,6 +78,41 @@ describe("neume.UGen", function() {
       assert.throws(function() {
         neume.UGen.register("not-a-function", { call: NOP, apply: NOP });
       }, TypeError);
+    });
+  });
+
+  describe("#id", function() {
+    it("\\getter", function() {
+      var ugen;
+
+      ugen = neume.UGen.build(synth, "sin#foo", {}, []);
+      assert(ugen.id === "foo");
+
+      ugen = neume.UGen.build(synth, "sin#foo", { id: "bar" }, []);
+      assert(ugen.id === "bar");
+    });
+  });
+
+  describe("#class", function() {
+    it("\\getter", function() {
+      var ugen;
+
+      ugen = neume.UGen.build(synth, "sin.foo.bar", {}, []);
+      assert(ugen.class === "bar foo");
+
+      ugen = neume.UGen.build(synth, "sin.foo.bar", { class: "baz qux" }, []);
+      assert(ugen.class === "bar baz foo qux");
+    });
+  });
+
+  describe("#hasClass", function() {
+    it("(className: string): boolean", function() {
+      var ugen;
+
+      ugen = neume.UGen.build(synth, "sin.foo.bar", {}, []);
+
+      assert(ugen.hasClass("bar") === true);
+      assert(ugen.hasClass("baz") === false);
     });
   });
 
@@ -179,30 +205,52 @@ describe("neume.UGen", function() {
     });
   });
 
-  describe("#trig", function() {
-    it("(startTime: timevalue): self", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
+  describe("#patch", function() {
+    it("(patcher: function, ...args: any)", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
 
+      var patched = ugen.patch(function($) {
+        return $("delay", $.inputs);
+      });
+
+      assert.deepEqual(patched.toAudioNode().toJSON(), {
+        name: "DelayNode",
+        delayTime: {
+          value: 0,
+          inputs: []
+        },
+        inputs: [ OSCILLATOR("sine", 440) ]
+      });
+    });
+    it("(patcher: !function)", function() {
+      var ugen = neume.UGen.build(synth, "sin", {}, []);
+
+      var patched = ugen.patch();
+
+      assert(ugen !== patched);
+      assert.deepEqual(patched.toAudioNode().toJSON(), OSCILLATOR("sine", 440));
+    });
+  });
+
+  describe("#trig", function() {
+    it("(startTime: timevalue): self", function() {
       var ugen = neume.UGen.build(synth, "sin.trig", {}, []);
       var spy = sinon.spy(ugen._unit, "start");
 
-      assert(ugen.start(0) === ugen);
-      assert(ugen.trig(0.1) === ugen);
+      useTimer(context, function(tick) {
+        assert(ugen.start(0) === ugen);
+        assert(ugen.trig(0.1) === ugen);
 
-      context.start();
+        context.start();
 
-      tick(50);
-      assert(!spy.called);
+        tick(50);
+        assert(!spy.called);
 
-      tick(50);
-      assert(spy.calledOnce);
-      assert(spy.calledWith(0.1));
-    }));
+        tick(50);
+        assert(spy.calledOnce);
+        assert(spy.calledWith(0.1));
+      });
+    });
   });
 
   describe("#sched", function() {
@@ -233,21 +281,7 @@ describe("neume.UGen", function() {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ OSCILLATOR("sine", 440) ]
       });
     });
     it("(to: AudioNode): self // when with offset", function() {
@@ -262,26 +296,14 @@ describe("neume.UGen", function() {
           inputs: []
         },
         inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          },
+          OSCILLATOR("sine", 440),
           {
             name: "GainNode",
             gain: {
               value: 880,
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
@@ -296,21 +318,7 @@ describe("neume.UGen", function() {
         name: "GainNode",
         gain: {
           value: 1,
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+          inputs: [ OSCILLATOR("sine", 440) ]
         },
         inputs: []
       });
@@ -324,21 +332,7 @@ describe("neume.UGen", function() {
         name: "GainNode",
         gain: {
           value: 880,
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+          inputs: [ OSCILLATOR("sine", 440) ]
         },
         inputs: []
       });
@@ -419,24 +413,10 @@ describe("neume.UGen", function() {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ OSCILLATOR("sine", 440) ]
       });
     });
-    it("return DC(0) when a * 0", function() {
+    it("return 0 when a * 0", function() {
       var node = context.createGain();
 
       var b = 0;
@@ -450,7 +430,7 @@ describe("neume.UGen", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(0) ]
+        inputs: []
       });
     });
     it("return a * b", function() {
@@ -472,37 +452,9 @@ describe("neume.UGen", function() {
             name: "GainNode",
             gain: {
               value: 0,
-              inputs: [
-                {
-                  name: "OscillatorNode",
-                  type: "sine",
-                  frequency: {
-                    value: 440,
-                    inputs: []
-                  },
-                  detune: {
-                    value: 0,
-                    inputs: []
-                  },
-                  inputs: []
-                }
-              ]
+              inputs: [ OSCILLATOR("sine", 440) ]
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });

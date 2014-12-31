@@ -1,11 +1,12 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("../component/param");
 require("./ugen");
 require("./ugen-promise");
+
+var util = require("../util");
 
 function NeuSynthDollar(synth) {
   var db = new neume.DB();
@@ -17,13 +18,13 @@ function NeuSynthDollar(synth) {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isPlainObject(args[0]) ? args.shift() : {};
-    var inputs = util.flatten(args);
+    var inputs = args;
     var ugen, promise;
 
     if (typeof key === "string") {
       if (key.charAt(0) === "@") {
         key = key.substr(1);
-        return atParam(key, spec, inputs.pop(), inputs);
+        return atParam(key, spec, inputs);
       }
       if (key.charAt(0) === "#") {
         key = key.substr(1);
@@ -80,15 +81,14 @@ function NeuSynthDollar(synth) {
 function createParamBuilder(synth) {
   var params = {};
 
-  return function(name, spec, defaultValue, inputs) {
+  return function(name, spec, inputs) {
     if (params.hasOwnProperty(name)) {
       return params[name];
     }
-    validateParam(name, defaultValue);
+    validateParam(name);
 
-    defaultValue = util.finite(util.defaults(defaultValue, 0));
-
-    var param = new neume.Param(synth.context, defaultValue, spec);
+    var value = util.finite(util.defaults(spec.value, 0));
+    var param = new neume.Param(synth.context, value, spec);
 
     Object.defineProperty(synth, name, {
       value: param, enumerable: true

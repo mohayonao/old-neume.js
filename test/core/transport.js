@@ -59,39 +59,39 @@ describe("neume.Transport", function() {
   });
 
   describe("#start", function() {
-    it("(): self", sinon.test(function() {
-      assert(transport.start() === transport);
-      assert(transport.start() === transport);
-    }));
+    it("(): self", function() {
+      useTimer(context, function() {
+        assert(transport.start() === transport);
+        assert(transport.start() === transport);
+      });
+    });
   });
 
   describe("#stop", function() {
-    it("(): self", sinon.test(function() {
-      assert(transport.start() === transport);
-      assert(transport.stop() === transport);
-      assert(transport.stop() === transport);
-    }));
+    it("(): self", function() {
+      useTimer(context, function() {
+        assert(transport.start() === transport);
+        assert(transport.stop() === transport);
+        assert(transport.stop() === transport);
+      });
+    });
   });
 
   describe("#reset", function() {
-    it("(): self", sinon.test(function() {
-      assert(transport.reset() === transport);
-      assert(transport.reset() === transport);
-    }));
+    it("(): self", function() {
+      useTimer(context, function() {
+        assert(transport.start() === transport);
+        assert(transport.reset() === transport);
+        assert(transport.reset() === transport);
+      });
+    });
   });
 
   describe("#sched", function() {
     it("(time: number, callback: !function, context: any): 0", function() {
       assert(transport.sched(10, "INVALID") === 0);
     });
-    it("(time: number, callback: function, context: any): number // works", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(time: number, callback: function, context: any): number // works", function() {
       var passed = [];
 
       var pass = function(i) {
@@ -100,38 +100,34 @@ describe("neume.Transport", function() {
         };
       };
 
-      transport.start();
-      transport.sched(0.100, pass(1));
-      transport.sched(0.500, pass(5));
-      transport.sched(0.200, pass(2));
-      transport.sched(0.400, pass(4));
-      transport.sched(0.300, pass(3));
+      useTimer(context, function(tick) {
+        transport.start();
 
-      assert(passed.length === 0, "00:00.000");
+        transport.sched(0.100, pass(1));
+        transport.sched(0.500, pass(5));
+        transport.sched(0.200, pass(2));
+        transport.sched(0.400, pass(4));
+        transport.sched(0.300, pass(3));
 
-      tick(100);
-      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
+        assert(passed.length === 0, "00:00.000");
 
-      tick(100);
-      assert.deepEqual(passed[1], [ 2, 0.2 ], "00:00.200");
+        tick(100);
+        assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      tick(350);
-      assert.deepEqual(passed, [
-        [ 1, 0.1 ],
-        [ 2, 0.2 ],
-        [ 3, 0.3 ],
-        [ 4, 0.4 ],
-        [ 5, 0.5 ],
-      ], "00:00.550");
-    }));
-    it("same time order", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
+        tick(100);
+        assert.deepEqual(passed[1], [ 2, 0.2 ], "00:00.200");
 
+        tick(350);
+        assert.deepEqual(passed, [
+          [ 1, 0.1 ],
+          [ 2, 0.2 ],
+          [ 3, 0.3 ],
+          [ 4, 0.4 ],
+          [ 5, 0.5 ],
+        ], "00:00.550");
+      });
+    });
+    it("same time order", function() {
       var passed = [];
 
       var pass = function(i) {
@@ -140,38 +136,34 @@ describe("neume.Transport", function() {
         };
       };
 
-      transport.start();
-      transport.sched(0.100, pass(1));
-      transport.sched(0.100, pass(2));
-      transport.sched(0.100, pass(3));
-      transport.sched(0.100, pass(4));
-      transport.sched(0.100, pass(5));
+      useTimer(context, function(tick) {
+        transport.start();
 
-      assert(passed.length === 0, "00:00.000");
+        transport.sched(0.100, pass(1));
+        transport.sched(0.100, pass(2));
+        transport.sched(0.100, pass(3));
+        transport.sched(0.100, pass(4));
+        transport.sched(0.100, pass(5));
 
-      tick(100);
-      assert.deepEqual(passed, [
-        [ 1, 0.1 ],
-        [ 2, 0.1 ],
-        [ 3, 0.1 ],
-        [ 4, 0.1 ],
-        [ 5, 0.1 ],
-      ], "00:00.100");
-    }));
+        assert(passed.length === 0, "00:00.000");
+
+        tick(100);
+        assert.deepEqual(passed, [
+          [ 1, 0.1 ],
+          [ 2, 0.1 ],
+          [ 3, 0.1 ],
+          [ 4, 0.1 ],
+          [ 5, 0.1 ],
+        ], "00:00.100");
+      });
+    });
   });
 
   describe("#unsched", function() {
     it("(id: !number): 0", function() {
       assert(transport.unsched("INVALID") === 0);
     });
-    it("(id: number): number", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(id: number): number", function() {
       var passed = [];
       var schedIds = [];
 
@@ -181,55 +173,53 @@ describe("neume.Transport", function() {
         };
       };
 
-      transport.start();
-      schedIds[1] = transport.sched(0.100, pass(1));
-      schedIds[5] = transport.sched(0.500, pass(5));
-      schedIds[2] = transport.sched(0.200, pass(2));
-      schedIds[4] = transport.sched(0.400, pass(4));
-      schedIds[3] = transport.sched(0.300, pass(3));
+      useTimer(context, function(tick) {
+        transport.start();
 
-      transport.unsched(schedIds[2]);
+        schedIds[1] = transport.sched(0.100, pass(1));
+        schedIds[5] = transport.sched(0.500, pass(5));
+        schedIds[2] = transport.sched(0.200, pass(2));
+        schedIds[4] = transport.sched(0.400, pass(4));
+        schedIds[3] = transport.sched(0.300, pass(3));
 
-      assert(passed.length === 0, "00:00.000");
+        transport.unsched(schedIds[2]);
 
-      tick(100);
-      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
+        assert(passed.length === 0, "00:00.000");
 
-      tick(100);
-      assert.deepEqual(passed[1], undefined, "00:00.200");
+        tick(100);
+        assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      tick(350);
-      assert.deepEqual(passed, [
-        [ 1, 0.1 ],
-        [ 3, 0.3 ],
-        [ 4, 0.4 ],
-        [ 5, 0.5 ],
-      ], "00:00.550");
-    }));
+        tick(100);
+        assert.deepEqual(passed[1], undefined, "00:00.200");
+
+        tick(350);
+        assert.deepEqual(passed, [
+          [ 1, 0.1 ],
+          [ 3, 0.3 ],
+          [ 4, 0.4 ],
+          [ 5, 0.5 ],
+        ], "00:00.550");
+      });
+    });
   });
 
   describe("#nextTick", function() {
-    it("(callback: function, context: any): self", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(callback: function, context: any): self", function() {
       var passed = 0;
 
-      transport.start();
+      useTimer(context, function(tick) {
+        transport.start();
 
-      transport.nextTick(function() {
-        passed = 1;
+        transport.nextTick(function() {
+          passed = 1;
+        });
+
+        assert(passed === 0);
+
+        tick(50);
+        assert(passed === 1);
       });
-
-      assert(passed === 0);
-
-      tick(50);
-      assert(passed === 1);
-    }));
+    });
   });
 
   describe("#toSeconds", function() {

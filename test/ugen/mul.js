@@ -24,7 +24,7 @@ describe("ugen/mul", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [ BUFSRC(128) ]
       });
       assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
@@ -39,9 +39,8 @@ describe("ugen/mul", function() {
           value: 1,
           inputs: []
         },
-        inputs: [ DC(0) ]
+        inputs: []
       });
-      assert(synth.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 0);
     });
     it("$('*', $('sin'), 1)", function() {
       var synth = neu.Synth(function($) {
@@ -54,21 +53,7 @@ describe("ugen/mul", function() {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ OSCILLATOR("sine", 440) ]
       });
     });
     it("$('*', $('sin'), 0.5)", function() {
@@ -89,21 +74,7 @@ describe("ugen/mul", function() {
               value: 0.5,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });

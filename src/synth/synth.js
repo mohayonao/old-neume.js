@@ -1,13 +1,14 @@
 "use strict";
 
-var util = require("../util");
-var DB = require("../util/db");
 var neume = require("../namespace");
-var Emitter = require("../util/emitter");
-var Parser = require("./parser");
 
 require("./dollar");
 require("./context");
+
+var util = require("../util");
+var DB = require("../util/db");
+var Emitter = require("../util/emitter");
+var Parser = require("./parser");
 
 var EMPTY_DB = new DB();
 var INIT = 0, START = 1, STOP = 2;
@@ -15,22 +16,30 @@ var INIT = 0, START = 1, STOP = 2;
 function NeuSynth(context, func, args) {
   Emitter.call(this);
 
-  this.context = new neume.SynthContext(context);
-  this.routes = [];
+  context = new neume.SynthContext(context);
+
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
 
   var $ = new neume.SynthDollar(this);
 
   this.builder = $.builder;
-  this.scheds = [];
+
+  this.__scheds = [];
+  this.__nodes = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
   var result = func.apply(this, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.isOutput) {
-    this.routes[0] = result;
+    this._dispatchNode(result, 0);
   }
 
-  this.routes = this.routes.map(function(node) {
+  this._nodes = this.__nodes.map(function(node) {
     var gain = context.createGain();
 
     context.connect(node, gain);
@@ -38,19 +47,22 @@ function NeuSynth(context, func, args) {
 
     return gain;
   });
+  this.__nodes = null;
 
-  this._connected = false;
-  this._db = this.routes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
+  this._scheds = this.__scheds.map(function(set) {
+    return new neume.Sched(context, set[0], set[1]);
+  });
+  this.__scheds = null;
+
+  this._db = this._nodes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
-  this._stateString = "UNSCHEDULED";
   this._param = param;
-  this._scheds = null;
 
-  this.methods = getMethods(this._db);
-
-  this.methods.filter(function(methodName) {
+  var methods = getMethods(this._db).filter(function(methodName) {
     return !this.hasOwnProperty(methodName);
-  }, this).forEach(function(methodName) {
+  }, this).sort();
+
+  methods.forEach(function(methodName) {
     Object.defineProperty(this, methodName, {
       value: function() {
         var args = util.toArray(arguments);
@@ -60,14 +72,15 @@ function NeuSynth(context, func, args) {
           }
         });
         return this;
-      }
+      },
+      enumerable: false
     });
   }, this);
 
   Object.defineProperties(this, {
-    state: {
+    methods: {
       get: function() {
-        return this._stateString;
+        return methods.slice();
       },
       enumerable: true
     }
@@ -77,11 +90,17 @@ util.inherits(NeuSynth, Emitter);
 
 NeuSynth.$$name = "NeuSynth";
 
+NeuSynth.prototype.hasClass = function(className) {
+  return this._db.all().some(function(ugen) {
+    return ugen.hasClass(className);
+  });
+};
+
 NeuSynth.prototype.query = function(selector) {
   var array = this._db.find(Parser.parse(selector));
 
   [
-    "on", "once", "off", "trig"
+    "on", "once", "off", "hasClass", "trig"
   ].concat(this.methods).forEach(function(methodName) {
     array[methodName] = function() {
       var args = util.toArray(arguments);
@@ -107,22 +126,15 @@ NeuSynth.prototype.start = function(startTime) {
   startTime = util.finite(startTime);
 
   this._state = START;
-  this._stateString = "SCHEDULED";
 
-  context.sched(startTime, function() {
-    this._stateString = "PLAYING";
-
-    this.routes.forEach(function(_, index) {
+  context.sched(startTime, function(t0) {
+    this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).append(this);
     }, this);
 
-    this._db.all().forEach(function(ugen) {
-      ugen.start(startTime);
+    this._db.all().concat(this._scheds).forEach(function(item) {
+      item.start(t0);
     });
-
-    this._scheds = this.scheds.splice(0).map(function(set) {
-      return new neume.Sched(context, set[0], set[1]).start(startTime);
-    }, this);
 
     this.emit("start", {
       type: "start",
@@ -135,21 +147,19 @@ NeuSynth.prototype.start = function(startTime) {
   return this;
 };
 
-NeuSynth.prototype.stop = function(startTime) {
+NeuSynth.prototype.stop = function(stopTime) {
   if (this._state !== START) {
     return this;
   }
 
   var context = this.context;
-  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
-  startTime = util.finite(startTime);
+  stopTime = util.defaults(context.toSeconds(stopTime), context.currentTime);
+  stopTime = util.finite(stopTime);
 
   this._state = STOP;
 
-  context.sched(startTime, function(t0) {
-    this._stateString = "FINISHED";
-
-    this.routes.forEach(function(_, index) {
+  context.sched(stopTime, function(t0) {
+    this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).remove(this);
     });
 
@@ -157,17 +167,13 @@ NeuSynth.prototype.stop = function(startTime) {
       context.dispose();
     });
 
-    this._db.all().forEach(function(ugen) {
-      ugen.stop(t0);
-    });
-
-    this._scheds.forEach(function(sched) {
-      sched.stop(t0);
+    this._db.all().concat(this._scheds).forEach(function(item) {
+      item.stop(t0);
     });
 
     this.emit("stop", {
       type: "stop",
-      playbackTime: startTime
+      playbackTime: t0
     });
   }, this);
 
@@ -190,7 +196,7 @@ NeuSynth.prototype.fadeIn = function(startTime, duration) {
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
   startTime = util.finite(startTime);
 
-  if (this.routes.length) {
+  if (this._nodes.length) {
     duration = util.defaults(context.toSeconds(duration), 0.5);
     duration = util.finite(duration);
 
@@ -217,7 +223,7 @@ NeuSynth.prototype.fadeOut = function(startTime, duration) {
   duration = util.defaults(context.toSeconds(duration), 0.5);
   duration = util.finite(duration);
 
-  if (this.routes.length) {
+  if (this._nodes.length) {
     context.sched(startTime, function(t0) {
       this._param.update(0, t0, duration);
     }, this);
@@ -234,7 +240,7 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
 
   var context = this.context;
 
-  if (this.routes.length) {
+  if (this._nodes.length) {
     startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
     startTime = util.finite(startTime);
 
@@ -253,10 +259,26 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
 
 NeuSynth.prototype.toAudioNode = function(index) {
   index = util.int(index);
-  if (this.routes[index]) {
-    return this.context.toAudioNode(this.routes[index]);
+  if (this._nodes[index]) {
+    return this.context.toAudioNode(this._nodes[index]);
   }
   return null;
+};
+
+NeuSynth.prototype._dispatchNode = function(node, index) {
+  if (this.__nodes) {
+    index = Math.max(0, util.int(index));
+    if (!this.__nodes[index]) {
+      this.__nodes[index] = [];
+    }
+    this.__nodes[index].push(node);
+  }
+};
+
+NeuSynth.prototype._dispatchSched = function(schedIter, callback) {
+  if (this.__scheds && util.isIterator(schedIter) && typeof callback === "function") {
+    this.__scheds.push([ schedIter, callback ]);
+  }
 };
 
 function getMethods(db) {

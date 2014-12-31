@@ -3,6 +3,7 @@
 var neume = require("../../src");
 
 neume.use(require("../../src/ugen/buf"));
+neume.use(require("../../src/ugen/osc"));
 
 describe("ugen/buf", function() {
   var neu = null;
@@ -114,17 +115,53 @@ describe("ugen/buf", function() {
         ]
       });
     });
+    it("$('buf', $('sin'))", function() {
+      var synth = neu.Synth(function($) {
+        var buffer = neu.context.createBuffer(2, 16, 44100);
+        return $("buf", { buffer: buffer }, $("sin"));
+      });
+
+      assert.deepEqual(synth.toAudioNode().toJSON(), {
+        name: "GainNode",
+        gain: {
+          value: 1,
+          inputs: []
+        },
+        inputs: [
+          {
+            name: "GainNode",
+            gain: {
+              value: 0,
+              inputs: [
+                {
+                  name: "AudioBufferSourceNode",
+                  buffer: {
+                    name: "AudioBuffer",
+                    sampleRate: 44100,
+                    length: 16,
+                    duration: 0.00036281179138321996,
+                    numberOfChannels: 2
+                  },
+                  playbackRate: {
+                    value: 1,
+                    inputs: []
+                  },
+                  loop: false,
+                  loopStart: 0,
+                  loopEnd: 0,
+                  inputs: []
+                }
+              ]
+            },
+            inputs: [ OSCILLATOR("sine", 440) ]
+          }
+        ]
+      });
+    });
   });
 
   describe("works", function() {
-    it("start", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("start", function() {
       var spy1 = sinon.spy(function(e) {
         assert(this instanceof neume.UGen);
         assert(e.type === "end");
@@ -136,33 +173,28 @@ describe("ugen/buf", function() {
         return $(buffer).on("end", spy1);
       });
 
-      synth.start(0.100);
-
       var outlet = synth.toAudioNode().$inputs[0];
 
-      tick(500);
+      useTimer(neu.context, function(tick) {
+        synth.start(0.100);
 
-      assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
-      assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
-      assert(outlet.$stateAtTime(0.100) === "PLAYING");
-      assert(outlet.$stateAtTime(0.150) === "PLAYING");
-      assert(outlet.$stateAtTime(0.200) === "PLAYING");
-      assert(outlet.$stateAtTime(0.250) === "PLAYING");
-      assert(outlet.$stateAtTime(0.300) === "PLAYING");
-      assert(outlet.$stateAtTime(0.350) === "FINISHED");
-      assert(outlet.$stateAtTime(0.400) === "FINISHED");
-      assert(outlet.$stateAtTime(0.450) === "FINISHED");
-      assert(outlet.$stateAtTime(0.500) === "FINISHED");
-      assert(spy1.calledOnce);
-    }));
-    it("start/stop", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          neu.audioContext.$process(0.05);
-        }
-      }.bind(this);
+        tick(500);
 
+        assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
+        assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
+        assert(outlet.$stateAtTime(0.100) === "PLAYING");
+        assert(outlet.$stateAtTime(0.150) === "PLAYING");
+        assert(outlet.$stateAtTime(0.200) === "PLAYING");
+        assert(outlet.$stateAtTime(0.250) === "PLAYING");
+        assert(outlet.$stateAtTime(0.300) === "PLAYING");
+        assert(outlet.$stateAtTime(0.350) === "FINISHED");
+        assert(outlet.$stateAtTime(0.400) === "FINISHED");
+        assert(outlet.$stateAtTime(0.450) === "FINISHED");
+        assert(outlet.$stateAtTime(0.500) === "FINISHED");
+        assert(spy1.calledOnce);
+      });
+    });
+    it("start/stop", function() {
       var synth = neu.Synth(function($) {
         var buffer = neu.Buffer(1, 11025, 44100);
         return $(buffer).on("end", function() {
@@ -170,25 +202,27 @@ describe("ugen/buf", function() {
         });
       });
 
-      synth.start(0.100);
-      synth.stop(0.200);
-
       var outlet = synth.toAudioNode().$inputs[0];
 
-      tick(500);
+      useTimer(neu.context, function(tick) {
+        synth.start(0.100);
+        synth.stop(0.200);
 
-      assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
-      assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
-      assert(outlet.$stateAtTime(0.100) === "PLAYING");
-      assert(outlet.$stateAtTime(0.150) === "PLAYING");
-      assert(outlet.$stateAtTime(0.200) === "FINISHED");
-      assert(outlet.$stateAtTime(0.250) === "FINISHED");
-      assert(outlet.$stateAtTime(0.300) === "FINISHED");
-      assert(outlet.$stateAtTime(0.350) === "FINISHED");
-      assert(outlet.$stateAtTime(0.400) === "FINISHED");
-      assert(outlet.$stateAtTime(0.450) === "FINISHED");
-      assert(outlet.$stateAtTime(0.500) === "FINISHED");
-    }));
+        tick(500);
+
+        assert(outlet.$stateAtTime(0.000) === "SCHEDULED");
+        assert(outlet.$stateAtTime(0.050) === "SCHEDULED");
+        assert(outlet.$stateAtTime(0.100) === "PLAYING");
+        assert(outlet.$stateAtTime(0.150) === "PLAYING");
+        assert(outlet.$stateAtTime(0.200) === "FINISHED");
+        assert(outlet.$stateAtTime(0.250) === "FINISHED");
+        assert(outlet.$stateAtTime(0.300) === "FINISHED");
+        assert(outlet.$stateAtTime(0.350) === "FINISHED");
+        assert(outlet.$stateAtTime(0.400) === "FINISHED");
+        assert(outlet.$stateAtTime(0.450) === "FINISHED");
+        assert(outlet.$stateAtTime(0.500) === "FINISHED");
+      });
+    });
   });
 
   describe("parameters", function() {

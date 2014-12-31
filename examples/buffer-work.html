@@ -57,7 +57,7 @@
 
   function Granular($, buffer, amp) {
     return $(buffer, { loop: true })
-    .$("line", { start: amp, dur: "8nd" }).on("end", $.stop)
+    .$("line", { start: amp, dur: "4n" }).on("end", $.stop)
     .$("out", { bus: 1 });
   }
 

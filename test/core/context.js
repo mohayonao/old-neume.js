@@ -288,26 +288,32 @@ describe("neume.Context", function() {
   });
 
   describe("#start", function() {
-    it("(): self", sinon.test(function() {
-      assert(context.start() === context);
-      assert(context.start() === context);
-    }));
+    it("(): self", function() {
+      useTimer(context, function() {
+        assert(context.start() === context);
+        assert(context.start() === context);
+      });
+    });
   });
 
   describe("#stop", function() {
-    it("(): self", sinon.test(function() {
-      assert(context.start() === context);
-      assert(context.stop() === context);
-      assert(context.stop() === context);
-    }));
+    it("(): self", function() {
+      useTimer(context, function() {
+        assert(context.start() === context);
+        assert(context.stop() === context);
+        assert(context.stop() === context);
+      });
+    });
   });
 
   describe("#reset", function() {
-    it("(): self", sinon.test(function() {
-      assert(context.start() === context);
-      assert(context.reset() === context);
-      assert(context.reset() === context);
-    }));
+    it("(): self", function() {
+      useTimer(context, function() {
+        assert(context.start() === context);
+        assert(context.reset() === context);
+        assert(context.reset() === context);
+      });
+    });
   });
 
   describe("#dispose", function() {
@@ -323,21 +329,7 @@ describe("neume.Context", function() {
           value: 1,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ OSCILLATOR("sine", 440) ]
       });
 
       assert(context.dispose() === context);
@@ -357,14 +349,7 @@ describe("neume.Context", function() {
     it("(time: number, callback: !function, context: any): 0", function() {
       assert(context.sched(10, "INVALID") === 0);
     });
-    it("(time: number, callback: function, context: any): number // works", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(time: number, callback: function, context: any): number // works", function() {
       var passed = [];
 
       var pass = function(i) {
@@ -373,38 +358,34 @@ describe("neume.Context", function() {
         };
       };
 
-      context.start();
-      context.sched(0.100, pass(1));
-      context.sched(0.500, pass(5));
-      context.sched(0.200, pass(2));
-      context.sched(0.400, pass(4));
-      context.sched(0.300, pass(3));
+      useTimer(context, function(tick) {
+        context.start();
 
-      assert(passed.length === 0, "00:00.000");
+        context.sched(0.100, pass(1));
+        context.sched(0.500, pass(5));
+        context.sched(0.200, pass(2));
+        context.sched(0.400, pass(4));
+        context.sched(0.300, pass(3));
 
-      tick(100);
-      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
+        assert(passed.length === 0, "00:00.000");
 
-      tick(100);
-      assert.deepEqual(passed[1], [ 2, 0.2 ], "00:00.200");
+        tick(100);
+        assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      tick(350);
-      assert.deepEqual(passed, [
-        [ 1, 0.1 ],
-        [ 2, 0.2 ],
-        [ 3, 0.3 ],
-        [ 4, 0.4 ],
-        [ 5, 0.5 ],
-      ], "00:00.550");
-    }));
-    it("same time order", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
+        tick(100);
+        assert.deepEqual(passed[1], [ 2, 0.2 ], "00:00.200");
 
+        tick(350);
+        assert.deepEqual(passed, [
+          [ 1, 0.1 ],
+          [ 2, 0.2 ],
+          [ 3, 0.3 ],
+          [ 4, 0.4 ],
+          [ 5, 0.5 ],
+        ], "00:00.550");
+      });
+    });
+    it("same time order", function() {
       var passed = [];
 
       var pass = function(i) {
@@ -413,38 +394,34 @@ describe("neume.Context", function() {
         };
       };
 
-      context.start();
-      context.sched(0.100, pass(1));
-      context.sched(0.100, pass(2));
-      context.sched(0.100, pass(3));
-      context.sched(0.100, pass(4));
-      context.sched(0.100, pass(5));
+      useTimer(context, function(tick) {
+        context.start();
 
-      assert(passed.length === 0, "00:00.000");
+        context.sched(0.100, pass(1));
+        context.sched(0.100, pass(2));
+        context.sched(0.100, pass(3));
+        context.sched(0.100, pass(4));
+        context.sched(0.100, pass(5));
 
-      tick(100);
-      assert.deepEqual(passed, [
-        [ 1, 0.1 ],
-        [ 2, 0.1 ],
-        [ 3, 0.1 ],
-        [ 4, 0.1 ],
-        [ 5, 0.1 ],
-      ], "00:00.100");
-    }));
+        assert(passed.length === 0, "00:00.000");
+
+        tick(100);
+        assert.deepEqual(passed, [
+          [ 1, 0.1 ],
+          [ 2, 0.1 ],
+          [ 3, 0.1 ],
+          [ 4, 0.1 ],
+          [ 5, 0.1 ],
+        ], "00:00.100");
+      });
+    });
   });
 
   describe("#unsched", function() {
     it("(id: !number): 0", function() {
       assert(context.unsched("INVALID") === 0);
     });
-    it("(id: number): number", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(id: number): number", function() {
       var passed = [];
       var schedIds = [];
 
@@ -454,55 +431,53 @@ describe("neume.Context", function() {
         };
       };
 
-      context.start();
-      schedIds[1] = context.sched(0.100, pass(1));
-      schedIds[5] = context.sched(0.500, pass(5));
-      schedIds[2] = context.sched(0.200, pass(2));
-      schedIds[4] = context.sched(0.400, pass(4));
-      schedIds[3] = context.sched(0.300, pass(3));
+      useTimer(context, function(tick) {
+        context.start();
 
-      context.unsched(schedIds[2]);
+        schedIds[1] = context.sched(0.100, pass(1));
+        schedIds[5] = context.sched(0.500, pass(5));
+        schedIds[2] = context.sched(0.200, pass(2));
+        schedIds[4] = context.sched(0.400, pass(4));
+        schedIds[3] = context.sched(0.300, pass(3));
 
-      assert(passed.length === 0, "00:00.000");
+        context.unsched(schedIds[2]);
 
-      tick(100);
-      assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
+        assert(passed.length === 0, "00:00.000");
 
-      tick(100);
-      assert.deepEqual(passed[1], undefined, "00:00.200");
+        tick(100);
+        assert.deepEqual(passed[0], [ 1, 0.1 ], "00:00.100");
 
-      tick(350);
-      assert.deepEqual(passed, [
-        [ 1, 0.1 ],
-        [ 3, 0.3 ],
-        [ 4, 0.4 ],
-        [ 5, 0.5 ],
-      ], "00:00.550");
-    }));
+        tick(100);
+        assert.deepEqual(passed[1], undefined, "00:00.200");
+
+        tick(350);
+        assert.deepEqual(passed, [
+          [ 1, 0.1 ],
+          [ 3, 0.3 ],
+          [ 4, 0.4 ],
+          [ 5, 0.5 ],
+        ], "00:00.550");
+      });
+    });
   });
 
   describe("#nextTick", function() {
-    it("(callback: function, context: any): self", sinon.test(function() {
-      var tick = function(t) {
-        for (var i = 0; i < t / 50; i++) {
-          this.clock.tick(50);
-          context.audioContext.$process(0.05);
-        }
-      }.bind(this);
-
+    it("(callback: function, context: any): self", function() {
       var passed = 0;
 
-      context.context.start();
+      useTimer(context, function(tick) {
+        context.start();
 
-      context.nextTick(function() {
-        passed = 1;
+        context.nextTick(function() {
+          passed = 1;
+        });
+
+        assert(passed === 0);
+
+        tick(50);
+        assert(passed === 1);
       });
-
-      assert(passed === 0);
-
-      tick(50);
-      assert(passed === 1);
-    }));
+    });
   });
 
   describe("#toAudioNode", function() {
@@ -528,7 +503,7 @@ describe("neume.Context", function() {
           value: 100,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [ BUFSRC(128) ]
       });
       assert(node.$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
@@ -593,21 +568,7 @@ describe("neume.Context", function() {
         name: "GainNode",
         gain: {
           value: 1,
-          inputs: [
-            {
-              name: "OscillatorNode",
-              type: "sine",
-              frequency: {
-                value: 440,
-                inputs: []
-              },
-              detune: {
-                value: 0,
-                inputs: []
-              },
-              inputs: []
-            }
-          ]
+          inputs: [ OSCILLATOR("sine", 440) ]
         },
         inputs: []
       });
@@ -644,7 +605,7 @@ describe("neume.Context", function() {
               value: 100,
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
@@ -661,21 +622,7 @@ describe("neume.Context", function() {
           value: 0,
           inputs: []
         },
-        inputs: [
-          {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
-              value: 0,
-              inputs: []
-            },
-            inputs: []
-          }
-        ]
+        inputs: [ OSCILLATOR("sine", 440) ]
       });
     });
     it("Array<AudioNode> -> AudioNode", function() {

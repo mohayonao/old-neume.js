@@ -1,22 +1,34 @@
 "use strict";
 
+var neume = require("../namespace");
+
+require("./timer");
+
 var C = require("../const");
 var util = require("../util");
-var neume = require("../namespace");
 
 var INIT = 0, START = 1, STOP = 2;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
 
-require("./timer");
-
 function NeuTransport(context, spec) {
   spec = spec || /* istanbul ignore next */ {};
 
-  this.context = context;
-  this.audioContext = context.audioContext;
-  this.sampleRate = context.sampleRate;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    audioContext: {
+      value: context.audioContext,
+      enumerable: true
+    },
+    sampleRate: {
+      value: context.sampleRate,
+      enumerable: true
+    },
+  });
 
   this._bpm = 120;
   this._events = [];

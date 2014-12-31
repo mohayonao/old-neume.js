@@ -2,8 +2,6 @@
 
 var neume = require("../../src");
 
-var NOP = function() {};
-
 describe("neume.AudioBus", function() {
   var context = null;
 

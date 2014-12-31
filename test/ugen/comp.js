@@ -94,21 +94,7 @@ describe("ugen/comp", function() {
               value: 0.250,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });

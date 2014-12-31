@@ -24,7 +24,7 @@ describe("ugen/add", function() {
           value: 1,
           inputs: [],
         },
-        inputs: [ DC(0) ]
+        inputs: []
       });
     });
     it("$('+', 1, 2, 3)", function() {
@@ -45,11 +45,10 @@ describe("ugen/add", function() {
               value: 6,
               inputs: []
             },
-            inputs: [ DC(1) ]
+            inputs: [ BUFSRC(128) ]
           }
         ]
       });
-
       assert(synth.toAudioNode().$inputs[0].$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("$('+', $('sin', {freq:1}), $('sin', {freq:2}), $('sin', {freq:3}))", function() {

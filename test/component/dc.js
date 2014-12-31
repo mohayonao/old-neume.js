@@ -29,17 +29,14 @@ describe("neume.DC", function() {
     it("(): AudioNode // when 0", function() {
       var a = new neume.DC(context, 0);
 
-      assert(a.toAudioNode() instanceof global.AudioNode);
-      assert(a.toAudioNode() === a.toAudioNode());
-      assert.deepEqual(a.toAudioNode().toJSON(), DC(0));
-      assert(a.toAudioNode().buffer.getChannelData(0)[0] === 0);
+      assert(a.toAudioNode() === null);
     });
     it("(): AudioNode // when 1", function() {
       var a = new neume.DC(context, 1);
 
       assert(a.toAudioNode() instanceof global.AudioNode);
       assert(a.toAudioNode() === a.toAudioNode());
-      assert.deepEqual(a.toAudioNode().toJSON(), DC(1));
+      assert.deepEqual(a.toAudioNode().toJSON(), BUFSRC(128));
       assert(a.toAudioNode().buffer.getChannelData(0)[0] === 1);
     });
     it("(): AudioNode // else", function() {
@@ -54,7 +51,7 @@ describe("neume.DC", function() {
           value: n,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [ BUFSRC(128) ]
       });
       assert(a.toAudioNode().$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
@@ -63,7 +60,7 @@ describe("neume.DC", function() {
   describe("#connect", function() {
     it("(to: AudioNode): self", function() {
       var toNode = context.createGain();
-      var a = new neume.DC(context, 0);
+      var a = new neume.DC(context, 1);
 
       assert(a.connect(toNode) === a);
       assert.deepEqual(toNode.toJSON(), {
@@ -95,7 +92,7 @@ describe("neume.DC", function() {
   describe("#disconnect", function() {
     it("(): self", function() {
       var toNode = context.createGain();
-      var a = new neume.DC(context, 0);
+      var a = new neume.DC(context, 1);
 
       a.connect(toNode);
 
@@ -114,7 +111,7 @@ describe("neume.DC", function() {
   describe("#stop", function() {
     it("(): self", function() {
       var toNode = context.createGain();
-      var a = new neume.DC(context, 0);
+      var a = new neume.DC(context, 1);
 
       assert(a.connect(toNode) === a);
       assert(a._bufSrc.$state === "PLAYING");

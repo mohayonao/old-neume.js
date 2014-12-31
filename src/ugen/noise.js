@@ -14,37 +14,67 @@ module.exports = function(neume) {
    * aliases:
    * $("white"), $("pink"), $("brown")
    *
+   * no inputs
    * +------------------+
    * | BufferSourceNode |
    * | - loop: true     |
    * +------------------+
    *   |
+   *
+   * has inputs
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +-----------+   +------------------+
+   * | GainNode  |   | BufferSourceNode |
+   * | - gain: 0 <---| - loop: true     |
+   * +-----------+   +------------------+
+   *   |
    */
-  neume.register("noise", function(ugen, spec) {
+  neume.register("noise", function(ugen, spec, inputs) {
     var type = {
       pink: "pink",
       brown: "brown"
     }[spec.type] || "white";
-    return make(type, ugen);
+    return make(type, ugen, inputs);
   });
 
   [
     "white", "pink", "brown"
   ].forEach(function(type) {
-    neume.register(type, function(ugen) {
-      return make(type, ugen);
+    neume.register(type, function(ugen, spec, inputs) {
+      return make(type, ugen, inputs);
     });
   });
 
-  function make(type, ugen) {
+  function make(type, ugen, inputs) {
     var context = ugen.context;
+    var outlet = null;
+
     var bufSrc = context.createBufferSource();
+    var gain = null;
 
     bufSrc.buffer = neume.KVS.get(KVSKEY + type, context, NOISE_DURATION);
     bufSrc.loop = true;
 
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(bufSrc, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = bufSrc;
+    }
+
     return new neume.Unit({
-      outlet: bufSrc,
+      outlet: outlet,
       start: function(t) {
         bufSrc.start(t);
       },

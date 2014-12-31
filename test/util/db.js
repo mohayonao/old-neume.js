@@ -35,43 +35,66 @@ describe("neume.DB", function() {
   });
 
   describe("#find", function() {
-    it("(selector: string): Array<any>", function() {
+    it("(selector: string): any[]", function() {
       var db = new neume.DB();
 
-      db.append({ key: "line", id: "id1", classes: [ "amp" ] });
-      db.append({ key: "line", id: "id2", classes: [ "amp" ] });
-      db.append({ key: "line", id: "id3", classes: [ "mod" ] });
-      db.append({ key: "line", id: "id4", classes: [ "mod" ] });
-      db.append({ key: "gate", id: "id5", classes: [ "amp" ] });
-      db.append({ key: "gate", id: "id6", classes: [ "amp" ] });
-      db.append({ key: "gate", id: "id7", classes: [ "mod", "ar" ] });
-      db.append({ key: "gate", id: "id8", classes: [ "mod", "kr" ] });
+      function ugen(spec) {
+        return Object.defineProperties({}, {
+          key: {
+            value: spec.key,
+            enumerable: true
+          },
+          id: {
+            value: spec.id,
+            enumerable: true
+          },
+          class: {
+            value: spec.class,
+            enumerable: true
+          },
+          hasClass: {
+            value: function(className) {
+              return spec.class.split(" ").indexOf(className) !== -1;
+            },
+            enumerable: false
+          }
+        });
+      }
+
+      db.append(ugen({ key: "line", id: "id1", class: "amp" }));
+      db.append(ugen({ key: "line", id: "id2", class: "amp" }));
+      db.append(ugen({ key: "line", id: "id3", class: "mod" }));
+      db.append(ugen({ key: "line", id: "id4", class: "mod" }));
+      db.append(ugen({ key: "gate", id: "id5", class: "amp" }));
+      db.append(ugen({ key: "gate", id: "id6", class: "amp" }));
+      db.append(ugen({ key: "gate", id: "id7", class: "mod ar" }));
+      db.append(ugen({ key: "gate", id: "id8", class: "mod kr" }));
 
       assert.deepEqual(db.find({ key: "line" }), [
-        { key: "line", id: "id1", classes: [ "amp" ] },
-        { key: "line", id: "id2", classes: [ "amp" ] },
-        { key: "line", id: "id3", classes: [ "mod" ] },
-        { key: "line", id: "id4", classes: [ "mod" ] },
+        { key: "line", id: "id1", class: "amp" },
+        { key: "line", id: "id2", class: "amp" },
+        { key: "line", id: "id3", class: "mod" },
+        { key: "line", id: "id4", class: "mod" },
       ], "line:end");
 
       assert.deepEqual(db.find({ id: "id1" }), [
-        { key: "line", id: "id1", classes: [ "amp" ] },
+        { key: "line", id: "id1", class: "amp" },
       ], "#id:end");
 
       assert.deepEqual(db.find({ classes: [ "mod" ] }), [
-        { key: "line", id: "id3", classes: [ "mod" ] },
-        { key: "line", id: "id4", classes: [ "mod" ] },
-        { key: "gate", id: "id7", classes: [ "mod", "ar" ] },
-        { key: "gate", id: "id8", classes: [ "mod", "kr" ] },
+        { key: "line", id: "id3", class: "mod" },
+        { key: "line", id: "id4", class: "mod" },
+        { key: "gate", id: "id7", class: "mod ar" },
+        { key: "gate", id: "id8", class: "mod kr" },
       ], ".mod:end");
 
       assert.deepEqual(db.find({ key: "gate", classes: [ "mod" ] }), [
-        { key: "gate", id: "id7", classes: [ "mod", "ar" ] },
-        { key: "gate", id: "id8", classes: [ "mod", "kr" ] },
+        { key: "gate", id: "id7", class: "mod ar" },
+        { key: "gate", id: "id8", class: "mod kr" },
       ], "gate.mod:end");
 
       assert.deepEqual(db.find({ key: "gate", classes: [ "mod", "kr" ] }), [
-        { key: "gate", id: "id8", classes: [ "mod", "kr" ] },
+        { key: "gate", id: "id8", class: "mod kr" },
       ], "gate.mod:end");
 
       assert.deepEqual(db.find({ key: "gate", id: "id1" }), [], "gate#id1");

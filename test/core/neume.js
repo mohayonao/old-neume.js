@@ -2,7 +2,6 @@
 
 var neume = require("../../src");
 var pkg = require("../../package.json");
-var NOP = function() {};
 
 describe("neume", function() {
   var audioContext = null;
@@ -47,11 +46,6 @@ describe("neume", function() {
   describe(".version", function() {
     it("\\getter: number", function() {
       assert(neume.version === pkg.version);
-    });
-  });
-  describe(".PROCESS_BUF_SIZE", function() {
-    it("\\getter: number", function() {
-      assert(typeof neume.PROCESS_BUF_SIZE === "number");
     });
   });
 
@@ -106,6 +100,11 @@ describe("neume", function() {
         assert(neu.reset() === neu);
         assert(spy.calledOnce);
       }));
+    });
+    describe(".master", function() {
+      it("\\getter: GainNode", function() {
+        assert(neu.master instanceof global.GainNode);
+      });
     });
     describe(".analyser", function() {
       it("\\getter: AnalyserNode", function() {

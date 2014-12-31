@@ -1,9 +1,10 @@
 "use strict";
 
+var neume = require("../namespace");
+
 require("./shim");
 
 var util = require("../util");
-var neume = require("../namespace");
 
 neume.webaudio = global;
 neume.util = util;
@@ -171,6 +172,12 @@ neume.impl = function(destination, spec) {
         value: function() {
           context.reset();
           return this;
+        },
+        enumerable: true
+      },
+      master: {
+        get: function() {
+          return context.getAudioBus(0).toAudioNode();
         },
         enumerable: true
       },

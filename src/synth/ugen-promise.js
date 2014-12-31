@@ -1,18 +1,33 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./ugen");
 
-function NeuUGenPromise(synth, id) {
-  this.context = synth.context;
-  this.synth = synth;
-  this.key = "";
-  this.classes = [];
-  this.id = id;
-  this.outlet = null;
+var util = require("../util");
 
+function NeuUGenPromise(synth, id) {
+  Object.defineProperties(this, {
+    context: {
+      value: synth.context,
+      enumerable: true
+    },
+    synth: {
+      value: synth,
+      enumerable: true
+    },
+    key: {
+      value: "",
+      enumerable: true
+    },
+    id: {
+      value: id,
+      enumerable: true
+    },
+  });
+
+  this._classes = {};
+  this._outlet = null;
   this._resolved = false;
   this._to = [];
   this._from = [];

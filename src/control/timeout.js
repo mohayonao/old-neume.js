@@ -1,9 +1,10 @@
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./sched");
+
+var util = require("../util");
 
 function NeuTimeout(context, schedTime, callback) {
   var schedIter = {

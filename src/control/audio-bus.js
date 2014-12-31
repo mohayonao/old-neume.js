@@ -1,38 +1,48 @@
 "use strict";
 
-var C = require("../const");
-var util = require("../util");
 var neume = require("../namespace");
 
-function NeuAudioBus(context, index) {
-  this.context = context;
-  this.index = index;
-  this.outlet = context.createGain();
+var C = require("../const");
+var util = require("../util");
 
+function NeuAudioBus(context, index) {
+  index = util.finite(index)|0;
+
+  this._outlet = context.createGain();
   this._maxNodes = C.DEFAULT_MAX_NODES_OF_BUS;
   this._inputs = [];
 
   Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    index: {
+      value: index,
+      enumerable: true
+    },
     maxNodes: {
       set: function(value) {
         this._maxNodes = Math.max(0, util.int(value));
       },
       get: function() {
         return this._maxNodes;
-      }
+      },
+      enumerable: true
     },
     nodes: {
       get: function() {
         return this._inputs.slice();
-      }
-    }
+      },
+      enumerable: true
+    },
   });
 }
 
 NeuAudioBus.$$name = "NeuAudioBus";
 
 NeuAudioBus.prototype.append = function(synth) {
-  this.context.connect(synth.toAudioNode(this.index), this.outlet);
+  this.context.connect(synth.toAudioNode(this.index), this._outlet);
 
   this._inputs.push(synth);
 
@@ -54,7 +64,7 @@ NeuAudioBus.prototype.remove = function(synth) {
 };
 
 NeuAudioBus.prototype.toAudioNode = function() {
-  return this.outlet;
+  return this._outlet;
 };
 
 module.exports = neume.AudioBus = NeuAudioBus;

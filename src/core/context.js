@@ -1,22 +1,44 @@
 "use strict";
 
-var C = require("../const");
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./transport");
+
+var util = require("../util");
 
 var INIT = 0, START = 1;
 
 function NeuContext(destination, spec) {
   spec = spec || /* istanbul ignore next */ {};
 
-  this.context = this;
-  this.destination = destination;
-  this.audioContext = destination.context;
-  this.sampleRate = this.audioContext.sampleRate;
-  this.listener = this.audioContext.listener;
-  this.analyser = this.audioContext.createAnalyser();
+  var audioContext = destination.context;
+
+  Object.defineProperties(this, {
+    context: {
+      value: this,
+      enumerable: true
+    },
+    audioContext: {
+      value: audioContext,
+      enumerable: true
+    },
+    destination: {
+      value: destination,
+      enumerable: true
+    },
+    sampleRate: {
+      value: audioContext.sampleRate,
+      enumerable: true
+    },
+    listener: {
+      value: audioContext.listener,
+      enumerable: true
+    },
+    analyser: {
+      value: audioContext.createAnalyser(),
+      enumerable: true
+    },
+  });
 
   this._transport = new neume.Transport(this, spec);
   this._nodes = [];
@@ -91,7 +113,7 @@ NeuContext.$$name = "NeuContext";
 });
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
+  index = Math.max(0, util.int(index));
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new neume.AudioBus(this, index);
   }
@@ -102,7 +124,7 @@ NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
     this._transport.start();
-    this.connect(this.getAudioBus(0).outlet, this.analyser);
+    this.connect(this.getAudioBus(0).toAudioNode(), this.analyser);
   }
   return this;
 };

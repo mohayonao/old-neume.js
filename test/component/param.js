@@ -444,8 +444,9 @@ describe("neume.Param", function() {
           value: param.value,
           inputs: []
         },
-        inputs: [ DC(1) ]
+        inputs: [ BUFSRC(128) ]
       });
+      assert(node.$inputs[0].buffer.getChannelData(0)[0] === 1);
     });
     it("(input): AudioNode", function() {
       var input = context.createOscillator();

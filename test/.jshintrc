@@ -20,6 +20,9 @@
     "assert"    : true,
     "closeTo"   : true,
     "sinon"     : true,
-    "DC"        : true
+    "BUFSRC"    : true,
+    "NOP"       : true,
+    "OSCILLATOR": true,
+    "useTimer"  : true
   }
 }

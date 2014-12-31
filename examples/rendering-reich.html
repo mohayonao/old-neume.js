@@ -71,11 +71,11 @@
     return $("in", { bus: 1 })
     .$("drywet", {
       mix: -0.5,
-      efx: function($) {
+      patch: function($) {
         return $("freeverb", { room: 0.75, damp: 0.65 }, $.inputs);
       }
     })
-    .$("lpf", { freq: 1800 })
+    .$("lpf", { freq: 1200, Q: 1.5 })
     .$("comp", { ratio: 9, thresh: -2 })
     .$("out", { bus: 0 });
   }

@@ -90,28 +90,14 @@ describe("ugen/audio-node", function() {
               value: 0,
               inputs: []
             },
-            inputs: [
-              {
-                name: "OscillatorNode",
-                type: "sine",
-                frequency: {
-                  value: 440,
-                  inputs: []
-                },
-                detune: {
-                  value: 0,
-                  inputs: []
-                },
-                inputs: []
-              }
-            ]
+            inputs: [ OSCILLATOR("sine", 440) ]
           }
         ]
       });
     });
     it("$(OscillatorNode, $('sin'))", function() {
       var synth = neu.Synth(function($) {
-        return $(neu.context.createOscillator(), $("sin"));
+        return $(neu.context.createOscillator(), $("sin", { freq: 220 }));
       });
 
       assert.deepEqual(synth.toAudioNode().toJSON(), {
@@ -122,17 +108,40 @@ describe("ugen/audio-node", function() {
         },
         inputs: [
           {
-            name: "OscillatorNode",
-            type: "sine",
-            frequency: {
-              value: 440,
-              inputs: []
-            },
-            detune: {
+            name: "GainNode",
+            gain: {
               value: 0,
-              inputs: []
+              inputs: [
+                {
+                  name: "OscillatorNode",
+                  type: "sine",
+                  frequency: {
+                    value: 440,
+                    inputs: []
+                  },
+                  detune: {
+                    value: 0,
+                    inputs: []
+                  },
+                  inputs: []
+                }
+              ]
             },
-            inputs: []
+            inputs: [
+              {
+                name: "OscillatorNode",
+                type: "sine",
+                frequency: {
+                  value: 220,
+                  inputs: []
+                },
+                detune: {
+                  value: 0,
+                  inputs: []
+                },
+                inputs: []
+              }
+            ]
           }
         ]
       });
