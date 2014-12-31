@@ -50,8 +50,8 @@
   var chord;
 
   function Sine($, freq, mod, amp) {
-    return $("sin", { freq: $("@freq", freq), detune: _.rand2(10) })
-    .$("sin", { freq: $("@mod", mod), mul: $("@amp", amp) })
+    return $("sin", { freq: $("@freq", { value: freq }), detune: _.rand2(10) })
+    .$("sin", { freq: $("@mod", { value: mod }), mul: $("@amp", { value: amp }) })
     .$("out", { bus: 1 });
   }
 
