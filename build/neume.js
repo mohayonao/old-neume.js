@@ -14,14 +14,20 @@ module.exports = neume;
 },{"./src/":20,"./src/ugen/":39}],2:[function(require,module,exports){
 "use strict";
 
+var neume = require("../namespace");
+
 var util = require("../util");
 var Emitter = require("../util/emitter");
-var neume = require("../namespace");
 
 function NeuComponent(context, node) {
   Emitter.call(this);
-  this.context = context;
-  this.outlet = null;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
+  this._outlet = null;
   this._node = util.defaults(node, null);
 }
 util.inherits(NeuComponent, Emitter);
@@ -37,10 +43,10 @@ NeuComponent.prototype.add = function(value) {
 };
 
 NeuComponent.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.toAudioNode(util.defaults(this._node, this));
+  if (this._outlet === null) {
+    this._outlet = this.context.toAudioNode(util.defaults(this._node, this));
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuComponent.prototype.connect = function(to) {
@@ -58,14 +64,20 @@ module.exports = neume.Component = NeuComponent;
 },{"../namespace":21,"../util":54,"../util/emitter":52}],3:[function(require,module,exports){
 "use strict";
 
-var C = require("../const");
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
 
-var filled0 = new FilledFloat32Array(C.DC_BUF_SIZE, 0);
-var filled1 = new FilledFloat32Array(C.DC_BUF_SIZE, 1);
+var util = require("../util");
+
+var FILLED1 = (function() {
+  var result = new Float32Array(128);
+  for (var i = 0, imax = result.length; i < imax; i++) {
+    result[i] = 1;
+  }
+  return result;
+})();
+
 var INIT = 0, START = 1, STOP = 2;
 
 function NeuDC(context, value) {
@@ -87,14 +99,15 @@ util.inherits(NeuDC, neume.Component);
 NeuDC.$$name = "NeuDC";
 
 NeuDC.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
+  var value = this._value;
+
+  if (this._outlet === null && value !== 0) {
     var context = this.context;
-    var value = this._value;
     var buf, bufSrc, gain;
 
-    if (value === 0 || value === 1) {
-      buf = context.createBuffer(1, C.DC_BUF_SIZE, context.sampleRate);
-      buf.getChannelData(0).set(value ? filled1 : filled0);
+    if (value === 1) {
+      buf = context.createBuffer(1, FILLED1.length, context.sampleRate);
+      buf.getChannelData(0).set(FILLED1);
 
       bufSrc = context.createBufferSource();
       bufSrc.buffer = buf;
@@ -103,7 +116,7 @@ NeuDC.prototype.toAudioNode = function() {
 
       this._bufSrc = bufSrc;
       this._state = START;
-      this.outlet = bufSrc;
+      this._outlet = bufSrc;
     } else {
       bufSrc = new NeuDC(context, 1).toAudioNode();
 
@@ -111,10 +124,10 @@ NeuDC.prototype.toAudioNode = function() {
       gain.gain.value = value;
       bufSrc.connect(gain);
 
-      this.outlet = gain;
+      this._outlet = gain;
     }
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuDC.prototype.connect = function(to) {
@@ -128,7 +141,7 @@ NeuDC.prototype.connect = function(to) {
 
 NeuDC.prototype.disconnect = function() {
   this.stop(this.context.currentTime);
-  this.context.disconnect(this.outlet);
+  this.context.disconnect(this._outlet);
   return this;
 };
 
@@ -144,19 +157,9 @@ NeuDC.prototype.valueOf = function() {
   return this._value;
 };
 
-function FilledFloat32Array(size, value) {
-  var result = new Float32Array(size);
-
-  for (var i = 0; i < size; i++) {
-    result[i] = value;
-  }
-
-  return result;
-}
-
 module.exports = neume.DC = NeuDC;
 
-},{"../const":8,"../namespace":21,"../util":54,"./component":2}],4:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./component":2}],4:[function(require,module,exports){
 require("./component");
 require("./dc");
 require("./mul");
@@ -166,10 +169,11 @@ require("./sum");
 },{"./component":2,"./dc":3,"./mul":5,"./param":6,"./sum":7}],5:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
+
+var util = require("../util");
 
 function NeuMul(context, a, b) {
   a = a.valueOf();
@@ -207,13 +211,13 @@ NeuMul.prototype.mul = function(value) {
 };
 
 NeuMul.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.createGain();
-    this.outlet.gain.value = 0;
-    this.context.connect(this._a, this.outlet);
-    this.context.connect(this._b, this.outlet.gain);
+  if (this._outlet === null) {
+    this._outlet = this.context.createGain();
+    this._outlet.gain.value = 0;
+    this.context.connect(this._a, this._outlet);
+    this.context.connect(this._b, this._outlet.gain);
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuMul.prototype.connect = function(to) {
@@ -222,7 +226,7 @@ NeuMul.prototype.connect = function(to) {
 };
 
 NeuMul.prototype.disconnect = function() {
-  this.context.disconnect(this.outlet);
+  this.context.disconnect(this._outlet);
   return this;
 };
 
@@ -231,10 +235,11 @@ module.exports = neume.Mul = NeuMul;
 },{"../namespace":21,"../util":54,"./component":2}],6:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
+
+var util = require("../util");
 
 function NeuParam(context, value, spec) {
   spec = spec || {};
@@ -498,18 +503,18 @@ function terminateAudioParamScheduling(_this, startValue, startTime) {
 NeuParam.prototype.toAudioNode = function(input) {
   var context = this.context;
 
-  if (this.outlet == null) {
-    this.outlet = context.createGain();
-    this.outlet.gain.value = this._value;
-    this._params.push(this.outlet.gain);
+  if (this._outlet == null) {
+    this._outlet = context.createGain();
+    this._outlet.gain.value = this._value;
+    this._params.push(this._outlet.gain);
     if (input) {
-      context.connect(input, this.outlet);
+      context.connect(input, this._outlet);
     } else {
-      context.connect(new neume.DC(context, 1), this.outlet);
+      context.connect(new neume.DC(context, 1), this._outlet);
     }
   }
 
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuParam.prototype.connect = function(to) {
@@ -523,7 +528,7 @@ NeuParam.prototype.connect = function(to) {
 };
 
 NeuParam.prototype.disconnect = function() {
-  this.context.disconnect(this.outlet);
+  this.context.disconnect(this._outlet);
   return this;
 };
 
@@ -580,10 +585,11 @@ module.exports = neume.Param = NeuParam;
 },{"../namespace":21,"../util":54,"./component":2}],7:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./component");
+
+var util = require("../util");
 
 function NeuSum(context, inputs) {
   neume.Component.call(this, context);
@@ -634,7 +640,7 @@ NeuSum.prototype.add = function(value) {
 };
 
 NeuSum.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
+  if (this._outlet === null) {
     var context = this.context;
     var nodes = this._nodes;
 
@@ -650,10 +656,10 @@ NeuSum.prototype.toAudioNode = function() {
       context.connect(this._number, sumNode);
     }
 
-    this.outlet = sumNode;
+    this._outlet = sumNode;
   }
 
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuSum.prototype.connect = function(to) {
@@ -689,51 +695,59 @@ module.exports = neume.Sum = NeuSum;
 "use strict";
 
 module.exports = {
-  PROCESS_BUF_SIZE: 1024,
   DC_BUF_SIZE: 128,
   WS_CURVE_SIZE: 4096,
   MAX_RENDERING_SEC: 180,
   MAX_DELAY_SEC: 180,
-  AUDIO_BUS_CHANNELS: 1023,
   DEFAULT_MAX_NODES_OF_BUS: 64,
 };
 
 },{}],9:[function(require,module,exports){
 "use strict";
 
-var C = require("../const");
-var util = require("../util");
 var neume = require("../namespace");
 
-function NeuAudioBus(context, index) {
-  this.context = context;
-  this.index = index;
-  this.outlet = context.createGain();
+var C = require("../const");
+var util = require("../util");
 
+function NeuAudioBus(context, index) {
+  index = util.finite(index)|0;
+
+  this._outlet = context.createGain();
   this._maxNodes = C.DEFAULT_MAX_NODES_OF_BUS;
   this._inputs = [];
 
   Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    index: {
+      value: index,
+      enumerable: true
+    },
     maxNodes: {
       set: function(value) {
         this._maxNodes = Math.max(0, util.int(value));
       },
       get: function() {
         return this._maxNodes;
-      }
+      },
+      enumerable: true
     },
     nodes: {
       get: function() {
         return this._inputs.slice();
-      }
-    }
+      },
+      enumerable: true
+    },
   });
 }
 
 NeuAudioBus.$$name = "NeuAudioBus";
 
 NeuAudioBus.prototype.append = function(synth) {
-  this.context.connect(synth.toAudioNode(this.index), this.outlet);
+  this.context.connect(synth.toAudioNode(this.index), this._outlet);
 
   this._inputs.push(synth);
 
@@ -755,7 +769,7 @@ NeuAudioBus.prototype.remove = function(synth) {
 };
 
 NeuAudioBus.prototype.toAudioNode = function() {
-  return this.outlet;
+  return this._outlet;
 };
 
 module.exports = neume.AudioBus = NeuAudioBus;
@@ -763,24 +777,46 @@ module.exports = neume.AudioBus = NeuAudioBus;
 },{"../const":8,"../namespace":21,"../util":54}],10:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var FFT = require("../util/fft");
 
 function NeuBuffer(context, buffer) {
-  this.context = context;
-  this.sampleRate = buffer.sampleRate;
-  this.length = buffer.length;
-  this.duration = buffer.duration;
-  this.numberOfChannels = buffer.numberOfChannels;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    sampleRate: {
+      value: buffer.sampleRate,
+      enumerable: true
+    },
+    length: {
+      value: buffer.length,
+      enumerable: true
+    },
+    duration: {
+      value: buffer.duration,
+      enumerable: true
+    },
+    numberOfChannels: {
+      value: buffer.numberOfChannels,
+      enumerable: true
+    },
+  });
+
+  function getChannelData(ch) {
+    return function() {
+      return buffer.getChannelData(ch);
+    };
+  }
+
+  for (var i = 0; i < buffer.numberOfChannels; i++) {
+    Object.defineProperty(this, i, { get: getChannelData(i) });
+  }
 
   this._buffer = buffer;
-
-  for (var i = 0; i < this._buffer.numberOfChannels; i++) {
-    Object.defineProperty(this, i, {
-      value: this._buffer.getChannelData(i)
-    });
-  }
 }
 NeuBuffer.$$name = "NeuBuffer";
 
@@ -1066,10 +1102,11 @@ require("./timeout");
 },{"./audio-bus":9,"./buffer":10,"./interval":12,"./sched":13,"./timeout":14}],12:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./sched");
+
+var util = require("../util");
 
 function NeuInterval(context, schedTime, callback) {
   var minSchedTime = 1 / context.sampleRate;
@@ -1092,8 +1129,9 @@ module.exports = neume.Interval = NeuInterval;
 },{"../namespace":21,"../util":54,"./sched":13}],13:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var Emitter = require("../util/emitter");
 
 var STATE_INIT = 0;
@@ -1105,26 +1143,16 @@ var STATE_DONE = 4;
 function NeuSched(context, schedIter, callback) {
   Emitter.call(this);
 
-  this.context = context;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
 
   this._schedIter = schedIter;
   this._state = STATE_INIT;
   this._count = 0;
-
-  Object.defineProperties(this, {
-    state: {
-      get: function() {
-        return [
-          "UNSCHEDULED",
-          "SCHEDULED",
-          "PLAYING",
-          "PLAYING",
-          "FINISHED"
-        ][this._state];
-      },
-      enumerable: true
-    },
-  });
 
   this.on("start", callback).on("sched", callback).on("stop", callback);
 }
@@ -1211,10 +1239,11 @@ module.exports = neume.Sched = NeuSched;
 },{"../namespace":21,"../util":54,"../util/emitter":52}],14:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./sched");
+
+var util = require("../util");
 
 function NeuTimeout(context, schedTime, callback) {
   var schedIter = {
@@ -1236,23 +1265,45 @@ module.exports = neume.Timeout = NeuTimeout;
 },{"../namespace":21,"../util":54,"./sched":13}],15:[function(require,module,exports){
 "use strict";
 
-var C = require("../const");
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./transport");
 
-var INIT = 0, START = 1, STOP = 2;
+var util = require("../util");
+
+var INIT = 0, START = 1;
 
 function NeuContext(destination, spec) {
   spec = spec || /* istanbul ignore next */ {};
 
-  this.context = this;
-  this.destination = destination;
-  this.audioContext = destination.context;
-  this.sampleRate = this.audioContext.sampleRate;
-  this.listener = this.audioContext.listener;
-  this.analyser = this.audioContext.createAnalyser();
+  var audioContext = destination.context;
+
+  Object.defineProperties(this, {
+    context: {
+      value: this,
+      enumerable: true
+    },
+    audioContext: {
+      value: audioContext,
+      enumerable: true
+    },
+    destination: {
+      value: destination,
+      enumerable: true
+    },
+    sampleRate: {
+      value: audioContext.sampleRate,
+      enumerable: true
+    },
+    listener: {
+      value: audioContext.listener,
+      enumerable: true
+    },
+    analyser: {
+      value: audioContext.createAnalyser(),
+      enumerable: true
+    },
+  });
 
   this._transport = new neume.Transport(this, spec);
   this._nodes = [];
@@ -1327,7 +1378,7 @@ NeuContext.$$name = "NeuContext";
 });
 
 NeuContext.prototype.getAudioBus = function(index) {
-  index = util.clip(util.int(util.defaults(index, 0)), 0, C.AUDIO_BUS_CHANNELS);
+  index = Math.max(0, util.int(index));
   if (!this._audioBuses[index]) {
     this._audioBuses[index] = new neume.AudioBus(this, index);
   }
@@ -1338,7 +1389,7 @@ NeuContext.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
     this._transport.start();
-    this.connect(this.getAudioBus(0).outlet, this.analyser);
+    this.connect(this.getAudioBus(0).toAudioNode(), this.analyser);
   }
   return this;
 };
@@ -1458,14 +1509,15 @@ NeuContext.prototype.toSeconds = function(value) {
 
 module.exports = neume.Context = NeuContext;
 
-},{"../const":8,"../namespace":21,"../util":54,"./transport":19}],16:[function(require,module,exports){
+},{"../namespace":21,"../util":54,"./transport":19}],16:[function(require,module,exports){
 (function (global){
 "use strict";
+
+var neume = require("../namespace");
 
 require("./shim");
 
 var util = require("../util");
-var neume = require("../namespace");
 
 neume.webaudio = global;
 neume.util = util;
@@ -1636,6 +1688,12 @@ neume.impl = function(destination, spec) {
         },
         enumerable: true
       },
+      master: {
+        get: function() {
+          return context.getAudioBus(0).toAudioNode();
+        },
+        enumerable: true
+      },
       analyser: {
         value: context.analyser,
         enumerable: true
@@ -1722,15 +1780,15 @@ var NeuTimer;
 if (typeof global.window === "undefined") {
   NeuTimer = (function() {
     function NodeNeuTimer(callback, interval) {
-      this.callback = callback;
-      this.interval = interval;
+      this._callback = callback;
+      this._interval = interval;
       this._timerId = 0;
     }
     NodeNeuTimer.$$name = "NeuTimer";
 
     NodeNeuTimer.prototype.start = function() {
       clearInterval(this._timerId);
-      this._timerId = setInterval(this.callback, this.interval);
+      this._timerId = setInterval(this._callback, this._interval);
       return this;
     };
 
@@ -1743,36 +1801,22 @@ if (typeof global.window === "undefined") {
   })();
 } else {
   NeuTimer = (function() {
-    var timerSource = (function() {
-      var _this = this, timerId = 0;
-      this.onmessage = function(e) {
-        clearInterval(timerId);
-        if (e.data > 0) {
-          timerId = setInterval(function() {
-            _this.postMessage(0);
-          }, e.data);
-        }
-      };
-    }).toString().trim().match(
-      /^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/
-    )[1];
-
     var timerJS = global.URL.createObjectURL(
-      new global.Blob([ timerSource ], { type: "text/javascript" })
+      new global.Blob([
+        "var t=0;onmessage=function(e){clearInterval(t);if(e.data)t=setInterval(function(){postMessage(0)},e.data)}"
+      ], { type: "text/javascript" })
     );
 
     function WorkerNeuTimer(callback, interval) {
-      this.callback = callback;
-      this.interval = interval;
+      this._callback = callback;
+      this._interval = interval;
       this._worker = new global.Worker(timerJS);
-      this._worker.onmessage = function() {
-        callback();
-      };
+      this._worker.onmessage = callback;
     }
     WorkerNeuTimer.$$name = "NeuTimer";
 
     WorkerNeuTimer.prototype.start = function() {
-      this._worker.postMessage(this.interval);
+      this._worker.postMessage(this._interval);
       return this;
     };
 
@@ -1792,23 +1836,35 @@ module.exports = neume.Timer = NeuTimer;
 },{"../namespace":21}],19:[function(require,module,exports){
 "use strict";
 
+var neume = require("../namespace");
+
+require("./timer");
+
 var C = require("../const");
 var util = require("../util");
-var neume = require("../namespace");
 
 var INIT = 0, START = 1, STOP = 2;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
 var schedId = 1;
 
-require("./timer");
-
 function NeuTransport(context, spec) {
   spec = spec || /* istanbul ignore next */ {};
 
-  this.context = context;
-  this.audioContext = context.audioContext;
-  this.sampleRate = context.sampleRate;
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+    audioContext: {
+      value: context.audioContext,
+      enumerable: true
+    },
+    sampleRate: {
+      value: context.sampleRate,
+      enumerable: true
+    },
+  });
 
   this._bpm = 120;
   this._events = [];
@@ -2050,22 +2106,34 @@ function neume() {
   return neume.impl.apply(null, arguments);
 }
 
-neume.version = "0.8.2";
+neume.version = "0.9.0";
 
 module.exports = neume;
 
 },{}],22:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("../core/context");
 
+var util = require("../util");
+
 function NeuSynthContext(context) {
-  this.context = this;
-  this.audioContext = context.audioContext;
-  this.sampleRate = context.sampleRate;
+  Object.defineProperties(this, {
+    context: {
+      value: this,
+      enumerable: true
+    },
+    audioContext: {
+      value: context.audioContext,
+      enumerable: true
+    },
+    sampleRate: {
+      value: context.sampleRate,
+      enumerable: true
+    },
+  });
   this._context = context;
   this._nodes = [];
 }
@@ -2114,12 +2182,13 @@ module.exports = neume.SynthContext = NeuSynthContext;
 },{"../core/context":15,"../namespace":21,"../util":54}],23:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("../component/param");
 require("./ugen");
 require("./ugen-promise");
+
+var util = require("../util");
 
 function NeuSynthDollar(synth) {
   var db = new neume.DB();
@@ -2131,13 +2200,13 @@ function NeuSynthDollar(synth) {
     var args = util.toArray(arguments);
     var key = args.shift();
     var spec = util.isPlainObject(args[0]) ? args.shift() : {};
-    var inputs = util.flatten(args);
+    var inputs = args;
     var ugen, promise;
 
     if (typeof key === "string") {
       if (key.charAt(0) === "@") {
         key = key.substr(1);
-        return atParam(key, spec, inputs.pop(), inputs);
+        return atParam(key, spec, inputs);
       }
       if (key.charAt(0) === "#") {
         key = key.substr(1);
@@ -2194,15 +2263,14 @@ function NeuSynthDollar(synth) {
 function createParamBuilder(synth) {
   var params = {};
 
-  return function(name, spec, defaultValue, inputs) {
+  return function(name, spec, inputs) {
     if (params.hasOwnProperty(name)) {
       return params[name];
     }
-    validateParam(name, defaultValue);
+    validateParam(name);
 
-    defaultValue = util.finite(util.defaults(defaultValue, 0));
-
-    var param = new neume.Param(synth.context, defaultValue, spec);
+    var value = util.finite(util.defaults(spec.value, 0));
+    var param = new neume.Param(synth.context, value, spec);
 
     Object.defineProperty(synth, name, {
       value: param, enumerable: true
@@ -2285,14 +2353,15 @@ module.exports = {
 },{}],26:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
-var DB = require("../util/db");
 var neume = require("../namespace");
-var Emitter = require("../util/emitter");
-var Parser = require("./parser");
 
 require("./dollar");
 require("./context");
+
+var util = require("../util");
+var DB = require("../util/db");
+var Emitter = require("../util/emitter");
+var Parser = require("./parser");
 
 var EMPTY_DB = new DB();
 var INIT = 0, START = 1, STOP = 2;
@@ -2300,22 +2369,30 @@ var INIT = 0, START = 1, STOP = 2;
 function NeuSynth(context, func, args) {
   Emitter.call(this);
 
-  this.context = new neume.SynthContext(context);
-  this.routes = [];
+  context = new neume.SynthContext(context);
+
+  Object.defineProperties(this, {
+    context: {
+      value: context,
+      enumerable: true
+    },
+  });
 
   var $ = new neume.SynthDollar(this);
 
   this.builder = $.builder;
-  this.scheds = [];
+
+  this.__scheds = [];
+  this.__nodes = [];
 
   var param = new neume.Param(context, 1, { curve: "lin" });
   var result = func.apply(this, [ $.builder ].concat(args));
 
   if (result && result.toAudioNode && !result.isOutput) {
-    this.routes[0] = result;
+    this._dispatchNode(result, 0);
   }
 
-  this.routes = this.routes.map(function(node) {
+  this._nodes = this.__nodes.map(function(node) {
     var gain = context.createGain();
 
     context.connect(node, gain);
@@ -2323,19 +2400,22 @@ function NeuSynth(context, func, args) {
 
     return gain;
   });
+  this.__nodes = null;
 
-  this._connected = false;
-  this._db = this.routes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
+  this._scheds = this.__scheds.map(function(set) {
+    return new neume.Sched(context, set[0], set[1]);
+  });
+  this.__scheds = null;
+
+  this._db = this._nodes.length ? $.db : /* istanbul ignore next */ EMPTY_DB;
   this._state = INIT;
-  this._stateString = "UNSCHEDULED";
   this._param = param;
-  this._scheds = null;
 
-  this.methods = getMethods(this._db);
-
-  this.methods.filter(function(methodName) {
+  var methods = getMethods(this._db).filter(function(methodName) {
     return !this.hasOwnProperty(methodName);
-  }, this).forEach(function(methodName) {
+  }, this).sort();
+
+  methods.forEach(function(methodName) {
     Object.defineProperty(this, methodName, {
       value: function() {
         var args = util.toArray(arguments);
@@ -2345,14 +2425,15 @@ function NeuSynth(context, func, args) {
           }
         });
         return this;
-      }
+      },
+      enumerable: false
     });
   }, this);
 
   Object.defineProperties(this, {
-    state: {
+    methods: {
       get: function() {
-        return this._stateString;
+        return methods.slice();
       },
       enumerable: true
     }
@@ -2362,11 +2443,17 @@ util.inherits(NeuSynth, Emitter);
 
 NeuSynth.$$name = "NeuSynth";
 
+NeuSynth.prototype.hasClass = function(className) {
+  return this._db.all().some(function(ugen) {
+    return ugen.hasClass(className);
+  });
+};
+
 NeuSynth.prototype.query = function(selector) {
   var array = this._db.find(Parser.parse(selector));
 
   [
-    "on", "once", "off", "trig"
+    "on", "once", "off", "hasClass", "trig"
   ].concat(this.methods).forEach(function(methodName) {
     array[methodName] = function() {
       var args = util.toArray(arguments);
@@ -2392,22 +2479,15 @@ NeuSynth.prototype.start = function(startTime) {
   startTime = util.finite(startTime);
 
   this._state = START;
-  this._stateString = "SCHEDULED";
 
-  context.sched(startTime, function() {
-    this._stateString = "PLAYING";
-
-    this.routes.forEach(function(_, index) {
+  context.sched(startTime, function(t0) {
+    this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).append(this);
     }, this);
 
-    this._db.all().forEach(function(ugen) {
-      ugen.start(startTime);
+    this._db.all().concat(this._scheds).forEach(function(item) {
+      item.start(t0);
     });
-
-    this._scheds = this.scheds.splice(0).map(function(set) {
-      return new neume.Sched(context, set[0], set[1]).start(startTime);
-    }, this);
 
     this.emit("start", {
       type: "start",
@@ -2420,21 +2500,19 @@ NeuSynth.prototype.start = function(startTime) {
   return this;
 };
 
-NeuSynth.prototype.stop = function(startTime) {
+NeuSynth.prototype.stop = function(stopTime) {
   if (this._state !== START) {
     return this;
   }
 
   var context = this.context;
-  startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
-  startTime = util.finite(startTime);
+  stopTime = util.defaults(context.toSeconds(stopTime), context.currentTime);
+  stopTime = util.finite(stopTime);
 
   this._state = STOP;
 
-  context.sched(startTime, function(t0) {
-    this._stateString = "FINISHED";
-
-    this.routes.forEach(function(_, index) {
+  context.sched(stopTime, function(t0) {
+    this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).remove(this);
     });
 
@@ -2442,17 +2520,13 @@ NeuSynth.prototype.stop = function(startTime) {
       context.dispose();
     });
 
-    this._db.all().forEach(function(ugen) {
-      ugen.stop(t0);
-    });
-
-    this._scheds.forEach(function(sched) {
-      sched.stop(t0);
+    this._db.all().concat(this._scheds).forEach(function(item) {
+      item.stop(t0);
     });
 
     this.emit("stop", {
       type: "stop",
-      playbackTime: startTime
+      playbackTime: t0
     });
   }, this);
 
@@ -2475,7 +2549,7 @@ NeuSynth.prototype.fadeIn = function(startTime, duration) {
   startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
   startTime = util.finite(startTime);
 
-  if (this.routes.length) {
+  if (this._nodes.length) {
     duration = util.defaults(context.toSeconds(duration), 0.5);
     duration = util.finite(duration);
 
@@ -2502,7 +2576,7 @@ NeuSynth.prototype.fadeOut = function(startTime, duration) {
   duration = util.defaults(context.toSeconds(duration), 0.5);
   duration = util.finite(duration);
 
-  if (this.routes.length) {
+  if (this._nodes.length) {
     context.sched(startTime, function(t0) {
       this._param.update(0, t0, duration);
     }, this);
@@ -2519,7 +2593,7 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
 
   var context = this.context;
 
-  if (this.routes.length) {
+  if (this._nodes.length) {
     startTime = util.defaults(context.toSeconds(startTime), context.currentTime);
     startTime = util.finite(startTime);
 
@@ -2538,10 +2612,26 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
 
 NeuSynth.prototype.toAudioNode = function(index) {
   index = util.int(index);
-  if (this.routes[index]) {
-    return this.context.toAudioNode(this.routes[index]);
+  if (this._nodes[index]) {
+    return this.context.toAudioNode(this._nodes[index]);
   }
   return null;
+};
+
+NeuSynth.prototype._dispatchNode = function(node, index) {
+  if (this.__nodes) {
+    index = Math.max(0, util.int(index));
+    if (!this.__nodes[index]) {
+      this.__nodes[index] = [];
+    }
+    this.__nodes[index].push(node);
+  }
+};
+
+NeuSynth.prototype._dispatchSched = function(schedIter, callback) {
+  if (this.__scheds && util.isIterator(schedIter) && typeof callback === "function") {
+    this.__scheds.push([ schedIter, callback ]);
+  }
 };
 
 function getMethods(db) {
@@ -2561,19 +2651,34 @@ module.exports = neume.Synth = NeuSynth;
 },{"../namespace":21,"../util":54,"../util/db":51,"../util/emitter":52,"./context":22,"./dollar":23,"./parser":25}],27:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
 
 require("./ugen");
 
-function NeuUGenPromise(synth, id) {
-  this.context = synth.context;
-  this.synth = synth;
-  this.key = "";
-  this.classes = [];
-  this.id = id;
-  this.outlet = null;
+var util = require("../util");
 
+function NeuUGenPromise(synth, id) {
+  Object.defineProperties(this, {
+    context: {
+      value: synth.context,
+      enumerable: true
+    },
+    synth: {
+      value: synth,
+      enumerable: true
+    },
+    key: {
+      value: "",
+      enumerable: true
+    },
+    id: {
+      value: id,
+      enumerable: true
+    },
+  });
+
+  this._classes = {};
+  this._outlet = null;
   this._resolved = false;
   this._to = [];
   this._from = [];
@@ -2610,8 +2715,9 @@ module.exports = neume.UGenPromise = NeuUGenPromise;
 },{"../namespace":21,"../util":54,"./ugen":28}],28:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var Emitter = require("../util/emitter");
 var Parser = require("./parser");
 
@@ -2624,17 +2730,46 @@ function NeuUGen(synth, key, spec, inputs) {
     throw new Error("unknown key: " + key);
   }
 
-  this.context = synth.context;
-  this.synth = synth;
-  this.key = parsed.key;
-  this.classes = parsed.classes;
-  this.id = parsed.id;
-  this.outlet = null;
+  var listOfClass = parsed.classes;
+  var classes = {};
 
-  if (hasClass(this, "mute")) {
+  if (typeof spec.class === "string" && spec.class.trim()) {
+    listOfClass = listOfClass.concat(spec.class.split(/\s+/));
+  }
+
+  listOfClass.forEach(function(className) {
+    classes[className] = true;
+  });
+
+  Object.defineProperties(this, {
+    context: {
+      value: synth.context,
+      enumerable: true
+    },
+    synth: {
+      value: synth,
+      enumerable: true
+    },
+    key: {
+      value: parsed.key,
+      enumerable: true
+    },
+    id: {
+      value: util.defaults(spec.id, parsed.id),
+      enumerable: true
+    },
+    class: {
+      value: Object.keys(classes).sort().join(" "),
+      enumerable: true
+    },
+  });
+
+  this._classes = classes;
+
+  if (this.hasClass("mute")) {
     this._unit = new neume.Unit({});
     this._node = this.context.createGain();
-  } else if (hasClass(this, "bypass")) {
+  } else if (this.hasClass("bypass")) {
     this._unit = NeuUGen.registered["+"](this, {}, inputs);
     this._node = this._unit.outlet;
   } else {
@@ -2661,6 +2796,7 @@ function NeuUGen(synth, key, spec, inputs) {
     });
   }, this);
 
+  this._outlet = null;
   this._scheds = [];
 }
 util.inherits(NeuUGen, Emitter);
@@ -2694,6 +2830,10 @@ NeuUGen.build = function(synth, key, spec, inputs) {
   return new NeuUGen(synth, key, spec, inputs);
 };
 
+NeuUGen.prototype.hasClass = function(className) {
+  return !!this._classes[className];
+};
+
 NeuUGen.prototype.$ = function() {
   var args = util.toArray(arguments);
   var key = args.shift();
@@ -2712,7 +2852,7 @@ NeuUGen.prototype.add = function(value) {
 };
 
 NeuUGen.prototype.start = function(startTime) {
-  if (!hasClass(this, "trig")) {
+  if (!this.hasClass("trig")) {
     this._unit.start(startTime);
   }
   return this;
@@ -2721,6 +2861,25 @@ NeuUGen.prototype.start = function(startTime) {
 NeuUGen.prototype.stop = function(startTime) {
   this._unit.stop(startTime);
   return this;
+};
+
+NeuUGen.prototype.patch = function(patcher) {
+  var args = util.toArray(arguments).slice(1);
+  var $ = this.synth.builder;
+
+  if (typeof patcher === "function") {
+    var builder = function() {
+      return $.apply(null, arguments);
+    };
+    builder.timeout = $.timeout;
+    builder.interval = $.interval;
+    builder.stop = $.stop;
+    builder.inputs = [ this ];
+
+    return patcher.apply(this.synth, [ builder ].concat(args));
+  }
+
+  return $("+", this);
 };
 
 NeuUGen.prototype.trig = function(startTime) {
@@ -2736,23 +2895,25 @@ NeuUGen.prototype.trig = function(startTime) {
 };
 
 NeuUGen.prototype.sched = function(schedIter, callback) {
-  if (util.isIterator(schedIter) && typeof callback === "function") {
-    var synth = this.synth;
-    synth.scheds.push([ schedIter, function(e) {
-      if (e.type === "start" || (e.type === "stop" && !e.done)) {
-        return;
-      }
-      callback.call(synth, e);
-    } ]);
-  }
+  var _this = this;
+
+  this.synth._dispatchSched(schedIter, function(e) {
+    if (e.type === "start" || (e.type === "stop" && !e.done)) {
+      return;
+    }
+    e = Object.create(e);
+    e.synth = _this.synth;
+    callback.call(_this, e);
+  });
+
   return this;
 };
 
 NeuUGen.prototype.toAudioNode = function() {
-  if (this.outlet === null) {
-    this.outlet = this.context.toAudioNode(this._node);
+  if (this._outlet === null) {
+    this._outlet = this.context.toAudioNode(this._node);
   }
-  return this.outlet;
+  return this._outlet;
 };
 
 NeuUGen.prototype.connect = function(to) {
@@ -2787,17 +2948,14 @@ function add(context, a, b) {
   return new neume.Sum(context, [ a, b ]);
 }
 
-function hasClass(_this, className) {
-  return _this.classes.indexOf(className) !== -1;
-}
-
 module.exports = neume.UGen = NeuUGen;
 
 },{"../namespace":21,"../util":54,"../util/emitter":52,"./parser":25}],29:[function(require,module,exports){
 "use strict";
 
-var util = require("../util");
 var neume = require("../namespace");
+
+var util = require("../util");
 var INIT = 0, START = 1, STOP = 2;
 
 function NeuUnit(spec) {
@@ -2907,6 +3065,8 @@ module.exports = function(neume) {
     var context = ugen.context;
     var outlet = spec.value;
 
+    var gain = null;
+
     Object.keys(spec).forEach(function(name) {
       if (typeof outlet[name] !== "undefined") {
         if (outlet[name] instanceof neume.webaudio.AudioParam) {
@@ -2916,9 +3076,19 @@ module.exports = function(neume) {
         }
       }
     });
+    if (inputs.length) {
+      if (outlet.numberOfInputs) {
+        context.connect(inputs, outlet);
+      } else {
+        gain = context.createGain();
 
-    if (outlet.numberOfInputs) {
-      context.connect(inputs, outlet);
+        gain.gain.value = 0;
+
+        context.connect(inputs, gain);
+        context.connect(outlet, gain.gain);
+
+        outlet = gain;
+      }
     }
 
     return new neume.Unit({
@@ -3032,11 +3202,12 @@ module.exports = function(neume, util) {
    *   loopEnd: number = 0,
    *   mul: signal = 1,
    *   add: signal = 0,
-   * })
+   * }, ...inputs:signal)
    *
    * aliases:
    *   $(AudioBuffer), $(neume.Buffer)
    *
+   * no inputs
    * +------------------------------+
    * | BufferSourceNode             |
    * | - buffer: buffer             |
@@ -3046,22 +3217,42 @@ module.exports = function(neume, util) {
    * | - loopEnd: loopEnd           |
    * +------------------------------+
    *   |
+   *
+   * has inputs
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   *   |             +------------------------------+
+   *   |             | BufferSourceNode             |
+   *   |             | - buffer: buffer             |
+   *   |             | - playbackRate: playbackRate |
+   * +-----------+   | - loop: loop                 |
+   * | GainNode  |   | - loopStart: loopStart       |
+   * | - gain: 0 <---| - loopEnd: loopEnd           |
+   * +-----------+   +------------------------------+
+   *   |
    */
-  neume.register("buf", function(ugen, spec) {
-    return make(util.defaults(spec.buf, spec.buffer), ugen, spec);
+  neume.register("buf", function(ugen, spec, inputs) {
+    return make(util.defaults(spec.buf, spec.buffer), ugen, spec, inputs);
   });
 
-  neume.register("AudioBuffer", function(ugen, spec) {
-    return make(spec.value, ugen, spec);
+  neume.register("AudioBuffer", function(ugen, spec, inputs) {
+    return make(spec.value, ugen, spec, inputs);
   });
 
-  neume.register("NeuBuffer", function(ugen, spec) {
-    return make(spec.value, ugen, spec);
+  neume.register("NeuBuffer", function(ugen, spec, inputs) {
+    return make(spec.value, ugen, spec, inputs);
   });
 
-  function make(buffer, ugen, spec) {
+  function make(buffer, ugen, spec, inputs) {
     var context = ugen.context;
+    var outlet = null;
+
     var bufSrc = context.createBufferSource();
+    var gain = null;
     var duration = 0;
 
     buffer = context.toAudioBuffer(buffer);
@@ -3071,12 +3262,30 @@ module.exports = function(neume, util) {
       bufSrc.buffer = buffer;
       duration = buffer.duration;
     }
-    bufSrc.loop = !!util.defaults(spec.loop, false);
-    bufSrc.loopStart = util.finite(util.defaults(spec.start, spec.loopStart, 0));
-    bufSrc.loopEnd = util.finite(util.defaults(spec.end, spec.loopEnd, 0));
 
+    var loop = !!util.defaults(spec.loop, false);
+    var loopStart = util.finite(util.defaults(spec.start, spec.loopStart, 0));
+    var loopEnd = util.finite(util.defaults(spec.end, spec.loopEnd, 0));
+    var playbackRate = util.defaults(spec.rate, spec.playbackRate, 1);
+
+    bufSrc.loop = loop;
+    bufSrc.loopStart = loopStart;
+    bufSrc.loopEnd = loopEnd;
     bufSrc.playbackRate.value = 0;
-    context.connect(util.defaults(spec.rate, spec.playbackRate, 1), bufSrc.playbackRate);
+    context.connect(playbackRate, bufSrc.playbackRate);
+
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(bufSrc, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = bufSrc;
+    }
 
     function start(t) {
       bufSrc.start(t);
@@ -3095,7 +3304,7 @@ module.exports = function(neume, util) {
     }
 
     return new neume.Unit({
-      outlet: bufSrc,
+      outlet: outlet,
       start: start,
       stop: stop
     });
@@ -3312,7 +3521,7 @@ module.exports = function(neume, util) {
   /*
    * $("drywet", {
    *   mix: signal = 0,
-   *   efx: function = null,
+   *   patch: function = null,
    *   args: any[] = [],
    *   mul: signal = 1,
    *   add: signal = 0,
@@ -3353,7 +3562,7 @@ module.exports = function(neume, util) {
     var context = ugen.context;
 
     var mix = util.defaults(spec.mix, 0);
-    var efx = util.defaults(spec.efx, spec.wet, null);
+    var efx = util.defaults(spec.patch, spec.efx, spec.wet, null);
     var args = util.defaults(spec.args, []);
     var dry = inputs;
     var wet = null;
@@ -3861,23 +4070,21 @@ module.exports = function(neume) {
 module.exports = function(neume, util) {
   "use strict";
 
-  var AUDIO_BUS_CHANNELS = neume.AUDIO_BUS_CHANNELS;
-
   /**
-  * $("in", {
-  *   bus: number = 0,
-  *   mul: signal = 1,
-  *   add: signal = 0,
-  * })
-  *
-  *  +---------------+
-  *  | AudioBus[bus] |
-  *  +---------------+
-  *   |
-  */
+   * $("in", {
+   *   bus: number = 0,
+   *   mul: signal = 1,
+   *   add: signal = 0,
+   * })
+   *
+   *  +---------------+
+   *  | AudioBus[bus] |
+   *  +---------------+
+   *   |
+   */
   neume.register("in", function(ugen, spec) {
     var context = ugen.context;
-    var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
+    var index = Math.max(0, util.int(spec.bus));
 
     return new neume.Unit({
       outlet: context.getAudioBus(index)
@@ -3902,10 +4109,9 @@ module.exports = function(neume, util) {
   neume.register("out", function(ugen, spec, inputs) {
     var context = ugen.context;
     var outlet = new neume.Sum(context, inputs);
+    var index = Math.max(0, util.int(spec.bus));
 
-    var index = util.clip(util.int(util.defaults(spec.bus, 0)), 0, AUDIO_BUS_CHANNELS);
-
-    ugen.synth.routes[index] = outlet;
+    ugen.synth._dispatchNode(outlet, index);
 
     return new neume.Unit({
       outlet: outlet,
@@ -4052,37 +4258,35 @@ module.exports = function(neume, util) {
   });
 
   function make(ugen, spec, inputs) {
-    var elem = inputs.length ? hasInputs(ugen, spec, inputs) : noInputs(ugen, spec);
-    var outlet = elem.outlet;
-    var ctrl = elem.ctrl;
+    var context = ugen.context;
+    var outlet = null;
+
+    var defaultFreq = inputs.length ? 2 : 440;
+    var pulse = createPulseOscillator(context, spec, defaultFreq);
+    var gain = null;
+
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(pulse.outlet, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = pulse.outlet;
+    }
 
     return new neume.Unit({
       outlet: outlet,
       start: function(t) {
-        ctrl.start(t);
+        pulse.ctrl.start(t);
       },
       stop: function(t) {
-        ctrl.stop(t);
+        pulse.ctrl.stop(t);
       }
     });
-  }
-
-  function noInputs(ugen, spec) {
-    var pulse = createPulseOscillator(ugen.context, spec, 440);
-    return { outlet: pulse.outlet, ctrl: pulse.ctrl };
-  }
-
-  function hasInputs(ugen, spec, inputs) {
-    var context = ugen.context;
-
-    var pulse = createPulseOscillator(context, spec, 2);
-    var gain = ugen.context.createGain();
-
-    gain.gain.value = 0;
-    context.connect(pulse.outlet, gain.gain);
-    context.connect(inputs, gain);
-
-    return { outlet: gain, ctrl: pulse.ctrl };
   }
 
   function createPulseOscillator(context, spec, defaultFreq) {
@@ -4405,37 +4609,67 @@ module.exports = function(neume) {
    * aliases:
    * $("white"), $("pink"), $("brown")
    *
+   * no inputs
    * +------------------+
    * | BufferSourceNode |
    * | - loop: true     |
    * +------------------+
    *   |
+   *
+   * has inputs
+   * +-----------+     +-----------+
+   * | inputs[0] | ... | inputs[N] |
+   * +-----------+     +-----------+
+   *   |                 |
+   *   +-----------------+
+   *   |
+   * +-----------+   +------------------+
+   * | GainNode  |   | BufferSourceNode |
+   * | - gain: 0 <---| - loop: true     |
+   * +-----------+   +------------------+
+   *   |
    */
-  neume.register("noise", function(ugen, spec) {
+  neume.register("noise", function(ugen, spec, inputs) {
     var type = {
       pink: "pink",
       brown: "brown"
     }[spec.type] || "white";
-    return make(type, ugen);
+    return make(type, ugen, inputs);
   });
 
   [
     "white", "pink", "brown"
   ].forEach(function(type) {
-    neume.register(type, function(ugen) {
-      return make(type, ugen);
+    neume.register(type, function(ugen, spec, inputs) {
+      return make(type, ugen, inputs);
     });
   });
 
-  function make(type, ugen) {
+  function make(type, ugen, inputs) {
     var context = ugen.context;
+    var outlet = null;
+
     var bufSrc = context.createBufferSource();
+    var gain = null;
 
     bufSrc.buffer = neume.KVS.get(KVSKEY + type, context, NOISE_DURATION);
     bufSrc.loop = true;
 
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(bufSrc, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = bufSrc;
+    }
+
     return new neume.Unit({
-      outlet: bufSrc,
+      outlet: outlet,
       start: function(t) {
         bufSrc.start(t);
       },
@@ -4681,58 +4915,50 @@ module.exports = function(neume, util) {
   });
 
   function make(wave, ugen, spec, inputs) {
-    var elem = inputs.length ?
-      hasInputs(wave, ugen, spec, inputs) : noInputs(wave, ugen, spec);
-    var outlet = elem.outlet;
-    var ctrl = elem.ctrl;
-
-    return new neume.Unit({
-      outlet: outlet,
-      start: function(t) {
-        ctrl.start(t);
-      },
-      stop: function(t) {
-        ctrl.stop(t);
-      }
-    });
-  }
-
-  function noInputs(wave, ugen, spec) {
-    var osc = createOscillator(ugen.context, wave, spec, 440);
-    return { outlet: osc, ctrl: osc };
-  }
-
-  function hasInputs(wave, ugen, spec, inputs) {
     var context = ugen.context;
+    var outlet = null;
 
-    var osc = createOscillator(context, wave, spec, 2);
-    var gain = ugen.context.createGain();
-
-    gain.gain.value = 0;
-    context.connect(osc, gain.gain);
-    context.connect(inputs, gain);
-
-    return { outlet: gain, ctrl: osc };
-  }
-
-  function createOscillator(context, type, spec, defaultFreq) {
     var osc = context.createOscillator();
+    var gain = null;
 
-    if (isPeriodicWave(type)) {
-      osc.setPeriodicWave(type);
-    } else {
-      osc.type = type;
-    }
-    osc.frequency.value = 0;
-    osc.detune.value = 0;
-
+    var defaultFreq = inputs.length ? 2 : 440;
     var frequency = util.defaults(spec.freq, spec.frequency, defaultFreq);
     var detune = util.defaults(spec.dt, spec.detune, 0);
+
+    if (isPeriodicWave(wave)) {
+      osc.setPeriodicWave(wave);
+    } else {
+      osc.type = wave;
+    }
+
+    osc.frequency.value = 0;
+    osc.detune.value = 0;
 
     context.connect(frequency, osc.frequency);
     context.connect(detune, osc.detune);
 
-    return osc;
+    if (inputs.length) {
+      gain = context.createGain();
+
+      gain.gain.value = 0;
+
+      context.connect(inputs, gain);
+      context.connect(osc, gain.gain);
+
+      outlet = gain;
+    } else {
+      outlet = osc;
+    }
+
+    return new neume.Unit({
+      outlet: outlet,
+      start: function(t) {
+        osc.start(t);
+      },
+      stop: function(t) {
+        osc.stop(t);
+      }
+    });
   }
 
   function isPeriodicWave(wave) {
@@ -4988,9 +5214,9 @@ DB.prototype.find = function(parsed) {
   }
 
   if (parsed.classes) {
-    parsed.classes.forEach(function(cls) {
+    parsed.classes.forEach(function(className) {
       result = result.filter(function(obj) {
-        return obj.classes.indexOf(cls) !== -1;
+        return obj.hasClass && obj.hasClass(className);
       });
     });
   }
