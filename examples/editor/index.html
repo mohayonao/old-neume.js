@@ -66,7 +66,37 @@
       window.location = "#" + window.encodeURIComponent(editor.getValue());
     }, false);
 
-    editor.setValue(window.decodeURIComponent(window.location.hash.substr(1)));
+    function readFromGist(gistid) {
+      var url = "https://api.github.com/gists/" + gistid;
+
+      return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
+        xhr.onload = function() {
+          var data = JSON.parse(xhr.response);
+          var jsFiles = _.filter(data.files, function(file) {
+            return file.language === "JavaScript";
+          });
+          if (jsFiles.length) {
+            resolve(jsFiles[0].content);
+          } else {
+            reject();
+          }
+        };
+        xhr.onerror = reject;
+        xhr.send();
+      });
+    }
+
+    var hash = window.decodeURIComponent(window.location.hash.substr(1));
+
+    if (/^gist:[0-9a-f]+/.test(hash)) {
+      readFromGist(hash.substr(5)).then(function(code) {
+        editor.setValue(code);
+      });
+    } else {
+      editor.setValue(hash);
+    }
   };
   </script>
 </body>
