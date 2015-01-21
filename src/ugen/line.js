@@ -58,12 +58,12 @@ module.exports = function(neume, util) {
       param.setAt(startValue, t0);
       param[curve](endValue, t1);
 
-      schedId = context.sched(t1, function(t) {
+      schedId = context.sched(t1, function(e) {
         schedId = 0;
         ugen.emit("end", {
           type: "end",
           synth: ugen.synth,
-          playbackTime: t
+          playbackTime: e.playbackTime
         });
       });
     }

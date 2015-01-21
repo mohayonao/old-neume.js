@@ -246,7 +246,9 @@ function onaudioprocess(_this, t0, t1) {
 
     _this._currentTime = Math.max(_this._currentTime, event.time);
 
-    event.callback(event.time);
+    event.callback({
+      playbackTime: event.time
+    });
   }
 
   _this._currentTime = t0;

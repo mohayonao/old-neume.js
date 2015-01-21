@@ -67,8 +67,8 @@ function NeuSynthDollar(synth) {
     };
   };
   builder.stop = function(stopTime) {
-    synth.context.sched(synth.context.toSeconds(stopTime), function(t0) {
-      synth.stop(t0);
+    synth.context.sched(synth.context.toSeconds(stopTime), function(e) {
+      synth.stop(e.playbackTime);
     });
   };
 

@@ -354,7 +354,7 @@ describe("neume.Context", function() {
 
       var pass = function(i) {
         return function(e) {
-          passed.push([ i, e ]);
+          passed.push([ i, e.playbackTime ]);
         };
       };
 
@@ -390,7 +390,7 @@ describe("neume.Context", function() {
 
       var pass = function(i) {
         return function(e) {
-          passed.push([ i, e ]);
+          passed.push([ i, e.playbackTime ]);
         };
       };
 
@@ -427,7 +427,7 @@ describe("neume.Context", function() {
 
       var pass = function(i) {
         return function(e) {
-          passed.push([ i, e ]);
+          passed.push([ i, e.playbackTime ]);
         };
       };
 

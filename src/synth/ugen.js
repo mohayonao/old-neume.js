@@ -173,8 +173,8 @@ NeuUGen.prototype.trig = function(startTime) {
 
   startTime = util.finite(context.toSeconds(startTime));
 
-  context.sched(startTime, function() {
-    _this._unit.start(startTime);
+  context.sched(startTime, function(e) {
+    _this._unit.start(e.playbackTime);
   });
 
   return this;

@@ -129,7 +129,9 @@ NeuSynth.prototype.start = function(startTime) {
 
   this._state = START;
 
-  context.sched(startTime, function(t0) {
+  context.sched(startTime, function(e) {
+    var t0 = e.playbackTime;
+
     _this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).append(_this);
     });
@@ -162,7 +164,9 @@ NeuSynth.prototype.stop = function(stopTime) {
 
   this._state = STOP;
 
-  context.sched(stopTime, function(t0) {
+  context.sched(stopTime, function(e) {
+    var t0 = e.playbackTime;
+
     _this._nodes.forEach(function(_, index) {
       context.getAudioBus(index).remove(_this);
     });
@@ -207,8 +211,8 @@ NeuSynth.prototype.fadeIn = function(startTime, duration) {
     duration = util.finite(duration);
 
     this._param.value = 0;
-    context.sched(startTime, function(t0) {
-      _this._param.update(1, t0, duration);
+    context.sched(startTime, function(e) {
+      _this._param.update(1, e.playbackTime, duration);
     });
   }
   this.start(startTime);
@@ -232,8 +236,8 @@ NeuSynth.prototype.fadeOut = function(startTime, duration) {
   duration = util.finite(duration);
 
   if (this._nodes.length) {
-    context.sched(startTime, function(t0) {
-      _this._param.update(0, t0, duration);
+    context.sched(startTime, function(e) {
+      _this._param.update(0, e.playbackTime, duration);
     });
   }
   this.stop(startTime + duration);
@@ -259,8 +263,8 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
     duration = util.defaults(context.toSeconds(duration), 0.5);
     duration = util.finite(duration);
 
-    context.sched(startTime, function(t0) {
-      _this._param.update(value, t0, duration);
+    context.sched(startTime, function(e) {
+      _this._param.update(value, e.playbackTime, duration);
     });
   }
 
