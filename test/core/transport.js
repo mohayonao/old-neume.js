@@ -216,7 +216,7 @@ describe("neume.Transport", function() {
 
         assert(passed === 0);
 
-        tick(50);
+        tick(100);
         assert(passed === 1);
       });
     });

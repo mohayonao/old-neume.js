@@ -32,7 +32,6 @@ function NeuTransport(context, spec) {
 
   this._bpm = 120;
   this._events = [];
-  this._nextTicks = [];
   this._state = INIT;
   this._currentTime = 0;
   this._timerAPI = spec.timerAPI || timerAPI;
@@ -88,7 +87,6 @@ NeuTransport.prototype.reset = function() {
     this._timerId = 0;
   }
   this._events = [];
-  this._nextTicks = [];
   this._state = INIT;
   this._currentTime = 0;
 
@@ -161,7 +159,7 @@ NeuTransport.prototype.unsched = function(id) {
 };
 
 NeuTransport.prototype.nextTick = function(callback, context) {
-  this._nextTicks.push(callback.bind(context || this));
+  this.sched(this.currentTime + 0.1, callback, context);
   return this;
 };
 
@@ -240,14 +238,9 @@ function note2sec(num, note, bpm) {
 }
 
 function onaudioprocess(_this, t0, t1) {
-  // Safari 7.0.6 does not support e.playbackTime
   var events = _this._events;
 
   _this._currentTime = t0;
-
-  _this._nextTicks.splice(0).forEach(function(callback) {
-    callback(t0);
-  });
 
   while (events.length && events[0].time <= t1) {
     var event = events.shift();
