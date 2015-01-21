@@ -102,8 +102,15 @@ function NEU(context) {
   });
 }
 
-neume.impl = function(destination, spec) {
-  spec = spec || /* istanbulg ignore next */ {};
+neume.impl = function(opts) {
+  opts = opts || /* istanbulg ignore next */ {};
+
+  var destination = null;
+
+  if (opts.context && opts.context.destination) {
+    destination = opts.context.destination;
+  }
+  destination = destination || opts.destination;
 
   if (destination instanceof neume.webaudio.AudioContext) {
     destination = destination.destination;
@@ -114,7 +121,7 @@ neume.impl = function(destination, spec) {
     throw new TypeError("neume(): Illegal arguments");
   }
 
-  var context = new neume.Context(destination, spec);
+  var context = new neume.Context(destination, opts);
   var autoPlayFunction = null;
 
   /* istanbul ignore next */

@@ -17,16 +17,23 @@ describe("neume", function() {
       assert(typeof neu === "object");
       assert(neu.audioContext instanceof global.AudioContext);
     });
-    it("(destination: AudioContext)", sinon.test(function() {
-      var neu = neume(audioContext);
+    it("({ context: AudioContext })", sinon.test(function() {
+      var neu = neume({ context: audioContext });
 
       assert(typeof neu === "object");
       assert(neu.audioContext === audioContext);
       assert(neu.destination === audioContext.destination);
     }));
-    it("(destination: AudioNode)", function() {
+    it("({ destination: AudioContext })", sinon.test(function() {
+      var neu = neume({ destination: audioContext });
+
+      assert(typeof neu === "object");
+      assert(neu.audioContext === audioContext);
+      assert(neu.destination === audioContext.destination);
+    }));
+    it("({ destination: AudioNode })", function() {
       var lpf = audioContext.createBiquadFilter();
-      var neu = neume(lpf);
+      var neu = neume({ destination: lpf });
 
       assert(typeof neu === "object");
       assert(neu.audioContext === audioContext);
@@ -34,7 +41,7 @@ describe("neume", function() {
     });
     it("failed", function() {
       assert.throws(function() {
-        neume("INVALID");
+        neume({ destination: "INVALID" });
       });
     });
   });
