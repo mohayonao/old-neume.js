@@ -276,12 +276,12 @@ describe("neume.SynthContext", function() {
   });
 
   describe("#sched", function() {
-    it("(time: timevalue, callback: function, [context: any]): number", function() {
+    it("(time: timevalue, callback: function): number", function() {
       var spy = sinon.spy(neuContext, "sched");
 
-      assert(typeof synContext.sched(1, it, audioContext) === "number");
+      assert(typeof synContext.sched(1, it) === "number");
       assert(spy.calledOnce);
-      assert(spy.calledWith(1, it, audioContext));
+      assert(spy.calledWith(1, it));
     });
   });
 
@@ -296,12 +296,12 @@ describe("neume.SynthContext", function() {
   });
 
   describe("#nextTick", function() {
-    it("(callback: function, [context: any]): self", function() {
+    it("(callback: function): self", function() {
       var spy = sinon.spy(neuContext, "nextTick");
 
-      assert(synContext.nextTick(it, audioContext) === synContext);
+      assert(synContext.nextTick(it) === synContext);
       assert(spy.calledOnce);
-      assert(spy.calledWith(it, audioContext));
+      assert(spy.calledWith(it));
     });
   });
 

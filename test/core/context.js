@@ -346,10 +346,10 @@ describe("neume.Context", function() {
   });
 
   describe("#sched", function() {
-    it("(time: number, callback: !function, context: any): 0", function() {
+    it("(time: number, callback: !function): 0", function() {
       assert(context.sched(10, "INVALID") === 0);
     });
-    it("(time: number, callback: function, context: any): number // works", function() {
+    it("(time: number, callback: function): number // works", function() {
       var passed = [];
 
       var pass = function(i) {
@@ -462,7 +462,7 @@ describe("neume.Context", function() {
   });
 
   describe("#nextTick", function() {
-    it("(callback: function, context: any): self", function() {
+    it("(callback: function): self", function() {
       var passed = 0;
 
       useTimer(context, function(tick) {

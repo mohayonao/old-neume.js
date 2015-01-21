@@ -160,16 +160,16 @@ NeuContext.prototype.dispose = function() {
   return this;
 };
 
-NeuContext.prototype.sched = function(time, callback, context) {
-  return this._transport.sched(time, callback, context);
+NeuContext.prototype.sched = function(time, callback) {
+  return this._transport.sched(time, callback);
 };
 
 NeuContext.prototype.unsched = function(id) {
   return this._transport.unsched(id);
 };
 
-NeuContext.prototype.nextTick = function(callback, context) {
-  this._transport.nextTick(callback, context);
+NeuContext.prototype.nextTick = function(callback) {
+  this._transport.nextTick(callback);
   return this;
 };
 

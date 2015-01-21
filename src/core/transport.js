@@ -113,7 +113,7 @@ function startAudioTimer() {
   }, this._scheduleInterval * 1000);
 }
 
-NeuTransport.prototype.sched = function(time, callback, context) {
+NeuTransport.prototype.sched = function(time, callback) {
   if (typeof callback !== "function") {
     return 0;
   }
@@ -124,8 +124,7 @@ NeuTransport.prototype.sched = function(time, callback, context) {
   var event = {
     id: schedId++,
     time: time,
-    callback: callback,
-    context: context || this
+    callback: callback
   };
 
   if (events.length === 0 || events[events.length - 1].time <= time) {
@@ -158,8 +157,8 @@ NeuTransport.prototype.unsched = function(id) {
   return id;
 };
 
-NeuTransport.prototype.nextTick = function(callback, context) {
-  this.sched(this.currentTime + 0.1, callback, context);
+NeuTransport.prototype.nextTick = function(callback) {
+  this.sched(this.currentTime + 0.1, callback);
   return this;
 };
 
@@ -247,7 +246,7 @@ function onaudioprocess(_this, t0, t1) {
 
     _this._currentTime = Math.max(_this._currentTime, event.time);
 
-    event.callback.call(event.context, event.time);
+    event.callback(event.time);
   }
 
   _this._currentTime = t0;

@@ -32,6 +32,8 @@ util.inherits(NeuSched, Emitter);
 NeuSched.$$name = "NeuSched";
 
 NeuSched.prototype.start = function(startTime) {
+  var _this = this;
+
   if (this._state !== STATE_INIT) {
     return this;
   }
@@ -44,9 +46,9 @@ NeuSched.prototype.start = function(startTime) {
   this._state = STATE_START;
 
   context.sched(startTime, function(t0) {
-    this._state = STATE_RUNNING;
-    emit(this, t0, false);
-  }, this);
+    _this._state = STATE_RUNNING;
+    emit(_this, t0, false);
+  });
 
   context.start(); // auto start
 
@@ -54,6 +56,8 @@ NeuSched.prototype.start = function(startTime) {
 };
 
 NeuSched.prototype.stop = function(startTime) {
+  var _this = this;
+
   if (this._state !== STATE_RUNNING && this._state !== STATE_START) {
     return this;
   }
@@ -64,15 +68,15 @@ NeuSched.prototype.stop = function(startTime) {
   startTime = util.finite(startTime);
 
   context.sched(startTime, function(t0) {
-    this.emit("stop", {
+    _this.emit("stop", {
       type: "stop",
       playbackTime: t0,
       duration: 0,
-      count: this._count,
+      count: _this._count,
       done: false
     });
-    this._state = STATE_DONE;
-  }, this);
+    _this._state = STATE_DONE;
+  });
 
   return this;
 };

@@ -168,13 +168,14 @@ NeuUGen.prototype.patch = function(patcher) {
 };
 
 NeuUGen.prototype.trig = function(startTime) {
+  var _this = this;
   var context = this.context;
 
   startTime = util.finite(context.toSeconds(startTime));
 
   context.sched(startTime, function() {
-    this._unit.start(startTime);
-  }, this);
+    _this._unit.start(startTime);
+  });
 
   return this;
 };
