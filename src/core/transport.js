@@ -1,8 +1,8 @@
 "use strict";
 
 var neume = require("../namespace");
-
-require("./timer");
+var timerAPI = require("./timer");
+var WebAudioScheduler = require("web-audio-scheduler");
 
 var C = require("../const");
 var util = require("../util");
@@ -35,6 +35,8 @@ function NeuTransport(context, spec) {
   this._nextTicks = [];
   this._state = INIT;
   this._currentTime = 0;
+  this._timerAPI = spec.timerAPI || timerAPI;
+  this._timerId = 0;
 
   this._duration = util.defaults(spec.duration, Infinity);
   this._scheduleInterval = util.defaults(spec.scheduleInterval, 0.025);
@@ -81,9 +83,9 @@ NeuTransport.prototype.stop = function() {
 };
 
 NeuTransport.prototype.reset = function() {
-  if (this._timer) {
-    this._timer.stop();
-    this._timer = null;
+  if (this._timerId) {
+    this._timerAPI.clearInterval(this._timerId);
+    this._timerId = 0;
   }
   this._events = [];
   this._nextTicks = [];
@@ -105,12 +107,12 @@ function startAudioTimer() {
   var context = this.audioContext;
   var scheduleAheadTime = this._scheduleAheadTime;
 
-  this._timer = new neume.Timer(function() {
+  this._timerId = this._timerAPI.setInterval(function() {
     var t0 = context.currentTime;
     var t1 = t0 + scheduleAheadTime;
 
     onaudioprocess(_this, t0, t1);
-  }, this._scheduleInterval * 1000).start();
+  }, this._scheduleInterval * 1000);
 }
 
 NeuTransport.prototype.sched = function(time, callback, context) {
