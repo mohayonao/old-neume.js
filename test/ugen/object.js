@@ -9,8 +9,10 @@ describe("ugen/object", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext(), {
-      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+    neu = neume({
+      scheduleInterval: 0.05,
+      scheduleAheadTime: 0.05,
+      scheduleOffsetTime: 0.00,
     });
   });
 
@@ -191,7 +193,7 @@ describe("ugen/object", function() {
         assert(outlet.gain.$valueAtTime(0.000) === 0);
 
         obj.foo = 1;
-        tick(100);
+        tick(105);
         assert(outlet.gain.$valueAtTime(0.100) === 1);
 
         obj.foo = 2;

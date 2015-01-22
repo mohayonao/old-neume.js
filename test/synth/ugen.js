@@ -10,7 +10,7 @@ describe("neume.UGen", function() {
 
   beforeEach(function() {
     context = new neume.Context(new global.AudioContext().destination, {
-      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05, scheduleOffsetTime: 0.00
     });
     synth = new neume.Synth(context, NOP, []);
   });
@@ -239,7 +239,7 @@ describe("neume.UGen", function() {
 
       useTimer(context, function(tick) {
         assert(ugen.start(0) === ugen);
-        assert(ugen.trig(0.1) === ugen);
+        assert(ugen.trig(0.095) === ugen);
 
         context.start();
 
@@ -248,7 +248,7 @@ describe("neume.UGen", function() {
 
         tick(50);
         assert(spy.calledOnce);
-        assert(spy.calledWith(0.1));
+        assert(spy.calledWith(0.095));
       });
     });
   });

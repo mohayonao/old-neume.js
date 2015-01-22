@@ -7,7 +7,8 @@
     "url": "https://github.com/mohayonao/neume.js/issues"
   },
   "dependencies": {
-    "es6-promise": "^2.0.0"
+    "es6-promise": "^2.0.0",
+    "web-audio-scheduler": "^0.2.0"
   },
   "devDependencies": {
     "browserify": "^8.0.2",

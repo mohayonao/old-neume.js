@@ -11,7 +11,7 @@ describe("neume.Synth", function() {
   beforeEach(function() {
     audioContext = new global.AudioContext();
     context = new neume.Context(audioContext.destination, {
-      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05, scheduleOffsetTime: 0.00
     });
   });
 

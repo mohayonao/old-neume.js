@@ -169,8 +169,7 @@ NeuContext.prototype.unsched = function(id) {
 };
 
 NeuContext.prototype.nextTick = function(callback) {
-  this._transport.nextTick(callback);
-  return this;
+  return this._transport.nextTick(callback);
 };
 
 NeuContext.prototype.toAudioNode = function(obj) {

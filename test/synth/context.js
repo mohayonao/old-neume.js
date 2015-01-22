@@ -296,10 +296,11 @@ describe("neume.SynthContext", function() {
   });
 
   describe("#nextTick", function() {
-    it("(callback: function): self", function() {
+    it("(callback: function): number", function() {
       var spy = sinon.spy(neuContext, "nextTick");
 
-      assert(synContext.nextTick(it) === synContext);
+      synContext.nextTick(it);
+
       assert(spy.calledOnce);
       assert(spy.calledWith(it));
     });

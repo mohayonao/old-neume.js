@@ -7,7 +7,7 @@ describe("neume.Timeout", function() {
 
   beforeEach(function() {
     context = new neume.Context(new global.AudioContext().destination, {
-      scheduleInterval: 0.05, scheduleAheadTime: 0.05
+      scheduleInterval: 0.05, scheduleAheadTime: 0.05, scheduleOffsetTime: 0.00
     });
   });
 
@@ -50,10 +50,10 @@ describe("neume.Timeout", function() {
 
       assert(passed === null);
 
-      sched.stop(0.100);
-      sched.start(0.200);
-      sched.start(0.100);
-      sched.stop(0.400);
+      sched.stop(0.095);
+      sched.start(0.195);
+      sched.start(0.095);
+      sched.stop(0.395);
 
       tick(50);
       assert(passed === null, "00:00.050");
@@ -71,7 +71,7 @@ describe("neume.Timeout", function() {
       assert(passed !== null, "00:00.250");
       assert(passed.count === 1, "00:00.250");
       assert(passed.done === true, "00:00.250");
-      assert(closeTo(passed.playbackTime, 0.250, 1e-6), "00:00.250");
+      assert(closeTo(passed.playbackTime, 0.245, 1e-6), "00:00.250");
     });
   });
 

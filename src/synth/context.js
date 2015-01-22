@@ -52,8 +52,7 @@ NeuSynthContext.prototype.unsched = function(id) {
 };
 
 NeuSynthContext.prototype.nextTick = function(callback) {
-  this._context.nextTick(callback);
-  return this;
+  return this._context.nextTick(callback);
 };
 
 NeuSynthContext.prototype.getAudioBus = function(index) {

@@ -60,7 +60,7 @@ describe("neume", function() {
     var neu = null;
 
     beforeEach(function() {
-      neu = neume(new global.AudioContext());
+      neu = neume({ context: new global.AudioContext() });
     });
 
     describe(".render", function() {
