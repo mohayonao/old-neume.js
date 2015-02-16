@@ -11,22 +11,18 @@
     "web-audio-scheduler": "^0.2.0"
   },
   "devDependencies": {
-    "browserify": "^8.0.2",
+    "browserify": "^8.1.3",
     "coveralls": "^2.11.2",
     "espower-loader": "^0.10.0",
-    "gulp": "^3.8.10",
-    "gulp-istanbul": "^0.5.0",
-    "gulp-jscs": "^1.3.1",
-    "gulp-jshint": "^1.9.0",
-    "gulp-mocha": "^2.0.0",
-    "gulp-rename": "^1.2.0",
-    "gulp-sourcemaps": "^1.3.0",
-    "gulp-uglify": "^1.0.2",
+    "intelli-espower-loader": "^0.6.0",
+    "istanbul": "^0.3.5",
+    "jscs": "^1.11.3",
+    "jshint": "^2.6.0",
     "jshint-stylish": "^1.0.0",
-    "power-assert": "^0.10.0",
+    "mocha": "^2.1.0",
+    "power-assert": "^0.10.1",
     "sinon": "^1.12.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.0.0",
+    "uglify-js": "^2.4.16",
     "web-audio-test-api": "^0.1.16"
   },
   "homepage": "http://mohayonao.github.io/neume.js/",
@@ -44,13 +40,15 @@
     "url": "https://github.com/mohayonao/neume.js.git"
   },
   "scripts": {
-    "build": "gulp build",
-    "code": "gulp code",
-    "cover": "gulp cover",
-    "jscs": "gulp jscs",
-    "lint": "gulp lint",
+    "build": "npm run build-browser && npm run build-minify",
+    "build-browser": "browserify index.js -o build/neume.js",
+    "build-minify": "uglifyjs build/neume.js -o build/neume.min.js --source-map build/neume.min.js.map",
+    "code": "npm run lint && npm run jscs",
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha",
+    "jscs": "jscs src test plugins",
+    "lint": "jshint --reporter node_modules/jshint-stylish/stylish.js src test plugins",
     "start": "python -m SimpleHTTPServer",
-    "test": "gulp test",
-    "travis": "gulp travis"
+    "test": "mocha",
+    "travis": "npm run code && npm run cover"
   }
 }
