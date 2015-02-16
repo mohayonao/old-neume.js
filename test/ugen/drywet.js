@@ -106,7 +106,7 @@ describe("ugen/drywet", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.7071067811865475,
+              value: 0.7071067811865476,
               inputs: []
             },
             inputs: [ OSCILLATOR("sine", 440) ]
