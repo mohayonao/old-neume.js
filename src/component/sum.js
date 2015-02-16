@@ -64,7 +64,7 @@ NeuSum.prototype.toAudioNode = function() {
     for (var i = 0, imax = nodes.length; i < imax; i++) {
       context.connect(nodes[i], sumNode);
     }
-    if (this._param)  {
+    if (this._param) {
       context.connect(this._param, sumNode);
     }
     if (this._number) {
