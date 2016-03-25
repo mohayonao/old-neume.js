@@ -9,7 +9,11 @@ describe("ugen/pan2", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume({
+      scheduleInterval: 0.05,
+      scheduleAheadTime: 0.05,
+      scheduleOffsetTime: 0.00,
+    });
   });
 
   describe("graph", function() {

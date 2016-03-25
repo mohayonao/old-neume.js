@@ -117,6 +117,8 @@ NeuSynth.prototype.query = function(selector) {
 };
 
 NeuSynth.prototype.start = function(startTime) {
+  var _this = this;
+
   if (this._state !== INIT) {
     return this;
   }
@@ -127,20 +129,22 @@ NeuSynth.prototype.start = function(startTime) {
 
   this._state = START;
 
-  context.sched(startTime, function(t0) {
-    this._nodes.forEach(function(_, index) {
-      context.getAudioBus(index).append(this);
-    }, this);
+  context.sched(startTime, function(e) {
+    var t0 = e.playbackTime;
 
-    this._db.all().concat(this._scheds).forEach(function(item) {
+    _this._nodes.forEach(function(_, index) {
+      context.getAudioBus(index).append(_this);
+    });
+
+    _this._db.all().concat(_this._scheds).forEach(function(item) {
       item.start(t0);
     });
 
-    this.emit("start", {
+    _this.emit("start", {
       type: "start",
       playbackTime: startTime
     });
-  }, this);
+  });
 
   context.start(); // auto start(?)
 
@@ -148,6 +152,8 @@ NeuSynth.prototype.start = function(startTime) {
 };
 
 NeuSynth.prototype.stop = function(stopTime) {
+  var _this = this;
+
   if (this._state !== START) {
     return this;
   }
@@ -158,24 +164,26 @@ NeuSynth.prototype.stop = function(stopTime) {
 
   this._state = STOP;
 
-  context.sched(stopTime, function(t0) {
-    this._nodes.forEach(function(_, index) {
-      context.getAudioBus(index).remove(this);
+  context.sched(stopTime, function(e) {
+    var t0 = e.playbackTime;
+
+    _this._nodes.forEach(function(_, index) {
+      context.getAudioBus(index).remove(_this);
     });
 
     context.nextTick(function() {
       context.dispose();
     });
 
-    this._db.all().concat(this._scheds).forEach(function(item) {
+    _this._db.all().concat(_this._scheds).forEach(function(item) {
       item.stop(t0);
     });
 
-    this.emit("stop", {
+    _this.emit("stop", {
       type: "stop",
       playbackTime: t0
     });
-  }, this);
+  });
 
   return this;
 };
@@ -188,6 +196,8 @@ NeuSynth.prototype.trig = function(startTime) {
 };
 
 NeuSynth.prototype.fadeIn = function(startTime, duration) {
+  var _this = this;
+
   if (this._state !== INIT) {
     return this;
   }
@@ -201,9 +211,9 @@ NeuSynth.prototype.fadeIn = function(startTime, duration) {
     duration = util.finite(duration);
 
     this._param.value = 0;
-    context.sched(startTime, function(t0) {
-      this._param.update(1, t0, duration);
-    }, this);
+    context.sched(startTime, function(e) {
+      _this._param.update(1, e.playbackTime, duration);
+    });
   }
   this.start(startTime);
 
@@ -211,6 +221,8 @@ NeuSynth.prototype.fadeIn = function(startTime, duration) {
 };
 
 NeuSynth.prototype.fadeOut = function(startTime, duration) {
+  var _this = this;
+
   if (this._state !== START) {
     return this;
   }
@@ -224,9 +236,9 @@ NeuSynth.prototype.fadeOut = function(startTime, duration) {
   duration = util.finite(duration);
 
   if (this._nodes.length) {
-    context.sched(startTime, function(t0) {
-      this._param.update(0, t0, duration);
-    }, this);
+    context.sched(startTime, function(e) {
+      _this._param.update(0, e.playbackTime, duration);
+    });
   }
   this.stop(startTime + duration);
 
@@ -234,6 +246,8 @@ NeuSynth.prototype.fadeOut = function(startTime, duration) {
 };
 
 NeuSynth.prototype.fade = function(startTime, value, duration) {
+  var _this = this;
+
   if (this._state !== START) {
     return this;
   }
@@ -249,9 +263,9 @@ NeuSynth.prototype.fade = function(startTime, value, duration) {
     duration = util.defaults(context.toSeconds(duration), 0.5);
     duration = util.finite(duration);
 
-    context.sched(startTime, function(t0) {
-      this._param.update(value, t0, duration);
-    }, this);
+    context.sched(startTime, function(e) {
+      _this._param.update(value, e.playbackTime, duration);
+    });
   }
 
   return this;

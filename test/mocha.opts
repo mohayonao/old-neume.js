@@ -1,3 +1,4 @@
 --reporter spec
+--require intelli-espower-loader
 --require test/bootstrap/bootstrap.js
 --recursive

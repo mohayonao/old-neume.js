@@ -1,8 +1,8 @@
 "use strict";
 
 var neume = require("../namespace");
-
-require("./timer");
+var timerAPI = require("./timer");
+var WebAudioScheduler = require("web-audio-scheduler");
 
 var C = require("../const");
 var util = require("../util");
@@ -10,7 +10,13 @@ var util = require("../util");
 var INIT = 0, START = 1, STOP = 2;
 var MAX_RENDERING_SEC = C.MAX_RENDERING_SEC;
 
-var schedId = 1;
+var offlineTimerAPI = {
+  setInterval: function(callback) {
+    callback();
+  },
+  clearInterval: function() {
+  }
+};
 
 function NeuTransport(context, spec) {
   spec = spec || /* istanbul ignore next */ {};
@@ -31,19 +37,20 @@ function NeuTransport(context, spec) {
   });
 
   this._bpm = 120;
-  this._events = [];
-  this._nextTicks = [];
   this._state = INIT;
-  this._currentTime = 0;
-
-  this._duration = util.defaults(spec.duration, Infinity);
+  this._scheduler = new WebAudioScheduler({
+    context: this.audioContext
+  });
   this._scheduleInterval = util.defaults(spec.scheduleInterval, 0.025);
   this._scheduleAheadTime = util.defaults(spec.scheduleAheadTime, 0.1);
+  this._scheduleOffsetTime = util.defaults(spec.scheduleOffsetTime, 0.005);
+  this._timerAPI = spec.timerAPI || timerAPI;
+  this._duration = util.defaults(spec.duration, Infinity);
 
   Object.defineProperties(this, {
     currentTime: {
       get: function() {
-        return this._currentTime || this.audioContext.currentTime;
+        return this._scheduler.currentTime;
       },
       enumerable: true
     },
@@ -63,11 +70,20 @@ NeuTransport.$$name = "NeuTransport";
 NeuTransport.prototype.start = function() {
   if (this._state === INIT) {
     this._state = START;
+
     if (this.audioContext instanceof neume.webaudio.OfflineAudioContext) {
-      startRendering.call(this);
+      this._scheduler.interval = 0;
+      this._scheduler.aheadTime = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
+      this._scheduler.offsetTime = 0;
+      this._scheduler.timerAPI = offlineTimerAPI;
     } else {
-      startAudioTimer.call(this);
+      this._scheduler.interval = this._scheduleInterval;
+      this._scheduler.aheadTime = this._scheduleAheadTime;
+      this._scheduler.offsetTime = this._scheduleOffsetTime;
+      this._scheduler.timerAPI = this._timerAPI;
     }
+
+    this._scheduler.start();
   }
   return this;
 };
@@ -81,86 +97,34 @@ NeuTransport.prototype.stop = function() {
 };
 
 NeuTransport.prototype.reset = function() {
-  if (this._timer) {
-    this._timer.stop();
-    this._timer = null;
-  }
-  this._events = [];
-  this._nextTicks = [];
+  this._scheduler.stop(true);
   this._state = INIT;
-  this._currentTime = 0;
 
   return this;
 };
 
-function startRendering() {
-  var t0 = 0;
-  var t1 = util.clip(util.finite(this._duration), 0, MAX_RENDERING_SEC);
-
-  onaudioprocess(this, t0, t1);
-}
-
-function startAudioTimer() {
-  var _this = this;
-  var context = this.audioContext;
-  var scheduleAheadTime = this._scheduleAheadTime;
-
-  this._timer = new neume.Timer(function() {
-    var t0 = context.currentTime;
-    var t1 = t0 + scheduleAheadTime;
-
-    onaudioprocess(_this, t0, t1);
-  }, this._scheduleInterval * 1000).start();
-}
-
-NeuTransport.prototype.sched = function(time, callback, context) {
+NeuTransport.prototype.sched = function(time, callback) {
   if (typeof callback !== "function") {
     return 0;
   }
 
   time = util.finite(time);
 
-  var events = this._events;
-  var event = {
-    id: schedId++,
-    time: time,
-    callback: callback,
-    context: context || this
-  };
-
-  if (events.length === 0 || events[events.length - 1].time <= time) {
-    events.push(event);
-  } else {
-    for (var i = 0, imax = events.length; i < imax; i++) {
-      if (time < events[i].time) {
-        events.splice(i, 0, event);
-        break;
-      }
-    }
-  }
-
-  return event.id;
+  return this._scheduler.insert(time, callback);
 };
 
 NeuTransport.prototype.unsched = function(id) {
   id = util.finite(id);
 
   if (id !== 0) {
-    var events = this._events;
-    for (var i = 0, imax = events.length; i < imax; i++) {
-      if (id === events[i].id) {
-        events.splice(i, 1);
-        break;
-      }
-    }
+    return this._scheduler.remove(id);
   }
 
   return id;
 };
 
-NeuTransport.prototype.nextTick = function(callback, context) {
-  this._nextTicks.push(callback.bind(context || this));
-  return this;
+NeuTransport.prototype.nextTick = function(callback) {
+  return this._scheduler.nextTick(callback);
 };
 
 NeuTransport.prototype.toSeconds = function(value) {
@@ -235,27 +199,6 @@ function note2sec(num, note, bpm) {
     nd: 3 / 2,
   }[note] || 1;
   return num === 0 ? 0 : ticks2sec((4 / num) * 480 * acc, bpm);
-}
-
-function onaudioprocess(_this, t0, t1) {
-  // Safari 7.0.6 does not support e.playbackTime
-  var events = _this._events;
-
-  _this._currentTime = t0;
-
-  _this._nextTicks.splice(0).forEach(function(callback) {
-    callback(t0);
-  });
-
-  while (events.length && events[0].time <= t1) {
-    var event = events.shift();
-
-    _this._currentTime = Math.max(_this._currentTime, event.time);
-
-    event.callback.call(event.context, event.time);
-  }
-
-  _this._currentTime = t0;
 }
 
 module.exports = neume.Transport = NeuTransport;

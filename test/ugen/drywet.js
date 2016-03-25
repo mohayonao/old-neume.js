@@ -10,7 +10,11 @@ describe("ugen/drywet", function() {
   var neu = null;
 
   beforeEach(function() {
-    neu = neume(new global.AudioContext());
+    neu = neume({
+      scheduleInterval: 0.05,
+      scheduleAheadTime: 0.05,
+      scheduleOffsetTime: 0.00,
+    });
   });
 
   describe("graph", function() {
@@ -102,7 +106,7 @@ describe("ugen/drywet", function() {
           {
             name: "GainNode",
             gain: {
-              value: 0.7071067811865475,
+              value: 0.7071067811865476,
               inputs: []
             },
             inputs: [ OSCILLATOR("sine", 440) ]

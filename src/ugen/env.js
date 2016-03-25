@@ -289,7 +289,9 @@ module.exports = function(neume, util) {
 
       t = util.finite(context.toSeconds(t));
 
-      releaseSchedId = context.sched(t, function(t0) {
+      releaseSchedId = context.sched(t, function(e) {
+        var t0 = e.playbackTime;
+
         context.unsched(schedId);
 
         schedId = 0;
@@ -297,11 +299,14 @@ module.exports = function(neume, util) {
         isReleased = true;
 
         terminateAudioParamScheduling(t0);
-        resume(t0);
+        resume({
+          playbackTime: t0
+        });
       });
     }
 
-    function resume(t0) {
+    function resume(e) {
+      var t0 = e.playbackTime;
       var params = env.list[env.index];
 
       /* istanbul ignore next */
@@ -348,12 +353,12 @@ module.exports = function(neume, util) {
       schedId = 0;
 
       if (env.index === env.length) {
-        schedId = context.sched(t1, function(t) {
+        schedId = context.sched(t1, function(e) {
           schedId = 0;
           ugen.emit("end", {
             type: "end",
             synth: ugen.synth,
-            playbackTime: t
+            playbackTime: e.playbackTime
           });
         });
       } else if (env.index !== env.releaseNode) {

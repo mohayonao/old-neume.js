@@ -43,17 +43,16 @@ NeuSynthContext.prototype.reset = function() {
   return this;
 };
 
-NeuSynthContext.prototype.sched = function(time, callback, context) {
-  return this._context.sched(time, callback, context);
+NeuSynthContext.prototype.sched = function(time, callback) {
+  return this._context.sched(time, callback);
 };
 
 NeuSynthContext.prototype.unsched = function(id) {
   return this._context.unsched(id);
 };
 
-NeuSynthContext.prototype.nextTick = function(callback, context) {
-  this._context.nextTick(callback, context);
-  return this;
+NeuSynthContext.prototype.nextTick = function(callback) {
+  return this._context.nextTick(callback);
 };
 
 NeuSynthContext.prototype.getAudioBus = function(index) {
